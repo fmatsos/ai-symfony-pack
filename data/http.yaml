@@ -1,0 +1,1608 @@
+category: HTTP
+questions:
+  -
+    question: 'Which of the following are essential components of an HTTP request message?'
+    answers:
+      - { value: 'Request line (method, URI, HTTP version)', correct: true }
+      - { value: 'Response status code', correct: false }
+      - { value: 'Request headers', correct: true }
+      - { value: 'Message body (optional)', correct: true }
+      - { value: 'Server-Sent Events', correct: false }
+    help: |
+      'An HTTP request message consists of a request line, request headers, and an optional message body.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_0'
+  -
+    question: 'Which of the following are essential components of an HTTP response message?'
+    answers:
+      - { value: 'Status line (HTTP version, status code, reason phrase)', correct: true }
+      - { value: 'Request method', correct: false }
+      - { value: 'Response headers', correct: true }
+      - { value: 'Message body (optional)', correct: true }
+      - { value: 'Query parameters', correct: false }
+    help: |
+      'An HTTP response message consists of a status line, response headers, and an optional message body.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_4'
+  -
+    question: 'How do you install the Symfony HTTP Client component using Composer?'
+    answers:
+      - { value: 'composer install symfony/http-client', correct: false }
+      - { value: 'composer require symfony/http-client', correct: true }
+      - { value: 'symfony install http-client', correct: false }
+      - { value: 'composer add symfony/http-client', correct: false }
+    help: |
+      'The Symfony HTTP Client component is installed via Composer using the `require` command.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_0'
+  -
+    question: 'Given the following Symfony service, how would you make a basic GET request to `https://api.github.com/repos/symfony/symfony-docs`?'
+    answers:
+      - { value: '
+        ```php
+        // ...
+        public function fetchGitHubInformation(): array
+        {
+            $response = $this->client->get(''https://api.github.com/repos/symfony/symfony-docs'');
+            return $response->toArray();
+        }
+        ```', correct: false }
+      - { value: '
+        ```php
+        // ...
+        public function fetchGitHubInformation(): array
+        {
+            $response = $this->client->request(
+                ''GET'',
+                ''https://api.github.com/repos/symfony/symfony-docs''
+            );
+            return $response->toArray();
+        }
+        ```', correct: true }
+      - { value: '
+        ```php
+        // ...
+        public function fetchGitHubInformation(): array
+        {
+            $response = $this->client->send(''GET'', ''https://api.github.com/repos/symfony/symfony-docs'');
+            return $response->json();
+        }
+        ```', correct: false }
+      - { value: '
+        ```php
+        // ...
+        public function fetchGitHubInformation(): array
+        {
+            $response = $this->client->fetch(''https://api.github.com/repos/symfony/symfony-docs'', ''GET'');
+            return $response->data();
+        }
+        ```', correct: false }
+    help: |
+      'The `request()` method of `HttpClientInterface` is used to send HTTP requests, taking the HTTP method and URL as arguments.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_1'
+  -
+    question: 'How can you retrieve the response body as a string from a `ResponseInterface` object in Symfony HttpClient?'
+    answers:
+      - { value: '$response->getBody();', correct: false }
+      - { value: '$response->getContent();', correct: true }
+      - { value: '$response->toString();', correct: false }
+      - { value: '$response->bodyAsString();', correct: false }
+    help: |
+      'The `getContent()` method on `ResponseInterface` returns the response body as a string.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_45'
+  -
+    question: 'Which `ResponseInterface` method allows you to retrieve all HTTP headers from a response, with header names lower-cased?'
+    answers:
+      - { value: 'getHeaders()', correct: true }
+      - { value: 'getAllHeaders()', correct: false }
+      - { value: 'getResponseHeaders()', correct: false }
+      - { value: 'headersToArray()', correct: false }
+    help: |
+      'The `getHeaders()` method returns the HTTP headers as a string[][] with header names lower-cased.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_46'
+  -
+    question: 'You have received a JSON response from an API using Symfony HttpClient. How do you cast its content to a PHP array?'
+    answers:
+      - { value: '$response->jsonDecode();', correct: false }
+      - { value: 'json_decode($response->getContent(), true);', correct: true }
+      - { value: '$response->toArray();', correct: true }
+      - { value: '$response->getJson();', correct: false }
+    help: |
+      'The `toArray()` method on `ResponseInterface` casts the response JSON content to a PHP array. Alternatively, you can manually decode the content.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_45'
+  -
+    question: 'When using Symfony HttpClient, how does the `request()` method behave regarding execution flow for multiple requests?'
+    answers:
+      - { value: 'It blocks execution until the full response for the current request is received.', correct: false }
+      - { value: 'It returns immediately, allowing code execution to continue while the request is being processed asynchronously.', correct: true }
+      - { value: 'It automatically waits for all pending requests to complete before returning any response.', correct: false }
+      - { value: 'It only supports synchronous requests by default.', correct: false }
+    help: |
+      'The `request()` method is asynchronous; it returns immediately, and the actual fetching of content or headers happens lazily.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_10'
+  -
+    question: 'Which method in Symfony HttpClient allows you to process large HTTP responses chunk by chunk to prevent memory exhaustion?'
+    answers:
+      - { value: 'download()', correct: false }
+      - { value: 'stream()', correct: true }
+      - { value: 'readChunks()', correct: false }
+      - { value: 'getStream()', correct: false }
+    help: |
+      'The `stream()` method of `HttpClientInterface` allows you to monitor responses and process them chunk by chunk, which is crucial for large responses.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_47'
+  -
+    question: 'What is the recommended way to inject the Symfony HTTP Client into your services to ensure proper decoupling and adherence to Symfony''s primary abstraction?'
+    answers:
+      - { value: 'Type-hint `Symfony\Component\HttpClient\HttpClient` in the constructor.', correct: false }
+      - { value: 'Type-hint `Psr\Http\Client\ClientInterface` in the constructor.', correct: false }
+      - { value: 'Type-hint `Symfony\Contracts\HttpClient\HttpClientInterface` in the constructor.', correct: true }
+      - { value: 'Use the `#[Autowire]` attribute with `HttpClient::create()`.', correct: false }
+    help: |
+      'Injecting `HttpClientInterface` ensures that your service is decoupled from the concrete implementation of the HTTP client.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_66'
+  -
+    question: 'When unit testing a service that uses Symfony HttpClient, which class is typically used to mock HTTP responses without making actual network calls?'
+    answers:
+      - { value: '`Symfony\Component\HttpClient\TestClient`', correct: false }
+      - { value: '`Symfony\Component\HttpClient\MockHttpClient`', correct: true }
+      - { value: '`Symfony\Component\HttpClient\FakeHttpClient`', correct: false }
+      - { value: '`Symfony\Component\HttpClient\Response\MockResponse`', correct: false }
+    help: |
+      '`MockHttpClient` is used to simulate HTTP client behavior for testing purposes, allowing you to define predefined or dynamically generated responses.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_98'
+  -
+    question: 'How would you configure a default `User-Agent` header for all requests made by the Symfony HTTP Client in `config/packages/framework.yaml`?'
+    answers:
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                headers:
+                    User-Agent: 'My Fancy App'
+        ```', correct: false }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                default_options:
+                    headers:
+                        User-Agent: 'My Fancy App'
+        ```', correct: true }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        http_client:
+            default_headers:
+                User-Agent: 'My Fancy App'
+        ```', correct: false }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        services:
+            _defaults:
+                http_headers:
+                    User-Agent: 'My Fancy App'
+        ```', correct: false }
+    help: |
+      'Default headers for the HTTP client are configured under `framework.http_client.default_options.headers`.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_16'
+  -
+    question: 'You have a globally configured `Content-Type: application/json` header for your Symfony HTTP Client. How can you override this to `Content-Type: text/plain` for a specific request?'
+    answers:
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''override_headers'' => [
+                ''Content-Type'' => ''text/plain'',
+            ],
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''headers'' => [
+                ''Content-Type'' => ''text/plain'',
+            ],
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'');
+        $response->setHeaders([''Content-Type'' => ''text/plain'']);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''default_headers'' => [
+                ''Content-Type'' => ''text/plain'',
+            ],
+        ]);
+        ```', correct: false }
+    help: |
+      'Headers provided in the `options` array of the `request()` method will override any globally defined default headers for that specific request.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_17'
+  -
+    question: 'When working with Symfony HttpClient, which exception type should you catch to handle transport-level errors (e.g., network issues, host unreachable) that can occur even when accessing response properties like `getStatusCode()`?'
+    answers:
+      - { value: '`Symfony\Component\HttpClient\Exception\ClientException`', correct: false }
+      - { value: '`Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface`', correct: true }
+      - { value: '`Symfony\Component\HttpClient\Exception\ServerException`', correct: false }
+      - { value: '`RuntimeException`', correct: false }
+    help: |
+      'Transport-level errors are wrapped in `TransportExceptionInterface`. Since responses are lazy, these exceptions can be thrown when trying to access response data.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_55'
+  -
+    question: 'Which Symfony HttpClient component allows you to automatically retry failed requests, providing resilience against transient network or server issues?'
+    answers:
+      - { value: '`ResilientHttpClient`', correct: false }
+      - { value: '`FaultTolerantHttpClient`', correct: false }
+      - { value: '`RetryableHttpClient`', correct: true }
+      - { value: '`ReliableHttpClient`', correct: false }
+    help: |
+      '`RetryableHttpClient` wraps an existing `HttpClientInterface` instance to add automatic retry logic.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_29'
+  -
+    question: 'Which Symfony HttpClient component is specifically designed to consume Server-Sent Events (SSE)?'
+    answers:
+      - { value: '`SseHttpClient`', correct: false }
+      - { value: '`EventStreamHttpClient`', correct: false }
+      - { value: '`EventSourceHttpClient`', correct: true }
+      - { value: '`StreamedHttpClient`', correct: false }
+    help: |
+      '`EventSourceHttpClient` is provided to connect to SSE endpoints and stream events.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_64'
+  -
+    question: 'How can you simulate a timeout for a specific response when using `MockResponse` in Symfony HttpClient tests?'
+    answers:
+      - { value: 'By setting an `is_timeout` option to `true` in the response info.', correct: false }
+      - { value: 'By providing an empty string `''` as a yielded value within a generator function used as the response body.', correct: true }
+      - { value: 'By calling `$mockResponse->timeout();` after instantiation.', correct: false }
+      - { value: 'Timeouts cannot be simulated with `MockResponse`.', correct: false }
+    help: |
+      'When using a generator for the `MockResponse` body, yielding an empty string `''` will simulate a timeout.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_88'
+  -
+    question: 'When you call `HttpClient::create()` without any arguments, what is the order of preference for the underlying HTTP client transports Symfony will try to use?'
+    answers:
+      - { value: '`NativeHttpClient` -> `CurlHttpClient` -> `AmpHttpClient`', correct: false }
+      - { value: '`CurlHttpClient` -> `AmpHttpClient` -> `NativeHttpClient`', correct: true }
+      - { value: '`AmpHttpClient` -> `NativeHttpClient` -> `CurlHttpClient`', correct: false }
+      - { value: '`HttpClient::create()` always uses `NativeHttpClient`.', correct: false }
+    help: |
+      '`HttpClient::create()` prioritizes `CurlHttpClient`, then falls back to `AmpHttpClient`, and finally to `NativeHttpClient` based on available extensions and packages.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_42'
+  -
+    question: 'Which `ResponseInterface` method allows you to explicitly cancel an ongoing HTTP request/response?'
+    answers:
+      - { value: '`abort()`', correct: false }
+      - { value: '`stop()`', correct: false }
+      - { value: '`cancel()`', correct: true }
+      - { value: '`disconnect()`', correct: false }
+    help: |
+      'The `cancel()` method can be called on a `ResponseInterface` object to abort the ongoing request.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_48'
+  -
+    question: 'Which `ResponseInterface` method provides access to transport layer information such as `response_headers`, `redirect_count`, `start_time`, or `debug` logs?'
+    answers:
+      - { value: '`getTransportInfo()`', correct: false }
+      - { value: '`getMeta()`', correct: false }
+      - { value: '`getInfo()`', correct: true }
+      - { value: '`getDetails()`', correct: false }
+    help: |
+      'The `getInfo()` method returns various details coming from the transport layer about the HTTP transaction.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_45'
+  -
+    question: 'In Symfony, how can you access query parameters (GET variables) from the current HTTP request using the `Request` object?'
+    answers:
+      - { value: '$request->get(''paramName'');', correct: false }
+      - { value: '$request->query->get(''paramName'');', correct: true }
+      - { value: '$request->attributes->get(''paramName'');', correct: false }
+      - { value: '$request->request->get(''paramName'');', correct: false }
+    help: |
+      'Query parameters are accessed via the `query` public property of the `Request` object, which is an instance of `ParameterBag`.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'When configuring a scoped HTTP client in Symfony, what is the purpose of the `base_uri` option?'
+    answers:
+      - { value: 'It defines the only allowed URI for requests made with this client.', correct: false }
+      - { value: 'It sets a default base URL, so relative URLs in requests will be resolved against it.', correct: true }
+      - { value: 'It specifies the URI for the client''s health check endpoint.', correct: false }
+      - { value: 'It is used for HTTP/2 server push configurations.', correct: false }
+    help: |
+      'The `base_uri` option sets a default base URL for the client, allowing relative URLs to be used in subsequent requests.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_6'
+  -
+    question: 'Which of the following HTTP methods are typically considered "safe" (i.e., they do not alter the state of the server)?'
+    answers:
+      - { value: 'GET', correct: true }
+      - { value: 'POST', correct: false }
+      - { value: 'HEAD', correct: true }
+      - { value: 'PUT', correct: false }
+      - { value: 'OPTIONS', correct: true }
+    help: |
+      'GET, HEAD, and OPTIONS are generally considered safe methods as they are not intended to cause side-effects on the server.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods'
+  -
+    question: 'Which of the following HTTP methods are typically considered "idempotent" (i.e., multiple identical requests have the same effect as a single request)?'
+    answers:
+      - { value: 'GET', correct: true }
+      - { value: 'POST', correct: false }
+      - { value: 'PUT', correct: true }
+      - { value: 'DELETE', correct: true }
+      - { value: 'PATCH', correct: false }
+    help: |
+      'GET, PUT, and DELETE are idempotent. POST and PATCH are generally not.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods'
+  -
+    question: 'What is the primary purpose of the `HttpClient::createForBaseUri()` static method?'
+    answers:
+      - { value: 'To create a client that only allows requests to the specified base URI.', correct: false }
+      - { value: 'To create a client with a predefined `base_uri` option, simplifying relative URL usage.', correct: true }
+      - { value: 'To create a client specifically for internal API calls within the same application.', correct: false }
+      - { value: 'To create a client that automatically handles URI encoding and decoding.', correct: false }
+    help: |
+      '`HttpClient::createForBaseUri()` is a convenience method to create an HTTP client with a specific base URI already configured.
+      https://symfony.com/doc/current/components/http_client.html#creating-a-client'
+  -
+    question: 'When sending a POST request with Symfony HttpClient, how can you send data as a raw string (e.g., a JSON payload)?'
+    answers:
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''json'' => ''raw data'',
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''form_params'' => ''raw data'',
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''body'' => ''raw data'',
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''content'' => ''raw data'',
+        ]);
+        ```', correct: false }
+    help: |
+      'The `body` option is used to send raw string data in the request body.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_18'
+  -
+    question: 'Which of the following HTTP status codes indicate a successful response?'
+    answers:
+      - { value: '200 OK', correct: true }
+      - { value: '201 Created', correct: true }
+      - { value: '301 Moved Permanently', correct: false }
+      - { value: '404 Not Found', correct: false }
+      - { value: '204 No Content', correct: true }
+    help: |
+      '2xx status codes generally indicate success. 200 (OK), 201 (Created), and 204 (No Content) are common successful responses.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status'
+  -
+    question: 'Which HTTP status code should be returned when a resource has been successfully created as a result of a POST request?'
+    answers:
+      - { value: '200 OK', correct: false }
+      - { value: '201 Created', correct: true }
+      - { value: '202 Accepted', correct: false }
+      - { value: '204 No Content', correct: false }
+    help: |
+      'The 201 (Created) status code indicates that the request has succeeded and has led to the creation of a resource.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201'
+  -
+    question: 'What does an HTTP 301 (Moved Permanently) status code signify?'
+    answers:
+      - { value: 'The resource has been temporarily moved to a new URI.', correct: false }
+      - { value: 'The request could not be understood by the server.', correct: false }
+      - { value: 'The resource has been permanently moved to a new URI, and clients should use the new URI for future requests.', correct: true }
+      - { value: 'The server is refusing to fulfill the request.', correct: false }
+    help: |
+      'The 301 (Moved Permanently) status code indicates that the target resource has been assigned a new permanent URI.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301'
+  -
+    question: 'Which HTTP status code indicates that the server understands the request but refuses to authorize it, often due to invalid authentication credentials?'
+    answers:
+      - { value: '401 Unauthorized', correct: true }
+      - { value: '403 Forbidden', correct: false }
+      - { value: '404 Not Found', correct: false }
+      - { value: '400 Bad Request', correct: false }
+    help: |
+      'The 401 (Unauthorized) status code indicates that the client request has not been completed because it lacks valid authentication credentials for the requested resource.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401'
+  -
+    question: 'What is the meaning of an HTTP 403 (Forbidden) status code?'
+    answers:
+      - { value: 'The server cannot find the requested resource.', correct: false }
+      - { value: 'The client does not have permission to access the resource, regardless of authentication.', correct: true }
+      - { value: 'The request was malformed or invalid.', correct: false }
+      - { value: 'The server encountered an unexpected condition that prevented it from fulfilling the request.', correct: false }
+    help: |
+      'The 403 (Forbidden) status code indicates that the server understood the request but refuses to authorize it. This implies that the client does not have permission to access the resource.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403'
+  -
+    question: 'Which HTTP status code is used to indicate that the requested resource could not be found on the server?'
+    answers:
+      - { value: '400 Bad Request', correct: false }
+      - { value: '401 Unauthorized', correct: false }
+      - { value: '404 Not Found', correct: true }
+      - { value: '500 Internal Server Error', correct: false }
+    help: |
+      'The 404 (Not Found) status code indicates that the server cannot find the requested resource.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404'
+  -
+    question: 'What does an HTTP 500 (Internal Server Error) status code indicate?'
+    answers:
+      - { value: 'The server is temporarily unavailable.', correct: false }
+      - { value: 'The server encountered an unexpected condition that prevented it from fulfilling the request.', correct: true }
+      - { value: 'The server is acting as a gateway or proxy and received an invalid response from an upstream server.', correct: false }
+      - { value: 'The client sent an invalid request.', correct: false }
+    help: |
+      'The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500'
+  -
+    question: 'In Symfony, how can you retrieve a specific HTTP request header (e.g., `Content-Type`) from the `Request` object, with normalized, lowercase keys?'
+    answers:
+      - { value: '$request->headers->get(''content-type'');', correct: true }
+      - { value: '$request->getHeader(''Content-Type'');', correct: false }
+      - { value: '$request->server->get(''HTTP_CONTENT_TYPE'');', correct: false }
+      - { value: '$request->headers[''Content-Type''];', correct: false }
+    help: |
+      'HTTP headers are accessed via the `headers` public property of the `Request` object, which is an instance of `HeaderBag`. Keys are normalized to lowercase.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'Which method of the Symfony `Request` object allows you to get the HTTP method (e.g., GET, POST, PUT) of the current request?'
+    answers:
+      - { value: '`getMethod()`', correct: true }
+      - { value: '`getHttpMethod()`', correct: false }
+      - { value: '`getRequestType()`', correct: false }
+      - { value: '`getVerb()`', correct: false }
+    help: |
+      'The `getMethod()` method returns the HTTP verb of the request.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'How can you retrieve POST parameters (payload data) from the current HTTP request using the Symfony `Request` object?'
+    answers:
+      - { value: '$request->request->get(''paramName'');', correct: true }
+      - { value: '$request->getPayload()->get(''paramName'');', correct: true }
+      - { value: '$request->post->get(''paramName'');', correct: false }
+      - { value: '$request->query->get(''paramName'');', correct: false }
+    help: |
+      'POST parameters can be retrieved using `$request->request->get()` or `$request->getPayload()->get()`.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'What is the purpose of the `Accept-Language` HTTP header in a client request?'
+    answers:
+      - { value: 'To specify the character encoding the client prefers.', correct: false }
+      - { value: 'To indicate the language of the content the client expects in the response.', correct: true }
+      - { value: 'To declare the client''s preferred locale for date and number formatting.', correct: false }
+      - { value: 'To set the language of the request body.', correct: false }
+    help: |
+      'The `Accept-Language` header indicates the preferred natural languages for the content of the response.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language'
+  -
+    question: 'Which Symfony `Request` object method allows you to get an array of languages the client accepts, ordered by preference?'
+    answers:
+      - { value: '`getPreferredLanguages()`', correct: false }
+      - { value: '`getAcceptedLanguages()`', correct: false }
+      - { value: '`getLanguages()`', correct: true }
+      - { value: '`getClientLanguages()`', correct: false }
+    help: |
+      'The `getLanguages()` method returns an array of languages the client accepts, based on the `Accept-Language` header.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'What is the primary purpose of HTTP cookies?'
+    answers:
+      - { value: 'To store server-side session data.', correct: false }
+      - { value: 'To allow the server to store state information on the client''s browser.', correct: true }
+      - { value: 'To encrypt HTTP communication.', correct: false }
+      - { value: 'To manage DNS resolution for web domains.', correct: false }
+    help: |
+      'HTTP cookies are small pieces of data that a server sends to the user''s web browser. The browser may store it and send it back with the next request to the same server.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies'
+  -
+    question: 'How can you retrieve a specific cookie value from the current HTTP request using the Symfony `Request` object?'
+    answers:
+      - { value: '$request->cookies->get(''cookieName'');', correct: true }
+      - { value: '$request->getCookie(''cookieName'');', correct: false }
+      - { value: '$request->attributes->get(''cookieName'');', correct: false }
+      - { value: '$request->headers->get(''Cookie'')[''cookieName''];', correct: false }
+    help: |
+      'Cookie values are accessed via the `cookies` public property of the `Request` object, which is an instance of `ParameterBag`.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'Which of the following attributes can be set on an HTTP cookie to enhance its security?'
+    answers:
+      - { value: '`HttpOnly`', correct: true }
+      - { value: '`Secure`', correct: true }
+      - { value: '`SameSite`', correct: true }
+      - { value: '`Encrypted`', correct: false }
+      - { value: '`Ephemeral`', correct: false }
+    help: |
+      '`HttpOnly` prevents client-side script access, `Secure` ensures transmission only over HTTPS, and `SameSite` mitigates CSRF attacks.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies'
+  -
+    question: 'What is the purpose of the `HttpOnly` cookie attribute?'
+    answers:
+      - { value: 'To ensure the cookie is only sent over HTTPS connections.', correct: false }
+      - { value: 'To prevent client-side JavaScript from accessing the cookie.', correct: true }
+      - { value: 'To make the cookie expire after the browser session ends.', correct: false }
+      - { value: 'To restrict the cookie to a specific domain.', correct: false }
+    help: |
+      'The `HttpOnly` attribute prevents client-side scripts from accessing the cookie, which helps mitigate cross-site scripting (XSS) attacks.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#httponly'
+  -
+    question: 'What is the primary goal of HTTP caching?'
+    answers:
+      - { value: 'To encrypt data transmitted over HTTP.', correct: false }
+      - { value: 'To reduce server load and improve response times by storing copies of resources closer to the client.', correct: true }
+      - { value: 'To ensure data integrity during transmission.', correct: false }
+      - { value: 'To manage user sessions across multiple requests.', correct: false }
+    help: |
+      'HTTP caching aims to reduce network traffic, server load, and perceived latency by storing copies of frequently accessed resources.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching'
+  -
+    question: 'Which HTTP response header is used to specify how long a cached resource is considered fresh?'
+    answers:
+      - { value: '`Cache-Control`', correct: true }
+      - { value: '`Expires`', correct: true }
+      - { value: '`Pragma`', correct: false }
+      - { value: '`Vary`', correct: false }
+    help: |
+      '`Cache-Control` and `Expires` are both used to control caching behavior and freshness. `Cache-Control` is more modern and flexible.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires'
+  -
+    question: 'What is the purpose of the `ETag` HTTP header in caching?'
+    answers:
+      - { value: 'It specifies the exact expiration date of a cached resource.', correct: false }
+      - { value: 'It provides a unique identifier for a specific version of a resource, used for validation.', correct: true }
+      - { value: 'It indicates the maximum age a resource can be stored in a cache.', correct: false }
+      - { value: 'It forces caches to revalidate the resource with the origin server.', correct: false }
+    help: |
+      'The `ETag` (entity tag) is an opaque identifier assigned by a web server to a specific version of a resource found at a URL. It allows caches to be more efficient and saves bandwidth.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag'
+  -
+    question: 'Which HTTP header is used for content negotiation, allowing the client to specify the media types it prefers to receive?'
+    answers:
+      - { value: '`Content-Type`', correct: false }
+      - { value: '`Accept`', correct: true }
+      - { value: '`Content-Encoding`', correct: false }
+      - { value: '`Vary`', correct: false }
+    help: |
+      'The `Accept` header is used by the client to indicate which content types (media types) it is able to understand.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept'
+  -
+    question: 'What is the purpose of the `Vary` HTTP response header in content negotiation?'
+    answers:
+      - { value: 'It tells the client which content types are available for the resource.', correct: false }
+      - { value: 'It indicates that the response content might vary based on the value of one or more request headers, instructing caches to store multiple versions.', correct: true }
+      - { value: 'It specifies the encoding used for the response body.', correct: false }
+      - { value: 'It defines the preferred language for the response.', correct: false }
+    help: |
+      'The `Vary` header informs caches that the response is subject to change based on the values of specified request headers.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary'
+  -
+    question: 'In Symfony, how can you configure HTTP Basic authentication for a scoped HTTP client in `config/packages/framework.yaml`?'
+    answers:
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                scoped_clients:
+                    my_api:
+                        auth: basic:username:password
+        ```', correct: false }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                scoped_clients:
+                    my_api:
+                        auth_basic: 'username:password'
+        ```', correct: true }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                scoped_clients:
+                    my_api:
+                        authentication:
+                            type: basic
+                            credentials: username:password
+        ```', correct: false }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                scoped_clients:
+                    my_api:
+                        basic_auth: username:password
+        ```', correct: false }
+    help: |
+      'HTTP Basic authentication is configured using the `auth_basic` option for scoped clients.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_12'
+  -
+    question: 'What is the purpose of the `User-Agent` HTTP request header?'
+    answers:
+      - { value: 'To specify the type of content the client accepts.', correct: false }
+      - { value: 'To identify the client software (e.g., browser, bot) making the request.', correct: true }
+      - { value: 'To indicate the language preferences of the client.', correct: false }
+      - { value: 'To provide authentication credentials.', correct: false }
+    help: |
+      'The `User-Agent` header identifies the user agent (e.g., web browser, crawler) making the request.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent'
+  -
+    question: 'Which Symfony component provides a way to simulate multiple client interactions in functional tests, such as in a chat application?'
+    answers:
+      - { value: '`Symfony\Component\HttpClient\Test\MultiClient`', correct: false }
+      - { value: '`Symfony\Component\BrowserKit\Client` with `createClient()`', correct: true }
+      - { value: '`Symfony\Component\HttpKernel\Client\InsulatedClient`', correct: false }
+      - { value: '`Symfony\Component\WebTest\WebClient`', correct: false }
+    help: |
+      'In functional tests, `static::createClient()` can be called multiple times to simulate different clients interacting with the application.
+      https://github.com/symfony/symfony-docs/blob/7.3/testing/insulating_clients.rst#_snippet_0'
+  -
+    question: 'When using `MockHttpClient` with multiple `MockResponse` objects, in what order are the responses returned?'
+    answers:
+      - { value: 'In reverse order of how they were provided to the constructor.', correct: false }
+      - { value: 'Randomly, to simulate real-world network conditions.', correct: false }
+      - { value: 'In the same order as they were passed to the `MockHttpClient` constructor.', correct: true }
+      - { value: 'Based on the HTTP method of the request.', correct: false }
+    help: |
+      'Responses provided as an array to `MockHttpClient` are returned in the same order they were provided.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_81'
+  -
+    question: 'What is the primary benefit of using `HarFileResponseFactory` with `MockHttpClient` in Symfony tests?'
+    answers:
+      - { value: 'It allows recording live HTTP interactions directly into your test suite.', correct: false }
+      - { value: 'It enables creating mock responses from pre-recorded HTTP Archive (HAR) files, making tests realistic and reproducible.', correct: true }
+      - { value: 'It automatically generates HAR files from your test runs for debugging.', correct: false }
+      - { value: 'It provides a visual representation of HTTP requests and responses during testing.', correct: false }
+    help: |
+      '`HarFileResponseFactory` allows you to create `MockResponse` objects from HAR files, which contain recorded HTTP interactions, for realistic testing.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_100'
+  -
+    question: 'Which of the following describes the behavior of lazy responses in Symfony HttpClient regarding exceptions?'
+    answers:
+      - { value: 'Exceptions are always thrown immediately when the `request()` method is called.', correct: false }
+      - { value: 'Exceptions are only thrown when `getContent()` or `toArray()` are called, never on `getStatusCode()`.', correct: false }
+      - { value: 'Exceptions (e.g., for 3xx-5xx status codes or transport errors) can be thrown when accessing any response method (like `getStatusCode()`, `getHeaders()`, `getContent()`, `toArray()`) if the response has not yet completed successfully.', correct: true }
+      - { value: 'Lazy responses never throw exceptions; they return default values on error.', correct: false }
+    help: |
+      'Due to the lazy nature of responses, exceptions can be thrown when accessing any response method if the underlying HTTP request encounters an error or a non-successful status code.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_49'
+  -
+    question: 'How can you pass query parameters to a Symfony HTTP Client request, ensuring they are automatically URL-encoded?'
+    answers:
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...'', [
+            ''params'' => [
+                ''token'' => ''...'',
+                ''name'' => ''...'',
+            ],
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...'', [
+            ''query'' => [
+                ''token'' => ''...'',
+                ''name'' => ''...'',
+            ],
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...?token=...&name=...'');
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...'', [
+            ''url_params'' => [
+                ''token'' => ''...'',
+                ''name'' => ''...'',
+            ],
+        ]);
+        ```', correct: false }
+    help: |
+      'The `query` option in the request options array is used to define query parameters, which are then automatically URL-encoded.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_15'
+  -
+    question: 'What is the primary benefit of decorating `HttpClientInterface` in Symfony?'
+    answers:
+      - { value: 'To replace the default HTTP client implementation with a custom one.', correct: false }
+      - { value: 'To add custom logic (e.g., logging, metrics, modification of requests/responses) to an existing HTTP client without altering its core functionality.', correct: true }
+      - { value: 'To enable asynchronous request handling automatically.', correct: false }
+      - { value: 'To convert HTTP responses into PSR-7 compatible messages.', correct: false }
+    help: |
+      'Decorating `HttpClientInterface` allows you to wrap an existing client and add custom behavior or modify requests/responses before or after they are processed by the original client.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_78'
+  -
+    question: 'Which interface should your custom HTTP client decorator implement to ensure compatibility with Symfony''s HTTP Client component?'
+    answers:
+      - { value: '`Psr\Http\Client\ClientInterface`', correct: false }
+      - { value: '`Symfony\Component\HttpClient\HttpClient`', correct: false }
+      - { value: '`Symfony\Contracts\HttpClient\HttpClientInterface`', correct: true }
+      - { value: '`Symfony\Component\HttpClient\DecoratorInterface`', correct: false }
+    help: |
+      'Any custom HTTP client, including decorators, should implement `HttpClientInterface` to be compatible with the Symfony HTTP Client component.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_78'
+  -
+    question: 'When implementing an asynchronous decorator for `HttpClientInterface`, which trait can simplify the process by providing default implementations for `stream()` and the constructor?'
+    answers:
+      - { value: '`AsyncClientTrait`', correct: false }
+      - { value: '`StreamDecoratorTrait`', correct: false }
+      - { value: '`AsyncDecoratorTrait`', correct: true }
+      - { value: '`HttpClientDecoratorTrait`', correct: false }
+    help: |
+      '`AsyncDecoratorTrait` provides a convenient way to implement asynchronous decorators for `HttpClientInterface`.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_79'
+  -
+    question: 'What is the purpose of the `on_progress` callback option in Symfony HttpClient requests?'
+    answers:
+      - { value: 'To log the progress of the request to a file.', correct: false }
+      - { value: 'To provide real-time updates on download/upload progress and allow for request cancellation based on custom logic.', correct: true }
+      - { value: 'To modify the request headers as the request progresses.', correct: false }
+      - { value: 'To trigger a new request after the current one completes.', correct: false }
+    help: |
+      'The `on_progress` callback allows you to monitor the progress of a request and can be used to cancel the request by throwing an exception.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_48'
+  -
+    question: 'Which of the following are valid ways to configure authentication for a Symfony HTTP Client instance in PHP code?'
+    answers:
+      - { value: '
+        ```php
+        $client = HttpClient::create([
+            ''auth_basic'' => ''username:password'',
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $client = HttpClient::create([
+            ''auth_bearer'' => ''the-bearer-token'',
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $client = HttpClient::create([
+            ''auth_ntlm'' => [''username'', ''password''],
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $client = HttpClient::create([
+            ''auth'' => [''type'' => ''basic'', ''user'' => ''username'', ''pass'' => ''password''],
+        ]);
+        ```', correct: false }
+    help: |
+      'Symfony HttpClient supports `auth_basic`, `auth_bearer`, and `auth_ntlm` options for authentication.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_12'
+  -
+    question: 'When using `MockHttpClient`, how can you provide a dynamic response based on the incoming request (method, URL, options)?'
+    answers:
+      - { value: 'By passing an array of `MockResponse` objects to the constructor.', correct: false }
+      - { value: 'By passing a callable function to the constructor that returns a `MockResponse`.', correct: true }
+      - { value: 'By using the `addResponse()` method with a closure.', correct: false }
+      - { value: 'Dynamic responses are not supported by `MockHttpClient`.', correct: false }
+    help: |
+      'You can pass a callable to the `MockHttpClient` constructor. This callable will receive the method, URL, and options of the request and should return a `MockResponse`.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_84'
+  -
+    question: 'What is the purpose of the `toStream()` method on `ResponseInterface` in Symfony HttpClient?'
+    answers:
+      - { value: 'To save the response content directly to a file.', correct: false }
+      - { value: 'To convert the response body into a PHP stream resource, allowing for efficient handling of large responses with standard PHP stream functions.', correct: true }
+      - { value: 'To initiate streaming of the response from the server.', correct: false }
+      - { value: 'To get a readable stream of the response headers.', correct: false }
+    help: |
+      'The `toStream()` method casts the response content to a PHP stream resource, which can be useful for processing large files without loading them entirely into memory.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_77'
+  -
+    question: 'Which of the following HTTP status codes indicate a client error?'
+    answers:
+      - { value: '400 Bad Request', correct: true }
+      - { value: '500 Internal Server Error', correct: false }
+      - { value: '404 Not Found', correct: true }
+      - { value: '302 Found', correct: false }
+      - { value: '429 Too Many Requests', correct: true }
+    help: |
+      '4xx status codes indicate client errors. 400 (Bad Request), 404 (Not Found), and 429 (Too Many Requests) are examples.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status'
+  -
+    question: 'Which of the following HTTP status codes indicate a server error?'
+    answers:
+      - { value: '500 Internal Server Error', correct: true }
+      - { value: '403 Forbidden', correct: false }
+      - { value: '502 Bad Gateway', correct: true }
+      - { value: '200 OK', correct: false }
+      - { value: '504 Gateway Timeout', correct: true }
+    help: |
+      '5xx status codes indicate server errors. 500 (Internal Server Error), 502 (Bad Gateway), and 504 (Gateway Timeout) are examples.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status'
+  -
+    question: 'What is the purpose of the `Last-Modified` HTTP header in caching?'
+    answers:
+      - { value: 'It indicates the date and time the resource was last modified, used for conditional requests.', correct: true }
+      - { value: 'It specifies the expiration date of the cached resource.', correct: false }
+      - { value: 'It defines the maximum age for a resource in the cache.', correct: false }
+      - { value: 'It forces the client to revalidate the resource.', correct: false }
+    help: |
+      'The `Last-Modified` header indicates the date and time at which the origin server believes the resource was last modified. It is used with `If-Modified-Since` for conditional requests.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified'
+  -
+    question: 'Which HTTP request header is used by a client to send the `ETag` of a cached resource to the server for revalidation?'
+    answers:
+      - { value: '`If-None-Match`', correct: true }
+      - { value: '`If-Match`', correct: false }
+      - { value: '`Cache-Control`', correct: false }
+      - { value: '`ETag-Match`', correct: false }
+    help: |
+      'The `If-None-Match` header is used to make a conditional GET request. If the `ETag` matches, the server returns a 304 Not Modified response.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match'
+  -
+    question: 'What is the primary difference between `HttpClient::create()` and `HttpClient::createForBaseUri()`?'
+    answers:
+      - { value: '`create()` is for synchronous requests, `createForBaseUri()` is for asynchronous.', correct: false }
+      - { value: '`create()` creates a generic client, while `createForBaseUri()` creates a client with a pre-configured base URI.', correct: true }
+      - { value: '`create()` is for internal services, `createForBaseUri()` is for external APIs.', correct: false }
+      - { value: '`create()` requires manual dependency injection, `createForBaseUri()` is autowired.', correct: false }
+    help: |
+      '`create()` creates a client with default options, whereas `createForBaseUri()` is a convenience method to immediately set a `base_uri` for the client.
+      https://symfony.com/doc/current/components/http_client.html#creating-a-client'
+  -
+    question: 'Which of the following options can be used in Symfony HttpClient to specify a timeout for a request?'
+    answers:
+      - { value: '`timeout`', correct: true }
+      - { value: '`request_timeout`', correct: false }
+      - { value: '`max_time`', correct: false }
+      - { value: '`connection_timeout`', correct: true }
+      - { value: '`response_timeout`', correct: true }
+    help: |
+      'Symfony HttpClient provides `timeout`, `connection_timeout`, and `response_timeout` options to control various aspects of request timing.
+      https://symfony.com/doc/current/components/http_client.html#request-options'
+  -
+    question: 'What is the purpose of the `Content-Encoding` HTTP header?'
+    answers:
+      - { value: 'To specify the character set of the resource.', correct: false }
+      - { value: 'To indicate the encoding (e.g., gzip, deflate) applied to the message body.', correct: true }
+      - { value: 'To declare the language of the content.', correct: false }
+      - { value: 'To define the content type of the resource.', correct: false }
+    help: |
+      'The `Content-Encoding` header is used to specify the encoding scheme used to compress or transform the message body.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding'
+  -
+    question: 'When making a request with Symfony HttpClient, how can you send form-urlencoded data (similar to an HTML form submission with `POST`)?'
+    answers:
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''form_fields'' => [
+                ''param1'' => ''value1'',
+                ''param2'' => ''value2'',
+            ],
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''body'' => [
+                ''param1'' => ''value1'',
+                ''param2'' => ''value2'',
+            ],
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''json'' => [
+                ''param1'' => ''value1'',
+                ''param2'' => ''value2'',
+            ],
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''POST'', ''https://...'', [
+            ''form_data'' => [
+                ''param1'' => ''value1'',
+                ''param2'' => ''value2'',
+            ],
+        ]);
+        ```', correct: false }
+    help: |
+      'When the `body` option is an array, Symfony HttpClient automatically sends the data as `application/x-www-form-urlencoded`.
+      https://symfony.com/doc/current/components/http_client.html#request-body'
+  -
+    question: 'What is the primary purpose of the `X-Forwarded-For` HTTP header?'
+    answers:
+      - { value: 'To indicate the original IP address of the client when the request passes through a proxy or load balancer.', correct: true }
+      - { value: 'To specify the preferred language of the client.', correct: false }
+      - { value: 'To define the maximum number of proxies a request can traverse.', correct: false }
+      - { value: 'To forward the request to another server.', correct: false }
+    help: |
+      'The `X-Forwarded-For` header is a de facto standard header for identifying the originating IP address of a client connecting to a web server through an HTTP proxy or load balancer.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For'
+  -
+    question: 'In Symfony, if you need to perform multiple HTTP requests concurrently and process their responses as they become available, which method of `HttpClientInterface` should you use?'
+    answers:
+      - { value: '`sendAsync()`', correct: false }
+      - { value: '`concurrentRequests()`', correct: false }
+      - { value: '`stream()`', correct: true }
+      - { value: '`waitAll()`', correct: false }
+    help: |
+      'The `stream()` method allows monitoring a list of responses concurrently, yielding chunks of data as they arrive.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_51'
+  -
+    question: 'When streaming responses with `HttpClientInterface::stream()`, what does `ChunkInterface::isFirst()` indicate?'
+    answers:
+      - { value: 'It''s the first chunk of the entire stream, regardless of the response.', correct: false }
+      - { value: 'It''s the first chunk for a specific response, meaning its headers have just arrived.', correct: true }
+      - { value: 'It''s the first chunk of the response body.', correct: false }
+      - { value: 'The stream has just started.', correct: false }
+    help: |
+      '`isFirst()` returns true when the headers for that specific response have just been received.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_54'
+  -
+    question: 'When streaming responses with `HttpClientInterface::stream()`, what does `ChunkInterface::isLast()` indicate?'
+    answers:
+      - { value: 'It''s the last chunk of the entire stream, meaning all responses are complete.', correct: false }
+      - { value: 'It''s the last chunk for a specific response, meaning its full body has been received.', correct: true }
+      - { value: 'The stream is about to close.', correct: false }
+      - { value: 'An error occurred and this is the final error chunk.', correct: false }
+    help: |
+      '`isLast()` returns true when the full body for that specific response has been received.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_54'
+  -
+    question: 'What is the purpose of the `Connection: keep-alive` HTTP header?'
+    answers:
+      - { value: 'To instruct the server to close the connection after the current response.', correct: false }
+      - { value: 'To request the server to keep the TCP connection open for multiple requests/responses, improving performance.', correct: true }
+      - { value: 'To maintain a persistent WebSocket connection.', correct: false }
+      - { value: 'To indicate that the client supports HTTP/2.', correct: false }
+    help: |
+      'The `Connection: keep-alive` header is used to signal that the client or server wants to keep the TCP connection open for subsequent requests, reducing overhead.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection'
+  -
+    question: 'Which of the following are valid ways to instantiate `MockHttpClient` with predefined responses for testing?'
+    answers:
+      - { value: '
+        ```php
+        $mockResponse1 = new MockResponse(''body1'');
+        $mockResponse2 = new MockResponse(''body2'');
+        $client = new MockHttpClient([$mockResponse1, $mockResponse2]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $client = new MockHttpClient();
+        $client->setResponseFactory([
+            new MockResponse(''body1''),
+            new MockResponse(''body2''),
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $client = MockHttpClient::fromResponses([
+            new MockResponse(''body1''),
+            new MockResponse(''body2''),
+        ]);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $client = new MockHttpClient(function () {
+            yield new MockResponse(''body1'');
+            yield new MockResponse(''body2'');
+        });
+        ```', correct: true }
+    help: |
+      '`MockHttpClient` can be instantiated with an array of `MockResponse` objects, a callable, or have its response factory set via `setResponseFactory()`.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_81
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_84
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_86'
+  -
+    question: 'What is the purpose of the `If-Modified-Since` HTTP request header in caching?'
+    answers:
+      - { value: 'To specify the maximum age of a cached resource.', correct: false }
+      - { value: 'To send the date of the last modification of the client''s cached copy to the server for revalidation.', correct: true }
+      - { value: 'To indicate that the client only accepts resources modified after a certain date.', correct: false }
+      - { value: 'To force the server to return a fresh copy of the resource.', correct: false }
+    help: |
+      'The `If-Modified-Since` header is used in conditional GET requests to check if a resource has been modified since a specified date. If not, the server returns a 304 Not Modified.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since'
+  -
+    question: 'Which of the following HTTP headers are primarily related to caching control?'
+    answers:
+      - { value: '`Cache-Control`', correct: true }
+      - { value: '`Expires`', correct: true }
+      - { value: '`Pragma`', correct: true }
+      - { value: '`Content-Length`', correct: false }
+      - { value: '`Set-Cookie`', correct: false }
+    help: |
+      '`Cache-Control`, `Expires`, and `Pragma` are all used to control caching behavior.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching'
+  -
+    question: 'What is the primary role of the `Psr18Client` in Symfony HttpClient?'
+    answers:
+      - { value: 'To provide a native PHP stream-based HTTP client implementation.', correct: false }
+      - { value: 'To act as an adapter, allowing Symfony HttpClient to be used with libraries that expect a PSR-18 compliant HTTP client.', correct: true }
+      - { value: 'To implement a mock HTTP client for testing purposes.', correct: false }
+      - { value: 'To handle asynchronous HTTP requests using Promises.', correct: false }
+    help: |
+      '`Psr18Client` is an adapter that makes Symfony HttpClient compatible with the PSR-18 `HttpClientInterface`.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_68'
+  -
+    question: 'When should you use `HttpClient::create()` versus injecting `HttpClientInterface` directly in a Symfony application?'
+    answers:
+      - { value: '`HttpClient::create()` is for standalone scripts or when you need a client with no specific configuration; `HttpClientInterface` injection is for services within the Symfony container to leverage autowiring and configuration.', correct: true }
+      - { value: '`HttpClient::create()` is for production, `HttpClientInterface` injection is for testing.', correct: false }
+      - { value: '`HttpClient::create()` is for synchronous requests, `HttpClientInterface` injection is for asynchronous.', correct: false }
+      - { value: 'They are interchangeable; there is no functional difference.', correct: false }
+    help: |
+      '`HttpClient::create()` is for manual instantiation, typically outside the container or for quick scripts. Injecting `HttpClientInterface` is the standard way within a Symfony application to benefit from the service container's features like autowiring and configuration.
+      https://symfony.com/doc/current/components/http_client.html#usage'
+  -
+    question: 'What is the significance of the `SameSite` cookie attribute?'
+    answers:
+      - { value: 'It ensures the cookie is only sent to the exact domain that set it, preventing sub-domain access.', correct: false }
+      - { value: 'It controls when cookies are sent with cross-site requests, helping to mitigate Cross-Site Request Forgery (CSRF) attacks.', correct: true }
+      - { value: 'It specifies that the cookie should only be sent over secure (HTTPS) connections.', correct: false }
+      - { value: 'It limits the cookie''s lifetime to the current browser session.', correct: false }
+    help: |
+      'The `SameSite` attribute helps prevent CSRF attacks by controlling whether cookies are sent with cross-site requests.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite'
+  -
+    question: 'Which of the following HTTP methods are considered "cacheable" by default?'
+    answers:
+      - { value: 'GET', correct: true }
+      - { value: 'POST', correct: false }
+      - { value: 'HEAD', correct: true }
+      - { value: 'PUT', correct: false }
+      - { value: 'DELETE', correct: false }
+    help: |
+      'GET and HEAD requests are cacheable by default. Other methods are generally not.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#what_can_be_cached'
+  -
+    question: 'What is "content negotiation" in HTTP?'
+    answers:
+      - { value: 'The process of negotiating the encryption algorithm for the connection.', correct: false }
+      - { value: 'The mechanism that allows the server to serve different versions of a resource based on client preferences (e.g., language, media type, encoding).', correct: true }
+      - { value: 'The process of agreeing on the HTTP protocol version to use.', correct: false }
+      - { value: 'The exchange of authentication credentials between client and server.', correct: false }
+    help: |
+      'Content negotiation is the mechanism that makes it possible to serve different versions of a document (or more generally, a resource) at the same URI, so that user agents can specify which version is most adequate for their capabilities.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation'
+  -
+    question: 'Which HTTP header is used by the client to indicate the character sets it prefers for the response?'
+    answers:
+      - { value: '`Accept-Charset`', correct: true }
+      - { value: '`Content-Charset`', correct: false }
+      - { value: '`Charset`', correct: false }
+      - { value: '`Content-Type`', correct: false }
+    help: |
+      'The `Accept-Charset` header indicates the character sets that the client is capable of understanding.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset'
+  -
+    question: 'What is the purpose of the `Location` HTTP response header?'
+    answers:
+      - { value: 'To specify the geographical location of the server.', correct: false }
+      - { value: 'To indicate the URI to which the client should redirect (used with 3xx status codes).', correct: true }
+      - { value: 'To provide the current URL of the requested resource.', correct: false }
+      - { value: 'To define the base URI for relative URLs in the response.', correct: false }
+    help: |
+      'The `Location` response header indicates the URL to which a page redirect should be done.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Location'
+  -
+    question: 'How can you set a custom timeout for a specific request using Symfony HttpClient?'
+    answers:
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...'', [
+            ''timeout'' => 5.0, // 5 seconds
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...'');
+        $response->setTimeout(5.0);
+        ```', correct: false }
+      - { value: '
+        ```php
+        $client->setDefaultTimeout(5.0);
+        $response = $client->request(''GET'', ''https://...'');
+        ```', correct: false }
+      - { value: '
+        ```php
+        $response = $client->request(''GET'', ''https://...'', [
+            ''options'' => [''timeout'' => 5.0],
+        ]);
+        ```', correct: false }
+    help: |
+      'The `timeout` option can be set directly in the request options array to define a specific timeout for that request.
+      https://symfony.com/doc/current/components/http_client.html#request-options'
+  -
+    question: 'What is the primary use case for `HttpClientInterface::toStream()` in Symfony?'
+    answers:
+      - { value: 'To convert a response into a string for logging.', correct: false }
+      - { value: 'To enable seeking and `stream_select()` on the response body, which is useful for large file downloads or processing.', correct: true }
+      - { value: 'To get a buffered version of the response content.', correct: false }
+      - { value: 'To automatically decompress the response body.', correct: false }
+    help: |
+      'The `toStream()` method returns a seekable and potentially `stream_select()`-able PHP stream resource, which is beneficial for handling large responses efficiently.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_77'
+  -
+    question: 'Which HTTP header is typically used to indicate the original host requested by the client in a virtual hosting environment?'
+    answers:
+      - { value: '`Host`', correct: true }
+      - { value: '`Server`', correct: false }
+      - { value: '`Origin`', correct: false }
+      - { value: '`Domain`', correct: false }
+    help: |
+      'The `Host` request header specifies the domain name of the server (for virtual hosting) and the TCP port number on which the server is listening.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host'
+  -
+    question: 'What is the purpose of the `Referer` HTTP request header?'
+    answers:
+      - { value: 'To indicate the URL of the resource from which the request was initiated.', correct: true }
+      - { value: 'To specify the preferred language of the client.', correct: false }
+      - { value: 'To provide authentication tokens.', correct: false }
+      - { value: 'To inform the server about the client''s capabilities.', correct: false }
+    help: |
+      'The `Referer` header contains the URL of the page that linked to the resource being requested.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer'
+  -
+    question: 'Which of the following are valid ways to upload data using the `body` option in Symfony HttpClient?'
+    answers:
+      - { value: 'A raw string.', correct: true }
+      - { value: 'An array of parameters (for form-urlencoded data).', correct: true }
+      - { value: 'A `\Closure` that generates the uploaded data.', correct: true }
+      - { value: 'A PHP stream resource (e.g., from `fopen()`).', correct: true }
+      - { value: 'A `SplFileObject` instance directly.', correct: false }
+    help: |
+      'The `body` option is highly flexible and can accept strings, arrays, closures, or stream resources for uploading data.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_18'
+  -
+    question: 'What is the primary purpose of the `Content-Length` HTTP header in a response?'
+    answers:
+      - { value: 'To indicate the size of the request body.', correct: false }
+      - { value: 'To specify the size of the message body in bytes, allowing the client to know when the full response has been received.', correct: true }
+      - { value: 'To limit the maximum size of the response.', correct: false }
+      - { value: 'To define the length of the content type.', correct: false }
+    help: |
+      'The `Content-Length` header indicates the size of the entity-body, in bytes, sent to the recipient.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length'
+  -
+    question: 'When dealing with lazy responses in Symfony HttpClient, what happens if you don''t assign the `ResponseInterface` object returned by `request()` to a variable and the request results in an error (e.g., 3xx-5xx status code)?'
+    answers:
+      - { value: 'The request is silently ignored.', correct: false }
+      - { value: 'The request is canceled immediately.', correct: false }
+      - { value: 'The destructor of the returned response is called immediately, and it will throw an exception if the status code is in the 300-599 range.', correct: true }
+      - { value: 'The response is automatically retried until it succeeds.', correct: false }
+    help: |
+      'If a lazy response is not assigned to a variable, its destructor is called immediately, which will trigger completion and throw an exception if the status code indicates an error.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_49'
+  -
+    question: 'What is the purpose of the `X-Debug-Token` header in Symfony responses?'
+    answers:
+      - { value: 'To indicate that the response is for a debug environment only.', correct: false }
+      - { value: 'To provide a token that can be used to access detailed debug information about the request and response in the Symfony Profiler.', correct: true }
+      - { value: 'To enable verbose logging for the current request.', correct: false }
+      - { value: 'To authenticate debug requests.', correct: false }
+    help: |
+      'The `X-Debug-Token` header contains a token that allows you to access the Symfony Profiler for detailed debugging of the request and response.
+      https://symfony.com/doc/current/profiler.html#accessing-the-profiler'
+  -
+    question: 'Which HTTP status code should be used when a request is valid, but the server is refusing to process it because the payload is too large?'
+    answers:
+      - { value: '400 Bad Request', correct: false }
+      - { value: '413 Payload Too Large', correct: true }
+      - { value: '406 Not Acceptable', correct: false }
+      - { value: '411 Length Required', correct: false }
+    help: |
+      'The 413 (Payload Too Large) status code indicates that the request entity is larger than limits defined by server.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/413'
+  -
+    question: 'What is the purpose of the `Expires` HTTP header in caching?'
+    answers:
+      - { value: 'It specifies the maximum age of a resource in a cache in seconds.', correct: false }
+      - { value: 'It provides a date/time after which the response is considered stale.', correct: true }
+      - { value: 'It indicates when the server will delete the resource.', correct: false }
+      - { value: 'It forces the client to revalidate the resource after a certain period.', correct: false }
+    help: |
+      'The `Expires` header provides a date/time after which the response is considered stale. It is a legacy header, largely superseded by `Cache-Control`.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires'
+  -
+    question: 'Which Symfony HttpClient option allows you to set a base URI for a client instance, so subsequent requests can use relative URLs?'
+    answers:
+      - { value: '`base_url`', correct: false }
+      - { value: '`default_uri`', correct: false }
+      - { value: '`base_uri`', correct: true }
+      - { value: '`root_uri`', correct: false }
+    help: |
+      'The `base_uri` option is used to define a base URL for the client, enabling the use of relative URLs in requests.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_3'
+  -
+    question: 'When using `MockHttpClient` with a callback function, what arguments does the callback receive?'
+    answers:
+      - { value: '`($request)`', correct: false }
+      - { value: '`($method, $url)`', correct: false }
+      - { value: '`($method, $url, $options)`', correct: true }
+      - { value: '`($request, $response)`', correct: false }
+    help: |
+      'The callable passed to `MockHttpClient` receives the HTTP method, URL, and options of the incoming request.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_84'
+  -
+    question: 'What is the purpose of the `Content-Disposition` HTTP header?'
+    answers:
+      - { value: 'To suggest a filename for the content when saving it locally, especially for downloads.', correct: true }
+      - { value: 'To indicate whether the content should be displayed inline or as an attachment.', correct: true }
+      - { value: 'To specify the encoding of the content.', correct: false }
+      - { value: 'To define the type of content being transmitted.', correct: false }
+    help: |
+      'The `Content-Disposition` header indicates if the content is expected to be displayed inline in the browser, or as an attachment (i.e., downloaded). It also suggests a filename.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition'
+  -
+    question: 'Which of the following are valid ways to configure a Symfony HTTP Client to use Bearer token authentication globally?'
+    answers:
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                default_options:
+                    headers:
+                        Authorization: 'Bearer %env(API_TOKEN)%'
+        ```', correct: true }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                scoped_clients:
+                    my_api:
+                        auth_bearer: '%env(API_TOKEN)%'
+        ```', correct: true }
+      - { value: '
+        ```php
+        $client = HttpClient::create([
+            ''auth_bearer'' => ''my_token'',
+        ]);
+        ```', correct: true }
+      - { value: '
+        ```yaml
+        # config/packages/framework.yaml
+        framework:
+            http_client:
+                bearer_token: '%env(API_TOKEN)%'
+        ```', correct: false }
+    help: |
+      'Bearer token authentication can be configured via `default_options.headers.Authorization`, `scoped_clients.auth_bearer`, or directly in `HttpClient::create()` options.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_12'
+  -
+    question: 'What is the purpose of the `Strict-Transport-Security` (HSTS) HTTP header?'
+    answers:
+      - { value: 'To force the browser to always use HTTPS for a specified domain for a certain period, even if the user types HTTP.', correct: true }
+      - { value: 'To prevent cross-site scripting (XSS) attacks.', correct: false }
+      - { value: 'To enable HTTP/2 protocol negotiation.', correct: false }
+      - { value: 'To enforce a specific content security policy.', correct: false }
+    help: |
+      'HSTS is a security policy mechanism that helps to protect websites against protocol downgrade attacks and cookie hijacking over insecure connections.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security'
+  -
+    question: 'Which Symfony HttpClient option allows you to configure a proxy for requests?'
+    answers:
+      - { value: '`proxy`', correct: true }
+      - { value: '`http_proxy`', correct: false }
+      - { value: '`forward_proxy`', correct: false }
+      - { value: '`gateway`', correct: false }
+    help: |
+      'The `proxy` option is used to configure an HTTP proxy for requests made by the client.
+      https://symfony.com/doc/current/components/http_client.html#proxy'
+  -
+    question: 'What is the purpose of the `X-Requested-With` HTTP header, commonly used in AJAX requests?'
+    answers:
+      - { value: 'To indicate that the request is an AJAX request, often used by servers to differentiate from regular browser requests.', correct: true }
+      - { value: 'To specify the client''s preferred XML version.', correct: false }
+      - { value: 'To provide a unique identifier for the request for debugging purposes.', correct: false }
+      - { value: 'To request a specific response format.', correct: false }
+    help: |
+      'The `X-Requested-With` header is a non-standard header that historically indicated that the request was made by JavaScript (e.g., XMLHttpRequest).
+      https://developer.mozilla.org/en-US/docs/Glossary/X-Requested-With'
+  -
+    question: 'When using Symfony HttpClient, how can you ensure that the `Content-Length` header is correctly set for a streamed request body to avoid HTTP 411 errors with some servers?'
+    answers:
+      - { value: 'By manually calculating the content length and setting the header.', correct: false }
+      - { value: 'By converting the streamed body to a string using `bodyToString()` before sending the request.', correct: true }
+      - { value: 'By using the `stream_size` option.', correct: false }
+      - { value: 'Symfony HttpClient automatically handles `Content-Length` for all body types.', correct: false }
+    help: |
+      'For streamed bodies, converting the body to a string using `bodyToString()` ensures the `Content-Length` header is present, which can resolve HTTP 411 errors. Note that this increases memory consumption for large streams.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_25'
+  -
+    question: 'What is the primary purpose of the `User-Agent` HTTP request header?'
+    answers:
+      - { value: 'To specify the type of content the client accepts.', correct: false }
+      - { value: 'To identify the client software (e.g., browser, bot) making the request.', correct: true }
+      - { value: 'To indicate the language preferences of the client.', correct: false }
+      - { value: 'To provide authentication credentials.', correct: false }
+    help: |
+      'The `User-Agent` header identifies the user agent (e.g., web browser, crawler) making the request.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent'
+  -
+    question: 'Which of the following HTTP headers are typically used for content negotiation?'
+    answers:
+      - { value: '`Accept`', correct: true }
+      - { value: '`Accept-Charset`', correct: true }
+      - { value: '`Accept-Encoding`', correct: true }
+      - { value: '`Accept-Language`', correct: true }
+      - { value: '`Content-Type`', correct: false }
+    help: |
+      '`Accept`, `Accept-Charset`, `Accept-Encoding`, and `Accept-Language` are all client-side headers used to specify preferences for content negotiation.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation'
+  -
+    question: 'What is the purpose of the `If-None-Match` HTTP request header?'
+    answers:
+      - { value: 'To send the `ETag` of a cached resource to the server for revalidation, requesting the resource only if it has changed.', correct: true }
+      - { value: 'To force the server to return a fresh copy of the resource, ignoring any cached versions.', correct: false }
+      - { value: 'To specify a list of `ETag` values that the client does not want to match.', correct: false }
+      - { value: 'To indicate that the client does not support `ETag` validation.', correct: false }
+    help: |
+      'The `If-None-Match` header is used with an `ETag` to make a conditional request. If the `ETag` matches, the server typically responds with a 304 Not Modified.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match'
+  -
+    question: 'Which Symfony HttpClient option allows you to disable SSL/TLS certificate verification (e.g., for self-signed certificates in development)?'
+    answers:
+      - { value: '`verify_peer`', correct: true }
+      - { value: '`ssl_verify`', correct: false }
+      - { value: '`allow_insecure`', correct: false }
+      - { value: '`no_ssl_check`', correct: false }
+    help: |
+      'The `verify_peer` option (set to `false`) disables SSL/TLS certificate verification. This should be used with caution and only in development environments.
+      https://symfony.com/doc/current/components/http_client.html#ssl-tls-peer-verification'
+  -
+    question: 'What is the purpose of the `X-CSRF-Token` header, often used in web applications?'
+    answers:
+      - { value: 'To protect against Cross-Site Request Forgery (CSRF) attacks by ensuring that a request originates from the legitimate web application.', correct: true }
+      - { value: 'To provide a unique identifier for each user session.', correct: false }
+      - { value: 'To specify the client''s preferred language.', correct: false }
+      - { value: 'To indicate that the request is an AJAX request.', correct: false }
+    help: |
+      'The `X-CSRF-Token` (or similar custom headers) is a common technique to mitigate CSRF attacks by including a unique, server-generated token in requests.
+      https://symfony.com/doc/current/security/csrf.html'
+  -
+    question: 'In Symfony, how can you retrieve uploaded files from the current HTTP request using the `Request` object?'
+    answers:
+      - { value: '$request->files->get(''fieldName'');', correct: true }
+      - { value: '$request->getUploadedFile(''fieldName'');', correct: false }
+      - { value: '$request->payload->get(''fieldName'');', correct: false }
+      - { value: '$request->input(''fieldName'');', correct: false }
+    help: |
+      'Uploaded files are accessed via the `files` public property of the `Request` object, which is an instance of `FileBag`.
+      https://github.com/symfony/symfony-docs/blob/7.3/introduction/http_fundamentals.rst#_snippet_5'
+  -
+    question: 'What is the purpose of the `WWW-Authenticate` HTTP header?'
+    answers:
+      - { value: 'To provide authentication credentials from the client to the server.', correct: false }
+      - { value: 'To indicate the authentication scheme and parameters required by the server for access to a resource (used with 401 Unauthorized).', correct: true }
+      - { value: 'To specify the client''s preferred authentication method.', correct: false }
+      - { value: 'To challenge the client to re-authenticate.', correct: false }
+    help: |
+      'The `WWW-Authenticate` response header defines the authentication method that should be used to gain access to a resource. It is sent with a 401 Unauthorized response.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate'
+  -
+    question: 'Which Symfony HttpClient option allows you to follow HTTP redirects automatically?'
+    answers:
+      - { value: '`follow_redirects`', correct: true }
+      - { value: '`allow_redirects`', correct: false }
+      - { value: '`max_redirects`', correct: true }
+      - { value: '`auto_redirect`', correct: false }
+    help: |
+      'The `follow_redirects` option (boolean) enables or disables automatic redirection. `max_redirects` limits the number of redirects.
+      https://symfony.com/doc/current/components/http_client.html#redirects'
+  -
+    question: 'What is the purpose of the `If-Unmodified-Since` HTTP request header?'
+    answers:
+      - { value: 'To make the request conditional, only applying the method if the resource has NOT been modified since the specified date.', correct: true }
+      - { value: 'To request the resource only if it has been modified after a certain date.', correct: false }
+      - { value: 'To specify the last modification date of the client''s cached copy.', correct: false }
+      - { value: 'To force the server to return an unmodified version of the resource.', correct: false }
+    help: |
+      'The `If-Unmodified-Since` header makes the request conditional. If the resource has been modified since the specified date, the server should return a 412 Precondition Failed status code.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Unmodified-Since'
+  -
+    question: 'Which Symfony HttpClient option can be used to set a custom DNS resolver for requests?'
+    answers:
+      - { value: '`dns_resolver`', correct: false }
+      - { value: '`resolve`', correct: true }
+      - { value: '`custom_dns`', correct: false }
+      - { value: '`name_server`', correct: false }
+    help: |
+      'The `resolve` option allows you to map hostnames to specific IP addresses, effectively acting as a custom DNS resolver for the client.
+      https://symfony.com/doc/current/components/http_client.html#dns-resolution'
+  -
+    question: 'What is the primary purpose of the `Content-Type` HTTP header in a response?'
+    answers:
+      - { value: 'To specify the character encoding of the response body.', correct: false }
+      - { value: 'To indicate the media type (e.g., `text/html`, `application/json`) of the resource being sent in the response body.', correct: true }
+      - { value: 'To define the length of the response body.', correct: false }
+      - { value: 'To suggest a filename for the content.', correct: false }
+    help: |
+      'The `Content-Type` header indicates the original media type of the resource (or of the data).
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type'
+  -
+    question: 'Which Symfony HttpClient option allows you to specify a certificate file for client-side SSL/TLS authentication?'
+    answers:
+      - { value: '`local_cert`', correct: true }
+      - { value: '`client_cert`', correct: false }
+      - { value: '`ssl_cert`', correct: false }
+      - { value: '`cert_file`', correct: false }
+    help: |
+      'The `local_cert` option specifies the path to a file containing a client-side certificate.
+      https://symfony.com/doc/current/components/http_client.html#ssl-tls-peer-verification'
+  -
+    question: 'What is the purpose of the `Age` HTTP response header in caching?'
+    answers:
+      - { value: 'It indicates the time in seconds since the response was generated or revalidated by the origin server.', correct: true }
+      - { value: 'It specifies the maximum age a resource can be stored in a cache.', correct: false }
+      - { value: 'It defines the expiration time of the cached resource.', correct: false }
+      - { value: 'It indicates how old the client''s cache is.', correct: false }
+    help: |
+      'The `Age` header indicates the age of the object (in seconds) that has been in a proxy cache.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Age'
+  -
+    question: 'Which Symfony HttpClient option allows you to specify a custom user agent string for all requests made by a client instance?'
+    answers:
+      - { value: '`user_agent`', correct: false }
+      - { value: '`headers` with `User-Agent`', correct: true }
+      - { value: '`default_user_agent`', correct: false }
+      - { value: '`client_agent`', correct: false }
+    help: |
+      'The `User-Agent` header can be set within the `headers` option of the client''s default options.
+      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_16'
+  -
+    question: 'What is the purpose of the `Upgrade-Insecure-Requests` HTTP header?'
+    answers:
+      - { value: 'To instruct the server to upgrade the connection to HTTP/2.', correct: false }
+      - { value: 'To signal to the server that the client prefers a secure (HTTPS) connection and can handle the upgrade.', correct: true }
+      - { value: 'To request the server to downgrade from HTTPS to HTTP for performance.', correct: false }
+      - { value: 'To indicate that the client supports HTTP Strict Transport Security (HSTS).', correct: false }
+    help: |
+      'The `Upgrade-Insecure-Requests` header sends a signal to the server that the client prefers a secure response, and can handle the `Content-Security-Policy` `upgrade-insecure-requests` directive.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Upgrade-Insecure-Requests'
+  -
+    question: 'Which Symfony HttpClient option allows you to specify a custom cookie jar for managing cookies across requests?'
+    answers:
+      - { value: '`cookie_jar`', correct: true }
+      - { value: '`cookies`', correct: false }
+      - { value: '`session_cookies`', correct: false }
+      - { value: '`cookie_handler`', correct: false }
+    help: |
+      'The `cookie_jar` option allows you to provide a `CookieJarInterface` instance to manage cookies.
+      https://symfony.com/doc/current/components/http_client.html#cookies'
+  -
+    question: 'What is the primary purpose of the `Range` HTTP request header?'
+    answers:
+      - { value: 'To specify the acceptable range of status codes for the response.', correct: false }
+      - { value: 'To request only a portion (a range of bytes) of a resource from the server.', correct: true }
+      - { value: 'To define the time range for which the request is valid.', correct: false }
+      - { value: 'To indicate the range of IP addresses the client accepts connections from.', correct: false }
+    help: |
+      'The `Range` header requests only part of a resource. This is useful for resuming interrupted downloads or for streaming media.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range'
+  -
+    question: 'Which HTTP status code indicates that the server has successfully fulfilled the request and there is no additional content to send in the response body?'
+    answers:
+      - { value: '200 OK', correct: false }
+      - { value: '201 Created', correct: false }
+      - { value: '204 No Content', correct: true }
+      - { value: '202 Accepted', correct: false }
+    help: |
+      'The 204 (No Content) status code indicates that the server successfully processed the request and is not returning any content.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204'
+  -
+    question: 'What is the purpose of the `If-Range` HTTP request header?'
+    answers:
+      - { value: 'To make a conditional range request: if the resource has not changed, return the specified range; otherwise, return the entire resource.', correct: true }
+      - { value: 'To specify a range of bytes to download only if the resource is older than a certain date.', correct: false }
+      - { value: 'To request a range of content only if the server supports range requests.', correct: false }
+      - { value: 'To indicate the preferred range of HTTP versions.', correct: false }
+    help: |
+      'The `If-Range` header is used to make a conditional range request. If the condition is met, the server sends the specified range; otherwise, it sends the entire resource.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Range'
+  -
+    question: 'Which Symfony HttpClient option allows you to specify a custom CA certificate file for verifying peer certificates?'
+    answers:
+      - { value: '`cafile`', correct: true }
+      - { value: '`ssl_ca_file`', correct: false }
+      - { value: '`cert_authority`', correct: false }
+      - { value: '`trusted_certs`', correct: false }
+    help: |
+      'The `cafile` option specifies the path to a file containing one or more trusted CA certificates.
+      https://symfony.com/doc/current/components/http_client.html#ssl-tls-peer-verification'
+  -
+    question: 'What is the purpose of the `Accept-Encoding` HTTP header?'
+    answers:
+      - { value: 'To specify the character encoding of the response.', correct: false }
+      - { value: 'To indicate the content encoding (e.g., gzip, deflate, br) the client can accept in the response.', correct: true }
+      - { value: 'To define the encoding of the request body.', correct: false }
+      - { value: 'To specify the preferred compression level.', correct: false }
+    help: |
+      'The `Accept-Encoding` header indicates the content encodings (e.g., compression algorithms) that the client is able to understand.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding'
+  -
+    question: 'Which Symfony HttpClient option allows you to configure a specific HTTP protocol version (e.g., HTTP/1.1, HTTP/2) for requests?'
+    answers:
+      - { value: '`http_version`', correct: true }
+      - { value: '`protocol`', correct: false }
+      - { value: '`version`', correct: false }
+      - { value: '`force_http_version`', correct: false }
+    help: |
+      'The `http_version` option allows you to explicitly set the HTTP protocol version for requests.
+      https://symfony.com/doc/current/components/http_client.html#request-options'
+  -
+    question: 'What is the purpose of the `Server` HTTP response header?'
+    answers:
+      - { value: 'To indicate the server''s operating system.', correct: false }
+      - { value: 'To provide information about the software used by the origin server to handle the request.', correct: true }
+      - { value: 'To specify the server''s hostname.', correct: false }
+      - { value: 'To define the server''s capabilities.', correct: false }
+    help: |
+      'The `Server` header contains information about the software used by the origin server to handle the request.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Server'
+  -
+    question: 'Which Symfony HttpClient option allows you to set a custom DNS server for resolving hostnames?'
+    answers:
+      - { value: '`dns`', correct: false }
+      - { value: '`resolve`', correct: true }
+      - { value: '`nameservers`', correct: false }
+      - { value: '`dns_server`', correct: false }
+    help: |
+      'The `resolve` option can be used to map hostnames to specific IP addresses, effectively allowing a custom DNS resolution.
+      https://symfony.com/doc/current/components/http_client.html#dns-resolution'
+  -
+    question: 'What is the purpose of the `Via` HTTP header?'
+    answers:
+      - { value: 'To indicate the intermediate proxies or gateways through which the request or response has passed.', correct: true }
+      - { value: 'To specify the preferred route for the request.', correct: false }
+      - { value: 'To define the maximum number of hops for a request.', correct: false }
+      - { value: 'To provide a unique identifier for the request path.', correct: false }
+    help: |
+      'The `Via` header is added by proxies and indicates the intermediate protocols and hosts through which the request or response has passed.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Via'
+  -
+    question: 'Which Symfony HttpClient option allows you to specify whether to throw an exception for HTTP 4xx or 5xx status codes when calling `getContent()` or `toArray()`?'
+    answers:
+      - { value: '`throw_on_error`', correct: true }
+      - { value: '`http_errors`', correct: false }
+      - { value: '`check_status_code`', correct: false }
+      - { value: '`fail_on_error`', correct: false }
+    help: |
+      'The `throw_on_error` option (defaulting to `true` for `getContent()` and `toArray()`) controls whether an `HttpExceptionInterface` is thrown for 4xx/5xx status codes.
+      https://symfony.com/doc/current/components/http_client.html#handling-http-errors'
+  -
+    question: 'What is the purpose of the `Alt-Svc` HTTP header?'
+    answers:
+      - { value: 'To indicate alternative services where the resource can be found, potentially on different protocols or hostnames.', correct: true }
+      - { value: 'To specify an alternative content type for the resource.', correct: false }
+      - { value: 'To suggest an alternative caching mechanism.', correct: false }
+      - { value: 'To provide an alternative authentication method.', correct: false }
+    help: |
+      'The `Alt-Svc` header allows an origin server to advertise alternative service endpoints for itself.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Alt-Svc'
+  -
+    question: 'Which Symfony HttpClient option allows you to set a custom DNS cache for the client?'
+    answers:
+      - { value: '`dns_cache`', correct: true }
+      - { value: '`resolve_cache`', correct: false }
+      - { value: '`hostname_cache`', correct: false }
+      - { value: '`name_cache`', correct: false }
+    help: |
+      'The `dns_cache` option allows you to provide a PSR-6 `CacheItemPoolInterface` instance to cache DNS resolutions.
+      https://symfony.com/doc/current/components/http_client.html#dns-resolution'
