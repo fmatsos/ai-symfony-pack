@@ -1,0 +1,1492 @@
+category: Templating with Twig
+
+questions:
+  -
+    question: >
+      What are the correct delimiters in Twig for displaying the value of a variable?
+    answers:
+      - { value: "{{ variable }}", correct: true }
+      - { value: "{% variable %}", correct: false }
+      - { value: "{# variable #}", correct: false }
+      - { value: "[[ variable ]]", correct: false }
+    help: |
+      Twig uses `{{ ... }}` to print the content of a variable or the result of an expression.
+      https://symfony.com/doc/current/templates.html#basic-twig-template-structure
+
+  -
+    question: >
+      Which Twig delimiters are used for executing statements such as loops or conditional logic?
+    answers:
+      - { value: "{% statement %}", correct: true }
+      - { value: "{{ statement }}", correct: false }
+      - { value: "{# statement #}", correct: false }
+      - { value: "[[ statement ]]", correct: false }
+    help: |
+      Twig uses `{% ... %}` for executing statements like `if`, `for`, `set`, etc.
+      https://symfony.com/doc/current/templates.html#basic-twig-template-structure
+
+  -
+    question: >
+      How do you add a single-line comment in a Twig template that will not be rendered in the final HTML output?
+    answers:
+      - { value: "{# This is a comment #}", correct: true }
+      - { value: "// This is a comment", correct: false }
+      - { value: "<!-- This is a comment -->", correct: false }
+      - { value: "/* This is a comment */", correct: false }
+    help: |
+      Twig comments are denoted by `{# ... #}` and are stripped from the compiled template.
+      https://symfony.com/doc/current/templates.html#basic-twig-template-structure
+
+  -
+    question: >
+      By default, how does Twig handle output of variables to prevent Cross-Site Scripting (XSS) attacks?
+    answers:
+      - { value: "It automatically escapes potentially dangerous characters into HTML entities.", correct: true }
+      - { value: "It requires manual escaping using a `raw` filter for all output.", correct: false }
+      - { value: "It relies on the browser's built-in XSS protection mechanisms.", correct: false }
+      - { value: "It only escapes variables explicitly marked as 'safe'.", correct: false }
+    help: |
+      Twig automatically escapes output by default, converting characters like `<`, `>`, `&`, and `"` into their corresponding HTML entities.
+      https://symfony.com/doc/current/templates.html#automatic-output-escaping
+
+  -
+    question: |
+      Given the following Twig snippet, if `user_input` contains `<script>alert('XSS')</script>`, what will be the rendered output by default?
+
+      ```twig
+      <p>User message: {{ user_input }}</p>
+      ```
+    answers:
+      - { value: "<p>User message: &lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</p>", correct: true }
+      - { value: "<p>User message: <script>alert('XSS')</script></p>", correct: false }
+      - { value: "An error will be thrown due to unsafe content.", correct: false }
+      - { value: "<p>User message: </p>", correct: false }
+    help: |
+      Twig's automatic escaping converts special characters into HTML entities to prevent XSS.
+      https://symfony.com/doc/current/templates.html#automatic-output-escaping
+
+  -
+    question: >
+      Which Twig tag is used in a child template to specify that it inherits from a parent layout template?
+    answers:
+      - { value: "{% extends 'parent.html.twig' %}", correct: true }
+      - { value: "{% include 'parent.html.twig' %}", correct: false }
+      - { value: "{% import 'parent.html.twig' %}", correct: false }
+      - { value: "{% uses 'parent.html.twig' %}", correct: false }
+    help: |
+      The `extends` tag is used to set up template inheritance. It must be the first tag in the template.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: >
+      In Twig template inheritance, what is the purpose of the `block` tag?
+    answers:
+      - { value: "To define a section of content that can be overridden by child templates.", correct: true }
+      - { value: "To include content from another template file.", correct: false }
+      - { value: "To create a reusable macro.", correct: false }
+      - { value: "To mark a section of code for debugging purposes.", correct: false }
+    help: |
+      Blocks define areas that child templates can fill in or override.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: |
+      Given a parent template `base.html.twig` with `{% block content %}{% endblock %}`, how would you include the parent's `content` within an overridden `content` block in a child template?
+    answers:
+      - { value: "{{ parent() }}", correct: true }
+      - { value: "{{ super() }}", correct: false }
+      - { value: "{{ self.content }}", correct: false }
+      - { value: "{{ block('content') }}", correct: false }
+    help: |
+      The `parent()` function allows you to render the contents of the parent block within a child block.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: |
+      Consider the following Twig template:
+
+      ```twig
+      {% extends 'base.html.twig' %}
+      <div class="alert">Some Alert</div>
+      {% block content %}My cool blog posts{% endblock %}
+      ```
+      What will be the result of rendering this template in Symfony?
+    answers:
+      - { value: "A `SyntaxError` will occur because content is placed outside a `block` tag after an `extends` declaration.", correct: true }
+      - { value: "The `div` with class `alert` will be rendered, followed by the content block.", correct: false }
+      - { value: "Only the content within the `block` tag will be rendered.", correct: false }
+      - { value: "The `div` will be ignored, and a warning will be logged.", correct: false }
+    help: |
+      When a template extends another, all content in the child template must be inside `block` tags. Any content outside blocks will cause a `SyntaxError`.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: >
+      When overriding a Twig template from a third-party bundle that itself extends another template, what special prefix should be used with the `extends` tag to prevent infinite loop errors?
+    answers:
+      - { value: "{% extends \"@!BundleName/template.html.twig\" %}", correct: true }
+      - { value: "{% extends \"@BundleName/template.html.twig\" with no_loop %}", correct: false }
+      - { value: "{% extends \"@BundleName/template.html.twig\" ignore_parent %}", correct: false }
+      - { value: "{% extends \"@BundleName/template.html.twig\" as_override %}", correct: false }
+    help: |
+      The `!` prefix in `{% extends "@!BundleName/..." %}` ensures that the original bundle template is extended, preventing an infinite loop when you're overriding a template that extends itself.
+      https://symfony.com/doc/current/bundles/override.html#templates
+
+  -
+    question: >
+      Which global Twig variable provides access to the current authenticated user, request details, and the application environment?
+    answers:
+      - { value: "`app`", correct: true }
+      - { value: "`symfony`", correct: false }
+      - { value: "`kernel`", correct: false }
+      - { value: "`container`", correct: false }
+    help: |
+      The `app` global variable provides access to common variables like `app.user`, `app.request`, `app.environment`, etc.
+      https://symfony.com/doc/current/templates.html#global-variables
+
+  -
+    question: |
+      How would you display the email of the currently authenticated user in a Twig template, ensuring it only shows if the user is fully authenticated?
+    answers:
+      - { value: "{% if is_granted('IS_AUTHENTICATED_FULLY') %}<p>Email: {{ app.user.email }}</p>{% endif %}", correct: true }
+      - { value: "<p>Email: {{ app.user.email }}</p>", correct: false }
+      - { value: "{% if app.user %}<p>Email: {{ app.user.email }}</p>{% endif %}", correct: false }
+      - { value: "{% if app.security.isLoggedIn %}<p>Email: {{ app.user.email }}</p>{% endif %}", correct: false }
+    help: |
+      The `app.user` global variable holds the user object, and `is_granted()` can check for specific roles or authentication states.
+      https://symfony.com/doc/current/security.html#accessing-the-user-in-a-template
+
+  -
+    question: |
+      If you have configured a custom global Twig variable named `ga_tracking` in your Symfony application, how would you access its value in a Twig template?
+    answers:
+      - { value: "{{ ga_tracking }}", correct: true }
+      - { value: "{{ app.ga_tracking }}", correct: false }
+      - { value: "{{ global.ga_tracking }}", correct: false }
+      - { value: "{{ get_global('ga_tracking') }}", correct: false }
+    help: |
+      Custom global variables are directly accessible by their name in Twig templates once configured.
+      https://symfony.com/doc/current/templates.html#global-variables
+
+  -
+    question: >
+      How do you apply a filter to a variable in Twig?
+    answers:
+      - { value: "Using the pipe symbol: `{{ variable|filter_name }}`", correct: true }
+      - { value: "Using parentheses: `{{ filter_name(variable) }}`", correct: false }
+      - { value: "Using a dot notation: `{{ variable.filter_name }}`", correct: false }
+      - { value: "Using a colon: `{{ variable:filter_name }}`", correct: false }
+    help: |
+      Filters are separated from the variable name by a pipe (`|`).
+      https://twig.symfony.com/doc/3.x/templates.html#filters
+
+  -
+    question: >
+      Which Twig filter is commonly used to format a `DateTime` object into a human-readable string?
+    answers:
+      - { value: "`date`", correct: true }
+      - { value: "`format_date`", correct: false }
+      - { value: "`datetime_format`", correct: false }
+      - { value: "`time_format`", correct: false }
+    help: |
+      The `date` filter formats a date to a given format.
+      https://twig.symfony.com/doc/3.x/filters/date.html
+
+  -
+    question: |
+      Given a variable `notifications` which is an array, how would you display the number of items in it using a Twig filter?
+    answers:
+      - { value: "{{ notifications|length }}", correct: true }
+      - { value: "{{ notifications.count }}", correct: false }
+      - { value: "{{ count(notifications) }}", correct: false }
+      - { value: "{{ notifications|size }}", correct: false }
+    help: |
+      The `length` filter returns the number of items of a sequence or mapping, or the length of a string.
+      https://twig.symfony.com/doc/3.x/filters/length.html
+
+  -
+    question: >
+      Which Twig function is used to include the content of another template file into the current template?
+    answers:
+      - { value: "`include()`", correct: true }
+      - { value: "`embed()`", correct: false }
+      - { value: "`import()`", correct: false }
+      - { value: "`render()`", correct: false }
+    help: |
+      The `include` function includes a template and returns the rendered content of that template.
+      https://symfony.com/doc/current/templates.html#including-templates
+
+  -
+    question: |
+      You want to include `_user_profile.html.twig` and pass a variable named `blog_author` to it, but the included template expects a variable named `user`. How would you achieve this?
+    answers:
+      - { value: "{{ include('blog/_user_profile.html.twig', {user: blog_author}) }}", correct: true }
+      - { value: "{{ include('blog/_user_profile.html.twig', with {user: blog_author}) }}", correct: false }
+      - { value: "{{ include('blog/_user_profile.html.twig') with {user: blog_author} }}", correct: false }
+      - { value: "{{ include('blog/_user_profile.html.twig', map: {user: blog_author}) }}", correct: false }
+    help: |
+      Variables can be passed to an included template as an associative array, allowing for renaming.
+      https://symfony.com/doc/current/templates.html#including-templates
+
+  -
+    question: >
+      When using the `include()` function in Twig, what is the default behavior regarding variables from the parent template?
+    answers:
+      - { value: "The included template inherits all variables from the parent template by default.", correct: true }
+      - { value: "The included template does not inherit any variables from the parent by default; they must be explicitly passed.", correct: false }
+      - { value: "Only global variables are inherited by default.", correct: false }
+      - { value: "Variables are inherited only if they have the same name in both templates.", correct: false }
+    help: |
+      By default, the included template has access to the variables of the active context.
+      https://twig.symfony.com/doc/3.x/functions/include.html
+
+  -
+    question: |
+      What is the correct Twig syntax for iterating over a collection named `articles` and displaying each `article.title`?
+    answers:
+      - { value: "{% for article in articles %}{{ article.title }}{% endfor %}", correct: true }
+      - { value: "{{ foreach article in articles }}{{ article.title }}{{ endforeach }}", correct: false }
+      - { value: "{% loop article in articles %}{{ article.title }}{% endloop %}", correct: false }
+      - { value: "{{ articles.each(article => article.title) }}", correct: false }
+    help: |
+      The `for` tag iterates over arrays and traversable objects.
+      https://twig.symfony.com/doc/3.x/tags/for.html
+
+  -
+    question: |
+      How would you display "Welcome, Admin!" if the `user.isAdmin` variable is true, otherwise display "Welcome, Guest!"?
+    answers:
+      - { value: "{% if user.isAdmin %}Welcome, Admin!{% else %}Welcome, Guest!{% endif %}", correct: true }
+      - { value: "{{ user.isAdmin ? 'Welcome, Admin!' : 'Welcome, Guest!' }}", correct: false }
+      - { value: "{% switch user.isAdmin %}{% case true %}Welcome, Admin!{% default %}Welcome, Guest!{% endswitch %}", correct: false }
+      - { value: "{% if user.isAdmin then %}Welcome, Admin!{% else %}Welcome, Guest!{% endif %}", correct: false }
+    help: |
+      The `if` tag is used to test if an expression is true or false.
+      https://twig.symfony.com/doc/3.x/tags/if.html
+
+  -
+    question: >
+      Which Twig function is used to generate a URL for a named Symfony route?
+    answers:
+      - { value: "`path()`", correct: true }
+      - { value: "`url()`", correct: false }
+      - { value: "`route()`", correct: false }
+      - { value: "`link_to()`", correct: false }
+    help: |
+      The `path()` function generates a relative URL for a given route.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-templates
+
+  -
+    question: |
+      How would you generate an absolute URL for an image located at `public/images/logo.png` using Twig?
+    answers:
+      - { value: "{{ absolute_url(asset('images/logo.png')) }}", correct: true }
+      - { value: "{{ asset_url('images/logo.png') }}", correct: false }
+      - { value: "{{ url('images/logo.png') }}", correct: false }
+      - { value: "{{ path('images/logo.png', absolute=true) }}", correct: false }
+    help: |
+      The `asset()` function generates a path to a public asset, and `absolute_url()` converts a path to an absolute URL.
+      https://symfony.com/doc/current/templates.html#linking-to-assets
+
+  -
+    question: |
+      You need to generate a URL for a JavaScript variable in a Twig template. Which Twig function and filter combination ensures the URL is safely embedded in JavaScript?
+    answers:
+      - { value: "{{ path('route_name')|escape('js') }}", correct: true }
+      - { value: "{{ path('route_name')|raw }}", correct: false }
+      - { value: "{{ path('route_name')|json_encode }}", correct: false }
+      - { value: "{{ path('route_name', { _format: 'js' }) }}", correct: false }
+    help: |
+      The `escape('js')` filter escapes a string for use in JavaScript.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-javascript
+
+  -
+    question: >
+      Which method of `Symfony\Bundle\FrameworkBundle\Controller\AbstractController` is typically used to render a Twig template and return a `Response` object?
+    answers:
+      - { value: "`render()`", correct: true }
+      - { value: "`renderView()`", correct: false }
+      - { value: "`display()`", correct: false }
+      - { value: "`show()`", correct: false }
+    help: |
+      The `render()` method is a shortcut to render a template and return a `Response` object.
+      https://symfony.com/doc/current/templates.html#rendering-templates-in-controllers
+
+  -
+    question: >
+      If you need to get the rendered HTML content of a Twig template as a string, without it being wrapped in a `Response` object, which method of `AbstractController` should you use?
+    answers:
+      - { value: "`renderView()`", correct: true }
+      - { value: "`render()`", correct: false }
+      - { value: "`getResponseContent()`", correct: false }
+      - { value: "`getTemplateContent()`", correct: false }
+    help: |
+      The `renderView()` method returns the rendered template content as a string, allowing you to manipulate it before creating a `Response`.
+      https://symfony.com/doc/current/templates.html#rendering-templates-in-controllers
+
+  -
+    question: |
+      Which of the following correctly uses the `#[Template]` attribute to render `product/index.html.twig` from a controller method, assuming the method returns an array of parameters?
+    answers:
+      - { value: "#[Template('product/index.html.twig')]", correct: true }
+      - { value: "#[Render('product/index.html.twig')]", correct: false }
+      - { value: "#[TwigTemplate('product/index.html.twig')]", correct: false }
+      - { value: "#[View('product/index.html.twig')]", correct: false }
+    help: |
+      The `#[Template]` attribute (from `Symfony\Bridge\Twig\Attribute\Template`) allows a controller method to return an array of parameters, and Symfony automatically renders the specified template.
+      https://symfony.com/doc/current/templates.html#rendering-templates-with-the-template-attribute
+
+  -
+    question: |
+      How can you embed the output of another Symfony controller (e.g., `App\Controller\BlogController::recentArticles`) into a Twig template, passing a `max` parameter?
+    answers:
+      - { value: "{{ render(controller('App\\\\Controller\\\\BlogController::recentArticles', {max: 3})) }}", correct: true }
+      - { value: "{{ include_controller('App\\\\Controller\\\\BlogController::recentArticles', {max: 3}) }}", correct: false }
+      - { value: "{{ embed_controller('App\\\\Controller\\\\BlogController::recentArticles', {max: 3}) }}", correct: false }
+      - { value: "{{ render_route('recent_articles', {max: 3}) }}", correct: false }
+    help: |
+      The `render()` Twig function with the `controller()` function allows embedding the output of a controller directly into a template.
+      https://symfony.com/doc/current/templates.html#embedding-controllers
+
+  -
+    question: >
+      Which Twig tag is used for translating content in Symfony applications?
+    answers:
+      - { value: "`trans`", correct: true }
+      - { value: "`translate`", correct: false }
+      - { value: "`i18n`", correct: false }
+      - { value: "`t`", correct: false }
+    help: |
+      The `trans` tag is used to translate a given message.
+      https://symfony.com/doc/current/translation.html#twig-templates
+
+  -
+    question: |
+      You want to translate the message "Hello %name%!" and pass a variable `username` to it, using the `messages` translation domain. Which Twig syntax is correct?
+    answers:
+      - { value: "{% trans with {'%name%': username} from 'messages' %}Hello %name%!{% endtrans %}", correct: true }
+      - { value: "{% trans %}Hello {{ '%name%'|replace({'%name%': username}) }}!{% endtrans %}", correct: false }
+      - { value: "{{ 'Hello %name%!'|trans({'%name%': username}, 'messages') }}", correct: true }
+      - { value: "{% trans from 'messages' %}Hello {{ username }}!{% endtrans %}", correct: false }
+    help: |
+      The `trans` tag and filter allow passing variables and specifying a translation domain.
+      https://symfony.com/doc/current/translation.html#twig-templates
+
+  -
+    question: >
+      How can you set a default translation domain for all subsequent translations within a specific Twig template?
+    answers:
+      - { value: "{% trans_default_domain 'app' %}", correct: true }
+      - { value: "{% set_translation_domain 'app' %}", correct: false }
+      - { value: "{% default_domain 'app' %}", correct: false }
+      - { value: "{% use_domain 'app' %}", correct: false }
+    help: |
+      The `trans_default_domain` tag sets the default translation domain for the current template.
+      https://symfony.com/doc/current/translation.html#twig-templates
+
+  -
+    question: |
+      If a controller passes a `TranslatableMessage` object named `status` to a Twig template, how can you render its translated content directly?
+    answers:
+      - { value: "{{ status|trans }}", correct: true }
+      - { value: "{{ status.message }}", correct: false }
+      - { value: "{{ status|render }}", correct: false }
+      - { value: "{{ status.translate() }}", correct: false }
+    help: |
+      `TranslatableMessage` objects can be passed directly to the `trans` filter in Twig.
+      https://symfony.com/doc/current/translation.html#using-translatablemessage-objects
+
+  -
+    question: >
+      Which Twig function is used to link to static assets (e.g., images, CSS, JavaScript files) and automatically handle base paths?
+    answers:
+      - { value: "`asset()`", correct: true }
+      - { value: "`static()`", correct: false }
+      - { value: "`resource()`", correct: false }
+      - { value: "`file()`", correct: false }
+    help: |
+      The `asset()` function generates a path to a public asset, respecting the `assets_base_urls` configuration.
+      https://symfony.com/doc/current/templates.html#linking-to-assets
+
+  -
+    question: |
+      To include page-specific JavaScript files generated by Symfony Encore (e.g., an entry named `checkout`), which Twig function should be used?
+    answers:
+      - { value: "`encore_entry_script_tags('checkout')`", correct: true }
+      - { value: "`asset_script('checkout')`", correct: false }
+      - { value: "`webpack_script('checkout')`", correct: false }
+      - { value: "`javascript_include('checkout')`", correct: false }
+    help: |
+      `encore_entry_script_tags()` is provided by Webpack Encore to render script tags for a given entrypoint.
+      https://symfony.com/doc/current/frontend/encore/simple-example.html#including-your-assets
+
+  -
+    question: |
+      When extending a `base.html.twig` and including Symfony Encore entry tags (e.g., `encore_entry_link_tags()`) in a child template's `stylesheets` block, why is it important to call `{{ parent() }}`?
+    answers:
+      - { value: "To ensure that stylesheets defined in the parent template are also included.", correct: true }
+      - { value: "To force the child template's stylesheets to override the parent's.", correct: false }
+      - { value: "To prevent duplicate inclusion of the same stylesheet.", correct: false }
+      - { value: "To enable hot-reloading for stylesheets during development.", correct: false }
+    help: |
+      `parent()` renders the content of the block from the parent template, ensuring all necessary assets from the base are loaded.
+      https://symfony.com/doc/current/frontend/encore/simple-example.html#including-your-assets
+
+  -
+    question: >
+      Which Twig tag is used to dump the contents of a variable to the Symfony Web Debug Toolbar for debugging purposes?
+    answers:
+      - { value: "{% dump variable %}", correct: true }
+      - { value: "{{ dump(variable) }}", correct: false }
+      - { value: "{% debug variable %}", correct: false }
+      - { value: "{{ debug(variable) }}", correct: false }
+    help: |
+      The `dump` tag sends the variable content to the Web Debug Toolbar.
+      https://symfony.com/doc/current/templates.html#debugging-variables
+
+  -
+    question: >
+      Which Twig function is used to dump the contents of a variable directly into the rendered HTML page content?
+    answers:
+      - { value: "{{ dump(variable) }}", correct: true }
+      - { value: "{% dump variable %}", correct: false }
+      - { value: "{{ debug(variable) }}", correct: false }
+      - { value: "{% print variable %}", correct: false }
+    help: |
+      The `dump` function outputs the variable content directly into the page.
+      https://symfony.com/doc/current/templates.html#debugging-variables
+
+  -
+    question: >
+      Which Symfony console command can you use to list all available Twig functions, filters, and global variables in your application?
+    answers:
+      - { value: "`php bin/console debug:twig`", correct: true }
+      - { value: "`php bin/console twig:list`", correct: false }
+      - { value: "`php bin/console list:twig`", correct: false }
+      - { value: "`php bin/console twig:info`", correct: false }
+    help: |
+      The `debug:twig` command provides detailed information about the Twig environment.
+      https://symfony.com/doc/current/templates.html#debugging-variables
+
+  -
+    question: >
+      Which Symfony console command is used to check Twig templates for syntax errors, useful for CI/CD pipelines?
+    answers:
+      - { value: "`php bin/console lint:twig`", correct: true }
+      - { value: "`php bin/console validate:twig`", correct: false }
+      - { value: "`php bin/console check:twig`", correct: false }
+      - { value: "`php bin/console twig:syntax`", correct: false }
+    help: |
+      The `lint:twig` command checks Twig templates for syntax errors.
+      https://symfony.com/doc/current/templates.html#linting-twig-templates
+
+  -
+    question: |
+      Given a Symfony form object named `form`, which Twig helper function is used to render the opening `<form>` tag?
+    answers:
+      - { value: "{{ form_start(form) }}", correct: true }
+      - { value: "{{ form_open(form) }}", correct: false }
+      - { value: "{{ form_begin(form) }}", correct: false }
+      - { value: "{{ form_init(form) }}", correct: false }
+    help: |
+      `form_start()` renders the opening `<form>` tag and the CSRF token.
+      https://symfony.com/doc/current/form/form_collections.html#rendering-a-form-collection
+
+  -
+    question: |
+      To render an individual field of a Symfony form (e.g., a field named `description` within a `form` object), which Twig helper function should you use?
+    answers:
+      - { value: "{{ form_row(form.description) }}", correct: true }
+      - { value: "{{ form_widget(form.description) }}", correct: false }
+      - { value: "{{ form_field(form.description) }}", correct: false }
+      - { value: "{{ form.description }}", correct: false }
+    help: |
+      `form_row()` renders the label, errors, and widget for a single form field.
+      https://symfony.com/doc/current/form/form_collections.html#rendering-a-form-collection
+
+  -
+    question: |
+      After rendering individual fields of a Symfony form, which Twig helper function should be used to render the closing `</form>` tag and any remaining unrendered fields (like CSRF tokens)?
+    answers:
+      - { value: "{{ form_end(form) }}", correct: true }
+      - { value: "{{ form_close(form) }}", correct: false }
+      - { value: "{{ form_finish(form) }}", correct: false }
+      - { value: "{{ form_stop(form) }}", correct: false }
+    help: |
+      `form_end()` renders the closing `</form>` tag and any fields that have not yet been rendered.
+      https://symfony.com/doc/current/form/form_collections.html#rendering-a-form-collection
+
+  -
+    question: |
+      You want to add an additional directory `src/templates/emails` to Twig's lookup paths without assigning a namespace. Which YAML configuration is correct?
+    answers:
+      - { value: "twig:\n    paths:\n        'src/templates/emails': ~", correct: true }
+      - { value: "twig:\n    paths:\n        'src/templates/emails': null", correct: true }
+      - { value: "twig:\n    paths:\n        emails: 'src/templates/emails'", correct: false }
+      - { value: "twig:\n    template_dirs:\n        - 'src/templates/emails'", correct: false }
+    help: |
+      Additional paths can be configured under `twig.paths`. Using `~` or `null` indicates no namespace.
+      https://symfony.com/doc/current/templates.html#configuring-twig-paths
+
+  -
+    question: |
+      You want to configure a Twig namespace `@Admin` for templates located in `src/Admin/templates`. Which YAML configuration is correct?
+    answers:
+      - { value: "twig:\n    paths:\n        'src/Admin/templates': 'admin'", correct: true }
+      - { value: "twig:\n    namespaces:\n        admin: 'src/Admin/templates'", correct: false }
+      - { value: "twig:\n    templates:\n        '@Admin': 'src/Admin/templates'", correct: false }
+      - { value: "twig:\n    path_namespaces:\n        admin: 'src/Admin/templates'", correct: false }
+    help: |
+      Namespaces are defined by mapping a path to a string namespace under `twig.paths`.
+      https://symfony.com/doc/current/templates.html#configuring-twig-paths
+
+  -
+    question: >
+      How do you change the default directory where Twig looks for templates (e.g., from `templates/` to `resources/views/`) in Symfony's `twig.yaml` configuration?
+    answers:
+      - { value: "twig:\n    default_path: \"%kernel.project_dir%/resources/views\"", correct: true }
+      - { value: "twig:\n    template_dir: \"%kernel.project_dir%/resources/views\"", correct: false }
+      - { value: "twig:\n    paths:\n        default: \"%kernel.project_dir%/resources/views\"", correct: false }
+      - { value: "twig:\n    root_path: \"%kernel.project_dir%/resources/views\"", correct: false }
+    help: |
+      The `default_path` option under `twig` configuration specifies the primary directory for templates.
+      https://symfony.com/doc/current/configuration/override_dir_structure.html#changing-the-templates-directory
+
+  -
+    question: >
+      Which Twig tag can be used to profile the performance of a specific block of Twig code, making the execution time visible in the Symfony profiler?
+    answers:
+      - { value: "`stopwatch`", correct: true }
+      - { value: "`profile`", correct: false }
+      - { value: "`benchmark`", correct: false }
+      - { value: "`timer`", correct: false }
+    help: |
+      The `stopwatch` tag allows you to measure the execution time and memory usage of a Twig block.
+      https://symfony.com/doc/current/performance.html#profiling-twig-templates
+
+  -
+    question: |
+      How can you programmatically check if a Twig template named `theme/layout_responsive.html.twig` exists using the Twig loader in PHP?
+    answers:
+      - { value: "`$loader->exists('theme/layout_responsive.html.twig')`", correct: true }
+      - { value: "`$loader->has('theme/layout_responsive.html.twig')`", correct: false }
+      - { value: "`$loader->find('theme/layout_responsive.html.twig')`", correct: false }
+      - { value: "`$loader->templateExists('theme/layout_responsive.html.twig')`", correct: false }
+    help: |
+      The `exists()` method of the Twig loader interface checks if a template can be found.
+      https://symfony.com/doc/current/templates.html#checking-if-a-template-exists
+
+  -
+    question: |
+      How would you serialize a `person` object into JSON format directly within a Twig template?
+    answers:
+      - { value: "{{ person|serialize(format = 'json') }}", correct: true }
+      - { value: "{{ person|json_encode }}", correct: false }
+      - { value: "{{ serialize(person, 'json') }}", correct: false }
+      - { value: "{{ person|to_json }}", correct: false }
+    help: |
+      The `serialize` filter (provided by `symfony/serializer`) can convert objects to various formats.
+      https://symfony.com/doc/current/serializer.html#serializing-objects-in-twig
+
+  -
+    question: >
+      Which Twig function is used to display workflow, place, or transition metadata in templates, given a subject and a key?
+    answers:
+      - { value: "`workflow_metadata()`", correct: true }
+      - { value: "`workflow_info()`", correct: false }
+      - { value: "`workflow_get_metadata()`", correct: false }
+      - { value: "`workflow_data()`", correct: false }
+    help: |
+      The `workflow_metadata()` function retrieves metadata associated with a workflow, place, or transition.
+      https://symfony.com/doc/current/workflow.html#displaying-workflow-metadata-in-twig
+
+  -
+    question: |
+      You are integrating a JavaScript framework that uses `${ variable }$` for its own variables. How can you configure Twig to use custom delimiters (e.g., `${` and `}$`) while still allowing standard Twig syntax?
+    answers:
+      - { value: "By configuring `twig.variable_delimiters` in `twig.yaml`.", correct: false }
+      - { value: "Twig does not support custom delimiters alongside standard ones.", correct: false }
+      - { value: "By setting `variable_start_delimiter` and `variable_end_delimiter` in Twig's environment configuration.", correct: true }
+      - { value: "By using the `raw` tag around the JavaScript code.", correct: false }
+    help: |
+      Twig allows configuring custom delimiters for variables and blocks, which can be useful when integrating with other templating engines.
+      https://twig.symfony.com/doc/3.x/api.html#environment-options (This is a more general Twig feature, but Symfony allows configuring it).
+      https://symfony.com/doc/current/frontend/encore/vuejs.html#using-custom-delimiters
+
+  -
+    question: |
+      What is the purpose of the `Twig\Environment` service in Symfony, and how is it typically injected into a custom service for rendering templates?
+    answers:
+      - { value: "It's the core Twig engine; injected via constructor autowiring (e.g., `private Environment $twig`).", correct: true }
+      - { value: "It's a helper for rendering forms; injected via `#[Required]` attribute.", correct: false }
+      - { value: "It's a Twig extension; injected via `setTwigEnvironment()` method.", correct: false }
+      - { value: "It's a global variable; accessed directly as `app.twig`.", correct: false }
+    help: |
+      The `Twig\Environment` class is the main entry point for Twig, and it's typically injected into services via dependency injection.
+      https://symfony.com/doc/current/templates.html#render-twig-templates-in-a-symfony-service
+
+  -
+    question: |
+      Consider a scenario where you need to render a specific block named `price_block` from `product.html.twig` directly from a controller method. Which method of `AbstractController` allows you to do this and returns a `Response` object?
+    answers:
+      - { value: "`renderBlock('product.html.twig', 'price_block', [...])`", correct: true }
+      - { value: "`renderViewBlock('product.html.twig', 'price_block', [...])`", correct: false }
+      - { value: "`renderPartial('product.html.twig', 'price_block', [...])`", correct: false }
+      - { value: "`renderFragment('product.html.twig', 'price_block', [...])`", correct: false }
+    help: |
+      The `renderBlock()` method allows rendering a specific block from a template and returns a `Response` object.
+      https://symfony.com/doc/current/templates.html#rendering-template-blocks-in-controllers
+
+  -
+    question: |
+      Which of the following is the correct Composer command to install the Twig templating engine and its Symfony integration?
+    answers:
+      - { value: "`composer require symfony/twig-bundle`", correct: true }
+      - { value: "`composer require twig/twig`", correct: false }
+      - { value: "`composer install symfony/twig`", correct: false }
+      - { value: "`composer add twig-bundle`", correct: false }
+    help: |
+      `symfony/twig-bundle` is the package that integrates Twig with Symfony applications.
+      https://symfony.com/doc/current/templates.html#installation
+
+  -
+    question: >
+      What is the primary benefit of using `render_hinclude()` in Twig templates?
+    answers:
+      - { value: "To embed content asynchronously, improving page load times.", correct: true }
+      - { value: "To include static HTML fragments without processing them.", correct: false }
+      - { value: "To render Twig templates on the client-side using JavaScript.", correct: false }
+      - { value: "To cache the output of a controller for faster rendering.", correct: false }
+    help: |
+      `render_hinclude()` is used for Hinclude, a technique for loading parts of a page asynchronously.
+      https://symfony.com/doc/current/templates.html#embedding-asynchronous-content
+
+  -
+    question: |
+      You are sending an email using `Symfony\Bridge\Twig\Mime\TemplatedEmail`. How do you specify the Twig template to be used for the HTML content of the email?
+    answers:
+      - { value: "`->htmlTemplate('emails/signup.html.twig')`", correct: true }
+      - { value: "`->template('emails/signup.html.twig')`", correct: false }
+      - { value: "`->setHtmlTemplate('emails/signup.html.twig')`", correct: false }
+      - { value: "`->twigHtml('emails/signup.html.twig')`", correct: false }
+    help: |
+      The `htmlTemplate()` method of `TemplatedEmail` sets the path to the Twig template for the HTML body.
+      https://symfony.com/doc/current/mailer.html#creating-email-messages
+
+  -
+    question: |
+      When sending a `TemplatedEmail`, how can you pass variables (e.g., `username` and `expiration_date`) to the Twig template?
+    answers:
+      - { value: "`->context(['username' => 'foo', 'expiration_date' => new \DateTime('+7 days')])`", correct: true }
+      - { value: "`->with(['username' => 'foo', 'expiration_date' => new \DateTime('+7 days')])`", correct: false }
+      - { value: "`->setTemplateVars(['username' => 'foo', 'expiration_date' => new \DateTime('+7 days')])`", correct: false }
+      - { value: "`->variables(['username' => 'foo', 'expiration_date' => new \DateTime('+7 days')])`", correct: false }
+    help: |
+      The `context()` method of `TemplatedEmail` allows passing an array of variables to the template.
+      https://symfony.com/doc/current/mailer.html#creating-email-messages
+
+  -
+    question: |
+      What is the purpose of `form_div_layout.html.twig` in Symfony's form rendering with Twig?
+    answers:
+      - { value: "It's the default Twig file that holds all the default markup for rendering forms.", correct: true }
+      - { value: "It's a Twig extension that enables form rendering features.", correct: false }
+      - { value: "It's a custom form theme for Bootstrap-based designs.", correct: false }
+      - { value: "It's a JavaScript file for client-side form validation.", correct: false }
+    help: |
+      `form_div_layout.html.twig` is the default form theme provided by Symfony's TwigBridge.
+      https://symfony.com/doc/current/components/form.html#rendering-forms-in-twig
+
+  -
+    question: |
+      Which of the following is NOT a valid way to configure additional Twig template paths in `config/packages/twig.php`?
+    answers:
+      - { value: "`$twig->addPath('email/templates');`", correct: true }
+      - { value: "`$twig->path('email/templates', null);`", correct: false }
+      - { value: "`$twig->path('backend/templates', 'admin');`", correct: false }
+      - { value: "`$twig->defaultPath('%kernel.project_dir%/resources/views');`", correct: false }
+    help: |
+      The `addPath()` method does not exist directly on the `TwigConfig` object. Instead, `path()` is used for adding paths with or without namespaces. `defaultPath()` sets the primary template directory.
+      https://symfony.com/doc/current/reference/configuration/twig.html#paths
+
+  -
+    question: |
+      You have a custom Twig filter named `price` that formats a number as currency. How would you apply this filter to a `product.price` variable, also passing `2` for decimals, `,` for decimal point, and `.` for thousands separator?
+    answers:
+      - { value: "{{ product.price|price(2, ',', '.') }}", correct: true }
+      - { value: "{{ product.price|price(decimals=2, decimal_point=',', thousands_separator='.') }}", correct: false }
+      - { value: "{{ product.price|price({decimals: 2, decimal_point: ',', thousands_separator: '.'}) }}", correct: false }
+      - { value: "{{ price(product.price, 2, ',', '.') }}", correct: false }
+    help: |
+      Filters can accept arguments, passed in parentheses after the filter name.
+      https://symfony.com/doc/current/templates.html#using-custom-twig-filters
+
+  -
+    question: |
+      Which Twig global variable would you use to check the current application environment (e.g., `dev`, `prod`)?
+    answers:
+      - { value: "`app.environment`", correct: true }
+      - { value: "`kernel.environment`", correct: false }
+      - { value: "`env`", correct: false }
+      - { value: "`app.env`", correct: false }
+    help: |
+      The `app` global variable provides access to the application environment.
+      https://symfony.com/doc/current/templates.html#global-variables
+
+  -
+    question: |
+      What is the recommended naming convention for variables passed from a Symfony controller to a Twig template?
+    answers:
+      - { value: "snake_case (e.g., `user_first_name`)", correct: true }
+      - { value: "camelCase (e.g., `userFirstName`)", correct: false }
+      - { value: "PascalCase (e.g., `UserFirstName`)", correct: false }
+      - { value: "kebab-case (e.g., `user-first-name`)", correct: false }
+    help: |
+      Twig recommends using `snake_case` for variable names.
+      https://symfony.com/doc/current/templates.html#rendering-templates-in-controllers
+
+  -
+    question: |
+      Which of the following is a valid way to access a property `name` of an object `user` in Twig?
+    answers:
+      - { value: "{{ user.name }}", correct: true }
+      - { value: "{{ user['name'] }}", correct: true }
+      - { value: "{{ user->name }}", correct: false }
+      - { value: "{{ user::name }}", correct: false }
+    help: |
+      Twig uses the dot (`.`) and bracket (`[]`) notations to access properties or array elements.
+      https://twig.symfony.com/doc/3.x/templates.html#variables
+
+  -
+    question: |
+      You want to display a list of recent articles (`articles`) in a Twig template. Which Twig construct would you use to loop through them and display their titles?
+    answers:
+      - { value: "{% for article in articles %}\n    {{ article.title }}\n{% endfor %}", correct: true }
+      - { value: "{% foreach article in articles %}\n    {{ article.title }}\n{% endforeach %}", correct: false }
+      - { value: "{% loop article in articles %}\n    {{ article.title }}\n{% endloop %}", correct: false }
+      - { value: "{% iterate article in articles %}\n    {{ article.title }}\n{% enditerate %}", correct: false }
+    help: |
+      The `for` tag is used for iteration over arrays or traversable objects.
+      https://twig.symfony.com/doc/3.x/tags/for.html
+
+  -
+    question: |
+      What is the primary benefit of using template inheritance in Twig?
+    answers:
+      - { value: "To reuse common layout elements across multiple pages, reducing code duplication.", correct: true }
+      - { value: "To dynamically load template fragments based on user roles.", correct: false }
+      - { value: "To compile Twig templates into pure PHP for better performance.", correct: false }
+      - { value: "To enable client-side rendering of templates.", correct: false }
+    help: |
+      Template inheritance allows you to build a base "layout" template that contains all common elements of your site and defines "blocks" that child templates can override.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: |
+      Which of the following is the correct way to include a Twig template fragment named `_header.html.twig` and ensure it does NOT inherit variables from the parent template?
+    answers:
+      - { value: "{{ include('_header.html.twig', with_context = false) }}", correct: true }
+      - { value: "{{ include('_header.html.twig', only = true) }}", correct: true }
+      - { value: "{{ include('_header.html.twig', no_inherit = true) }}", correct: false }
+      - { value: "{{ include('_header.html.twig', isolated = true) }}", correct: false }
+    help: |
+      The `with_context = false` or `only = true` option prevents the included template from accessing the current context.
+      https://twig.symfony.com/doc/3.x/functions/include.html
+
+  -
+    question: |
+      You want to display a message only if the `debug` global variable is `true` and the `app.request.method` is 'POST'. Which Twig condition is correct?
+    answers:
+      - { value: "{% if app.debug and app.request.method == 'POST' %}", correct: true }
+      - { value: "{% if app.debug && app.request.method == 'POST' %}", correct: false }
+      - { value: "{% if app.debug is true and app.request.method is 'POST' %}", correct: false }
+      - { value: "{% if app.debug and app.request.method equals 'POST' %}", correct: false }
+    help: |
+      Twig uses `and` for logical AND operations and `==` for equality comparison.
+      https://twig.symfony.com/doc/3.x/templates.html#expressions
+
+  -
+    question: |
+      What is the purpose of the `asset()` Twig function when dealing with static files in Symfony?
+    answers:
+      - { value: "It generates a URL for a public asset, handling base paths and versioning.", correct: true }
+      - { value: "It copies a file from the `src/` directory to `public/`.", correct: false }
+      - { value: "It embeds the content of a static file directly into the HTML.", correct: false }
+      - { value: "It creates a new asset file on the server.", correct: false }
+    help: |
+      The `asset()` function generates a URL for an asset, which can be configured to add versioning or a base path.
+      https://symfony.com/doc/current/templates.html#linking-to-assets
+
+  -
+    question: |
+      Which of the following is the correct way to render a Symfony form named `form` in a Twig template, including all its fields and the closing tag?
+    answers:
+      - { value: "{{ form(form) }}", correct: true }
+      - { value: "{{ form_widget(form) }}", correct: false }
+      - { value: "{{ form_full(form) }}", correct: false }
+      - { value: "{{ render_form(form) }}", correct: false }
+    help: |
+      Calling `{{ form(form) }}` is a shortcut to render all form fields, the start tag, and the end tag.
+      https://symfony.com/doc/current/form/form_collections.html#rendering-a-form-collection
+
+  -
+    question: |
+      What is the primary reason for configuring Twig template paths with namespaces (e.g., `@Admin/dashboard.html.twig`)?
+    answers:
+      - { value: "To provide a logical grouping for templates and prevent naming conflicts.", correct: true }
+      - { value: "To improve template rendering performance by pre-compiling templates.", correct: false }
+      - { value: "To enable automatic translation of template content.", correct: false }
+      - { value: "To restrict access to certain templates based on user roles.", correct: false }
+    help: |
+      Namespaces help organize templates, especially in larger applications or when integrating bundles, by providing a unique identifier for template directories.
+      https://symfony.com/doc/current/templates.html#configuring-twig-paths
+
+  -
+    question: |
+      You have a `TemplatedEmail` and want to specify a text-only version of the email using a Twig template. Which method should you use?
+    answers:
+      - { value: "`->textTemplate('emails/signup.txt.twig')`", correct: true }
+      - { value: "`->plainTextTemplate('emails/signup.txt.twig')`", correct: false }
+      - { value: "`->setTextBodyTemplate('emails/signup.txt.twig')`", correct: false }
+      - { value: "`->addTextTemplate('emails/signup.txt.twig')`", correct: false }
+    help: |
+      The `textTemplate()` method sets the path to the Twig template for the plain text body.
+      https://symfony.com/doc/current/mailer.html#creating-email-messages
+
+  -
+    question: |
+      Which of the following is NOT a valid way to pass variables to an included Twig template using the `include()` function?
+    answers:
+      - { value: "{{ include('template.html.twig', ['var1', 'var2']) }}", correct: true }
+      - { value: "{{ include('template.html.twig', {key: 'value'}) }}", correct: false }
+      - { value: "{{ include('template.html.twig', {user: current_user}) }}", correct: false }
+      - { value: "{{ include('template.html.twig') with {data: my_data} }}", correct: false }
+    help: |
+      The `include` function expects an associative array for variables, not a simple list.
+      https://twig.symfony.com/doc/3.x/functions/include.html
+
+  -
+    question: |
+      What is the primary benefit of using `renderView()` over `render()` in a Symfony controller when dealing with Twig templates?
+    answers:
+      - { value: "It returns the rendered HTML as a string, allowing for further manipulation before creating a `Response`.", correct: true }
+      - { value: "It automatically caches the template output for better performance.", correct: false }
+      - { value: "It allows rendering only specific blocks of a template.", correct: false }
+      - { value: "It automatically handles JSON responses for API endpoints.", correct: false }
+    help: |
+      `renderView()` gives you the raw HTML string, which can be useful if you need to do something else with the content before sending it as a response.
+      https://symfony.com/doc/current/templates.html#rendering-templates-in-controllers
+
+  -
+    question: |
+      When defining a base Twig template, what is the purpose of the `{% block stylesheets %}` and `{% block javascripts %}`?
+    answers:
+      - { value: "To define sections where child templates can add their own CSS and JavaScript files.", correct: true }
+      - { value: "To automatically include all CSS and JavaScript files from the `public/` directory.", correct: false }
+      - { value: "To enable inline styling and scripting directly within the template.", correct: false }
+      - { value: "To prevent external stylesheets and scripts from being loaded.", correct: false }
+    help: |
+      These blocks are placeholders for stylesheets and JavaScripts that child templates can populate.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: |
+      What is the correct way to access a method `generate` on a globally defined service variable `uuid` in a Twig template?
+    answers:
+      - { value: "{{ uuid.generate }}", correct: true }
+      - { value: "{{ uuid.generate() }}", correct: true }
+      - { value: "{{ uuid->generate() }}", correct: false }
+      - { value: "{{ uuid::generate() }}", correct: false }
+    help: |
+      Twig allows calling methods on objects using the dot notation.
+      https://symfony.com/doc/current/templates.html#global-variables
+
+  -
+    question: |
+      Which Twig filter would you use to convert a string to uppercase?
+    answers:
+      - { value: "`upper`", correct: true }
+      - { value: "`uppercase`", correct: false }
+      - { value: "`to_upper`", correct: false }
+      - { value: "`strtoupper`", correct: false }
+    help: |
+      The `upper` filter converts a string to uppercase.
+      https://twig.symfony.com/doc/3.x/filters/upper.html
+
+  -
+    question: |
+      What is the output of `{{ "hello"|capitalize }}` in Twig?
+    answers:
+      - { value: "Hello", correct: true }
+      - { value: "hello", correct: false }
+      - { value: "HELLO", correct: false }
+      - { value: "hELLO", correct: false }
+    help: |
+      The `capitalize` filter capitalizes the first letter of a string.
+      https://twig.symfony.com/doc/3.x/filters/capitalize.html
+
+  -
+    question: |
+      How would you display a variable `price` formatted as a number with two decimal places and a comma as the decimal separator?
+    answers:
+      - { value: "{{ price|number_format(2, ',', '.') }}", correct: true }
+      - { value: "{{ price|format_number(2, ',', '.') }}", correct: false }
+      - { value: "{{ price|decimal(2, ',') }}", correct: false }
+      - { value: "{{ price|round(2) }}", correct: false }
+    help: |
+      The `number_format` filter formats a number.
+      https://twig.symfony.com/doc/3.x/filters/number_format.html
+
+  -
+    question: |
+      Which of the following is a valid way to define a macro in Twig?
+    answers:
+      - { value: "{% macro input(name, value) %}\n    <input type=\"text\" name=\"{{ name }}\" value=\"{{ value }}\">\n{% endmacro %}", correct: true }
+      - { value: "{% function input(name, value) %}\n    <input type=\"text\" name=\"{{ name }}\" value=\"{{ value }}\">\n{% endfunction %}", correct: false }
+      - { value: "{% def input(name, value) %}\n    <input type=\"text\" name=\"{{ name }}\" value=\"{{ value }}\">\n{% enddef %}", correct: false }
+      - { value: "{% macro input(name, value) => \n    <input type=\"text\" name=\"{{ name }}\" value=\"{{ value }}\">\n%}", correct: false }
+    help: |
+      The `macro` tag allows you to define reusable pieces of Twig code.
+      https://twig.symfony.com/doc/3.x/tags/macro.html
+
+  -
+    question: |
+      How do you import a macro from a file named `forms.html.twig` into another Twig template?
+    answers:
+      - { value: "{% import 'forms.html.twig' as forms %}", correct: true }
+      - { value: "{% use 'forms.html.twig' as forms %}", correct: false }
+      - { value: "{% include 'forms.html.twig' as forms %}", correct: false }
+      - { value: "{% from 'forms.html.twig' import * as forms %}", correct: false }
+    help: |
+      The `import` tag is used to import macros from other templates.
+      https://twig.symfony.com/doc/3.x/tags/import.html
+
+  -
+    question: |
+      What is the purpose of the `{% set %}` tag in Twig?
+    answers:
+      - { value: "To assign a value to a variable within the template.", correct: true }
+      - { value: "To define a new block for template inheritance.", correct: false }
+      - { value: "To include another template file.", correct: false }
+      - { value: "To define a global variable for the entire application.", correct: false }
+    help: |
+      The `set` tag assigns values to variables.
+      https://twig.symfony.com/doc/3.x/tags/set.html
+
+  -
+    question: |
+      How would you check if a variable `user` is defined and not null in Twig?
+    answers:
+      - { value: "{% if user is defined and user is not null %}", correct: true }
+      - { value: "{% if user is not empty %}", correct: false }
+      - { value: "{% if user %} {% endif %}", correct: false }
+      - { value: "{% if isset(user) and user != null %}", correct: false }
+    help: |
+      The `defined` test checks if a variable is defined, and `null` checks for null value.
+      https://twig.symfony.com/doc/3.x/tests/defined.html
+      https://twig.symfony.com/doc/3.x/tests/null.html
+
+  -
+    question: |
+      What is the output of `{{ "Hello World"|lower }}` in Twig?
+    answers:
+      - { value: "hello world", correct: true }
+      - { value: "Hello World", correct: false }
+      - { value: "HELLO WORLD", correct: false }
+      - { value: "hello_world", correct: false }
+    help: |
+      The `lower` filter converts a string to lowercase.
+      https://twig.symfony.com/doc/3.x/filters/lower.html
+
+  -
+    question: |
+      Which of the following is the correct way to trim whitespace from the beginning and end of a string in Twig?
+    answers:
+      - { value: "{{ my_string|trim }}", correct: true }
+      - { value: "{{ my_string|strip }}", correct: false }
+      - { value: "{{ my_string|whitespace_trim }}", correct: false }
+      - { value: "{{ trim(my_string) }}", correct: false }
+    help: |
+      The `trim` filter strips whitespace from the beginning and/or end of a string.
+      https://twig.symfony.com/doc/3.x/filters/trim.html
+
+  -
+    question: |
+      How can you concatenate two strings, `first_name` and `last_name`, with a space in between, in Twig?
+    answers:
+      - { value: "{{ first_name ~ ' ' ~ last_name }}", correct: true }
+      - { value: "{{ first_name + ' ' + last_name }}", correct: false }
+      - { value: "{{ first_name.concat(' ', last_name) }}", correct: false }
+      - { value: "{{ first_name | join(' ') | join(last_name) }}", correct: false }
+    help: |
+      The `~` operator is used for string concatenation in Twig.
+      https://twig.symfony.com/doc/3.x/templates.html#operators
+
+  -
+    question: |
+      What is the purpose of the `{% autoescape %}` tag in Twig?
+    answers:
+      - { value: "To enable or disable automatic output escaping for a block of template code.", correct: true }
+      - { value: "To specify the default escaping strategy for the entire template.", correct: false }
+      - { value: "To escape all variables within the block using a specific filter.", correct: false }
+      - { value: "To prevent any HTML from being rendered within the block.", correct: false }
+    help: |
+      The `autoescape` tag can be used to enable or disable auto-escaping for a section of a template.
+      https://twig.symfony.com/doc/3.x/tags/autoescape.html
+
+  -
+    question: |
+      You want to display a list of items, and if the list is empty, display a "No items found" message. Which Twig construct is suitable for this?
+    answers:
+      - { value: "{% for item in items %}\n    {{ item.name }}\n{% else %}\n    No items found\n{% endfor %}", correct: true }
+      - { value: "{% if items is not empty %}\n    {% for item in items %}\n        {{ item.name }}\n    {% endfor %}\n{% else %}\n    No items found\n{% endif %}", correct: true }
+      - { value: "{% if items.length > 0 %}\n    {% for item in items %}\n        {{ item.name }}\n    {% endfor %}\n{% else %}\n    No items found\n{% endif %}", correct: false }
+      - { value: "{% for item in items or 'No items found' %}\n    {{ item.name }}\n{% endfor %}", correct: false }
+    help: |
+      The `for` tag has an `else` clause that is rendered if the sequence is empty.
+      https://twig.symfony.com/doc/3.x/tags/for.html#the-else-clause
+
+  -
+    question: |
+      Which Twig function is used to generate an absolute URL for a named route?
+    answers:
+      - { value: "`url()`", correct: true }
+      - { value: "`path()` with `absolute=true` option.", correct: false }
+      - { value: "`absolute_path()`", correct: false }
+      - { value: "`route_url()`", correct: false }
+    help: |
+      The `url()` function generates an absolute URL for a given route.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-templates
+
+  -
+    question: |
+      What is the purpose of the `{% verbatim %}` tag in Twig?
+    answers:
+      - { value: "To mark a block of content as raw, preventing Twig from parsing it.", correct: true }
+      - { value: "To disable auto-escaping for a specific block.", correct: false }
+      - { value: "To include a file without rendering its Twig syntax.", correct: false }
+      - { value: "To output debugging information without formatting.", correct: false }
+    help: |
+      The `verbatim` tag marks a section of a template as raw text that should not be parsed by Twig.
+      https://twig.symfony.com/doc/3.x/tags/verbatim.html
+
+  -
+    question: |
+      Which of the following is the correct way to include a JavaScript file named `app.js` located in the `public/js/` directory using the `asset()` function?
+    answers:
+      - { value: "<script src=\"{{ asset('js/app.js') }}\"></script>", correct: true }
+      - { value: "<script src=\"{{ path('js/app.js') }}\"></script>", correct: false }
+      - { value: "<script src=\"{{ url('js/app.js') }}\"></script>", correct: false }
+      - { value: "<script src=\"/js/app.js\"></script>", correct: false }
+    help: |
+      The `asset()` function generates the correct public path for assets.
+      https://symfony.com/doc/current/templates.html#linking-to-assets
+
+  -
+    question: |
+      How can you check if a variable `data` is an array in Twig?
+    answers:
+      - { value: "{% if data is iterable %}", correct: true }
+      - { value: "{% if data is array %}", correct: false }
+      - { value: "{% if data is collection %}", correct: false }
+      - { value: "{% if is_array(data) %}", correct: false }
+    help: |
+      The `iterable` test checks if a variable is an array or a traversable object.
+      https://twig.symfony.com/doc/3.x/tests/iterable.html
+
+  -
+    question: |
+      What is the primary purpose of the `{% apply %}` tag in Twig?
+    answers:
+      - { value: "To apply Twig filters to a block of template data.", correct: true }
+      - { value: "To apply CSS styles to a block of HTML.", correct: false }
+      - { value: "To execute a JavaScript function on a block of content.", correct: false }
+      - { value: "To include a block from another template and apply filters to it.", correct: false }
+    help: |
+      The `apply` tag applies Twig filters to the content of a block.
+      https://twig.symfony.com/doc/3.x/tags/apply.html
+
+  -
+    question: |
+      Which of the following Twig functions can be used to generate a path to a route, but also include query parameters?
+    answers:
+      - { value: "`path('route_name', {param1: 'value1', param2: 'value2'})`", correct: true }
+      - { value: "`url('route_name', {param1: 'value1', param2: 'value2'})`", correct: true }
+      - { value: "`route('route_name', {param1: 'value1', param2: 'value2'})`", correct: false }
+      - { value: "`link('route_name', {param1: 'value1', param2: 'value2'})`", correct: false }
+    help: |
+      Both `path()` and `url()` functions accept an associative array of parameters.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-templates
+
+  -
+    question: |
+      What is the correct way to display the current year in a Twig template?
+    answers:
+      - { value: "{{ 'now'|date('Y') }}", correct: true }
+      - { value: "{{ date('Y') }}", correct: false }
+      - { value: "{{ "now"|format_date('Y') }}", correct: false }
+      - { value: "{{ current_date|year }}", correct: false }
+    help: |
+      The `date` filter can be applied to the string 'now' to get the current date and format it.
+      https://twig.symfony.com/doc/3.x/filters/date.html
+
+  -
+    question: |
+      How can you include a template named `_footer.html.twig` but prevent it from being rendered if the file does not exist?
+    answers:
+      - { value: "{{ include('_footer.html.twig', ignore_missing = true) }}", correct: true }
+      - { value: "{{ include_if_exists('_footer.html.twig') }}", correct: false }
+      - { value: "{% try_include '_footer.html.twig' %}", correct: false }
+      - { value: "{% if template_exists('_footer.html.twig') %}{{ include('_footer.html.twig') }}{% endif %}", correct: false }
+    help: |
+      The `ignore_missing` option in the `include` function prevents an error if the template doesn't exist.
+      https://twig.symfony.com/doc/3.x/functions/include.html#ignoring-missing-templates
+
+  -
+    question: |
+      Which Twig filter is used to convert a string to its URL-friendly (slug) version?
+    answers:
+      - { value: "`slug`", correct: true }
+      - { value: "`url_encode`", correct: false }
+      - { value: "`urlize`", correct: false }
+      - { value: "`sanitize`", correct: false }
+    help: |
+      The `slug` filter converts a string into a URL-friendly slug. This filter is provided by `symfony/string` component.
+      https://symfony.com/doc/current/components/string.html#slugger
+
+  -
+    question: |
+      What is the correct way to escape a string `my_string` for use in an HTML attribute in Twig?
+    answers:
+      - { value: "{{ my_string|escape('html_attr') }}", correct: true }
+      - { value: "{{ my_string|attr_escape }}", correct: false }
+      - { value: "{{ my_string|e('html_attr') }}", correct: true }
+      - { value: "{{ my_string|html_attribute }}", correct: false }
+    help: |
+      The `escape` filter (or its alias `e`) can take an argument to specify the escaping strategy, such as `html_attr`.
+      https://twig.symfony.com/doc/3.x/filters/escape.html
+
+  -
+    question: |
+      How would you display the value of a variable `name`, but if it's not defined or null, display "Guest" instead?
+    answers:
+      - { value: "{{ name ?? 'Guest' }}", correct: true }
+      - { value: "{{ name | default('Guest') }}", correct: true }
+      - { value: "{% if name is defined %}{{ name }}{% else %}Guest{% endif %}", correct: false }
+      - { value: "{{ name ?: 'Guest' }}", correct: false }
+    help: |
+      The `??` operator (null-coalescing) and the `default` filter provide fallback values for undefined or null variables.
+      https://twig.symfony.com/doc/3.x/templates.html#the-null-coalescing-operator
+      https://twig.symfony.com/doc/3.x/filters/default.html
+
+  -
+    question: |
+      What is the purpose of the `{% block %}...{% endblock %}` structure within a Twig template that *does not* extend another template?
+    answers:
+      - { value: "To define reusable sections of content that can be included in other templates.", correct: true }
+      - { value: "It serves no purpose unless the template extends another.", correct: false }
+      - { value: "To create a new Twig function.", correct: false }
+      - { value: "To mark a section for conditional rendering.", correct: false }
+    help: |
+      Even in non-extending templates, blocks can be useful for defining logical sections or for use with `renderBlock()`.
+      https://twig.symfony.com/doc/3.x/tags/block.html
+
+  -
+    question: |
+      Which of the following is the correct way to display the current date and time in a Twig template using the default format?
+    answers:
+      - { value: "{{ 'now'|date }}", correct: true }
+      - { value: "{{ date() }}", correct: false }
+      - { value: "{{ current_datetime }}", correct: false }
+      - { value: "{{ 'now'|format_datetime }}", correct: false }
+    help: |
+      Applying the `date` filter to the string 'now' without arguments formats it using the default date format.
+      https://twig.symfony.com/doc/3.x/filters/date.html
+
+  -
+    question: |
+      How can you include a Twig template named `_sidebar.html.twig` and pass it a variable `menu_items` while ensuring that the included template cannot access any other variables from the current context?
+    answers:
+      - { value: "{{ include('_sidebar.html.twig', {menu_items: items}, only = true) }}", correct: true }
+      - { value: "{{ include('_sidebar.html.twig', {menu_items: items}, with_context = false) }}", correct: true }
+      - { value: "{{ include('_sidebar.html.twig', {menu_items: items}, isolated = true) }}", correct: false }
+      - { value: "{{ include('_sidebar.html.twig', {menu_items: items}, no_global_context = true) }}", correct: false }
+    help: |
+      The `only = true` or `with_context = false` option ensures that the included template only has access to the explicitly passed variables.
+      https://twig.symfony.com/doc/3.x/functions/include.html#including-templates
+
+  -
+    question: |
+      What is the purpose of the `{% filter %}` tag in Twig?
+    answers:
+      - { value: "To apply a filter to a large block of template data.", correct: true }
+      - { value: "To define a custom filter for use in the template.", correct: false }
+      - { value: "To conditionally apply a filter based on an expression.", correct: false }
+      - { value: "To escape a block of HTML content.", correct: false }
+    help: |
+      The `filter` tag allows you to apply a filter to the content of a block.
+      https://twig.symfony.com/doc/3.x/tags/filter.html
+
+  -
+    question: |
+      Which of the following Twig functions is used to generate a path to a static asset, but also includes a cache-busting version string if configured?
+    answers:
+      - { value: "`asset()`", correct: true }
+      - { value: "`versioned_asset()`", correct: false }
+      - { value: "`cached_asset()`", correct: false }
+      - { value: "`asset_with_version()`", correct: false }
+    help: |
+      The `asset()` function integrates with Symfony's asset versioning to append a cache-busting string.
+      https://symfony.com/doc/current/frontend/assets/versioning.html
+
+  -
+    question: |
+      How can you display the current loop iteration number (1-indexed) inside a `for` loop in Twig?
+    answers:
+      - { value: "{{ loop.index }}", correct: true }
+      - { value: "{{ loop.iteration }}", correct: false }
+      - { value: "{{ loop.number }}", correct: false }
+      - { value: "{{ loop.current }}", correct: false }
+    help: |
+      The `loop.index` variable provides the current iteration of the loop (1-indexed).
+      https://twig.symfony.com/doc/3.x/tags/for.html#the-loop-variable
+
+  -
+    question: |
+      What is the output of `{{ "  Hello World  "|trim }}` in Twig?
+    answers:
+      - { value: "Hello World", correct: true }
+      - { value: "  Hello World", correct: false }
+      - { value: "Hello World  ", correct: false }
+      - { value: "HelloWorld", correct: false }
+    help: |
+      The `trim` filter removes leading and trailing whitespace.
+      https://twig.symfony.com/doc/3.x/filters/trim.html
+
+  -
+    question: |
+      Which Twig filter would you use to convert a string to its first letter capitalized and the rest lowercase?
+    answers:
+      - { value: "`capitalize`", correct: true }
+      - { value: "`title`", correct: false }
+      - { value: "`ucfirst`", correct: false }
+      - { value: "`first_upper`", correct: false }
+    help: |
+      The `capitalize` filter capitalizes the first letter and lowercases the rest.
+      https://twig.symfony.com/doc/3.x/filters/capitalize.html
+
+  -
+    question: |
+      What is the purpose of the `{% block title %}` in a `base.html.twig` template?
+    answers:
+      - { value: "To define a default title that can be overridden by child templates.", correct: true }
+      - { value: "To automatically generate a title based on the current route.", correct: false }
+      - { value: "To prevent child templates from setting their own titles.", correct: false }
+      - { value: "To include an external title from a configuration file.", correct: false }
+    help: |
+      Blocks define areas that can be overridden by templates that extend the base.
+      https://symfony.com/doc/current/templates.html#template-inheritance
+
+  -
+    question: |
+      Which of the following is the correct way to display the value of a variable `count` and pluralize the word "item" based on its value (e.g., "1 item", "2 items")?
+    answers:
+      - { value: "{% trans choice count %} {1} item | ]1,Inf] items {% endtrans %}", correct: true }
+      - { value: "{{ 'item'|transchoice(count) }}", correct: true }
+      - { value: "{% pluralize count %} item {% endpluralize %}", correct: false }
+      - { value: "{{ count }} {{ count == 1 ? 'item' : 'items' }}", correct: false }
+    help: |
+      The `trans` tag with `choice` or the `transchoice` filter handles pluralization based on a number.
+      https://symfony.com/doc/current/translation.html#pluralization
+
+  -
+    question: |
+      How can you check if a variable `user` is an instance of a specific class `App\Entity\User` in Twig?
+    answers:
+      - { value: "{% if user is instance of 'App\\\\Entity\\\\User' %}", correct: true }
+      - { value: "{% if user is a 'App\\\\Entity\\\\User' %}", correct: false }
+      - { value: "{% if user.instanceof('App\\\\Entity\\\\User') %}", correct: false }
+      - { value: "{% if user is type 'App\\\\Entity\\\\User' %}", correct: false }
+    help: |
+      The `instance of` test checks if an object is an instance of a given class. Note the double backslashes for escaping in the string literal.
+      https://twig.symfony.com/doc/3.x/tests/instanceof.html
+
+  -
+    question: |
+      What is the output of `{{ [1, 2, 3]|join(', ') }}` in Twig?
+    answers:
+      - { value: "1, 2, 3", correct: true }
+      - { value: "123", correct: false }
+      - { value: "[1, 2, 3]", correct: false }
+      - { value: "1, 2, 3,", correct: false }
+    help: |
+      The `join` filter concatenates the elements of an array with a given separator.
+      https://twig.symfony.com/doc/3.x/filters/join.html
+
+  -
+    question: |
+      Which of the following is the correct way to display the current loop's first status (true if it's the first iteration, false otherwise)?
+    answers:
+      - { value: "{{ loop.first }}", correct: true }
+      - { value: "{{ loop.is_first }}", correct: false }
+      - { value: "{{ loop.index == 1 }}", correct: false }
+      - { value: "{{ loop.start }}", correct: false }
+    help: |
+      The `loop.first` variable is true during the first iteration.
+      https://twig.symfony.com/doc/3.x/tags/for.html#the-loop-variable
+
+  -
+    question: |
+      What is the purpose of the `{% do %}` tag in Twig?
+    answers:
+      - { value: "To execute a statement that does not print anything.", correct: true }
+      - { value: "To define a new Twig function.", correct: false }
+      - { value: "To include a template only if it exists.", correct: false }
+      - { value: "To perform a database operation.", correct: false }
+    help: |
+      The `do` tag can be used to execute statements that don't output anything.
+      https://twig.symfony.com/doc/3.x/tags/do.html
+
+  -
+    question: |
+      How would you display the value of a variable `message` and ensure that any HTML tags within it are stripped out, leaving only plain text?
+    answers:
+      - { value: "{{ message|striptags }}", correct: true }
+      - { value: "{{ message|strip_html }}", correct: false }
+      - { value: "{{ message|plain_text }}", correct: false }
+      - { value: "{{ message|remove_tags }}", correct: false }
+    help: |
+      The `striptags` filter strips SGML/XML tags and replaces each tag with a single space.
+      https://twig.symfony.com/doc/3.x/filters/striptags.html
+
+  -
+    question: |
+      What is the primary benefit of using `encore_entry_link_tags()` and `encore_entry_script_tags()` in Twig templates?
+    answers:
+      - { value: "They automatically include the correct CSS and JavaScript files generated by Webpack Encore, handling file hashing and paths.", correct: true }
+      - { value: "They allow you to write JavaScript and CSS directly within your Twig templates.", correct: false }
+      - { value: "They optimize image loading for faster page rendering.", correct: false }
+      - { value: "They provide a way to lazy-load assets on demand.", correct: false }
+    help: |
+      These functions are part of Symfony Webpack Encore and simplify the inclusion of compiled assets.
+      https://symfony.com/doc/current/frontend/encore/simple-example.html#including-your-assets
+
+  -
+    question: |
+      Which of the following is the correct way to check if a variable `items` is empty (e.g., an empty array or an empty string)?
+    answers:
+      - { value: "{% if items is empty %}", correct: true }
+      - { value: "{% if items.length == 0 %}", correct: false }
+      - { value: "{% if items is null or items == '' %}", correct: false }
+      - { value: "{% if empty(items) %}", correct: false }
+    help: |
+      The `empty` test checks if a variable is empty.
+      https://twig.symfony.com/doc/3.x/tests/empty.html
+
+  -
+    question: |
+      How would you display the value of a variable `text` and truncate it to 100 characters, appending "..." if it's longer?
+    answers:
+      - { value: "{{ text|slice(0, 100) ~ '...' }}", correct: false }
+      - { value: "{{ text|truncate(100, true, '...') }}", correct: true }
+      - { value: "{{ text|limit(100, '...') }}", correct: false }
+      - { value: "{{ text|shorten(100, '...') }}", correct: false }
+    help: |
+      The `truncate` filter truncates a string to a given length.
+      https://twig.symfony.com/doc/3.x/filters/truncate.html
+
+  -
+    question: |
+      What is the purpose of the `{% use %}` tag in Twig?
+    answers:
+      - { value: "To import blocks from another template into the current template without inheritance.", correct: true }
+      - { value: "To include a template and execute its logic.", correct: false }
+      - { value: "To define a new Twig extension.", correct: false }
+      - { value: "To declare variables that will be used in the template.", correct: false }
+    help: |
+      The `use` tag allows you to import blocks from other templates into the current template (similar to traits in PHP).
+      https://twig.symfony.com/doc/3.x/tags/use.html
+
+  -
+    question: |
+      Which Twig filter would you use to reverse the order of elements in an array?
+    answers:
+      - { value: "`reverse`", correct: true }
+      - { value: "`flip`", correct: false }
+      - { value: "`invert`", correct: false }
+      - { value: "`array_reverse`", correct: false }
+    help: |
+      The `reverse` filter reverses a string or an array.
+      https://twig.symfony.com/doc/3.x/filters/reverse.html
+
+  -
+    question: |
+      How can you display the current loop's last status (true if it's the last iteration, false otherwise)?
+    answers:
+      - { value: "{{ loop.last }}", correct: true }
+      - { value: "{{ loop.is_last }}", correct: false }
+      - { value: "{{ loop.index == loop.length }}", correct: false }
+      - { value: "{{ loop.end }}", correct: false }
+    help: |
+      The `loop.last` variable is true during the last iteration.
+      https://twig.symfony.com/doc/3.x/tags/for.html#the-loop-variable
+
+  -
+    question: |
+      What is the purpose of the `{% spaceless %}` tag in Twig?
+    answers:
+      - { value: "To remove whitespace between HTML tags in a block of content.", correct: true }
+      - { value: "To remove all whitespace from a string.", correct: false }
+      - { value: "To prevent Twig from adding extra spaces around its tags.", correct: false }
+      - { value: "To compress the HTML output for faster delivery.", correct: false }
+    help: |
+      The `spaceless` tag removes whitespace between HTML tags.
+      https://twig.symfony.com/doc/3.x/tags/spaceless.html
+
+  -
+    question: |
+      Which of the following is the correct way to display the value of a variable `price` formatted as currency (e.g., "$1,234.56") using the `format_currency` filter?
+    answers:
+      - { value: "{{ price|format_currency('USD') }}", correct: true }
+      - { value: "{{ price|currency('USD') }}", correct: false }
+      - { value: "{{ price|money('USD') }}", correct: false }
+      - { value: "{{ price|currency_format('USD') }}", correct: false }
+    help: |
+      The `format_currency` filter formats a number as a currency. This filter is provided by `symfony/intl`.
+      https://symfony.com/doc/current/components/intl.html#twig-integration
+
+  -
+    question: |
+      How can you display a variable `text` and convert newlines to HTML `<br>` tags?
+    answers:
+      - { value: "{{ text|nl2br }}", correct: true }
+      - { value: "{{ text|linebreaks }}", correct: false }
+      - { value: "{{ text|convert_newlines }}", correct: false }
+      - { value: "{{ text|br }}", correct: false }
+    help: |
+      The `nl2br` filter converts newlines into HTML line breaks (`<br>`).
+      https://twig.symfony.com/doc/3.x/filters/nl2br.html
+
+  -
+    question: |
+      What is the output of `{{ "symfony"|title }}` in Twig?
+    answers:
+      - { value: "Symfony", correct: true }
+      - { value: "symfony", correct: false }
+      - { value: "SYMFONY", correct: false }
+      - { value: "Symphony", correct: false }
+    help: |
+      The `title` filter capitalizes the first letter of each word in a string.
+      https://twig.symfony.com/doc/3.x/filters/title.html
+
+  -
+    question: |
+      Which Twig function is used to generate a URL for a route, but also ensures that the generated URL is always absolute (e.g., `http://example.com/blog/post`)?
+    answers:
+      - { value: "`url()`", correct: true }
+      - { value: "`path()` with `absolute=true` option.", correct: false }
+      - { value: "`absolute_path()`", correct: false }
+      - { value: "`full_url()`", correct: false }
+    help: |
+      The `url()` function generates an absolute URL for a given route.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-templates
