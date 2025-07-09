@@ -3,1080 +3,1237 @@ category: Automated Tests
 questions:
   -
     question: >
-      What is the recommended command to run all PHPUnit tests in a Symfony application?
+      Which command is used to run all PHPUnit tests in a Symfony application?
     answers:
-      - { value: "php bin/phpunit", correct: true }
-      - { value: "composer test", correct: false }
-      - { value: "symfony run tests", correct: false }
-      - { value: "php vendor/bin/phpunit all", correct: false }
+      - { value: "`php bin/phpunit`", correct: true }
+      - { value: "`symfony console tests:run`", correct: false }
+      - { value: "`phpunit run all`", correct: false }
+      - { value: "`bin/console phpunit:run`", correct: false }
     help: |
-      The `php bin/phpunit` command executes all tests configured in `phpunit.xml.dist`.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_1
+      The standard command to execute all PHPUnit tests in a Symfony application is `php bin/phpunit`.
+      https://symfony.com/doc/current/testing.html#running-tests
+
+  -
+    question: |
+      When writing functional tests in Symfony, which base class should your test extend to gain access to the test client and kernel booting capabilities?
+    answers:
+      - { value: "`PHPUnit\\Framework\\TestCase`", correct: false }
+      - { value: "`Symfony\\Bundle\\FrameworkBundle\\Test\\WebTestCase`", correct: true }
+      - { value: "`Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase`", correct: false }
+      - { value: "`Symfony\\Component\\BrowserKit\\HttpBrowser`", correct: false }
+    help: |
+      `WebTestCase` is the recommended base class for functional tests as it provides methods like `createClient()` and handles kernel booting.
+      https://symfony.com/doc/current/testing.html#functional-tests
 
   -
     question: >
-      Which base class should you extend for writing functional tests in Symfony that involve HTTP requests and responses?
+      What is the primary purpose of the `$client = static::createClient();` call in a Symfony functional test?
     answers:
-      - { value: "PHPUnit\\Framework\\TestCase", correct: false }
-      - { value: "Symfony\\Bundle\\FrameworkBundle\\Test\\WebTestCase", correct: true }
-      - { value: "Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase", correct: false }
-      - { value: "Symfony\\Component\\BrowserKit\\HttpBrowser", correct: false }
+      - { value: "To create a new database connection for the test.", correct: false }
+      - { value: "To boot the Symfony kernel and create a test browser instance.", correct: true }
+      - { value: "To initialize a new HTTP request object.", correct: false }
+      - { value: "To clear the Symfony cache for the test environment.", correct: false }
     help: |
-      `WebTestCase` is the base class for functional tests that simulate a web browser and interact with the application via HTTP requests.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_22
+      `static::createClient()` boots the Symfony kernel and returns a `Client` object that acts like a browser for making requests.
+      https://symfony.com/doc/current/testing.html#functional-tests
+
+  -
+    question: |
+      Given the following functional test snippet, which assertion correctly checks if the `<h1>` tag on the homepage contains the text "Hello World"?
+
+      ```php
+      // ...
+      $client = static::createClient();
+      $crawler = $client->request('GET', '/');
+      // ...
+      ```
+    answers:
+      - { value: "`$this->assertContains('Hello World', $crawler->filter('h1')->text());`", correct: false }
+      - { value: "`$this->assertSelectorTextContains('h1', 'Hello World');`", correct: true }
+      - { value: "`$this->assertEquals('Hello World', $crawler->filter('h1')->html());`", correct: false }
+      - { value: "`$this->assertPageContains('Hello World', 'h1');`", correct: false }
+    help: |
+      The `assertSelectorTextContains()` method is a convenient assertion provided by `WebTestCase` for checking text content within a selector.
+      https://symfony.com/doc/current/testing.html#asserting-content
 
   -
     question: >
-      After calling `static::createClient()` in a `WebTestCase`, what does the returned object primarily represent?
+      To enable the Symfony Profiler for a specific request within a functional test, which method should be called on the test client before making the request?
     answers:
-      - { value: "A real web browser instance.", correct: false }
-      - { value: "A simulated browser for making requests.", correct: true }
-      - { value: "An HTTP client for external API calls.", correct: false }
-      - { value: "A direct database connection.", correct: false }
+      - { value: "`$client->enableDebug();`", correct: false }
+      - { value: "`$client->startProfiler();`", correct: false }
+      - { value: "`$client->enableProfiler();`", correct: true }
+      - { value: "`$client->collectData();`", correct: false }
     help: |
-      The client returned by `createClient()` acts as a simulated browser, allowing you to make requests and inspect responses.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_22
+      The `enableProfiler()` method on the test client enables the profiler for the very next request, allowing you to retrieve its data.
+      https://symfony.com/doc/current/testing/profiling.html
+
+  -
+    question: |
+      In a Symfony `KernelTestCase`, how can you access services from the dependency injection container?
+    answers:
+      - { value: "By calling `$this->get('service_id');`", correct: false }
+      - { value: "By calling `self::getContainer()->get(ServiceClass::class);`", correct: true }
+      - { value: "By calling `$this->container->get(ServiceClass::class);`", correct: false }
+      - { value: "Services are not directly accessible in `KernelTestCase`.", correct: false }
+    help: |
+      After booting the kernel with `self::bootKernel()`, you can access the service container using `static::getContainer()` and then retrieve services.
+      https://symfony.com/doc/current/testing.html#accessing-the-container
 
   -
     question: >
-      Which assertion method is used in Symfony functional tests to verify that an HTTP response was successful (HTTP status is 2xx)?
+      Which PHPUnit listener should be configured in `phpunit.xml.dist` to enable `ClockMock` functionality for time-sensitive tests in Symfony?
     answers:
-      - { value: "assertResponseStatusCode(200)", correct: false }
-      - { value: "assertResponseIsSuccessful()", correct: true }
-      - { value: "assertSuccessfulResponse()", correct: false }
-      - { value: "assertStatusCodeIs2xx()", correct: false }
+      - { value: "`Symfony\\Bridge\\PhpUnit\\ClockMockListener`", correct: false }
+      - { value: "`Symfony\\Bridge\\PhpUnit\\TimeSensitiveListener`", correct: false }
+      - { value: "`Symfony\\Bridge\\PhpUnit\\SymfonyTestsListener`", correct: true }
+      - { value: "`Symfony\\Component\\Clock\\Test\\ClockListener`", correct: false }
     help: |
-      The `assertResponseIsSuccessful()` method checks if the HTTP status code is in the 2xx range.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_45
+      The `SymfonyTestsListener` from the PHPUnit Bridge is responsible for enabling `ClockMock` when the `@group time-sensitive` annotation is used.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#time-sensitive-tests
 
   -
     question: >
-      How can you access services from the Dependency Injection Container within a `KernelTestCase` after booting the kernel?
+      To run PHPUnit tests while ignoring deprecations listed in a specific baseline file, which environment variable should be used?
     answers:
-      - { value: "$this->get('service_id')", correct: false }
-      - { value: "self::getContainer()->get(ServiceClass::class)", correct: true }
-      - { value: "static::get('service_id')", correct: false }
-      - { value: "Kernel::getService('service_id')", correct: false }
+      - { value: "`SYMFONY_IGNORE_DEPRECATIONS`", correct: false }
+      - { value: "`SYMFONY_DEPRECATIONS_HELPER`", correct: true }
+      - { value: "`PHPUNIT_DEPRECATIONS_BASELINE`", correct: false }
+      - { value: "`APP_ENV=test_no_deprecations`", correct: false }
     help: |
-      After calling `self::bootKernel()`, you can retrieve services using `static::getContainer()->get()`.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_10
+      The `SYMFONY_DEPRECATIONS_HELPER` environment variable is used to configure the deprecation helper, including specifying a baseline file to ignore known deprecations.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#using-a-deprecation-baseline
+
+  -
+    question: |
+      Consider a functional test that performs an action leading to a redirect. How can you explicitly follow this redirect using the Symfony test client?
+    answers:
+      - { value: "`$client->followRedirect();`", correct: true }
+      - { value: "`$client->getResponse()->follow();`", correct: false }
+      - { value: "`$client->redirect();`", correct: false }
+      - { value: "`$client->request('GET', $client->getResponse()->headers->get('Location'));`", correct: false }
+    help: |
+      The `followRedirect()` method on the client object allows you to manually follow the last redirect. You can also configure the client to follow redirects automatically.
+      https://symfony.com/doc/current/testing.html#handling-redirects
 
   -
     question: >
-      What is the primary purpose of the `Crawler` object returned by `$client->request()` in a functional test?
+      Before running functional tests that interact with a database, what are the recommended commands to prepare the test database?
     answers:
-      - { value: "To send subsequent HTTP requests.", correct: false }
-      - { value: "To interact directly with the database.", correct: false }
-      - { value: "To navigate and query the HTML content of the response.", correct: true }
-      - { value: "To manage the test client's session data.", correct: false }
+      - { value: "`php bin/console doctrine:database:create --env=test && php bin/console doctrine:schema:update --force --env=test`", correct: false }
+      - { value: "`php bin/console doctrine:database:create --env=test && php bin/console doctrine:schema:create --env=test`", correct: true }
+      - { value: "`php bin/console doctrine:migrations:migrate --env=test`", correct: false }
+      - { value: "`php bin/console doctrine:fixtures:load --env=test`", correct: false }
     help: |
-      The `Crawler` object provides methods to traverse the DOM and make assertions on the content of the HTML response.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
+      You should create the test database and then its schema using `doctrine:database:create` and `doctrine:schema:create` respectively, ensuring the `--env=test` flag is used.
+      https://symfony.com/doc/current/testing.html#database
+
+  -
+    question: |
+      When unit testing a service that depends on Doctrine's `EntityManager`, what is the best approach to isolate the service from the database?
+    answers:
+      - { value: "Use a real in-memory SQLite database.", correct: false }
+      - { value: "Mock the `EntityManager` and its `getRepository()` method to return a mocked repository.", correct: true }
+      - { value: "Extend `KernelTestCase` and boot the kernel to get a real `EntityManager`.", correct: false }
+      - { value: "Make the service static to avoid dependency injection.", correct: false }
+    help: |
+      For unit tests, mocking dependencies like `EntityManager` and `EntityRepository` allows you to test the service in isolation without needing a real database connection.
+      https://symfony.com/doc/current/testing/database.html#unit-testing-a-doctrine-repository
+
+  -
+    question: |
+      How can you simulate a user being logged in during a Symfony functional test without going through the actual login form?
+    answers:
+      - { value: "By setting session variables directly.", correct: false }
+      - { value: "By using `$client->loginUser($userObject);`", correct: true }
+      - { value: "By sending a `POST` request to the login route with user credentials.", correct: false }
+      - { value: "By using a custom authentication header.", correct: false }
+    help: |
+      The `loginUser()` method on the test client allows you to simulate a user being logged in, which is efficient for testing protected pages.
+      https://symfony.com/doc/current/testing.html#simulating-a-logged-in-user
+
+  -
+    question: |
+      To make a time-sensitive PHPUnit test reliable when using the Symfony PHPUnit bridge, which annotation should be applied to the test class?
+    answers:
+      - { value: "`@coversNothing`", correct: false }
+      - { value: "`@group time-sensitive`", correct: true }
+      - { value: "`@preserveGlobalState disabled`", correct: false }
+      - { value: "`@runInSeparateProcess`", correct: false }
+    help: |
+      The `@group time-sensitive` annotation, when used with the Symfony PHPUnit bridge, automatically enables `ClockMock` for the test, ensuring predictable time-based behavior.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#time-sensitive-tests
+
+  -
+    question: |
+      Which method of the Symfony test client is used to send an HTTP request to a specific URL?
+    answers:
+      - { value: "`send()`", correct: false }
+      - { value: "`execute()`", correct: false }
+      - { value: "`request()`", correct: true }
+      - { value: "`get()`", correct: false }
+    help: |
+      The `request()` method is used to send an HTTP request (e.g., GET, POST) to a given URL.
+      https://symfony.com/doc/current/testing.html#making-requests
 
   -
     question: >
-      Which `Crawler` assertion method verifies that an element matching a given CSS selector contains specific text?
+      Which of the following `Crawler` assertions correctly verifies that there are exactly 3 elements matching the CSS selector `.item-list li`?
     answers:
-      - { value: "assertSelectorContainsText()", correct: false }
-      - { value: "assertTextContains()", correct: false }
-      - { value: "assertSelectorTextContains()", correct: true }
-      - { value: "assertElementTextContains()", correct: false }
+      - { value: "`$this->assertSelectorExists('.item-list li', 3);`", correct: false }
+      - { value: "`$this->assertSelectorCount(3, '.item-list li');`", correct: true }
+      - { value: "`$crawler->filter('.item-list li')->count()->assertEquals(3);`", correct: false }
+      - { value: "`$this->assertEquals(3, $crawler->filter('.item-list li')->count());`", correct: false }
     help: |
-      `assertSelectorTextContains()` is used to check if the first element matching the selector includes the specified text.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
+      The `assertSelectorCount()` method is specifically designed to assert the number of elements matching a given selector.
+      https://symfony.com/doc/current/testing.html#asserting-content
 
   -
     question: >
-      How can you configure the Symfony test client to automatically follow all redirects before a request is made?
+      After enabling the profiler and making a request with the test client, how do you retrieve the collected profiler data?
     answers:
-      - { value: "$client->followRedirects(true);", correct: true }
-      - { value: "$client->enableAutoRedirect();", correct: false }
-      - { value: "$client->request('GET', '/', [], [], [], [], true);", correct: false }
-      - { value: "$client->followRedirect();", correct: false }
+      - { value: "`$client->getProfilerData();`", correct: false }
+      - { value: "`$client->getProfile();`", correct: true }
+      - { value: "`$client->getResponse()->getProfiler();`", correct: false }
+      - { value: "`$client->fetchProfile();`", correct: false }
     help: |
-      Calling `$client->followRedirects()` (or `$client->followRedirects(true)`) enables automatic redirect following.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_27
+      The `getProfile()` method on the test client returns the `Profile` object containing all collected profiler data for the last request.
+      https://symfony.com/doc/current/testing/profiling.html
 
   -
     question: >
-      To enable the Symfony Profiler for a specific request during a functional test, which method of the client object should be called *before* the request?
+      What is the main benefit of extending `Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase` for your tests?
     answers:
-      - { value: "$client->collectProfilerData()", correct: false }
-      - { value: "$client->enableProfiler()", correct: true }
-      - { value: "$client->startProfiling()", correct: false }
-      - { value: "$client->getProfile()->enable()", correct: false }
+      - { value: "It allows you to run tests without booting the Symfony kernel, making them faster.", correct: false }
+      - { value: "It provides a test client for making HTTP requests.", correct: false }
+      - { value: "It allows you to boot the Symfony kernel and access services from the container, ensuring test isolation by rebooting for each test.", correct: true }
+      - { value: "It automatically mocks all database interactions.", correct: false }
     help: |
-      The `enableProfiler()` method ensures that the profiler collects data for the very next request.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_39
+      `KernelTestCase` is designed for integration tests where you need to interact with the Symfony kernel and its services. It ensures a clean state for each test by rebooting the kernel.
+      https://symfony.com/doc/current/testing.html#kerneltestcase
 
   -
     question: >
-      After enabling the profiler and making a request with the test client, how do you retrieve the collected profile data?
+      What is the primary function of the `Symfony\\Bridge\\PhpUnit\\CoverageListener`?
     answers:
-      - { value: "$client->getProfilerData()", correct: false }
-      - { value: "$client->getProfile()", correct: true }
-      - { value: "$client->fetchProfile()", correct: false }
-      - { value: "$client->retrieveProfile()", correct: false }
+      - { value: "To automatically generate `@covers` annotations for test classes.", correct: true }
+      - { value: "To report code coverage directly to the console.", correct: false }
+      - { value: "To integrate XDebug with PHPUnit for coverage analysis.", correct: false }
+      - { value: "To ensure that tests run in isolation.", correct: false }
     help: |
-      The `getProfile()` method returns the `Profile` object containing the collected data for the last request.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_39
+      The `CoverageListener` automatically adds the appropriate `@covers` annotation to test classes, improving the accuracy of code coverage reports.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#code-coverage
+
+  -
+    question: |
+      To ensure your functional tests use a dedicated database and do not interfere with your development or production databases, how should you configure the `DATABASE_URL`?
+    answers:
+      - { value: "Define it in `config/services.yaml` under the `test` environment.", correct: false }
+      - { value: "Set it in your `php.ini` file.", correct: false }
+      - { value: "Create or modify the `.env.test.local` file with a specific `DATABASE_URL`.", correct: true }
+      - { value: "Pass it as a command-line argument to PHPUnit.", correct: false }
+    help: |
+      The `.env.test.local` file is the standard way to override environment variables specifically for the test environment, including the database URL.
+      https://symfony.com/doc/current/testing.html#database
+
+  -
+    question: |
+      When performing a smoke test on multiple URLs in a Symfony application using PHPUnit, which feature is best suited for providing a list of URLs to test?
+    answers:
+      - { value: "A fixture loader.", correct: false }
+      - { value: "A data provider method.", correct: true }
+      - { value: "A custom test listener.", correct: false }
+      - { value: "A separate YAML configuration file.", correct: false }
+    help: |
+      PHPUnit's data providers allow you to run the same test method multiple times with different sets of data, which is ideal for smoke testing a list of URLs.
+      https://symfony.com/doc/current/best_practices.html#smoke-test-all-urls
 
   -
     question: >
-      Which PHPUnit annotation, when used with the Symfony PHPUnit bridge, automatically enables `ClockMock` for a time-sensitive test?
+      What is the main difference between `PHPUnit\\Framework\\TestCase` and `Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase`?
     answers:
-      - { value: "@timeSensitive", correct: false }
-      - { value: "@mockClock", correct: false }
-      - { value: "@group time-sensitive", correct: true }
-      - { value: "@usesClockMock", correct: false }
+      - { value: "`TestCase` is for functional tests, while `KernelTestCase` is for unit tests.", correct: false }
+      - { value: "`KernelTestCase` boots the Symfony kernel, allowing access to services and the container, while `TestCase` does not and is for pure unit tests.", correct: true }
+      - { value: "`TestCase` requires a database connection, while `KernelTestCase` does not.", correct: false }
+      - { value: "`KernelTestCase` is deprecated in Symfony 7.", correct: false }
     help: |
-      The `@group time-sensitive` annotation, combined with `SymfonyTestsListener`, activates `ClockMock` for the test.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_21
+      `PHPUnit\\Framework\\TestCase` is for isolated unit tests, whereas `KernelTestCase` is for integration tests that require the Symfony kernel to be booted to access the application's services and environment.
+      https://symfony.com/doc/current/testing.html#kerneltestcase
 
   -
     question: >
-      What is the main purpose of registering `Symfony\\Bridge\\PhpUnit\\SymfonyTestsListener` in `phpunit.xml.dist`?
+      After making a request with the Symfony test client, how can you obtain the `Response` object to perform assertions on its content or status?
     answers:
-      - { value: "To speed up test execution by disabling certain features.", correct: false }
-      - { value: "To enable `ClockMock` and other Symfony PHPUnit bridge functionalities.", correct: true }
-      - { value: "To manage database transactions for functional tests.", correct: false }
-      - { value: "To generate detailed code coverage reports.", correct: false }
+      - { value: "`$client->getResponse();`", correct: true }
+      - { value: "`$client->getLastResponse();`", correct: false }
+      - { value: "`$crawler->getResponse();`", correct: false }
+      - { value: "`$this->getResponse();`", correct: false }
     help: |
-      This listener integrates Symfony's PHPUnit bridge features, such as `ClockMock`, into your test suite.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_20
+      The `getResponse()` method on the test client returns the `Response` object generated by the last request.
+      https://symfony.com/doc/current/testing.html#response-assertions
+
+  -
+    question: |
+      Which `Crawler` method would you use to fill a form field with a specific value?
+    answers:
+      - { value: "`$crawler->setValue('field_name', 'value');`", correct: false }
+      - { value: "`$crawler->filter('input[name=\"field_name\"]')->val('value');`", correct: false }
+      - { value: "`$form = $crawler->selectButton('Submit')->form(['field_name' => 'value']);`", correct: true }
+      - { value: "`$crawler->fill('field_name', 'value');`", correct: false }
+    help: |
+      To fill a form, you typically first select the form using `form()` (often from a button) and then pass an array of field names and values.
+      https://symfony.com/doc/current/components/dom_crawler.html#forms
+
+  -
+    question: |
+      In the Symfony profiler configuration for the `test` environment (`config/packages/test/web_profiler.yaml`), what does `collect: false` signify?
+    answers:
+      - { value: "The profiler is completely disabled and cannot be used.", correct: false }
+      - { value: "The profiler is enabled, but it will only collect data when explicitly requested per test via `$client->enableProfiler();`.", correct: true }
+      - { value: "The profiler collects data, but it is not displayed in the web debug toolbar.", correct: false }
+      - { value: "The profiler collects data only for requests that result in an error.", correct: false }
+    help: |
+      Setting `collect: false` means the profiler is enabled but won't automatically collect data for every request, allowing you to selectively enable it for specific tests to improve performance.
+      https://symfony.com/doc/current/testing/profiling.html
 
   -
     question: >
-      Which method of the Symfony test client allows you to simulate a user being logged in for functional tests without going through a login form?
+      Can you access private services from the Symfony container in a `KernelTestCase`?
     answers:
-      - { value: "$client->login('username', 'password')", correct: false }
-      - { value: "$client->authenticateUser($user)", correct: false }
-      - { value: "$client->loginUser($user)", correct: true }
-      - { value: "$client->setUser($user)", correct: false }
+      - { value: "Yes, all private services are automatically made public in the test environment.", correct: false }
+      - { value: "No, private services are never accessible directly in tests.", correct: false }
+      - { value: "Yes, if they are not explicitly marked as `removed` and you use `static::getContainer()->get(ServiceClass::class);`.", correct: true }
+      - { value: "Only if you manually configure them as public in `services_test.yaml`.", correct: false }
     help: |
-      The `loginUser()` method injects a user object into the test client's session, simulating a logged-in state.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_28
+      In the test environment, private services that are not explicitly marked as `removed` can be accessed via `static::getContainer()->get()`.
+      https://symfony.com/doc/current/testing.html#accessing-the-container
 
   -
     question: >
-      What is `Symfony\\Bundle\\FrameworkBundle\\Test\\TestBrowserToken`?
+      Which of the following deprecation reporting levels in the Symfony PHPUnit Bridge will cause tests to fail immediately upon encountering *any* deprecation?
     answers:
-      - { value: "A token for API authentication in tests.", correct: false }
-      - { value: "A special token object created by `loginUser()` and stored in the test client's session.", correct: true }
-      - { value: "A token used for CSRF protection in functional tests.", correct: false }
-      - { value: "A mock object for the security context.", correct: false }
+      - { value: "`weak`", correct: false }
+      - { value: "`log`", correct: false }
+      - { value: "`fail`", correct: true }
+      - { value: "`ignore`", correct: false }
     help: |
-      `TestBrowserToken` is the security token used internally by Symfony when `loginUser()` is called.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_32
+      The `fail` reporting level (configured via `SYMFONY_DEPRECATIONS_HELPER`) will cause tests to fail as soon as any deprecation is triggered.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#configuring-the-deprecation-helper
 
   -
     question: >
-      Where is the recommended place to define a separate `DATABASE_URL` for the test environment in a Symfony application?
+      Which Symfony command can be used to generate a new test class, such as a `WebTestCase`?
     answers:
-      - { value: "config/services.yaml", correct: false }
-      - { value: ".env", correct: false }
-      - { value: ".env.test.local", correct: true }
-      - { value: "config/packages/doctrine.yaml", correct: false }
+      - { value: "`php bin/console make:test`", correct: true }
+      - { value: "`php bin/console generate:test`", correct: false }
+      - { value: "`php bin/console create:test`", correct: false }
+      - { value: "`php bin/console new:test`", correct: false }
     help: |
-      The `.env.test.local` file is used to override environment variables specifically for the test environment.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_12
+      The `make:test` command from SymfonyMakerBundle provides an interactive way to generate various types of test classes.
+      https://symfony.com/doc/current/testing.html#generating-a-test-class
+
+  -
+    question: |
+      How would you send a `POST` request to the `/submit` endpoint with a JSON payload using the Symfony test client?
+    answers:
+      - { value: "`$client->request('POST', '/submit', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data));`", correct: true }
+      - { value: "`$client->post('/submit', ['json' => $data]);`", correct: false }
+      - { value: "`$client->request('POST', '/submit', $data, 'json');`", correct: false }
+      - { value: "`$client->submitForm('submit_button', $data);`", correct: false }
+    help: |
+      The `request()` method allows specifying the HTTP method, URL, parameters, files, server parameters (including `CONTENT_TYPE`), and raw content for the request body.
+      https://symfony.com/doc/current/testing.html#making-requests
+
+  -
+    question: |
+      Which `Crawler` method is used to select elements based on a CSS selector?
+    answers:
+      - { value: "`find()`", correct: false }
+      - { value: "`select()`", correct: false }
+      - { value: "`filter()`", correct: true }
+      - { value: "`query()`", correct: false }
+    help: |
+      The `filter()` method of the `Crawler` object allows you to select elements using CSS selectors or XPath expressions.
+      https://symfony.com/doc/current/components/dom_crawler.html#filtering-nodes
 
   -
     question: >
-      What is the primary benefit of installing and enabling `dama/doctrine-test-bundle` for Symfony functional tests?
+      What type of object is returned by `$client->getProfile()` in a Symfony functional test?
     answers:
-      - { value: "It provides a custom database connection for tests.", correct: false }
-      - { value: "It enables automatic database transaction rollback after each test.", correct: true }
-      - { value: "It generates database fixtures automatically.", correct: false }
-      - { value: "It speeds up Doctrine queries in tests.", correct: false }
+      - { value: "`Symfony\\Component\\HttpFoundation\\Response`", correct: false }
+      - { value: "`Symfony\\Component\\HttpKernel\\Profiler\\Profile`", correct: true }
+      - { value: "`Symfony\\Component\\HttpKernel\\DataCollector\\DataCollector`", correct: false }
+      - { value: "`Symfony\\Component\\Stopwatch\\Stopwatch`", correct: false }
     help: |
-      This bundle ensures a clean database state for every test by rolling back transactions.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_14
+      The `getProfile()` method returns an instance of `Symfony\\Component\\HttpKernel\\Profiler\\Profile`, which contains all the collected data from the profiler.
+      https://symfony.com/doc/current/testing/profiling.html
 
   -
     question: >
-      How is `DAMA\\DoctrineTestBundle\\PHPUnit\\PHPUnitExtension` enabled in PHPUnit for transactional tests?
+      What is the effect of calling `self::bootKernel()` in a `KernelTestCase`?
     answers:
-      - { value: "By adding it as a service in `services.yaml`.", correct: false }
-      - { value: "By configuring it in `config/packages/test/doctrine.yaml`.", correct: false }
-      - { value: "By adding an `<extension>` tag in `phpunit.xml.dist`.", correct: true }
-      - { value: "By calling a method on the test client.", correct: false }
+      - { value: "It reloads the entire application for each test, ensuring a clean slate.", correct: true }
+      - { value: "It only initializes the test client without loading services.", correct: false }
+      - { value: "It clears the database and loads fixtures.", correct: false }
+      - { value: "It starts an in-memory web server for functional tests.", correct: false }
     help: |
-      The bundle is enabled as a PHPUnit extension in the `phpunit.xml.dist` file.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_15
+      `self::bootKernel()` boots the Symfony application kernel. For each test, the kernel is rebooted to ensure isolation and a fresh state.
+      https://symfony.com/doc/current/testing.html#kerneltestcase
+
+  -
+    question: |
+      If you use the `@group time-sensitive` annotation in a PHPUnit test with the Symfony PHPUnit bridge, how does it affect calls to `sleep()` within that test?
+    answers:
+      - { value: "Calls to `sleep()` are ignored and the test continues immediately.", correct: false }
+      - { value: "Calls to `sleep()` are replaced with an instant time advancement by `ClockMock`, making the test run faster.", correct: true }
+      - { value: "Calls to `sleep()` will cause a real delay, but the test will be marked as time-sensitive.", correct: false }
+      - { value: "Calls to `sleep()` are automatically mocked to return a fixed value.", correct: false }
+    help: |
+      The `@group time-sensitive` annotation enables `ClockMock`, which intercepts time-related functions like `sleep()` and `time()`, allowing you to control time programmatically for reliable testing.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#time-sensitive-tests
 
   -
     question: >
-      Which Composer package is used to create and load dummy data (fixtures) into the database for testing purposes in Symfony?
+      To run PHPUnit tests while ignoring specific deprecations defined in a file named `tests/baseline-ignore`, which command would you use?
     answers:
-      - { value: "doctrine/orm", correct: false }
-      - { value: "doctrine/data-fixtures", correct: false }
-      - { value: "doctrine/doctrine-fixtures-bundle", correct: true }
-      - { value: "symfony/maker-bundle", correct: false }
+      - { value: "`./vendor/bin/simple-phpunit --ignore-deprecations=tests/baseline-ignore`", correct: false }
+      - { value: "`SYMFONY_DEPRECATIONS_HELPER='ignoreFile=./tests/baseline-ignore' ./vendor/bin/simple-phpunit`", correct: true }
+      - { value: "`PHPUNIT_IGNORE_DEPRECATIONS=tests/baseline-ignore ./vendor/bin/phpunit`", correct: false }
+      - { value: "`php bin/console deprecations:ignore --file=tests/baseline-ignore`", correct: false }
     help: |
-      The `doctrine/doctrine-fixtures-bundle` provides the tools for managing test data.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_16
+      The `SYMFONY_DEPRECATIONS_HELPER` environment variable is used to configure the deprecation helper, including specifying a file to ignore known deprecations.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#using-a-deprecation-baseline
 
   -
     question: >
-      What is the purpose of `KernelTestCase::bootKernel()`?
+      What is the primary benefit of using `dama/doctrine-test-bundle` in Symfony functional tests involving a database?
     answers:
-      - { value: "To start the built-in web server for tests.", correct: false }
-      - { value: "To initialize the database connection for the test.", correct: false }
-      - { value: "To boot the Symfony application kernel, ensuring test isolation.", correct: true }
-      - { value: "To clear the application cache before each test.", correct: false }
+      - { value: "It provides an in-memory database for faster tests.", correct: false }
+      - { value: "It automatically rolls back database transactions after each test, ensuring a clean state.", correct: true }
+      - { value: "It generates test data (fixtures) for your database.", correct: false }
+      - { value: "It allows you to mock database connections without a real database.", correct: false }
     help: |
-      `bootKernel()` ensures that the Symfony kernel is booted and rebooted for each test to maintain isolation.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_4
+      The DAMA Doctrine Test Bundle automatically wraps each test in a database transaction and rolls it back afterwards, ensuring that each test starts with a clean database state.
+      https://symfony.com/doc/current/testing.html#database
+
+  -
+    question: |
+      In a `KernelTestCase`, what is the correct way to ensure that the `EntityManager` is closed and nulled in the `tearDown()` method to prevent memory leaks?
+    answers:
+      - { value: "```php
+        protected function tearDown(): void
+        {
+            parent::tearDown();
+            $this->entityManager->close();
+            $this->entityManager = null;
+        }
+        ```", correct: true }
+      - { value: "```php
+        protected function tearDown(): void
+        {
+            $this->entityManager->clear();
+            $this->entityManager = null;
+        }
+        ```", correct: false }
+      - { value: "```php
+        protected function tearDown(): void
+        {
+            $this->entityManager = null;
+        }
+        ```", correct: false }
+      - { value: "It's not necessary; Symfony handles memory leaks automatically.", correct: false }
+    help: |
+      It is recommended to explicitly close and null the `EntityManager` in `tearDown()` to prevent memory leaks, especially when running many tests.
+      https://symfony.com/doc/current/testing/database.html#functional-test-for-a-doctrine-repository
+
+  -
+    question: |
+      When accessing the service container in a `WebTestCase` or `KernelTestCase`, why is `static::getContainer()` preferred over `$this->getContainer()`?
+    answers:
+      - { value: "Because `getContainer()` is a static method.", correct: true }
+      - { value: "Because `$this->getContainer()` is deprecated.", correct: false }
+      - { value: "To ensure the container is always the same instance across tests.", correct: false }
+      - { value: "It has no functional difference; it's a matter of style.", correct: false }
+    help: |
+      `getContainer()` is a static method on `KernelTestCase` (and thus `WebTestCase`), so it should be called statically.
+      https://symfony.com/doc/current/testing.html#accessing-the-container
+
+  -
+    question: |
+      Which `Crawler` method is used to find and click a link by its text content or ID?
+    answers:
+      - { value: "`$crawler->click('Link Text');`", correct: false }
+      - { value: "`$crawler->link('Link Text')->click();`", correct: true }
+      - { value: "`$crawler->findLink('Link Text')->click();`", correct: false }
+      - { value: "`$crawler->selectLink('Link Text')->click();`", correct: false }
+    help: |
+      The `link()` method allows you to select a link by its text content or ID, and then you can call `click()` on the returned `Link` object.
+      https://symfony.com/doc/current/components/dom_crawler.html#links
+
+  -
+    question: |
+      After retrieving a `Profile` object from the Symfony profiler in a test, how would you typically access data collected by a specific data collector (e.g., the `logger` collector)?
+    answers:
+      - { value: "`$profile->get('logger');`", correct: false }
+      - { value: "`$profile->getCollector('logger');`", correct: true }
+      - { value: "`$profile->getData('logger');`", correct: false }
+      - { value: "`$profile->logger;`", correct: false }
+    help: |
+      The `getCollector()` method on the `Profile` object allows you to retrieve a specific data collector by its name (e.g., 'logger', 'db', 'time').
+      https://symfony.com/doc/current/testing/profiling.html
+
+  -
+    question: |
+      If you have a custom namespace for time-sensitive classes (e.g., `App\\TimeSensitive`), how would you configure the `SymfonyTestsListener` in `phpunit.xml.dist` to apply `ClockMock` to these classes?
+    answers:
+      - { value: "```xml
+        <listeners>
+            <listener class=\"Symfony\\Bridge\\PhpUnit\\SymfonyTestsListener\">
+                <arguments>
+                    <array>
+                        <element key=\"time-sensitive\"><string>App\\TimeSensitive</string></element>
+                    </array>
+                </arguments>
+            </listener>
+        </listeners>
+        ```", correct: true }
+      - { value: "```xml
+        <listeners>
+            <listener class=\"Symfony\\Bridge\\PhpUnit\\SymfonyTestsListener\" time-sensitive-namespace=\"App\\TimeSensitive\"/>
+        </listeners>
+        ```", correct: false }
+      - { value: "```xml
+        <listeners>
+            <listener class=\"Symfony\\Bridge\\PhpUnit\\SymfonyTestsListener\">
+                <config time-sensitive-namespaces=\"App\\TimeSensitive\"/>
+            </listener>
+        </listeners>
+        ```", correct: false }
+      - { value: "You cannot configure custom namespaces for `ClockMock`.", correct: false }
+    help: |
+      The `SymfonyTestsListener` can be configured with arguments to specify which namespaces should be treated as time-sensitive, allowing `ClockMock` to be applied.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#configuring-the-listener
 
   -
     question: >
-      When unit testing a service that depends on Doctrine's `EntityManager`, how would you typically isolate the service from the real database?
+      Which of the following is a common practice for managing deprecations in Symfony tests?
     answers:
-      - { value: "By using an in-memory SQLite database.", correct: false }
-      - { value: "By mocking the `EntityManager` and its `EntityRepository` instances.", correct: true }
-      - { value: "By clearing the database before each test method.", correct: false }
-      - { value: "By using a separate test database configured in `.env.test.local`.", correct: false }
+      - { value: "Ignoring all deprecations permanently.", correct: false }
+      - { value: "Generating a deprecation baseline file to track and ignore existing deprecations while still reporting new ones.", correct: true }
+      - { value: "Disabling deprecation warnings in `php.ini`.", correct: false }
+      - { value: "Manually fixing all deprecations before every test run.", correct: false }
     help: |
-      Mocking dependencies like `EntityManager` allows you to test the service in isolation without actual database interaction.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/database.rst#_snippet_1
+      Using a deprecation baseline allows you to acknowledge and ignore existing deprecations, preventing them from failing your tests, while still being notified of new deprecations.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#using-a-deprecation-baseline
 
   -
     question: >
-      Which class from the `Symfony\\Component\\Filesystem` component can be used to manually clear the Symfony cache directory for the test environment?
+      What is the primary purpose of `doctrine/doctrine-fixtures-bundle` in the context of Symfony testing?
     answers:
-      - { value: "Symfony\\Component\\Cache\\Adapter\\FilesystemAdapter", correct: false }
-      - { value: "Symfony\\Component\\Filesystem\\Filesystem", correct: true }
-      - { value: "Symfony\\Component\\HttpKernel\\CacheClearer\\CacheClearer", correct: false }
-      - { value: "Symfony\\Component\\Finder\\Finder", correct: false }
+      - { value: "To provide an ORM for database interaction.", correct: false }
+      - { value: "To automatically roll back database transactions after each test.", correct: false }
+      - { value: "To load dummy data into the database for testing purposes.", correct: true }
+      - { value: "To manage database migrations.", correct: false }
     help: |
-      The `Filesystem` component provides utilities for file system operations, including removing directories.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_8
+      The Doctrine Fixtures Bundle allows you to create and load dummy data (fixtures) into your database, which is essential for setting up a consistent state for functional and integration tests.
+      https://symfony.com/doc/current/testing.html#database
+
+  -
+    question: |
+      When unit testing a custom Symfony Validator constraint that is a compound constraint, which base class should your test extend?
+    answers:
+      - { value: "`PHPUnit\\Framework\\TestCase`", correct: false }
+      - { value: "`Symfony\\Component\\Validator\\Test\\ConstraintTestCase`", correct: false }
+      - { value: "`Symfony\\Component\\Validator\\Test\\CompoundConstraintTestCase`", correct: true }
+      - { value: "`Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase`", correct: false }
+    help: |
+      `CompoundConstraintTestCase` is specifically designed for testing custom compound constraints, providing helper methods for asserting violations.
+      https://symfony.com/doc/current/validation/custom_constraint.html#testing-a-compound-constraint
 
   -
     question: >
-      Which Symfony MakerBundle command can be used to generate a new application test class, prompting for the test type (e.g., WebTestCase)?
+      Which assertion method on the Symfony test client verifies that the HTTP response status code is in the 2xx range (successful)?
     answers:
-      - { value: "php bin/console make:entity", correct: false }
-      - { value: "php bin/console make:controller", correct: false }
-      - { value: "php bin/console make:test", correct: true }
-      - { value: "php bin/console make:functional-test", correct: false }
+      - { value: "`$this->assertResponseOk();`", correct: false }
+      - { value: "`$this->assertResponseIsSuccessful();`", correct: true }
+      - { value: "`$this->assertStatusCode(200);`", correct: false }
+      - { value: "`$this->assertResponseCode(2xx);`", correct: false }
     help: |
-      The `make:test` command is an interactive tool to scaffold new test classes.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_21
+      `assertResponseIsSuccessful()` is a convenient method to check if the HTTP response has a 2xx status code.
+      https://symfony.com/doc/current/testing.html#response-assertions
 
   -
-    question: >
-      When performing a smoke test on all application URLs using PHPUnit data providers, what is the primary assertion to check for successful page loads?
+    question: |
+      Which `Crawler` method is used to get a `Form` object from the current HTML document, allowing you to interact with forms?
     answers:
-      - { value: "$this->assertResponseStatusCodeSame(200);", correct: false }
-      - { value: "$this->assertResponseIsSuccessful();", correct: true }
-      - { value: "$this->assertPageExists();", correct: false }
-      - { value: "$this->assertUrlLoads();", correct: false }
+      - { value: "`$crawler->getForm();`", correct: false }
+      - { value: "`$crawler->selectForm('selector');`", correct: false }
+      - { value: "`$crawler->form();`", correct: true }
+      - { value: "`$crawler->getFormElement();`", correct: false }
     help: |
-      `assertResponseIsSuccessful()` is the most robust way to check for a 2xx status code, indicating success.
-      https://github.com/symfony/symfony-docs/blob/7.3/best_practices.rst#_snippet_4
+      The `form()` method on the `Crawler` object returns a `Form` object, which provides methods for interacting with HTML forms.
+      https://symfony.com/doc/current/components/dom_crawler.html#forms
 
   -
-    question: >
-      What does the `assertSelectorExists(string $selector)` method of the Symfony Crawler assert?
+    question: |
+      When configuring the `Symfony\\Bridge\\PhpUnit\\CoverageListener`, how can you provide a custom System Under Test (SUT) solver if the default logic is insufficient?
     answers:
-      - { value: "That the given selector does not match any element in the response.", correct: false }
-      - { value: "That the given selector matches exactly one element in the response.", correct: false }
-      - { value: "That the given selector does match at least one element in the response.", correct: true }
-      - { value: "That the given selector matches a visible element in the response.", correct: false }
+      - { value: "By implementing a `SutSolverInterface` and registering it as a service.", correct: false }
+      - { value: "By passing a PHP callable as an argument to the listener in `phpunit.xml.dist`.", correct: true }
+      - { value: "By setting an environment variable `SYMFONY_SUT_SOLVER`.", correct: false }
+      - { value: "The `CoverageListener` does not support custom SUT solvers.", correct: false }
     help: |
-      This assertion verifies the presence of at least one element matching the provided CSS selector.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
+      You can provide a custom SUT solver by passing a PHP callable (e.g., a static method) as an argument to the `CoverageListener` in your `phpunit.xml.dist` configuration.
+      https://symfony.com/doc/current/components/phpunit_bridge.html#custom-sut-solver
 
   -
-    question: >
-      Which `Crawler` assertion method checks if the `<title>` element of the response is exactly equal to a given string?
-    answers:
-      - { value: "assertTitleEquals()", correct: false }
-      - { value: "assertPageTitleContains()", correct: false }
-      - { value: "assertPageTitleSame()", correct: true }
-      - { value: "assertHtmlTitle()", correct: false }
-    help: |
-      `assertPageTitleSame()` performs an exact comparison of the page title.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
-
-  -
-    question: >
-      To assert that the value of a form input with a given name equals an expected value, which `Crawler` assertion method should be used?
-    answers:
-      - { value: "assertInputEquals(string $fieldName, string $expectedValue)", correct: false }
-      - { value: "assertFormInput(string $fieldName, string $expectedValue)", correct: false }
-      - { value: "assertInputValueSame(string $fieldName, string $expectedValue)", correct: true }
-      - { value: "assertFieldValue(string $fieldName, string $expectedValue)", correct: false }
-    help: |
-      `assertInputValueSame()` specifically targets the value of an input field by its name.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
-
-  -
-    question: >
-      How do you assert that a checkbox with a specific name is checked in a functional test using the Symfony Crawler?
-    answers:
-      - { value: "assertCheckboxIsChecked('fieldName')", correct: false }
-      - { value: "assertChecked('fieldName')", correct: false }
-      - { value: "assertCheckboxChecked('fieldName')", correct: true }
-      - { value: "assertInputChecked('fieldName')", correct: false }
-    help: |
-      `assertCheckboxChecked()` is the dedicated method for checking checkbox states.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
-
-  -
-    question: >
-      Which assertion method is used to verify that an HTTP response is a redirect, optionally checking the target location and status code?
-    answers:
-      - { value: "assertRedirect()", correct: false }
-      - { value: "assertResponseIsRedirect()", correct: false }
-      - { value: "assertResponseRedirects(?string $expectedLocation = null, ?int $expectedCode = null)", correct: true }
-      - { value: "assertRedirectTo()", correct: false }
-    help: |
-      `assertResponseRedirects()` allows for flexible assertions on redirect responses.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_45
-
-  -
-    question: >
-      How do you assert that a specific header (e.g., `Content-Type`) is present in the HTTP response using the Symfony test client?
-    answers:
-      - { value: "assertHeaderExists('headerName')", correct: false }
-      - { value: "assertResponseHeaderExists('headerName')", correct: false }
-      - { value: "assertResponseHasHeader('headerName')", correct: true }
-      - { value: "assertHasHeader('headerName')", correct: false }
-    help: |
-      `assertResponseHasHeader()` checks for the existence of a given header in the response.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_45
-
-  -
-    question: >
-      To assert that a specific HTTP response header has an exact expected value, which method should be used?
-    answers:
-      - { value: "assertHeaderValue(string $headerName, string $expectedValue)", correct: false }
-      - { value: "assertResponseHeaderEquals(string $headerName, string $expectedValue)", correct: false }
-      - { value: "assertResponseHeaderSame(string $headerName, string $expectedValue)", correct: true }
-      - { value: "assertHeaderSame(string $headerName, string $expectedValue)", correct: false }
-    help: |
-      `assertResponseHeaderSame()` performs a strict comparison of the header's value.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_45
-
-  -
-    question: >
-      When testing Symfony console commands using `ApplicationTester`, why is it important to call `$application->setAutoExit(false)`?
-    answers:
-      - { value: "To prevent the test process from exiting prematurely, allowing results to be retrieved.", correct: true }
-      - { value: "To allow the command to run in the background without blocking the test.", correct: false }
-      - { value: "To enable interactive input during the command execution in tests.", correct: false }
-      - { value: "To capture the command's output in real-time.", correct: false }
-    help: |
-      Disabling auto-exit ensures that the `ApplicationTester` can properly capture and assert on the command's output and exit code.
-      https://github.com/symfony/symfony-docs/blob/7.3/console.rst#_snippet_18
-
-  -
-    question: >
-      When creating a Panther client for multi-domain testing, which option is used to specify the base URI for an external domain?
+    question: |
+      When testing a multi-domain application with Symfony Panther, what option should be passed to `static::createPantherClient()` to specify the base URI for a different domain?
     answers:
       - { value: "`base_uri`", correct: false }
       - { value: "`domain_uri`", correct: false }
       - { value: "`external_base_uri`", correct: true }
       - { value: "`target_uri`", correct: false }
     help: |
-      The `external_base_uri` option allows Panther to interact with different domains within the same test suite.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_19
+      The `external_base_uri` option allows you to specify a different base URI for the Panther client, which is useful for testing multi-domain applications.
+      https://symfony.com/doc/current/testing/end_to_end.html#testing-multi-domain-applications
 
   -
     question: >
-      What is the purpose of the `PantherClient::waitFor('.selector')` method?
+      Which assertion method on the Symfony test client verifies that the response is a redirect, optionally checking the target location and status code?
     answers:
-      - { value: "To wait for an element to be removed from the DOM.", correct: false }
-      - { value: "To wait for an element to become visible on the page.", correct: false }
-      - { value: "To wait for an element to be attached to the DOM.", correct: true }
-      - { value: "To wait for an element to contain specific text.", correct: false }
+      - { value: "`$this->assertRedirect();`", correct: false }
+      - { value: "`$this->assertResponseRedirects();`", correct: true }
+      - { value: "`$this->assertResponseStatusCodeSame(302);`", correct: false }
+      - { value: "`$this->assertLocation();`", correct: false }
     help: |
-      `waitFor()` is used to pause test execution until a specified element appears in the DOM.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_6
+      `assertResponseRedirects()` is used to assert that the response is a redirect, and it can optionally verify the expected redirect location and HTTP status code.
+      https://symfony.com/doc/current/testing.html#response-assertions
 
   -
     question: >
-      Which Panther assertion is used to verify that an element matching a selector is expected to appear in the DOM in the future (asynchronously)?
+      What is the primary benefit of registering `Symfony\\Component\\Panther\\ServerExtension` in `phpunit.xml.dist` when using Symfony Panther for end-to-end tests?
     answers:
-      - { value: "assertSelectorExistsEventually()", correct: false }
-      - { value: "assertSelectorFutureExist()", correct: false }
-      - { value: "assertSelectorWillExist()", correct: true }
-      - { value: "assertElementWillExist()", correct: false }
+      - { value: "It automatically starts and stops the web server for tests, improving performance.", correct: true }
+      - { value: "It enables JavaScript execution in the browser.", correct: false }
+      - { value: "It allows Panther to connect to an external Selenium server.", correct: false }
+      - { value: "It provides additional assertions for browser interactions.", correct: false }
     help: |
-      `assertSelectorWillExist()` is a future assertion that waits for the element to appear within a timeout.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_7
+      The `ServerExtension` automatically manages the lifecycle of the web server used by Panther, starting it before tests and stopping it afterwards, which significantly improves testing performance.
+      https://symfony.com/doc/current/testing/end_to_end.html#server-extension
 
   -
     question: >
-      What is the main benefit of enabling `Symfony\\Bridge\\PhpUnit\\CoverageListener` in `phpunit.xml.dist`?
+      How can you enable interactive debug mode for Symfony Panther tests, which pauses tests on failure to allow manual browser inspection?
     answers:
-      - { value: "It improves test execution speed by optimizing code loading.", correct: false }
-      - { value: "It automatically adds `@covers` annotations for accurate code coverage reporting.", correct: true }
-      - { value: "It provides detailed performance metrics for each test case.", correct: false }
-      - { value: "It helps in debugging test failures by providing more context.", correct: false }
+      - { value: "`bin/phpunit --debug-panther`", correct: false }
+      - { value: "`PANTHER_DEBUG=1 bin/phpunit`", correct: false }
+      - { value: "`PANTHER_NO_HEADLESS=1 bin/phpunit --debug`", correct: true }
+      - { value: "`php bin/console panther:debug`", correct: false }
     help: |
-      The `CoverageListener` helps PHPUnit correctly attribute code coverage to the tested classes.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_39
+      Setting `PANTHER_NO_HEADLESS=1` and running PHPUnit with `--debug` will enable interactive debug mode, keeping the browser open on test failures.
+      https://symfony.com/doc/current/testing/end_to_end.html#interactive-debug-mode
+
+  -
+    question: >
+      Which of the following is true about `Symfony\\Bundle\\FrameworkBundle\\Test\\TestBrowserToken`?
+    answers:
+      - { value: "It's a standard JWT used for API authentication in tests.", correct: false }
+      - { value: "It's a special token object created by `loginUser()` and stored in the test client's session.", correct: true }
+      - { value: "It's a mock object for the `UserInterface`.", correct: false }
+      - { value: "It's used to bypass the firewall entirely in functional tests.", correct: false }
+    help: |
+      `TestBrowserToken` is an internal token object used by Symfony's test client to represent a logged-in user when `loginUser()` is called.
+      https://symfony.com/doc/current/testing.html#simulating-a-logged-in-user
 
   -
     question: |
-      How can you provide a custom System Under Test (SUT) solver to the `Symfony\\Bridge\\PhpUnit\\CoverageListener` if the default logic is insufficient?
+      When writing unit tests for a Symfony Form Type, which base class is typically extended to provide the necessary form environment?
     answers:
-      - { value: "By extending the `CoverageListener` class and overriding a method.", correct: false }
-      - { value: "By configuring a service with a `sut_solver` tag in `services.yaml`.", correct: false }
-      - { value: "By passing a PHP callable as an argument to the listener in `phpunit.xml.dist`.", correct: true }
-      - { value: "By using a dedicated annotation in the test class for the SUT.", correct: false }
+      - { value: "`PHPUnit\\Framework\\TestCase`", correct: false }
+      - { value: "`Symfony\\Bundle\\FrameworkBundle\\Test\\WebTestCase`", correct: false }
+      - { value: "`Symfony\\Component\\Form\\Test\\TypeTestCase`", correct: true }
+      - { value: "`Symfony\\Component\\Form\\Test\\FormIntegrationTestCase`", correct: false }
     help: |
-      A custom callable can be provided in the `phpunit.xml.dist` configuration to define how the SUT is determined.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_40
+      `TypeTestCase` is the base class for unit testing Symfony Form Types, providing methods to create form factories and extensions.
+      https://symfony.com/doc/current/form/unit_testing.html
 
   -
     question: >
-      What is `Symfony\\Component\\Clock\\MockClock` primarily used for in tests?
+      What is the purpose of the `assertSelectorWillExist()` assertion in Symfony Panther tests?
     answers:
-      - { value: "To measure the execution time of code blocks.", correct: false }
-      - { value: "To simulate network latency in HTTP client tests.", correct: false }
-      - { value: "To control and manipulate time for testing time-sensitive logic.", correct: true }
-      - { value: "To generate random timestamps for data seeding.", correct: false }
+      - { value: "To assert that an element exists immediately in the DOM.", correct: false }
+      - { value: "To assert that an element will eventually exist in the DOM after an asynchronous operation.", correct: true }
+      - { value: "To assert that an element will never exist in the DOM.", correct: false }
+      - { value: "To assert that an element is visible on the page.", correct: false }
     help: |
-      `MockClock` allows tests to precisely control the current time, making time-dependent assertions reliable.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/clock.rst#_snippet_5
+      Panther's "future assertions" like `assertSelectorWillExist()` wait for a condition to become true within a timeout, which is crucial for testing asynchronous UI changes.
+      https://symfony.com/doc/current/testing/end_to_end.html#future-assertions
 
   -
     question: >
-      What is the key difference between `MockClock::sleep()` and PHP's built-in `sleep()` function when used in tests with `MockClock`?
+      Which of the following `WebTestClient` assertions checks if the HTTP response has a specific status code?
     answers:
-      - { value: "`MockClock::sleep()` pauses test execution, while `sleep()` does not.", correct: false }
-      - { value: "`MockClock::sleep()` instantly changes the mock time, while `sleep()` introduces a real-time delay.", correct: true }
-      - { value: "`MockClock::sleep()` is only for functional tests, `sleep()` for unit tests.", correct: false }
-      - { value: "There is no functional difference; they are interchangeable.", correct: false }
+      - { value: "`assertResponseStatusCodeIs(int $expectedCode)`", correct: false }
+      - { value: "`assertResponseCodeSame(int $expectedCode)`", correct: false }
+      - { value: "`assertResponseStatusCodeSame(int $expectedCode)`", correct: true }
+      - { value: "`assertStatusCodeIs(int $expectedCode)`", correct: false }
     help: |
-      `MockClock::sleep()` advances the mocked time without actually pausing the test process.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/clock.rst#_snippet_5
+      The `assertResponseStatusCodeSame()` method is used to assert that the HTTP response has a specific status code.
+      https://symfony.com/doc/current/testing.html#response-assertions
+
+  -
+    question: |
+      When debugging a Symfony functional test, how can you view the content of the response received by the test client?
+    answers:
+      - { value: "`$client->getResponse()->getContent();`", correct: true }
+      - { value: "`$crawler->html();`", correct: false }
+      - { value: "`$client->getDebugContent();`", correct: false }
+      - { value: "`$client->getResponse()->getBody();`", correct: false }
+    help: |
+      The `getContent()` method of the `Response` object returns the raw content of the HTTP response.
+      https://symfony.com/doc/current/testing.html#response-assertions
 
   -
     question: >
-      Which command generates an HTML test coverage report that can be viewed in a web browser, assuming XDebug is enabled?
+      What is the purpose of the `Symfony\\Component\\Clock\\MockClock` class in tests?
     answers:
-      - { value: "./vendor/bin/phpunit --coverage-html=cov/", correct: true }
-      - { value: "./vendor/bin/phpunit --report-coverage=html", correct: false }
-      - { value: "./vendor/bin/phpunit --html-coverage-report", correct: false }
-      - { value: "./vendor/bin/phpunit --generate-html-report", correct: false }
+      - { value: "To measure the execution time of test methods.", correct: false }
+      - { value: "To simulate real-time delays in asynchronous tests.", correct: false }
+      - { value: "To control and manipulate the current time for time-sensitive logic testing.", correct: true }
+      - { value: "To generate random timestamps for test data.", correct: false }
     help: |
-      The `--coverage-html` option specifies the directory where the HTML report will be generated.
-      https://github.com/symfony/symfony-docs/blob/7.3/create_framework/unit_testing.rst#_snippet_8
+      `MockClock` allows you to freeze time, advance it, or modify it, providing full control over time-sensitive logic during testing without actual delays.
+      https://symfony.com/doc/current/components/clock.html#testing-time-sensitive-logic
 
   -
     question: >
-      Which command outputs the test coverage results directly to the console?
+      Which of the following is a key reason to use `composer require --dev symfony/test-pack` when setting up testing in a Symfony project?
     answers:
-      - { value: "./vendor/bin/phpunit --coverage-console", correct: false }
-      - { value: "./vendor/bin/phpunit --coverage-text", correct: true }
-      - { value: "./vendor/bin/phpunit --text-coverage", correct: false }
-      - { value: "./vendor/bin/phpunit --show-coverage", correct: false }
+      - { value: "It installs all necessary production dependencies for testing.", correct: false }
+      - { value: "It includes `phpunit/phpunit` and other essential testing dependencies.", correct: true }
+      - { value: "It configures the test database automatically.", correct: false }
+      - { value: "It generates all initial test classes for your application.", correct: false }
     help: |
-      The `--coverage-text` option displays a summary of code coverage in the terminal.
-      https://github.com/symfony/symfony-docs/blob/7.3/create_framework/unit_testing.rst#_snippet_9
+      The `symfony/test-pack` is a meta-package that pulls in common development dependencies required for testing, including PHPUnit.
+      https://symfony.com/doc/current/testing.html#installation
+
+  -
+    question: |
+      When performing a functional test that involves form submission, after selecting the form with `$crawler->selectButton('Submit')->form()`, how do you submit it with specific data?
+    answers:
+      - { value: "`$form->submit();`", correct: false }
+      - { value: "`$client->submit($form, ['field_name' => 'value']);`", correct: false }
+      - { value: "`$client->submit($form, ['field_name' => 'value']);`", correct: true }
+      - { value: "`$crawler->submit($form, ['field_name' => 'value']);`", correct: false }
+    help: |
+      The `submit()` method of the test client takes the `Form` object and an array of field values to submit the form.
+      https://symfony.com/doc/current/components/dom_crawler.html#forms
 
   -
     question: >
-      In `config/packages/test/framework.yaml`, what does setting `framework.test` to `true` enable?
+      What is the primary purpose of the `Symfony\\Component\\HttpClient\\Response\\MockResponse` class in Symfony HTTP Client testing?
     answers:
-      - { value: "Debug mode for tests, providing more verbose output.", correct: false }
-      - { value: "Loading of services related to testing (e.g., `test.client`).", correct: true }
-      - { value: "Automatic database migrations before each test run.", correct: false }
-      - { value: "Profiler collection for all requests by default.", correct: false }
+      - { value: "To send real HTTP requests to external services.", correct: false }
+      - { value: "To create mock HTTP responses for testing purposes without making actual network calls.", correct: true }
+      - { value: "To capture and store HTTP requests and responses in HAR files.", correct: false }
+      - { value: "To assert the content of HTTP responses.", correct: false }
     help: |
-      This configuration setting ensures that Symfony's testing-specific services are available in the test environment.
-      https://github.com/symfony/symfony-docs/blob/7.3/reference/configuration/framework.rst#_snippet_156
+      `MockResponse` allows you to define predefined responses for the `MockHttpClient`, enabling isolated and reproducible tests for HTTP client interactions.
+      https://symfony.com/doc/current/http_client.html#testing
+
+  -
+    question: |
+      In a Symfony `WebTestCase`, which method is used to assert that the HTTP response status code is exactly `200`?
+    answers:
+      - { value: "`$this->assertResponseIsSuccessful();`", correct: false }
+      - { value: "`$this->assertResponseStatusCodeSame(200);`", correct: true }
+      - { value: "`$this->assertStatusCode(200);`", correct: false }
+      - { value: "`$this->assertEquals(200, $client->getResponse()->getStatusCode());`", correct: false }
+    help: |
+      `assertResponseStatusCodeSame()` is the dedicated assertion for checking an exact HTTP status code.
+      https://symfony.com/doc/current/testing.html#response-assertions
 
   -
     question: >
-      Why is it recommended to configure a less resource-intensive password hasher for the `test` environment in `security.yaml`?
+      Which of the following is a valid way to run only the tests located in the `tests/Form` directory?
     answers:
-      - { value: "To improve the security of test user passwords.", correct: false }
-      - { value: "To prevent password leaks from the test database.", correct: false }
-      - { value: "To speed up test execution by reducing hashing overhead.", correct: true }
-      - { value: "To simplify user management in the test environment.", correct: false }
+      - { value: "`php bin/phpunit --dir tests/Form`", correct: false }
+      - { value: "`php bin/phpunit tests/Form`", correct: true }
+      - { value: "`php bin/phpunit --filter-dir tests/Form`", correct: false }
+      - { value: "`php bin/phpunit --path tests/Form`", correct: false }
     help: |
-      Using a faster hasher like `plaintext` or a low-cost bcrypt in tests significantly reduces test run times.
-      https://github.com/symfony/symfony-docs/blob/7.3/security/passwords.rst#_snippet_3
+      You can specify a directory or a specific file path as an argument to the `php bin/phpunit` command to run a subset of your tests.
+      https://symfony.com/doc/current/testing.html#running-tests
 
   -
     question: >
-      Which environment variable is used with `simple-phpunit` to instruct the Symfony Deprecations Helper to ignore deprecations listed in a specified file?
+      What is the primary purpose of the `Symfony\\Component\\Panther\\PantherTestCase`?
     answers:
-      - { value: "SYMFONY_IGNORE_DEPRECATIONS", correct: false }
-      - { value: "SYMFONY_DEPRECATIONS_HELPER", correct: true }
-      - { value: "PHPUNIT_DEPRECATIONS_FILTER", correct: false }
-      - { value: "SYMFONY_TEST_MODE", correct: false }
+      - { value: "To run JavaScript unit tests in a browser.", correct: false }
+      - { value: "To perform end-to-end tests by controlling a real browser.", correct: true }
+      - { value: "To mock HTTP requests for API testing.", correct: false }
+      - { value: "To generate screenshots of web pages.", correct: false }
     help: |
-      The `SYMFONY_DEPRECATIONS_HELPER` environment variable is used to configure the deprecations helper, including ignoring specific files.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_9
+      `PantherTestCase` is the base class for writing end-to-end tests in Symfony, allowing you to interact with a real browser (Chrome or Firefox) to test JavaScript-heavy applications.
+      https://symfony.com/doc/current/testing/end_to_end.html
+
+  -
+    question: |
+      Which of the following is a "future assertion" provided by Symfony Panther for testing asynchronous UI changes?
+    answers:
+      - { value: "`assertSelectorExists()`", correct: false }
+      - { value: "`assertSelectorWillExist()`", correct: true }
+      - { value: "`assertElementPresent()`", correct: false }
+      - { value: "`assertWaitAndSee()`", correct: false }
+    help: |
+      "Future assertions" like `assertSelectorWillExist()` wait for a condition to become true within a timeout, making them suitable for testing dynamic content loaded via AJAX.
+      https://symfony.com/doc/current/testing/end_to_end.html#future-assertions
 
   -
     question: >
-      To run PHPUnit tests using a previously generated deprecation baseline file, which option is used with `SYMFONY_DEPRECATIONS_HELPER`?
+      When writing a unit test for a Symfony form type, how can you register custom form extensions (e.g., a custom `ValidatorExtension`)?
     answers:
-      - { value: "`ignoreFile`", correct: false }
-      - { value: "`baselineFile`", correct: true }
-      - { value: "`allowFile`", correct: false }
-      - { value: "`deprecationsFile`", correct: false }
+      - { value: "By overriding the `getExtensions()` method in your `TypeTestCase`.", correct: true }
+      - { value: "By registering them as services in `config/services_test.yaml`.", correct: false }
+      - { value: "By calling `$this->addExtension(new MyExtension());` in `setUp()`.", correct: false }
+      - { value: "Form extensions are automatically discovered by Symfony.", correct: false }
     help: |
-      Setting `baselineFile` to the path of your baseline JSON file will ignore existing deprecations while reporting new ones.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_11
+      The `getExtensions()` method in `TypeTestCase` allows you to return an array of form extensions that should be registered for the current test case.
+      https://symfony.com/doc/current/form/unit_testing.html#adding-extensions
 
   -
     question: >
-      What does `static::createClient()` in a `WebTestCase` implicitly do before creating the client instance?
+      What is the purpose of the `assertResponseHasHeader()` assertion in a Symfony functional test?
     answers:
-      - { value: "Clears the application cache.", correct: false }
-      - { value: "Runs database migrations.", correct: false }
-      - { value: "Boots the Symfony kernel.", correct: true }
-      - { value: "Starts a built-in web server.", correct: false }
+      - { value: "To check if a specific header is present in the request.", correct: false }
+      - { value: "To verify that the response body contains a certain header tag.", correct: false }
+      - { value: "To assert that a given HTTP header is available in the response.", correct: true }
+      - { value: "To check the value of a specific response header.", correct: false }
     help: |
-      `createClient()` internally calls `KernelTestCase::bootKernel()` to prepare the application environment.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_22
+      `assertResponseHasHeader()` is used to verify the existence of a specific HTTP header in the response.
+      https://symfony.com/doc/current/testing.html#response-assertions
 
   -
     question: >
-      When writing a functional test for a Doctrine repository that interacts with a real database, which base class should the test extend?
+      Which of the following commands would generate an HTML code coverage report for your PHPUnit tests?
     answers:
-      - { value: "PHPUnit\\Framework\\TestCase", correct: false }
-      - { value: "Symfony\\Bundle\\FrameworkBundle\\Test\\WebTestCase", correct: false }
-      - { value: "Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase", correct: true }
-      - { value: "Doctrine\\ORM\\Tools\\SchemaTool", correct: false }
+      - { value: "`./vendor/bin/phpunit --coverage-html=cov/`", correct: true }
+      - { value: "`./vendor/bin/phpunit --report-coverage=html`", correct: false }
+      - { value: "`php bin/console test:coverage --format=html`", correct: false }
+      - { value: "`./vendor/bin/phpunit --generate-html-coverage`", correct: false }
     help: |
-      `KernelTestCase` is appropriate for tests that need access to the Symfony container and a real database connection.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/database.rst#_snippet_2
+      The `--coverage-html` option with a directory path instructs PHPUnit to generate an HTML code coverage report. XDebug must be enabled for this.
+      https://symfony.com/doc/current/create_framework/unit_testing.html#generating-a-code-coverage-report
+
+  -
+    question: |
+      When using `ApplicationTester` to test a console command, what should you do to ensure you can retrieve the command's output after execution?
+    answers:
+      - { value: "Call `$tester->execute(['command' => 'my:command']);`", correct: false }
+      - { value: "Set `$application->setAutoExit(false);` before creating the `ApplicationTester`.", correct: true }
+      - { value: "Redirect the output to a file using `setOutputStream()`.", correct: false }
+      - { value: "The `ApplicationTester` automatically captures output.", correct: false }
+    help: |
+      Setting `setAutoExit(false)` on the `Application` instance prevents the command from exiting the PHP process, allowing `ApplicationTester` to capture its output.
+      https://symfony.com/doc/current/console.html#testing-commands
 
   -
     question: >
-      In a `KernelTestCase` involving Doctrine's `EntityManager`, why is it recommended to call `$this->entityManager->close();` and `$this->entityManager = null;` in the `tearDown()` method?
+      What is the purpose of `Symfony\\Component\\HttpClient\\MockHttpClient` in the context of testing?
     answers:
-      - { value: "To commit any pending database transactions.", correct: false }
-      - { value: "To reset the database schema for the next test.", correct: false }
-      - { value: "To avoid memory leaks by properly closing the entity manager and nullifying the property.", correct: true }
-      - { value: "To clear the Doctrine entity cache between tests.", correct: false }
+      - { value: "To make real HTTP requests to external APIs.", correct: false }
+      - { value: "To provide a client that can be configured with mock responses for isolated testing of HTTP client usage.", correct: true }
+      - { value: "To intercept and log all outgoing HTTP requests during tests.", correct: false }
+      - { value: "To simulate network errors and timeouts.", correct: false }
     help: |
-      Properly closing the `EntityManager` and nullifying the property prevents memory accumulation during long test runs.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/database.rst#_snippet_2
+      `MockHttpClient` allows you to define a sequence of mock responses, enabling you to test code that uses the HTTP Client without making actual network calls.
+      https://symfony.com/doc/current/http_client.html#testing
+
+  -
+    question: |
+      Which PHPUnit assertion is typically used to check if a specific HTTP status code (e.g., 404 Not Found) is returned by a functional test?
+    answers:
+      - { value: "`$this->assertResponseIsNotFound();`", correct: false }
+      - { value: "`$this->assertResponseStatusCodeSame(404);`", correct: true }
+      - { value: "`$this->assertStatusCode(404);`", correct: false }
+      - { value: "`$this->assertEquals(404, $client->getResponse()->getStatusCode());`", correct: false }
+    help: |
+      `assertResponseStatusCodeSame()` is the correct method to assert a specific HTTP status code in functional tests.
+      https://symfony.com/doc/current/testing.html#response-assertions
 
   -
     question: >
-      What is the primary benefit of registering `Symfony\\Component\\Panther\\ServerExtension` in `phpunit.xml.dist` for Panther tests?
+      What is the main advantage of using `HarFileResponseFactory` with `MockHttpClient` for testing Symfony's HTTP Client?
     answers:
-      - { value: "It enables automatic screenshot capture on test failures.", correct: true }
-      - { value: "It manages the web server lifecycle for improved testing performance.", correct: true }
-      - { value: "It allows running tests in parallel for faster execution.", correct: false }
-      - { value: "It provides additional assertions for browser interactions.", correct: false }
+      - { value: "It allows recording new HTTP interactions directly from tests.", correct: false }
+      - { value: "It enables replaying recorded HTTP interactions from HAR files, ensuring realistic and reproducible tests.", correct: true }
+      - { value: "It automatically generates HAR files from your test suite.", correct: false }
+      - { value: "It provides a visual interface for inspecting HTTP requests.", correct: false }
     help: |
-      The `ServerExtension` automates the management of the web server and provides useful features like screenshot capture.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_3
+      `HarFileResponseFactory` allows you to use pre-recorded HTTP Archive (HAR) files to generate mock responses, making tests more realistic and reproducible.
+      https://symfony.com/doc/current/http_client.html#testing-with-har-files
 
   -
     question: >
-      Which environment variable and PHPUnit flag are used to enable Panther's interactive debug mode, pausing tests on failure for manual browser inspection?
+      What is the purpose of the `#[AsCommand]` attribute in a Symfony console command class?
     answers:
-      - { value: "PANTHER_DEBUG=1 --stop-on-failure", correct: false }
-      - { value: "PANTHER_NO_HEADLESS=1 bin/phpunit --debug", correct: true }
-      - { value: "PANTHER_INTERACTIVE=true --verbose", correct: false }
-      - { value: "PANTHER_PAUSE_ON_FAIL=1 --testdox", correct: false }
+      - { value: "To define the command's name and description.", correct: true }
+      - { value: "To inject services into the command.", correct: false }
+      - { value: "To execute the command automatically on kernel boot.", correct: false }
+      - { value: "To mark the command as a test command.", correct: false }
     help: |
-      `PANTHER_NO_HEADLESS=1` prevents the browser from running in headless mode, and `--debug` enables the interactive pause.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_25
+      The `#[AsCommand]` attribute is the modern way to configure a console command's name, description, and other options directly on the class.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: |
+      Consider a scenario where you have a `UserRepository` and want to simulate a logged-in user in a functional test. How would you retrieve a test user from the repository to pass to `loginUser()`?
+    answers:
+      - { value: "```php
+        $userRepository = static::getContainer()->get(UserRepository::class);
+        $testUser = $userRepository->findOneByEmail('test@example.com');
+        ```", correct: true }
+      - { value: "```php
+        $testUser = new User('test@example.com', 'password');
+        ```", correct: false }
+      - { value: "```php
+        $testUser = $this->getUserManager()->findUserByUsername('test@example.com');
+        ```", correct: false }
+      - { value: "```php
+        $testUser = $client->getSecurityToken()->getUser();
+        ```", correct: false }
+    help: |
+      In a `WebTestCase`, you can access the service container via `static::getContainer()` to retrieve repositories and then fetch a user.
+      https://symfony.com/doc/current/testing.html#simulating-a-logged-in-user
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\HttpClient\\Response\\HarFileResponseFactory` when testing Symfony's HTTP Client?
+      Which of the following is a valid way to configure a less resource-intensive password hasher specifically for the `test` environment in Symfony?
     answers:
-      - { value: "To record HTTP interactions into HAR files for later analysis.", correct: false }
-      - { value: "To create mock responses for the HTTP client based on recorded HAR files.", correct: true }
-      - { value: "To send HTTP requests to a HAR file server for validation.", correct: false }
-      - { value: "To validate the format and content of HAR files.", correct: false }
+      - { value: "```yaml
+        # config/packages/security.yaml
+        when@test:
+            security:
+                password_hashers:
+                    App\\Entity\\User: plaintext
+        ```", correct: true }
+      - { value: "```yaml
+        # config/packages/test/security.yaml
+        security:
+            password_hashers:
+                App\\Entity\\User: auto
+        ```", correct: false }
+      - { value: "```yaml
+        # config/packages/security.yaml
+        security:
+            password_hashers:
+                App\\Entity\\User: bcrypt_test
+        ```", correct: false }
+      - { value: "Password hashers cannot be configured per environment.", correct: false }
     help: |
-      `HarFileResponseFactory` allows you to replay recorded HTTP interactions, making tests realistic and reproducible.
-      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_100
+      You can use the `when@test` condition in your security configuration to define a different password hasher (e.g., `plaintext` or a faster algorithm) for the test environment.
+      https://symfony.com/doc/current/security/passwords.html#configuring-the-password-hasher
 
   -
     question: >
-      Which of the following is a valid method to run tests for a specific directory in a Symfony application using PHPUnit?
+      When using Symfony Panther, what is the purpose of the `waitForElementToContain()` method?
     answers:
-      - { value: "$ php bin/phpunit tests/Form", correct: true }
-      - { value: "$ php bin/phpunit --dir=tests/Form", correct: false }
-      - { value: "$ php bin/phpunit run tests/Form", correct: false }
-      - { value: "$ php bin/phpunit --path=tests/Form", correct: false }
+      - { value: "To assert that an element's content contains a specific text immediately.", correct: false }
+      - { value: "To wait until an element's content contains a specific text within a timeout.", correct: true }
+      - { value: "To wait for an element to be removed from the DOM.", correct: false }
+      - { value: "To check if an element is visible on the page.", correct: false }
     help: |
-      You can specify a directory path directly after `php bin/phpunit` to run tests within that directory.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_2
+      `waitForElementToContain()` is a waiting method that pauses test execution until the specified element's content matches the expected text, useful for asynchronous updates.
+      https://symfony.com/doc/current/testing/end_to_end.html#waiting-for-elements
 
   -
     question: >
-      When configuring the Symfony profiler for the `test` environment, what does setting `collect: false` under `framework.profiler` achieve?
+      What is the primary purpose of `Symfony\\Component\\Form\\Test\\FormIntegrationTestCase`?
     answers:
-      - { value: "It disables the profiler entirely.", correct: false }
-      - { value: "It enables the profiler but prevents it from collecting data unless explicitly requested per test.", correct: true }
-      - { value: "It collects profiler data but does not display it in the web profiler.", correct: false }
-      - { value: "It only collects data for requests that result in an error.", correct: false }
+      - { value: "To test the rendering of forms with Twig.", correct: false }
+      - { value: "To test the integration of custom form types, extensions, and guessers.", correct: true }
+      - { value: "To test form validation rules.", correct: false }
+      - { value: "To create mock form factories for unit tests.", correct: false }
     help: |
-      `collect: false` allows the profiler to be enabled without automatically gathering data for every request, improving test performance. Data can then be collected on demand.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/profiling.rst#_snippet_0
+      `FormIntegrationTestCase` is designed for testing how custom form types, type extensions, and type guessers integrate with the Symfony Form component.
+      https://symfony.com/doc/current/form/unit_testing.html#testing-form-integration
 
   -
     question: >
-      Which of the following describes a unit test in the context of Symfony applications?
+      Which of the following is a valid way to run PHPUnit tests and output the code coverage results directly to the console?
     answers:
-      - { value: "A test that simulates a full HTTP request and response cycle.", correct: false }
+      - { value: "`./vendor/bin/phpunit --coverage-console`", correct: false }
+      - { value: "`./vendor/bin/phpunit --coverage-text`", correct: true }
+      - { value: "`php bin/console test:coverage --format=text`", correct: false }
+      - { value: "`./vendor/bin/phpunit --text-coverage`", correct: false }
+    help: |
+      The `--coverage-text` option outputs a summary of the code coverage directly to the console.
+      https://symfony.com/doc/current/create_framework/unit_testing.html#generating-a-code-coverage-report
+
+  -
+    question: >
+      When testing a Symfony application with multiple kernels (e.g., for API and web), how would you define separate test suites in `phpunit.xml.dist`?
+    answers:
+      - { value: "By creating multiple `<testsuite>` elements, each with a `<directory>` pointing to the respective tests folder.", correct: true }
+      - { value: "By using the `--testsuite` option on the command line for each kernel.", correct: false }
+      - { value: "By defining separate `PHPUNIT_TESTSUITE` environment variables.", correct: false }
+      - { value: "Symfony automatically detects multiple test suites based on kernel configuration.", correct: false }
+    help: |
+      You can define multiple `<testsuite>` elements in `phpunit.xml.dist`, each specifying a `name` and a `directory` for its tests, to organize tests for different parts of your application.
+      https://symfony.com/doc/current/configuration/multiple_kernels.html#testing-multiple-applications
+
+  -
+    question: >
+      What is the purpose of the `assertSelectorWillNotBeVisible()` assertion in Symfony Panther tests?
+    answers:
+      - { value: "To assert that an element is currently hidden.", correct: false }
+      - { value: "To assert that an element will eventually become hidden after an asynchronous operation.", correct: true }
+      - { value: "To assert that an element will never be visible.", correct: false }
+      - { value: "To assert that an element does not exist in the DOM.", correct: false }
+    help: |
+      `assertSelectorWillNotBeVisible()` is a future assertion that waits for an element to become invisible within a timeout, useful for testing dynamic UI changes.
+      https://symfony.com/doc/current/testing/end_to_end.html#future-assertions
+
+  -
+    question: >
+      Which of the following methods is used on the `Crawler` object to select a form by its button text or ID?
+    answers:
+      - { value: "`$crawler->selectButton('Submit');`", correct: true }
+      - { value: "`$crawler->getFormButton('Submit');`", correct: false }
+      - { value: "`$crawler->filter('button:contains(\"Submit\")');`", correct: false }
+      - { value: "`$crawler->findButton('Submit');`", correct: false }
+    help: |
+      The `selectButton()` method on the `Crawler` object returns a `Button` object, which can then be used to get the associated form.
+      https://symfony.com/doc/current/components/dom_crawler.html#forms
+
+  -
+    question: >
+      What is the main difference between `KernelTestCase::bootKernel()` and `WebTestCase::createClient()`?
+    answers:
+      - { value: "`bootKernel()` only initializes the container, while `createClient()` also creates a test browser.", correct: true }
+      - { value: "`bootKernel()` is for unit tests, `createClient()` is for functional tests.", correct: false }
+      - { value: "`bootKernel()` clears the cache, `createClient()` does not.", correct: false }
+      - { value: "There is no difference; they are interchangeable.", correct: false }
+    help: |
+      `bootKernel()` just boots the kernel, allowing container access. `createClient()` calls `bootKernel()` internally and then creates a `Client` object for making HTTP requests.
+      https://symfony.com/doc/current/testing.html#kerneltestcase
+
+  -
+    question: >
+      When writing an end-to-end test with Symfony Panther, how would you wait for an element with the class `.loader` to become visible on the page?
+    answers:
+      - { value: "`$client->waitFor('.loader');`", correct: false }
+      - { value: "`$client->waitForVisibility('.loader');`", correct: true }
+      - { value: "`$client->waitAndSee('.loader');`", correct: false }
+      - { value: "`$client->waitUntilVisible('.loader');`", correct: false }
+    help: |
+      `waitForVisibility()` is a Panther waiting method that pauses test execution until the specified element becomes visible in the browser.
+      https://symfony.com/doc/current/testing/end_to_end.html#waiting-for-elements
+
+  -
+    question: >
+      Which of the following is a valid way to manually clear the Symfony cache for the `test` environment in a PHP script (e.g., before running tests on CI)?
+    answers:
+      - { value: "`exec('php bin/console cache:clear --env=test');`", correct: false }
+      - { value: "`unlink(__DIR__.'/../var/cache/test/*');`", correct: false }
+      - { value: "` (new \\Symfony\\Component\\Filesystem\\Filesystem())->remove(__DIR__.'/../var/cache/test');`", correct: true }
+      - { value: "`rm -rf var/cache/test`", correct: false }
+    help: |
+      Using the `Filesystem` component to remove the `var/cache/test` directory ensures a fresh cache, especially when debug mode is disabled.
+      https://symfony.com/doc/current/testing.html#clearing-the-cache
+
+  -
+    question: >
+      What is the primary purpose of the `Symfony\\Component\\Panther\\ServerExtension` in `phpunit.xml.dist`?
+    answers:
+      - { value: "To manage the web server lifecycle for Panther tests.", correct: true }
+      - { value: "To enable JavaScript execution in the browser.", correct: false }
+      - { value: "To provide custom assertions for Panther tests.", correct: false }
+      - { value: "To configure the browser used by Panther.", correct: false }
+    help: |
+      The `ServerExtension` automatically starts and stops the web server required for Panther tests, streamlining the test setup and teardown.
+      https://symfony.com/doc/current/testing/end_to_end.html#server-extension
+
+  -
+    question: >
+      When using `MockClock` in a test, how can you instantly advance the time by a specific duration (e.g., 10 minutes)?
+    answers:
+      - { value: "`$clock->advance(600);`", correct: false }
+      - { value: "`$clock->sleep(600);`", correct: true }
+      - { value: "`$clock->add(new \\DateInterval('PT10M'));`", correct: false }
+      - { value: "`$clock->fastForward('10 minutes');`", correct: false }
+    help: |
+      The `sleep()` method on `MockClock` instantly advances the mocked time by the specified number of seconds.
+      https://symfony.com/doc/current/components/clock.html#testing-time-sensitive-logic
+
+  -
+    question: >
+      Which of the following is a valid way to run a single PHPUnit test file, for example, `tests/Form/UserTypeTest.php`?
+    answers:
+      - { value: "`php bin/phpunit --file tests/Form/UserTypeTest.php`", correct: false }
+      - { value: "`php bin/phpunit tests/Form/UserTypeTest.php`", correct: true }
+      - { value: "`php bin/phpunit --test tests/Form/UserTypeTest.php`", correct: false }
+      - { value: "`php bin/phpunit run tests/Form/UserTypeTest.php`", correct: false }
+    help: |
+      You can specify the path to a single test file as an argument to the `php bin/phpunit` command.
+      https://symfony.com/doc/current/testing.html#running-tests
+
+  -
+    question: >
+      What is the purpose of the `assertSelectorTextNotContains()` assertion in the Symfony Crawler?
+    answers:
+      - { value: "To assert that no element matching the selector contains the specified text.", correct: false }
+      - { value: "To assert that the first element matching the selector does not contain the specified text.", correct: true }
+      - { value: "To assert that the element is empty.", correct: false }
+      - { value: "To assert that the selector does not exist.", correct: false }
+    help: |
+      `assertSelectorTextNotContains()` checks that the text content of the *first* element matching the selector does not contain the given text.
+      https://symfony.com/doc/current/testing.html#asserting-content
+
+  -
+    question: >
+      When testing a Symfony console command, which class from the `symfony/console` component is typically used to simulate command execution and capture output?
+    answers:
+      - { value: "`Symfony\\Component\\Console\\Command\\CommandTester`", correct: false }
+      - { value: "`Symfony\\Component\\Console\\Tester\\CommandTester`", correct: true }
+      - { value: "`Symfony\\Component\\Console\\Application\\ApplicationTester`", correct: false }
+      - { value: "`Symfony\\Component\\Console\\Test\\ConsoleTester`", correct: false }
+    help: |
+      `CommandTester` is the dedicated class for testing individual console commands, allowing you to execute them and assert on their output and exit code.
+      https://symfony.com/doc/current/console.html#testing-commands
+
+  -
+    question: >
+      Which of the following is a valid way to assert that the response does NOT have a specific HTTP header named `X-Debug-Token`?
+    answers:
+      - { value: "`$this->assertResponseNotHasHeader('X-Debug-Token');`", correct: true }
+      - { value: "`$this->assertResponseHeaderDoesNotExist('X-Debug-Token');`", correct: false }
+      - { value: "`$this->assertResponseHasNoHeader('X-Debug-Token');`", correct: false }
+      - { value: "`$this->assertFalse($client->getResponse()->headers->has('X-Debug-Token'));`", correct: false }
+    help: |
+      The `assertResponseNotHasHeader()` method is provided by `WebTestCase` for asserting the absence of a specific header.
+      https://symfony.com/doc/current/testing.html#response-assertions
+
+  -
+    question: >
+      What is the purpose of the `assertInputValueSame()` assertion in the Symfony Crawler?
+    answers:
+      - { value: "To assert that a form input field has a specific value.", correct: true }
+      - { value: "To assert that a form input field is present in the DOM.", correct: false }
+      - { value: "To assert that a form input field is enabled.", correct: false }
+      - { value: "To assert that a form input field has a specific name.", correct: false }
+    help: |
+      `assertInputValueSame()` is used to check if the value of a form input field (identified by its name) matches the expected value.
+      https://symfony.com/doc/current/testing.html#asserting-content
+
+  -
+    question: >
+      When writing a functional test, how can you check if a checkbox with the name `newsletter_signup` is checked?
+    answers:
+      - { value: "`$this->assertCheckboxChecked('newsletter_signup');`", correct: true }
+      - { value: "`$crawler->filter('input[name=\"newsletter_signup\"]:checked')->count()->assertEquals(1);`", correct: false }
+      - { value: "`$this->assertInputValueSame('newsletter_signup', 'on');`", correct: false }
+      - { value: "`$this->assertTrue($crawler->filter('#newsletter_signup')->attr('checked'));`", correct: false }
+    help: |
+      The `assertCheckboxChecked()` method provides a direct way to assert the checked state of a checkbox.
+      https://symfony.com/doc/current/testing.html#asserting-content
+
+  -
+    question: >
+      What is the primary role of `Symfony\\Component\\BrowserKit\\HttpBrowser` in Symfony's testing utilities?
+    answers:
+      - { value: "It's the base class for the test client, simulating a web browser.", correct: true }
+      - { value: "It's used for making real HTTP requests to external websites.", correct: false }
+      - { value: "It provides methods for parsing HTML and XML documents.", correct: false }
+      - { value: "It's a component for building HTTP servers.", correct: false }
+    help: |
+      `HttpBrowser` is the underlying component that the Symfony test client (`Client`) uses to simulate a web browser, allowing you to make requests and interact with responses.
+      https://symfony.com/doc/current/components/browser_kit.html
+
+  -
+    question: >
+      Which of the following describes a "unit test" in the context of Symfony applications?
+    answers:
       - { value: "A test that verifies the interaction between multiple services and the database.", correct: false }
-      - { value: "A test that focuses on a single component or class in isolation, often using mocks for dependencies.", correct: true }
-      - { value: "A test that checks the entire application's functionality from end-to-end.", correct: false }
+      - { value: "A test that simulates user interaction with the application through a web browser.", correct: false }
+      - { value: "A test that verifies a small, isolated piece of code (e.g., a single class or method) without external dependencies.", correct: true }
+      - { value: "A test that checks the performance of a specific part of the application.", correct: false }
     help: |
-      Unit tests are designed to test the smallest testable parts of an application, typically individual methods or classes, in isolation.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/database.rst#_snippet_1 (example of unit test with mocks)
+      Unit tests focus on testing individual units of code in isolation, typically by mocking their dependencies.
+      https://symfony.com/doc/current/testing.html#unit-tests
 
   -
     question: >
-      What is the primary characteristic of a functional test in Symfony?
+      Which of the following describes a "functional test" in the context of Symfony applications?
     answers:
-      - { value: "It tests individual functions or methods without external dependencies.", correct: false }
-      - { value: "It verifies the integration between different parts of the application, often involving the full request/response stack.", correct: true }
-      - { value: "It focuses on the user interface and browser interactions.", correct: false }
-      - { value: "It ensures that the database schema is correctly applied.", correct: false }
+      - { value: "A test that verifies a single method of a class in isolation.", correct: false }
+      - { value: "A test that simulates user interaction with the application through a web browser or HTTP client, testing the full request-response cycle.", correct: true }
+      - { value: "A test that checks the performance of the entire application.", correct: false }
+      - { value: "A test that only verifies database interactions.", correct: false }
     help: |
-      Functional tests (also known as integration tests) verify that different components of the application work together as expected, often by simulating HTTP requests.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_22 (example of functional test)
+      Functional tests (also known as integration tests) test the interaction between different components of your application, typically by simulating an HTTP request and asserting on the response.
+      https://symfony.com/doc/current/testing.html#functional-tests
 
   -
     question: >
-      When writing a `WebTestCase`, what is the purpose of the `assertResponseStatusCodeSame(int $expectedCode)` method?
+      What is the purpose of the `assertPageTitleSame()` assertion in the Symfony Crawler?
     answers:
-      - { value: "To assert that the response body contains the expected status code.", correct: false }
-      - { value: "To assert that the HTTP status code of the response is exactly the expected value.", correct: true }
-      - { value: "To assert that the response is a redirect with the given status code.", correct: false }
-      - { value: "To assert that the response is successful and has the given status code.", correct: false }
+      - { value: "To assert that the `<title>` element contains a specific text.", correct: false }
+      - { value: "To assert that the `<title>` element is exactly equal to the given title.", correct: true }
+      - { value: "To assert that the page has a title.", correct: false }
+      - { value: "To assert that the page title is not empty.", correct: false }
     help: |
-      This method provides a precise way to check the HTTP status code of the response.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_45
+      `assertPageTitleSame()` is a convenient assertion to check if the HTML page's title exactly matches the expected string.
+      https://symfony.com/doc/current/testing.html#asserting-content
 
   -
     question: >
-      Which of the following is NOT a valid assertion method provided by the Symfony Crawler for checking HTML content?
+      When using `loginUser()` with an `InMemoryUser`, what is a crucial consideration regarding firewalls?
     answers:
-      - { value: "assertSelectorCount(int $expectedCount, string $selector)", correct: false }
-      - { value: "assertElementExists(string $selector)", correct: true }
-      - { value: "assertSelectorTextSame(string $selector, string $text)", correct: false }
-      - { value: "assertPageTitleContains(string $expectedTitle)", correct: false }
+      - { value: "`loginUser()` only works with stateless firewalls.", correct: false }
+      - { value: "`loginUser()` does not work with stateless firewalls.", correct: true }
+      - { value: "You must explicitly specify the firewall name for `loginUser()` to work.", correct: false }
+      - { value: "`InMemoryUser` can only be used with custom authentication systems.", correct: false }
     help: |
-      The correct method to check if a selector exists is `assertSelectorExists()`, not `assertElementExists()`.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
+      The `loginUser()` method stores a `TestBrowserToken` in the session, which means it relies on session-based authentication and will not work with stateless firewalls (e.g., API tokens).
+      https://symfony.com/doc/current/testing.html#authenticating-users-in-tests
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Validator\\Test\\CompoundConstraintTestCase`?
+      Which of the following is the correct way to configure an in-memory user for the `test` environment in `security.yaml` to be used with `loginUser()`?
     answers:
-      - { value: "To test individual validation constraints in isolation.", correct: false }
-      - { value: "To test custom form types that include validation.", correct: false }
-      - { value: "To write unit tests for custom compound validation constraints.", correct: true }
-      - { value: "To test the entire validation process of an entity.", correct: false }
+      - { value: "```yaml
+        # config/packages/security.yaml
+        when@test:
+            security:
+                providers:
+                    in_memory: { memory: ~ }
+                firewalls:
+                    main:
+                        stateless: true
+                        provider: in_memory
+                        users:
+                            admin: { password: password, roles: ROLE_ADMIN }
+        ```", correct: false }
+      - { value: "```yaml
+        # config/packages/security.yaml
+        when@test:
+            security:
+                users_in_memory:
+                    memory:
+                        users:
+                            admin: { password: password, roles: ROLE_ADMIN }
+        ```", correct: true }
+      - { value: "```yaml
+        # config/packages/test/security.yaml
+        security:
+            providers:
+                in_memory:
+                    users:
+                        admin: { password: password, roles: ROLE_ADMIN }
+        ```", correct: false }
+      - { value: "In-memory users cannot be defined in `security.yaml` for the test environment.", correct: false }
     help: |
-      This test case provides a structured way to test custom compound constraints, asserting violations raised by its inner constraints.
-      https://github.com/symfony/symfony-docs/blob/7.3/validation/custom_constraint.rst#_snippet_17
-
-  -
-    question: >
-      When performing a functional test and you need to manually follow a redirect after a response, which method of the client object should you use?
-    answers:
-      - { value: "$client->followRedirect();", correct: true }
-      - { value: "$client->getRedirectResponse();", correct: false }
-      - { value: "$client->requestRedirect();", correct: false }
-      - { value: "$client->autoFollowRedirects(false);", correct: false }
-    help: |
-      `followRedirect()` explicitly makes a new request to the redirect target.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_27
-
-  -
-    question: >
-      Which of the following is a key advantage of using `Symfony\\Component\\Panther\\PantherTestCase` for end-to-end testing?
-    answers:
-      - { value: "It runs tests directly in PHP without a browser.", correct: false }
-      - { value: "It allows testing JavaScript-driven applications in a real browser environment.", correct: true }
-      - { value: "It provides faster test execution than traditional functional tests.", correct: false }
-      - { value: "It automatically generates screenshots for all test steps.", correct: false }
-    help: |
-      Panther enables testing of client-side JavaScript and dynamic content by controlling a real browser.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst
-
-  -
-    question: >
-      What is the purpose of `PantherClient::waitForStaleness('.selector')`?
-    answers:
-      - { value: "To wait for an element to become visible.", correct: false }
-      - { value: "To wait for an element to be removed from the DOM.", correct: true }
-      - { value: "To wait for an element to change its content.", correct: false }
-      - { value: "To wait for an element to become disabled.", correct: false }
-    help: |
-      `waitForStaleness()` is used when you expect an element to disappear from the page.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_6
-
-  -
-    question: >
-      Which of the following is true about the `Symfony\\Bridge\\PhpUnit\\SymfonyTestsListener` and time-sensitive tests?
-    answers:
-      - { value: "It automatically mocks the system clock for all tests.", correct: false }
-      - { value: "It requires explicit configuration in `phpunit.xml.dist` to enable `ClockMock` for specific namespaces or groups.", correct: true }
-      - { value: "It only works with PHP's built-in `sleep()` function.", correct: false }
-      - { value: "It is deprecated in Symfony 7.", correct: false }
-    help: |
-      The listener needs to be configured to know which tests or namespaces are time-sensitive to apply `ClockMock`.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/phpunit_bridge.rst#_snippet_33
-
-  -
-    question: >
-      What is the primary goal of using a data provider (e.g., `urlProvider()`) in a functional test for application availability?
-    answers:
-      - { value: "To dynamically generate test users.", correct: false }
-      - { value: "To run the same test method with different sets of input data (e.g., URLs).", correct: true }
-      - { value: "To mock external API responses.", correct: false }
-      - { value: "To parallelize test execution across multiple processes.", correct: false }
-    help: |
-      Data providers allow you to test multiple scenarios with a single test method, reducing code duplication.
-      https://github.com/symfony/symfony-docs/blob/7.3/best_practices.rst#_snippet_4
-
-  -
-    question: >
-      Which of the following is a valid way to create the dedicated test database and its schema using Doctrine commands in Symfony?
-    answers:
-      - { value: "$ php bin/console doctrine:database:create --env=test && php bin/console doctrine:schema:update --force --env=test", correct: false }
-      - { value: "$ php bin/console --env=test doctrine:database:create && php bin/console --env=test doctrine:schema:create", correct: true }
-      - { value: "$ php bin/console test:database:setup", correct: false }
-      - { value: "$ php bin/console doctrine:fixtures:load --env=test", correct: false }
-    help: |
-      The `--env=test` flag is crucial to ensure these operations target the test database.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_13
-
-  -
-    question: >
-      When unit testing a form type, which base class should you extend to get access to form-specific testing utilities like `factory`?
-    answers:
-      - { value: "PHPUnit\\Framework\\TestCase", correct: false }
-      - { value: "Symfony\\Bundle\\FrameworkBundle\\Test\\WebTestCase", correct: false }
-      - { value: "Symfony\\Component\\Form\\Test\\TypeTestCase", correct: true }
-      - { value: "Symfony\\Component\\Form\\Test\\FormIntegrationTestCase", correct: false }
-    help: |
-      `TypeTestCase` provides the necessary setup for testing individual form types.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst
-
-  -
-    question: >
-      What is the purpose of the `getExtensions()` method in `Symfony\\Component\\Form\\Test\\TypeTestCase`?
-    answers:
-      - { value: "To return a list of Twig extensions to be loaded for form rendering tests.", correct: false }
-      - { value: "To return a list of form extensions to register for the current test case.", correct: true }
-      - { value: "To return a list of custom form types to be used in the test.", correct: false }
-      - { value: "To return a list of PHPUnit extensions for the form tests.", correct: false }
-    help: |
-      This method allows you to register specific form extensions needed for your form type tests.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      Which of the following assertions would you use in a Panther test to verify that a button with `type="submit"` will eventually become enabled?
-    answers:
-      - { value: "$this->assertSelectorWillBeEnabled('[type=\"submit\"]');", correct: true }
-      - { value: "$this->assertButtonWillBeEnabled('submit');", correct: false }
-      - { value: "$this->assertElementWillBeEnabled('[type=\"submit\"]');", correct: false }
-      - { value: "$this->assertEnabled('[type=\"submit\"]');", correct: false }
-    help: |
-      `assertSelectorWillBeEnabled()` is a future assertion specifically for checking element enablement.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_7
-
-  -
-    question: >
-      What is the main advantage of using `MockHttpClient` with `HarFileResponseFactory` for testing HTTP clients in Symfony?
-    answers:
-      - { value: "It records new HTTP requests into HAR files automatically.", correct: false }
-      - { value: "It allows for realistic and reproducible tests without relying on external services.", correct: true }
-      - { value: "It performs real HTTP requests to a local server for integration testing.", correct: false }
-      - { value: "It generates a report of all HTTP interactions during the test run.", correct: false }
-    help: |
-      This approach ensures consistent test results by replaying predefined HTTP responses from HAR files.
-      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_100
-
-  -
-    question: >
-      When writing a unit test for a framework's exception handling, how would you typically simulate a `ResourceNotFoundException` being thrown by the URL matcher?
-    answers:
-      - { value: "By configuring a route that does not exist.", correct: false }
-      - { value: "By mocking the `UrlMatcherInterface` to throw the exception when `match()` is called.", correct: true }
-      - { value: "By calling `throw new ResourceNotFoundException()` directly in the test.", correct: false }
-      - { value: "By making a request to a non-existent URL with the test client.", correct: false }
-    help: |
-      Mocking the `UrlMatcherInterface` allows you to control its behavior and simulate specific exceptions.
-      https://github.com/symfony/symfony-docs/blob/7.3/create_framework/unit_testing.rst#_snippet_3
-
-  -
-    question: >
-      Which of the following is true regarding `Symfony\\Bundle\\FrameworkBundle\\Test\\KernelTestCase`?
-    answers:
-      - { value: "It is primarily used for testing controllers and HTTP responses.", correct: false }
-      - { value: "It reboots the Symfony kernel for each test to ensure isolation.", correct: true }
-      - { value: "It does not provide access to the dependency injection container.", correct: false }
-      - { value: "It is intended for end-to-end browser testing.", correct: false }
-    help: |
-      The kernel is rebooted for each test to prevent side effects between tests.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_4
-
-  -
-    question: >
-      What is the purpose of `Symfony\\Component\\Form\\PreloadedExtension` in form testing?
-    answers:
-      - { value: "To register preloaded form type instances with the FormRegistry, ensuring specific instances are used during testing.", correct: true }
-      - { value: "To define custom form type extensions for the test environment.", correct: false }
-      - { value: "To load form data from a predefined fixture file.", correct: false }
-      - { value: "To automatically resolve form options based on configured services.", correct: false }
-    help: |
-      `PreloadedExtension` allows you to inject specific form type instances for testing, rather than relying on autowiring or service location.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      When defining test suites in `phpunit.xml.dist` for a Symfony application, what does the `<directory>tests</directory>` element typically refer to?
-    answers:
-      - { value: "The directory containing all application source code.", correct: false }
-      - { value: "The root directory where all PHPUnit test files are located.", correct: true }
-      - { value: "A directory for storing test data fixtures.", correct: false }
-      - { value: "A directory for generated test reports.", correct: false }
-    help: |
-      The `tests/` directory is the conventional location for all application tests in Symfony.
-      https://github.com/symfony/symfony-docs/blob/7.3/configuration/multiple_kernels.rst#_snippet_13
-
-  -
-    question: >
-      Which command is used to install the `symfony/test-pack` Composer package, which includes `phpunit/phpunit` and other necessary dependencies for testing Symfony applications?
-    answers:
-      - { value: "$ composer install symfony/test-pack", correct: false }
-      - { value: "$ composer require symfony/test-pack", correct: false }
-      - { value: "$ composer require --dev symfony/test-pack", correct: true }
-      - { value: "$ composer update symfony/test-pack", correct: false }
-    help: |
-      The `--dev` flag ensures it's installed as a development dependency.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_0
-
-  -
-    question: >
-      What is the primary purpose of `Symfony\\Component\\HttpClient\\MockHttpClient`?
-    answers:
-      - { value: "To make real HTTP requests to external services.", correct: false }
-      - { value: "To mock HTTP client responses for isolated testing.", correct: true }
-      - { value: "To record HTTP traffic for debugging purposes.", correct: false }
-      - { value: "To manage HTTP client configurations.", correct: false }
-    help: |
-      `MockHttpClient` allows you to control the responses of HTTP requests, making tests deterministic.
-      https://github.com/symfony/symfony-docs/blob/7.3/http_client.rst#_snippet_100
-
-  -
-    question: >
-      Which of the following is an example of a "future assertion" in Symfony Panther?
-    answers:
-      - { value: "assertSelectorExists('.element')", correct: false }
-      - { value: "assertSelectorWillExist('.element')", correct: true }
-      - { value: "assertResponseIsSuccessful()", correct: false }
-      - { value: "assertPageTitleSame('My Page')", correct: false }
-    help: |
-      Future assertions wait for a condition to become true within a given timeout, useful for asynchronous operations.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_7
-
-  -
-    question: >
-      When using `Symfony\\Component\\Clock\\MockClock`, how can you instantly advance the mocked time to a specific point, accepting formats supported by `DateTimeImmutable::modify()`?
-    answers:
-      - { value: "$clock->sleep(seconds);", correct: false }
-      - { value: "$clock->advance(string $modifier);", correct: false }
-      - { value: "$clock->modify(string $modifier);", correct: true }
-      - { value: "$clock->setTime(string $time);", correct: false }
-    help: |
-      The `modify()` method allows precise control over the mocked time.
-      https://github.com/symfony/symfony-docs/blob/7.3/components/clock.rst#_snippet_5
-
-  -
-    question: >
-      What is the primary benefit of using `Symfony\\Bridge\\Twig\\Test\\FormLayoutTestCase` for form testing?
-    answers:
-      - { value: "It allows testing form data submission and validation.", correct: false }
-      - { value: "It provides a specialized test case for testing form themes with Twig.", correct: true }
-      - { value: "It enables mocking of Twig services for faster tests.", correct: false }
-      - { value: "It ensures that all form types are correctly registered with Twig.", correct: false }
-    help: |
-      This test case simplifies the setup for testing how forms are rendered with Twig templates.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      Which of the following is true about the `Symfony\\Component\\OptionsResolver\\Exception\\InvalidOptionsException`?
-    answers:
-      - { value: "It is thrown when a required form option is missing.", correct: false }
-      - { value: "It is raised by the OptionsResolver component when an invalid or unsupported option is encountered.", correct: true }
-      - { value: "It indicates a validation error in a form field.", correct: false }
-      - { value: "It is a generic exception for all form-related errors.", correct: false }
-    help: |
-      This exception specifically signals issues with options passed to components using the OptionsResolver.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      When configuring GitHub Actions for Symfony Panther tests, which action is commonly used to install Composer dependencies?
-    answers:
-      - { value: "actions/composer-install@v1", correct: false }
-      - { value: "ramsey/composer-install@v2", correct: true }
-      - { value: "php-actions/composer@v2", correct: false }
-      - { value: "shivammathur/setup-php@v2", correct: false }
-    help: |
-      `ramsey/composer-install` is a popular action for installing Composer dependencies in GitHub Actions workflows.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_29
-
-  -
-    question: >
-      What is the purpose of the `getTwigExtensions()` method in `Symfony\\Bridge\\Twig\\Test\\FormLayoutTestCase`?
-    answers:
-      - { value: "To return an array of Twig extensions to be loaded for the test environment.", correct: true }
-      - { value: "To return an array of custom form types that use Twig.", correct: false }
-      - { value: "To configure Twig's cache directory for tests.", correct: false }
-      - { value: "To define global Twig variables for the tests.", correct: false }
-    help: |
-      This method allows you to register any Twig extensions (e.g., custom filters or functions) needed for your form layout tests.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      Which of the following describes the role of `Symfony\\Component\\Form\\Extension\\Validator\\ValidatorExtension` in form testing?
-    answers:
-      - { value: "It provides core form types and functionality.", correct: false }
-      - { value: "It integrates the Symfony Validator component, enabling validation features for form fields.", correct: true }
-      - { value: "It handles the rendering of form errors in Twig.", correct: false }
-      - { value: "It is responsible for mapping form data to entities.", correct: false }
-    help: |
-      This extension is crucial for testing forms that rely on Symfony's validation component.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      What is the primary purpose of `Symfony\\Component\\Form\\Extension\\Core\\CoreExtension` in the context of form testing?
-    answers:
-      - { value: "It provides advanced form types for complex scenarios.", correct: false }
-      - { value: "It is the default core form extension that provides basic form types and functionality, registered by default in `TypeTestCase`.", correct: true }
-      - { value: "It handles the integration with external form libraries.", correct: false }
-      - { value: "It manages form events and listeners.", correct: false }
-    help: |
-      The `CoreExtension` is fundamental for most form tests as it provides the basic building blocks.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      When testing a multi-domain application with Symfony Panther, why is the `@runInSeparateProcess` PHPUnit annotation often used?
-    answers:
-      - { value: "To speed up tests by running them in parallel.", correct: false }
-      - { value: "To ensure test isolation between different domains by providing a clean environment for each test.", correct: true }
-      - { value: "To allow the Panther client to access external networks.", correct: false }
-      - { value: "To prevent memory leaks during long test runs.", correct: false }
-    help: |
-      Running tests in separate processes prevents state leakage between tests, which is crucial for multi-domain scenarios.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_19
-
-  -
-    question: >
-      What is the purpose of `Symfony\\Component\\Form\\Test\\FormIntegrationTestCase::getTypes()`?
-    answers:
-      - { value: "To return an array of custom form types required for integration tests.", correct: true }
-      - { value: "To return an array of form type extensions.", correct: false }
-      - { value: "To return an array of form type guessers.", correct: false }
-      - { value: "To return an array of preloaded form type instances.", correct: false }
-    help: |
-      This method allows you to register custom form types that your integration tests will use.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      Which method in `Symfony\\Component\\Form\\Test\\FormIntegrationTestCase` is used to load custom form type extensions required for integration tests?
-    answers:
-      - { value: "getTypes()", correct: false }
-      - { value: "getTypeExtensions()", correct: true }
-      - { value: "getTypeGuessers()", correct: false }
-      - { value: "getExtensions()", correct: false }
-    help: |
-      `getTypeExtensions()` is specifically for registering form type extensions.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      What is the purpose of `Symfony\\Component\\Form\\Test\\FormIntegrationTestCase::getTypeGuessers()`?
-    answers:
-      - { value: "To return an array of form types that can be guessed.", correct: false }
-      - { value: "To return an array of form type extensions that provide guessing capabilities.", correct: false }
-      - { value: "To return an array of custom form type guessers required for integration tests.", correct: true }
-      - { value: "To return an array of services that can guess form options.", correct: false }
-    help: |
-      This method allows you to register custom form type guessers for your integration tests.
-      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_7
-
-  -
-    question: >
-      When using Panther, which method allows you to wait for an element of the DOM to become visible?
-    answers:
-      - { value: "$client->waitFor('.selector');", correct: false }
-      - { value: "$client->waitForVisibility('.selector');", correct: true }
-      - { value: "$client->waitUntilVisible('.selector');", correct: false }
-      - { value: "$client->assertSelectorWillBeVisible('.selector');", correct: false }
-    help: |
-      `waitForVisibility()` is a client-side waiting method that pauses execution until the element is visible.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_6
-
-  -
-    question: >
-      Which Panther client method is used to wait for text to be inserted into an element's content?
-    answers:
-      - { value: "$client->waitForElementToContain('.selector', 'text');", correct: true }
-      - { value: "$client->waitForText('.selector', 'text');", correct: false }
-      - { value: "$client->assertSelectorWillContain('.selector', 'text');", correct: false }
-      - { value: "$client->waitUntilTextPresent('.selector', 'text');", correct: false }
-    help: |
-      `waitForElementToContain()` waits for the specified text to appear within the element's content.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_6
-
-  -
-    question: >
-      What is the purpose of `PantherClient::waitForAttributeToContain('.selector', 'attributeName', 'value')`?
-    answers:
-      - { value: "To assert that an attribute will contain a specific value in the future.", correct: false }
-      - { value: "To wait for an element's attribute to contain specific content.", correct: true }
-      - { value: "To wait for an element's attribute to be removed.", correct: false }
-      - { value: "To set an attribute's value on an element.", correct: false }
-    help: |
-      This method is used to pause test execution until a specific attribute of an element contains the expected content.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing/end_to_end.rst#_snippet_6
-
-  -
-    question: >
-      Which assertion method would you use in a Symfony functional test to verify that any element matching a given selector contains specific text?
-    answers:
-      - { value: "assertSelectorTextContains(string $selector, string $text)", correct: false }
-      - { value: "assertAnySelectorTextContains(string $selector, string $text)", correct: true }
-      - { value: "assertElementTextContains(string $selector, string $text)", correct: false }
-      - { value: "assertTextInAnySelector(string $selector, string $text)", correct: false }
-    help: |
-      `assertAnySelectorTextContains()` checks if at least one element matching the selector contains the text.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
-
-  -
-    question: >
-      What is the purpose of `assertAnySelectorTextSame(string $selector, string $text)` in Symfony Crawler assertions?
-    answers:
-      - { value: "Asserts that the contents of the first element matching the given selector does equal the expected text.", correct: false }
-      - { value: "Asserts that any element matching the given selector does equal the expected text.", correct: true }
-      - { value: "Asserts that all elements matching the given selector contain the expected text.", correct: false }
-      - { value: "Asserts that no element matching the given selector contains the expected text.", correct: false }
-    help: |
-      This assertion is useful when you need to confirm that at least one of the matched elements has the exact text.
-      https://github.com/symfony/symfony-docs/blob/7.3/testing.rst#_snippet_50
+      You can define in-memory users under the `users_in_memory` key within the `security` configuration, specifically for the `when@test` environment.
+      https://symfony.com/doc/current/testing.html#authenticating-users-in-tests
