@@ -1,0 +1,1622 @@
+category: Forms
+
+questions:
+  -
+    question: >
+      Which of the following commands is used to install the Symfony Form component?
+    answers:
+      - { value: "`composer require symfony/form`", correct: true }
+      - { value: "`composer install symfony/form`", correct: false }
+      - { value: "`php bin/console form:install`", correct: false }
+      - { value: "`symfony new --full my_project`", correct: false }
+    help: |
+      The Symfony Form component is installed via Composer using `composer require symfony/form`.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_0
+
+  -
+    question: |
+      Given the following controller snippet, what is the primary purpose of `$this->createFormBuilder($task)`?
+
+      ```php
+      // src/Controller/TaskController.php
+      namespace App\Controller;
+
+      use App\Entity\Task;
+      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+      use Symfony\Component\HttpFoundation\Request;
+      use Symfony\Component\HttpFoundation\Response;
+
+      class TaskController extends AbstractController
+      {
+          public function new(Request $request): Response
+          {
+              $task = new Task();
+              $task->setTask('Write a blog post');
+              $task->setDueDate(new \DateTimeImmutable('tomorrow'));
+
+              $form = $this->createFormBuilder($task)
+                  ->add('task', TextType::class)
+                  ->add('dueDate', DateType::class)
+                  ->add('save', SubmitType::class, ['label' => 'Create Task'])
+                  ->getForm();
+
+              // ...
+          }
+      }
+      ```
+    answers:
+      - { value: "To create a form builder and bind it to the `$task` object.", correct: true }
+      - { value: "To generate the HTML for the form.", correct: false }
+      - { value: "To handle the form submission.", correct: false }
+      - { value: "To define validation constraints for the form.", correct: false }
+    help: |
+      `createFormBuilder()` is used to create a form directly in the controller, and passing an object as the first argument binds the form to that object, allowing it to read and write data from/to it.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_4
+
+  -
+    question: |
+      Consider the following Symfony controller code for form submission:
+
+      ```php
+      // src/Controller/TaskController.php
+      namespace App\Controller;
+
+      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+      use Symfony\Component\HttpFoundation\Request;
+      use Symfony\Component\HttpFoundation\Response;
+
+      class TaskController extends AbstractController
+      {
+          public function new(Request $request): Response
+          {
+              $form = $this->createFormBuilder()
+                  ->add('task', TextType::class)
+                  ->add('dueDate', DateType::class)
+                  ->getForm();
+
+              $form->handleRequest($request);
+
+              if ($form->isSubmitted() && $form->isValid()) {
+                  $data = $form->getData();
+                  // ... perform some action
+                  return $this->redirectToRoute('task_success');
+              }
+
+              return $this->render('task/new.html.twig', [
+                  'form' => $form,
+              ]);
+          }
+      }
+      ```
+      What is the purpose of `$form->handleRequest($request);`?
+    answers:
+      - { value: "It processes the incoming HTTP request to populate the form with submitted data.", correct: true }
+      - { value: "It renders the form HTML to the browser.", correct: false }
+      - { value: "It validates the form data against defined constraints.", correct: false }
+      - { value: "It redirects the user to a success page.", correct: false }
+    help: |
+      The `handleRequest()` method is crucial for form handling. It inspects the request to see if the form was submitted and, if so, populates the form with the submitted data.
+      https://github.com/symfony/symfony-docs/blob/7.3/components/form.rst#_snippet_24
+
+  -
+    question: >
+      After calling `$form->handleRequest($request);`, which two methods are typically used to check if the form submission was successful and the data is ready for processing?
+    answers:
+      - { value: "`$form->isSubmitted()`", correct: true }
+      - { value: "`$form->isValid()`", correct: true }
+      - { value: "`$form->isHandled()`", correct: false }
+      - { value: "`$form->isProcessed()`", correct: false }
+      - { value: "`$form->hasErrors()`", correct: false }
+    help: |
+      The `isSubmitted()` method checks if the form was submitted, and `isValid()` checks if the submitted data passes all validation constraints.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_11
+
+  -
+    question: |
+      Which Twig helper function is used to render an entire Symfony form, including its opening and closing `<form>` tags, and all fields, with minimal code?
+    answers:
+      - { value: "`{{ form(form) }}`", correct: true }
+      - { value: "`{{ form_start(form) }}{{ form_widget(form) }}{{ form_end(form) }}`", correct: false }
+      - { value: "`{{ form_render(form) }}`", correct: false }
+      - { value: "`{{ form_all(form) }}`", correct: false }
+    help: |
+      The `form()` Twig helper is a shortcut to render the entire form. While convenient, `form_start`, `form_row`, `form_widget`, and `form_end` offer more granular control.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_9
+
+  -
+    question: >
+      To render a Symfony form with granular control over each part (start tag, fields, end tag), which sequence of Twig helper functions should you use?
+    answers:
+      - { value: "`form_start()`, `form_row()`, `form_end()`", correct: true }
+      - { value: "`form_open()`, `form_field()`, `form_close()`", correct: false }
+      - { value: "`form_begin()`, `form_element()`, `form_finish()`", correct: false }
+      - { value: "`form()`, `form_widget()`, `form_end()`", correct: false }
+    help: |
+      The standard way to render a form with full control is to use `form_start()` for the opening tag, `form_row()` (or `form_label`, `form_widget`, `form_errors`) for individual fields, and `form_end()` for the closing tag.
+      https://github.com/symfony/symfony-docs/blob/7.3/components/form.rst#_snippet_22
+
+  -
+    question: |
+      You want to apply a custom Twig form theme named `form/my_theme.html.twig` to a specific form instance named `form` in your template. Which Twig tag correctly achieves this?
+    answers:
+      - { value: "`{% form_theme form 'form/my_theme.html.twig' %}`", correct: true }
+      - { value: "`{% include 'form/my_theme.html.twig' with { form: form } %}`", correct: false }
+      - { value: "`{% use 'form/my_theme.html.twig' for form %}`", correct: false }
+      - { value: "`{% apply_theme form 'form/my_theme.html.twig' %}`", correct: false }
+    help: |
+      The `form_theme` Twig tag is used to specify one or more themes for a given form.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_themes.rst#_snippet_19
+
+  -
+    question: |
+      To apply multiple Twig form themes to a single Symfony form, where later themes can override earlier ones, how should the `form_theme` tag be used?
+    answers:
+      - { value: "`{% form_theme form with ['theme1.html.twig', 'theme2.html.twig'] %}`", correct: true }
+      - { value: "`{% form_theme form 'theme1.html.twig', 'theme2.html.twig' %}`", correct: false }
+      - { value: "`{% form_theme form and 'theme1.html.twig' and 'theme2.html.twig' %}`", correct: false }
+      - { value: "`{% form_theme form using ['theme1.html.twig', 'theme2.html.twig'] %}`", correct: false }
+    help: |
+      Multiple themes can be applied by providing an array of template paths to the `form_theme` tag. The order in the array determines the precedence.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_themes.rst#_snippet_2
+
+  -
+    question: >
+      How can you ensure that only the explicitly listed Twig form themes are applied to a specific form, ignoring any globally configured themes?
+    answers:
+      - { value: "By adding the `only` keyword after the list of themes, e.g., `{% form_theme form with ['my_theme.html.twig'] only %}`.", correct: true }
+      - { value: "By setting the `inherit_themes` option to `false` in the form configuration.", correct: false }
+      - { value: "By defining the theme in `config/packages/twig.yaml` with a `priority` of `0`.", correct: false }
+      - { value: "By using the `{% form_theme_exclusive %}` tag.", correct: false }
+    help: |
+      The `only` keyword ensures that only the specified themes are used, effectively disabling inheritance from global themes.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_themes.rst#_snippet_5
+
+  -
+    question: >
+      Which of the following are built-in form types in Symfony that you would commonly use for a single-line text input and a date selection, respectively?
+    answers:
+      - { value: "`TextType`", correct: true }
+      - { value: "`DateType`", correct: true }
+      - { value: "`StringType`", correct: false }
+      - { value: "`CalendarType`", correct: false }
+      - { value: "`TextInputType`", correct: false }
+    help: |
+      `TextType` is for single-line text inputs, and `DateType` is for date selection.
+      https://github.com/symfony/symfony-docs/blob/7.3/components/form.rst#_snippet_20
+
+  -
+    question: |
+      You need to create a form field that allows users to add multiple instances of a nested form (e.g., multiple "Tag" forms within a "Task" form). Which built-in Symfony form type is designed for this purpose?
+    answers:
+      - { value: "`CollectionType`", correct: true }
+      - { value: "`ArrayType`", correct: false }
+      - { value: "`EmbedType`", correct: false }
+      - { value: "`ListType`", correct: false }
+    help: |
+      `CollectionType` is used to render a collection of forms, such as a list of tags or items.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_3
+
+  -
+    question: |
+      When creating a custom Symfony form type by extending `AbstractType`, which method is primarily responsible for defining the form fields and their options?
+    answers:
+      - { value: "`buildForm(FormBuilderInterface $builder, array $options): void`", correct: true }
+      - { value: "`configureOptions(OptionsResolver $resolver): void`", correct: false }
+      - { value: "`buildView(FormView $view, FormInterface $form, array $options): void`", correct: false }
+      - { value: "`createForm(FormBuilderInterface $builder, array $options): void`", correct: false }
+    help: |
+      The `buildForm()` method is where you add fields to your form type using the `FormBuilderInterface`.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: |
+      In a custom Symfony form type, which method is used to define default options for the form, including `data_class` and custom options?
+    answers:
+      - { value: "`configureOptions(OptionsResolver $resolver): void`", correct: true }
+      - { value: "`setDefaultOptions(OptionsResolver $resolver): void`", correct: false }
+      - { value: "`setOptions(array $options): void`", correct: false }
+      - { value: "`resolveOptions(OptionsResolver $resolver): void`", correct: false }
+    help: |
+      The `configureOptions()` method allows you to define and configure the options available for your form type, including default values and validation rules for options.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: >
+      By default, how does Symfony Forms provide CSRF (Cross-Site Request Forgery) protection?
+    answers:
+      - { value: "It automatically adds a hidden `_token` field to every form.", correct: true }
+      - { value: "It requires manual configuration of a CSRF token in every form type.", correct: false }
+      - { value: "It uses session-based tokens that must be manually validated in the controller.", correct: false }
+      - { value: "CSRF protection is not enabled by default and requires a separate bundle.", correct: false }
+    help: |
+      Symfony Forms automatically integrates CSRF protection by adding a hidden `_token` field and validating it upon submission. This is a built-in feature.
+      https://symfony.com/doc/current/form/csrf_protection.html
+
+  -
+    question: >
+      What is the primary purpose of a Data Transformer in Symfony Forms?
+    answers:
+      - { value: "To convert data between the format used in the underlying object and the format used in the form field.", correct: true }
+      - { value: "To validate the data submitted through a form field.", correct: false }
+      - { value: "To render a form field in a Twig template.", correct: false }
+      - { value: "To handle file uploads for a form field.", correct: false }
+    help: |
+      Data transformers are used to convert data from the model format to the normalized format, and from the normalized format to the view format (and vice-versa).
+      https://symfony.com/doc/current/form/data_transformers.html
+
+  -
+    question: >
+      Which form event is triggered *before* the form's data is mapped to the underlying object, allowing you to modify the data based on user input or other conditions?
+    answers:
+      - { value: "`FormEvents::PRE_SUBMIT`", correct: true }
+      - { value: "`FormEvents::POST_SUBMIT`", correct: false }
+      - { value: "`FormEvents::PRE_SET_DATA`", correct: false }
+      - { value: "`FormEvents::POST_SET_DATA`", correct: false }
+    help: |
+      `FormEvents::PRE_SUBMIT` is triggered after the request data is bound to the form, but before it's mapped to the object. This is useful for modifying submitted data.
+      https://symfony.com/doc/current/form/events.html#pre-submit-and-post-submit
+
+  -
+    question: >
+      Which form event is triggered *after* the form's data has been submitted and validated, and the data has been mapped to the underlying object?
+    answers:
+      - { value: "`FormEvents::POST_SUBMIT`", correct: true }
+      - { value: "`FormEvents::PRE_SUBMIT`", correct: false }
+      - { value: "`FormEvents::POST_SET_DATA`", correct: false }
+      - { value: "`FormEvents::PRE_SET_DATA`", correct: false }
+    help: |
+      `FormEvents::POST_SUBMIT` is triggered after the form has been submitted, validated, and the data has been written to the object. This is a good place for post-processing.
+      https://symfony.com/doc/current/form/events.html#pre-submit-and-post-submit
+
+  -
+    question: >
+      What is the primary purpose of a Form Type Extension in Symfony?
+    answers:
+      - { value: "To add new functionality or options to existing form types without modifying their original classes.", correct: true }
+      - { value: "To create entirely new custom form types from scratch.", correct: false }
+      - { value: "To define the HTML rendering of a form type.", correct: false }
+      - { value: "To handle form submission and validation logic.", correct: false }
+    help: |
+      Form Type Extensions allow you to extend the functionality of existing form types, adding new options or modifying their behavior, without directly altering the original type class.
+      https://symfony.com/doc/current/form/type_extensions.html
+
+  -
+    question: |
+      You are creating a form without an associated data class. How would you initialize the form with default data?
+    answers:
+      - { value: "Pass an array of default data as the first argument to `createFormBuilder()`, e.g., `$this->createFormBuilder(['name' => 'John Doe'])`.", correct: true }
+      - { value: "Set the `data` option in `configureOptions()`.", correct: false }
+      - { value: "Call `$form->setData(['name' => 'John Doe'])` after creating the form.", correct: false }
+      - { value: "Use the `setDefaultData()` method on the form builder.", correct: false }
+    help: |
+      When creating a form without a data class, you can pass an array of default data to `createFormBuilder()`.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/without_class.rst#_snippet_0
+
+  -
+    question: |
+      After a form without an associated data class has been submitted and is valid, how do you retrieve the submitted data as an associative array?
+    answers:
+      - { value: "Call `$form->getData()`.", correct: true }
+      - { value: "Call `$form->getSubmittedData()`.", correct: false }
+      - { value: "Access `$request->request->all()`.", correct: false }
+      - { value: "Use `$form->get('field_name')->getData()` for each field.", correct: false }
+    help: |
+      The `getData()` method on the form object returns the submitted and mapped data. For forms without a data class, this will be an array.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/without_class.rst#_snippet_0
+
+  -
+    question: |
+      How can you render a specific form field's widget in Twig and apply a custom CSS class to its HTML element?
+
+      ```twig
+      {# Render a widget, but add a "foo" class to it #}
+      {{ form_widget(form.name, /* ??? */) }}
+      ```
+    answers:
+      - { value: "`{'attr': {'class': 'foo'}}`", correct: true }
+      - { value: "`{'class': 'foo'}`", correct: false }
+      - { value: "`{'html_attr': {'class': 'foo'}}`", correct: false }
+      - { value: "`{'widget_attr': {'class': 'foo'}}`", correct: false }
+    help: |
+      The `form_widget` helper accepts an `attr` option to apply HTML attributes to the rendered widget.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_customization.rst#_snippet_14
+
+  -
+    question: |
+      Given a parent form `form` and a child form `form.a_child_form`, how would you apply a specific Twig form theme `form/my_custom_theme.html.twig` only to the child form?
+    answers:
+      - { value: "`{% form_theme form.a_child_form 'form/my_custom_theme.html.twig' %}`", correct: true }
+      - { value: "`{% form_theme form with { 'a_child_form': 'form/my_custom_theme.html.twig' } %}`", correct: false }
+      - { value: "`{% form_theme 'form/my_custom_theme.html.twig' for form.a_child_form %}`", correct: false }
+      - { value: "`{% form_theme form.a_child_form using 'form/my_custom_theme.html.twig' %}`", correct: false }
+    help: |
+      You can specify a theme for a child form by using its path within the form object in the `form_theme` tag.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_themes.rst#_snippet_3
+
+  -
+    question: |
+      You have a form field `agreeTerms` that does not correspond to any property on your underlying data object. How should you configure this field in your form type to prevent an exception during data mapping?
+    answers:
+      - { value: "Set the `mapped` option to `false`, e.g., `->add('agreeTerms', CheckboxType::class, ['mapped' => false])`.", correct: true }
+      - { value: "Set the `data_class` option to `null` for that specific field.", correct: false }
+      - { value: "Exclude the field from the `data_class` in `configureOptions()`.", correct: false }
+      - { value: "Mark the field as `virtual`.", correct: false }
+    help: |
+      The `mapped` option, when set to `false`, indicates that the field's value should not be read from or written to the underlying object.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_31
+
+  -
+    question: |
+      You want to add validation constraints directly when creating a form using `createFormBuilder()` in a controller, without a dedicated form class. How would you apply a `Length` constraint to a `firstName` field and `NotBlank` and `Length` constraints to a `lastName` field?
+    answers:
+      - { value: |
+          ```php
+          $form = $this->createFormBuilder($defaultData, [
+                      'constraints' => [
+                          'firstName' => new Length(['min' => 3]),
+                          'lastName' => [
+                              new NotBlank(),
+                              new Length(['min' => 3]),
+                          ],
+                      ],
+                  ])
+                  ->add('firstName', TextType::class)
+                  ->add('lastName', TextType::class)
+                  ->getForm();
+          ```, correct: true }
+      - { value: |
+          ```php
+          $form = $this->createFormBuilder($defaultData)
+                      ->add('firstName', TextType::class, ['constraints' => new Length(['min' => 3])])
+                      ->add('lastName', TextType::class, ['constraints' => [new NotBlank(), new Length(['min' => 3])]])
+                      ->getForm();
+          ```, correct: false }
+      - { value: |
+          ```php
+          $form = $this->createFormBuilder($defaultData)
+                      ->add('firstName', TextType::class, ['validation' => new Length(['min' => 3])])
+                      ->add('lastName', TextType::class, ['validation' => [new NotBlank(), new Length(['min' => 3])]])
+                      ->getForm();
+          ```, correct: false }
+      - { value: |
+          ```php
+          $form = $this->createFormBuilder($defaultData)
+                      ->add('firstName', TextType::class, ['rules' => new Length(['min' => 3])])
+                      ->add('lastName', TextType::class, ['rules' => [new NotBlank(), new Length(['min' => 3])]])
+                      ->getForm();
+          ```, correct: false }
+    help: |
+      Constraints can be applied directly to the form builder via the `constraints` option, where keys are field names.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/without_class.rst#_snippet_4
+
+  -
+    question: |
+      When defining a custom form type, how would you apply validation constraints to fields within the `configureOptions` method using the `Collection` constraint?
+    answers:
+      - { value: |
+          ```php
+          public function configureOptions(OptionsResolver $resolver): void
+          {
+              $resolver->setDefaults([
+                  'data_class' => null,
+                  'constraints' => new Collection([
+                      'firstName' => new Length(min: 3),
+                      'lastName' => [
+                          new NotBlank(),
+                          new Length(min: 3),
+                      ],
+                  ]),
+              ]);
+          }
+          ```, correct: true }
+      - { value: |
+          ```php
+          public function configureOptions(OptionsResolver $resolver): void
+          {
+              $resolver->setDefaults([
+                  'data_class' => null,
+                  'validation_rules' => [
+                      'firstName' => new Length(min: 3),
+                      'lastName' => [
+                          new NotBlank(),
+                          new Length(min: 3),
+                      ],
+                  ],
+              ]);
+          }
+          ```, correct: false }
+      - { value: |
+          ```php
+          public function configureOptions(OptionsResolver $resolver): void
+          {
+              $resolver->setDefaults([
+                  'data_class' => null,
+                  'constraints' => [
+                      'firstName' => ['Length' => ['min' => 3]],
+                      'lastName' => ['NotBlank' => [], 'Length' => ['min' => 3]],
+                  ],
+              ]);
+          }
+          ```, correct: false }
+      - { value: |
+          ```php
+          public function configureOptions(OptionsResolver $resolver): void
+          {
+              $resolver->setDefaults([
+                  'data_class' => null,
+                  'validation' => new Collection([
+                      'firstName' => new Length(min: 3),
+                      'lastName' => [
+                          new NotBlank(),
+                          new Length(min: 3),
+                      ],
+                  ]),
+              ]);
+          }
+          ```, correct: false }
+    help: |
+      The `constraints` option in `configureOptions` can accept a `Collection` constraint to define validation rules for multiple fields.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/without_class.rst#_snippet_3
+
+  -
+    question: |
+      You have a custom form type `CategoryType` and you want to include all its fields directly within another form type, `TaskType`. Which code snippet correctly embeds `CategoryType` into `TaskType`?
+    answers:
+      - { value: |
+          ```php
+          // src/Form/TaskType.php
+          use App\Form\CategoryType;
+          use Symfony\Component\Form\FormBuilderInterface;
+
+          public function buildForm(FormBuilderInterface $builder, array $options): void
+          {
+              // ...
+              $builder->add('category', CategoryType::class);
+          }
+          ```, correct: true }
+      - { value: |
+          ```php
+          // src/Form/TaskType.php
+          use App\Form\CategoryType;
+          use Symfony\Component\Form\FormBuilderInterface;
+
+          public function buildForm(FormBuilderInterface $builder, array $options): void
+          {
+              // ...
+              $builder->add('category', 'App\Form\CategoryType');
+          }
+          ```, correct: false }
+      - { value: |
+          ```php
+          // src/Form/TaskType.php
+          use App\Form\CategoryType;
+          use Symfony\Component\Form\FormBuilderInterface;
+
+          public function buildForm(FormBuilderInterface $builder, array $options): void
+          {
+              // ...
+              $builder->embed('category', CategoryType::class);
+          }
+          ```, correct: false }
+      - { value: |
+          ```php
+          // src/Form/TaskType.php
+          use App\Form\CategoryType;
+          use Symfony\Component\Form\FormBuilderInterface;
+
+          public function buildForm(FormBuilderInterface $builder, array $options): void
+          {
+              // ...
+              $builder->add('category', new CategoryType());
+          }
+          ```, correct: false }
+    help: |
+      To embed one form type into another, you simply add it as a field using its FQCN (Fully Qualified Class Name).
+      https://github.com/symfony/symfony-docs/blob/7.3/form/embedded.rst#_snippet_3
+
+  -
+    question: >
+      Which Symfony console command can you use to list all available form types, type extensions, and type guessers in your application?
+    answers:
+      - { value: "`php bin/console debug:form`", correct: true }
+      - { value: "`php bin/console form:list`", correct: false }
+      - { value: "`php bin/console list:forms`", correct: false }
+      - { value: "`php bin/console form:debug`", correct: false }
+    help: |
+      The `debug:form` command provides detailed information about your form types.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_2
+
+  -
+    question: |
+      When unit testing a custom Symfony Form Type using `TypeTestCase`, which method is typically used to verify that the form submission correctly updates the underlying data object?
+    answers:
+      - { value: "`testSubmitValidData()`", correct: true }
+      - { value: "`testFormSubmission()`", correct: false }
+      - { value: "`testDataMapping()`", correct: false }
+      - { value: "`testFormValidity()`", correct: false }
+    help: |
+      The `testSubmitValidData()` method is the standard approach in `TypeTestCase` to simulate form submission and assert data synchronization.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/unit_testing.rst#_snippet_0
+
+  -
+    question: |
+      How do you pass custom options from a controller to a form type when creating the form instance?
+    answers:
+      - { value: "As the third argument to the `createForm()` method, e.g., `$this->createForm(TaskType::class, $task, ['my_option' => 'value'])`.", correct: true }
+      - { value: "By calling `setOption()` on the form builder before `getForm()`.", correct: false }
+      - { value: "Through the request attributes.", correct: false }
+      - { value: "By defining them in the `configureOptions()` method of the controller.", correct: false }
+    help: |
+      The `createForm()` method accepts an array of options as its third argument, which are then passed to the form type's `buildForm` and `configureOptions` methods.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_16
+
+  -
+    question: |
+      In a custom Symfony form type, how do you access custom options (e.g., `require_due_date`) passed from the controller within the `buildForm` method?
+    answers:
+      - { value: "Through the `$options` array argument, e.g., `$options['require_due_date']`.", correct: true }
+      - { value: "By calling `$builder->getOption('require_due_date')`.", correct: false }
+      - { value: "Through `$this->getOptions()['require_due_date']`.", correct: false }
+      - { value: "They are automatically available as properties of the form type.", correct: false }
+    help: |
+      The `$options` array, passed as the second argument to `buildForm`, contains all options configured for the form type.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_18
+
+  -
+    question: |
+      How do you register a custom form event subscriber (e.g., `AddEmailFieldListener`) with a Symfony form builder?
+    answers:
+      - { value: "By calling `$builder->addEventSubscriber(new AddEmailFieldListener())`.", correct: true }
+      - { value: "By calling `$builder->addEventListener(new AddEmailFieldListener())`.", correct: false }
+      - { value: "By adding it to the `services.yaml` and tagging it as `form.event_subscriber`.", correct: false }
+      - { value: "By implementing `EventSubscriberInterface` directly in the form type.", correct: false }
+    help: |
+      The `addEventSubscriber()` method on the `FormBuilderInterface` is used to attach an event subscriber.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/events.rst#_snippet_12
+
+  -
+    question: >
+      In Twig, why is `{% if form is rootform %}` preferred over `{% if form.parent is null %}` when checking if a form is the root form?
+    answers:
+      - { value: "Because `form.parent` could be a child form named 'parent', leading to incorrect logic.", correct: true }
+      - { value: "Because `form is rootform` is more performant.", correct: false }
+      - { value: "Because `form.parent` is deprecated in Symfony 7.", correct: false }
+      - { value: "Because `form is rootform` also checks for form validity.", correct: false }
+    help: |
+      The `is rootform` test is a reliable way to determine if a form view is the top-level form, avoiding naming conflicts with child forms.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_customization.rst#_snippet_18
+
+  -
+    question: >
+      Which Twig helper function is specifically designed to render only the error messages for a given form or form field?
+    answers:
+      - { value: "`form_errors(form)` or `form_errors(form.field_name)`", correct: true }
+      - { value: "`form_messages(form)`", correct: false }
+      - { value: "`form_validation_errors(form)`", correct: false }
+      - { value: "`form_has_errors(form)`", correct: false }
+    help: |
+      The `form_errors` helper is used to display validation errors associated with a form or a specific field.
+      https://symfony.com/doc/current/form/form_customization.html#form-errors
+
+  -
+    question: >
+      What is the main difference between using `$this->createFormBuilder()` and `$this->createForm(MyFormType::class)` in a Symfony controller?
+    answers:
+      - { value: "`createFormBuilder()` is for building simple, inline forms, while `createForm()` is for instantiating dedicated form classes for reusability.", correct: true }
+      - { value: "`createFormBuilder()` is deprecated in Symfony 7, while `createForm()` is the recommended approach.", correct: false }
+      - { value: "`createFormBuilder()` does not support data binding, while `createForm()` does.", correct: false }
+      - { value: "`createFormBuilder()` is used for API forms, and `createForm()` for traditional web forms.", correct: false }
+    help: |
+      `createFormBuilder()` is convenient for simple forms directly in the controller, whereas `createForm()` is used to instantiate and use a separate, reusable form class.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_6
+
+  -
+    question: >
+      After a Symfony form has been submitted and `isValid()` returns `true`, what does `$form->getData()` return?
+    answers:
+      - { value: "The submitted and validated data, mapped to the underlying object or as an array if no data class is used.", correct: true }
+      - { value: "The raw, unvalidated data from the HTTP request.", correct: false }
+      - { value: "A boolean indicating if the form is valid.", correct: false }
+      - { value: "An array of validation errors.", correct: false }
+    help: |
+      `getData()` provides the clean, validated, and mapped data from the form.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_11
+
+  -
+    question: >
+      Which built-in Symfony form types are suitable for an email input field and a multi-line text area, respectively?
+    answers:
+      - { value: "`EmailType`", correct: true }
+      - { value: "`TextareaType`", correct: true }
+      - { value: "`MailType`", correct: false }
+      - { value: "`LongTextType`", correct: false }
+      - { value: "`HtmlAreaType`", correct: false }
+    help: |
+      `EmailType` provides an email input, and `TextareaType` provides a multi-line text area.
+      https://symfony.com/doc/current/reference/forms/types.html
+
+  -
+    question: >
+      Is CSRF protection enabled by default for all Symfony forms?
+    answers:
+      - { value: "Yes, it is enabled by default and automatically adds a hidden `_token` field.", correct: true }
+      - { value: "No, it must be explicitly enabled for each form.", correct: false }
+      - { value: "Only for forms that are bound to an entity.", correct: false }
+      - { value: "It's enabled only if the `csrf_protection` option is set to `true` in `framework.yaml`.", correct: false }
+    help: |
+      CSRF protection is a standard feature of Symfony forms and is enabled by default.
+      https://symfony.com/doc/current/form/csrf_protection.html
+
+  -
+    question: >
+      To allow users to upload a single file through a Symfony form, which built-in form type should you use for the file input field?
+    answers:
+      - { value: "`FileType`", correct: true }
+      - { value: "`UploadType`", correct: false }
+      - { value: "`FileFieldType`", correct: false }
+      - { value: "`AttachmentType`", correct: false }
+    help: |
+      The `FileType` is specifically designed for handling file uploads in Symfony forms.
+      https://symfony.com/doc/current/reference/forms/types/FileType.html
+
+  -
+    question: >
+      A data transformer has two core methods: one for converting data from the model to the form's view format, and another for converting data from the form's submitted view format back to the model format. What are these methods typically named?
+    answers:
+      - { value: "`transform()` and `reverseTransform()`", correct: true }
+      - { value: "`convert()` and `revert()`", correct: false }
+      - { value: "`toView()` and `toModel()`", correct: false }
+      - { value: "`format()` and `parse()`", correct: false }
+    help: |
+      `transform()` converts model data to view data, and `reverseTransform()` converts view data back to model data.
+      https://symfony.com/doc/current/form/data_transformers.html
+
+  -
+    question: >
+      Which of the following represents the correct order of form events during the form submission process in Symfony?
+    answers:
+      - { value: "`PRE_SUBMIT`, `SUBMIT`, `POST_SUBMIT`", correct: true }
+      - { value: "`PRE_SET_DATA`, `POST_SET_DATA`, `PRE_SUBMIT`, `SUBMIT`, `POST_SUBMIT`", correct: false }
+      - { value: "`SUBMIT`, `PRE_SUBMIT`, `POST_SUBMIT`", correct: false }
+      - { value: "`PRE_SUBMIT`, `POST_SUBMIT`, `SUBMIT`", correct: false }
+    help: |
+      The order of events during submission is `PRE_SUBMIT` (before data is mapped), `SUBMIT` (data is mapped), and `POST_SUBMIT` (after data is mapped and validated).
+      https://symfony.com/doc/current/form/events.html
+
+  -
+    question: >
+      When creating a Form Type Extension, which method must you implement to specify which form types your extension applies to?
+    answers:
+      - { value: "`getExtendedTypes(): iterable`", correct: true }
+      - { value: "`getTargetTypes(): array`", correct: false }
+      - { value: "`supportsType(string $type): bool`", correct: false }
+      - { value: "`extend(FormBuilderInterface $builder, array $options): void`", correct: false }
+    help: |
+      The `getExtendedTypes()` method returns an iterable of fully-qualified class names of the form types that this extension will apply to.
+      https://symfony.com/doc/current/form/type_extensions.html
+
+  -
+    question: >
+      How are global Twig form themes typically configured in a Symfony application?
+    answers:
+      - { value: "In `config/packages/twig.yaml` under the `twig.form_themes` key.", correct: true }
+      - { value: "By calling `Form::addTheme()` in a service container extension.", correct: false }
+      - { value: "In `config/services.yaml` by tagging a service with `form.theme`.", correct: false }
+      - { value: "They are automatically discovered from the `templates/form/` directory.", correct: false }
+    help: |
+      Global form themes are configured in the Twig bundle's configuration file, typically `config/packages/twig.yaml`.
+      https://symfony.com/doc/current/form/form_themes.html#global-form-themes
+
+  -
+    question: |
+      When setting the `dueDate` property of a `Task` entity before binding it to a form, which PHP class is recommended for handling dates to ensure immutability?
+    answers:
+      - { value: "`DateTimeImmutable`", correct: true }
+      - { value: "`DateTime`", correct: false }
+      - { value: "`Date`", correct: false }
+      - { value: "`Carbon`", correct: false }
+    help: |
+      `DateTimeImmutable` is preferred for date handling in modern PHP applications to ensure that date objects are not accidentally modified.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_4
+
+  -
+    question: >
+      After a successful form submission and data processing in a Symfony controller, what is the recommended action to prevent resubmission on page refresh?
+    answers:
+      - { value: "Perform a redirect to another route.", correct: true }
+      - { value: "Render the same form template again.", correct: false }
+      - { value: "Display a success message on the current page.", correct: false }
+      - { value: "Clear the form data.", correct: false }
+    help: |
+      The Post/Redirect/Get (PRG) pattern is a common web development design pattern that prevents duplicate form submissions.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_11
+
+  -
+    question: >
+      Which Twig helper function is used to render only the HTML `<label>` tag for a specific form field?
+    answers:
+      - { value: "`form_label(form.field_name)`", correct: true }
+      - { value: "`form_row(form.field_name)`", correct: false }
+      - { value: "`form_widget(form.field_name)`", correct: false }
+      - { value: "`form_element_label(form.field_name)`", correct: false }
+    help: |
+      `form_label` renders the label for a form field.
+      https://symfony.com/doc/current/form/form_customization.html#form-label
+
+  -
+    question: >
+      Which Twig helper function is used to render only the error messages for a specific form field, without rendering the label or widget?
+    answers:
+      - { value: "`form_errors(form.field_name)`", correct: true }
+      - { value: "`form_field_errors(form.field_name)`", correct: false }
+      - { value: "`form_validation_errors(form.field_name)`", correct: false }
+      - { value: "`form_error_messages(form.field_name)`", correct: false }
+    help: |
+      `form_errors` can be applied to individual fields to display their specific validation errors.
+      https://symfony.com/doc/current/form/form_customization.html#form-errors
+
+  -
+    question: >
+      Which built-in form type is used to create a submit button in a Symfony form?
+    answers:
+      - { value: "`SubmitType`", correct: true }
+      - { value: "`ButtonType`", correct: false }
+      - { value: "`FormButtonType`", correct: false }
+      - { value: "`ActionType`", correct: false }
+    help: |
+      `SubmitType` creates an HTML submit button.
+      https://symfony.com/doc/current/reference/forms/types/SubmitType.html
+
+  -
+    question: |
+      When using `CollectionType` for a nested form, what option is used to specify the form type for each entry in the collection?
+    answers:
+      - { value: "`entry_type`", correct: true }
+      - { value: "`child_type`", correct: false }
+      - { value: "`item_type`", correct: false }
+      - { value: "`collection_entry_type`", correct: false }
+    help: |
+      The `entry_type` option specifies the fully qualified class name of the form type to use for each item in the collection.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_3
+
+  -
+    question: >
+      In Symfony, where are validation constraints for an entity typically defined to be automatically applied when the entity is used in a form?
+    answers:
+      - { value: "As PHP attributes (e.g., `#[Assert\NotBlank]`) directly on the entity properties.", correct: true }
+      - { value: "In a separate YAML or XML validation file (e.g., `config/validator/validation.yaml`).", correct: true }
+      - { value: "Within the `configureOptions()` method of the associated form type.", correct: false }
+      - { value: "By calling `addConstraint()` on the form builder.", correct: false }
+    help: |
+      Validation constraints can be defined using PHP attributes, YAML, or XML files, and Symfony's Validator component will automatically apply them when an entity is validated (e.g., via a form).
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_13
+
+  -
+    question: >
+      When should you generally prefer creating a dedicated form class (extending `AbstractType`) over using `createFormBuilder()` directly in a controller?
+    answers:
+      - { value: "When the form is complex, needs to be reused, or requires custom options and events.", correct: true }
+      - { value: "Only when the form is bound to a Doctrine entity.", correct: false }
+      - { value: "When the form is very simple and used only once in a single controller action.", correct: false }
+      - { value: "When you need to disable CSRF protection.", correct: false }
+    help: |
+      Dedicated form classes promote reusability, maintainability, and better organization for complex forms. `createFormBuilder()` is suitable for very simple, one-off forms.
+      https://symfony.com/doc/current/forms.html#creating-form-classes
+
+  -
+    question: |
+      Which of the following form types is typically used to embed a single instance of another form type within a parent form?
+    answers:
+      - { value: "The fully qualified class name of the embedded form type (e.g., `CategoryType::class`)", correct: true }
+      - { value: "`EmbeddedType`", correct: false }
+      - { value: "`FormType`", correct: false }
+      - { value: "`ChildType`", correct: false }
+    help: |
+      To embed a single instance of another form type, you simply use its class name as the type for the field.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/embedded.rst#_snippet_3
+
+  -
+    question: >
+      What is the purpose of the `#[AsCommand]` attribute in the context of Symfony console commands?
+    answers:
+      - { value: "To define the command's name, description, and other configuration directly in the class.", correct: true }
+      - { value: "To register the command as a service in the container.", correct: false }
+      - { value: "To enable autowiring for command arguments.", correct: false }
+      - { value: "To mark the command as a background process.", correct: false }
+    help: |
+      The `#[AsCommand]` attribute provides a convenient way to configure console commands using PHP attributes.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: |
+      Given the following Twig snippet, what is the effect of `{{ form_start(form, { attr: { id: 'sport_meetup_form' } }) }}`?
+
+      ```twig
+      {# templates/meetup/create.html.twig #}
+      {{ form_start(form, { attr: { id: 'sport_meetup_form' } }) }}
+      ```
+    answers:
+      - { value: "It renders the opening `<form>` tag with the `id=\"sport_meetup_form\"` attribute.", correct: true }
+      - { value: "It sets the ID of the form object in the controller.", correct: false }
+      - { value: "It defines a new form theme for the current form.", correct: false }
+      - { value: "It adds a hidden input field with the name `sport_meetup_form`.", correct: false }
+    help: |
+      The `attr` option in `form_start` allows you to add custom HTML attributes to the `<form>` tag.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/dynamic_form_modification.rst#_snippet_14
+
+  -
+    question: >
+      Which method of `Symfony\Component\Form\FormInterface` is responsible for recognizing form submission and populating the form with submitted data?
+    answers:
+      - { value: "`handleRequest(request: Request): void`", correct: true }
+      - { value: "`submit(data: array): void`", correct: false }
+      - { value: "`bind(request: Request): void`", correct: false }
+      - { value: "`populate(request: Request): void`", correct: false }
+    help: |
+      The `handleRequest()` method processes the incoming HTTP request and populates the form.
+      https://github.com/symfony/symfony-docs/blob/7.3/components/form.rst#_snippet_26
+
+  -
+    question: >
+      What is the purpose of the `buildView()` method in a custom Symfony form type?
+    answers:
+      - { value: "To set any extra variables needed when rendering the field in a form theme template.", correct: true }
+      - { value: "To define the form fields and their options.", correct: false }
+      - { value: "To configure the default options for the form type.", correct: false }
+      - { value: "To process the submitted data before validation.", correct: false }
+    help: |
+      `buildView()` is used to add or modify variables that will be available in the Twig template when rendering the form field.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: >
+      What is the purpose of the `finishView()` method in a custom Symfony form type, and when is it particularly useful compared to `buildView()`?
+    answers:
+      - { value: "It's useful for accessing child views (e.g., `\$view['child_name']`) when the form type consists of many fields, as all child views are guaranteed to be built.", correct: true }
+      - { value: "It's called before `buildView()` and is used for initial setup of the form view.", correct: false }
+      - { value: "It's used to finalize the form submission process.", correct: false }
+      - { value: "It's where you define the final HTML output for the form.", correct: false }
+    help: |
+      `finishView()` is called after all child views have been built, making it suitable for operations that depend on the complete view hierarchy.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: |
+      Which Twig function is the reliable way to get the parent form view of a given form view, returning `null` if it's the root form?
+    answers:
+      - { value: "`form_parent(form_view)`", correct: true }
+      - { value: "`form_view.parent`", correct: false }
+      - { value: "`get_parent_form(form_view)`", correct: false }
+      - { value: "`form_view.getParent()`", correct: false }
+    help: |
+      The `form_parent` function is the correct and reliable way to access the parent form view in Twig.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_customization.rst#_snippet_20
+
+  -
+    question: >
+      What is the primary benefit of defining a dedicated form class (e.g., `TaskType`) instead of creating forms inline with `createFormBuilder()` in a controller?
+    answers:
+      - { value: "Improved reusability and separation of concerns, making forms easier to manage and test.", correct: true }
+      - { value: "Automatic integration with Doctrine ORM for database persistence.", correct: false }
+      - { value: "Enhanced performance due to compile-time optimization.", correct: false }
+      - { value: "Simplified client-side JavaScript integration.", correct: false }
+    help: |
+      Dedicated form classes promote modularity and reusability, which are key principles in larger applications.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_5
+
+  -
+    question: |
+      When defining a `CollectionType` field in a Symfony form, what option can be used to pass options to each individual entry form within the collection?
+    answers:
+      - { value: "`entry_options`", correct: true }
+      - { value: "`child_options`", correct: false }
+      - { value: "`item_options`", correct: false }
+      - { value: "`collection_options`", correct: false }
+    help: |
+      The `entry_options` array is passed to each form type created for the collection entries.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_3
+
+  -
+    question: >
+      What is the purpose of the `block_name` option when defining a `CollectionType` in a Symfony form?
+    answers:
+      - { value: "To provide a custom block name for rendering the collection in Twig, allowing for more specific theming.", correct: true }
+      - { value: "To define the HTML `id` attribute for the collection's container element.", correct: false }
+      - { value: "To specify the name of the JavaScript file used for dynamic collection manipulation.", correct: false }
+      - { value: "To set the default label for each entry in the collection.", correct: false }
+    help: |
+      The `block_name` option allows you to customize the Twig block name used for rendering the collection, which is useful for form theming.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_themes.rst#_snippet_14
+
+  -
+    question: |
+      Consider a scenario where you have a `Task` entity with a `tags` property that is a `Collection` of `Tag` entities. How would you define the `tags` field in `TaskType` to allow embedding multiple `TagType` forms?
+    answers:
+      - { value: |
+          ```php
+          $builder->add('tags', CollectionType::class, [
+              'entry_type' => TagType::class,
+              'entry_options' => ['label' => false],
+          ]);
+          ```, correct: true }
+      - { value: |
+          ```php
+          $builder->add('tags', CollectionType::class, [
+              'type' => TagType::class,
+          ]);
+          ```, correct: false }
+      - { value: |
+          ```php
+          $builder->add('tags', 'collection', [
+              'entry_type' => TagType::class,
+          ]);
+          ```, correct: false }
+      - { value: |
+          ```php
+          $builder->addCollection('tags', TagType::class);
+          ```, correct: false }
+    help: |
+      `CollectionType` is used with `entry_type` to specify the form type for each element in the collection.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_3
+
+  -
+    question: |
+      When rendering a `CollectionType` in Twig, how would you iterate over the individual entries (e.g., `tag` in `form.tags`) to render each nested form's fields?
+    answers:
+      - { value: |
+          ```twig
+          {% for tag in form.tags %}
+              {{ form_row(tag.name) }}
+          {% endfor %}
+          ```, correct: true }
+      - { value: |
+          ```twig
+          {% for tag in form.tags.children %}
+              {{ form_row(tag.name) }}
+          {% endfor %}
+          ```, correct: false }
+      - { value: |
+          ```twig
+          {% for tag in form.tags.entries %}
+              {{ form_row(tag.name) }}
+          {% endfor %}
+          ```, correct: false }
+      - { value: |
+          ```twig
+          {{ form_rows(form.tags) }}
+          ```, correct: false }
+    help: |
+      You can iterate directly over the form view of the collection field to access its children.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_6
+
+  -
+    question: >
+      What is the primary role of the `OptionsResolver` in the `configureOptions()` method of a Symfony form type?
+    answers:
+      - { value: "To define, validate, and set default values for the options that can be passed to the form type.", correct: true }
+      - { value: "To resolve the data class associated with the form type.", correct: false }
+      - { value: "To manage the form's internal state during submission.", correct: false }
+      - { value: "To guess the form field types based on entity metadata.", correct: false }
+    help: |
+      `OptionsResolver` is a powerful component for managing configuration options, ensuring they are valid and providing default values.
+      https://symfony.com/doc/current/form/create_custom_field_type.html#form-type-options
+
+  -
+    question: >
+      Which of the following is a key benefit of using dedicated form classes (extending `AbstractType`) instead of inline form creation with `createFormBuilder()`?
+    answers:
+      - { value: "Encapsulation of form logic, making forms reusable and testable in isolation.", correct: true }
+      - { value: "Reduced boilerplate code for simple forms.", correct: false }
+      - { value: "Direct access to the `Request` object within the form class.", correct: false }
+      - { value: "Automatic database persistence for submitted data.", correct: false }
+    help: |
+      Dedicated form classes promote better architecture by encapsulating form-related logic.
+      https://symfony.com/doc/current/forms.html#creating-form-classes
+
+  -
+    question: |
+      You want to create a form that is not bound to any specific data object or class. How would you instantiate the form builder to achieve this?
+    answers:
+      - { value: "`$form = $this->createFormBuilder()->getForm();`", correct: true }
+      - { value: "`$form = $this->createFormBuilder(null)->getForm();`", correct: false }
+      - { value: "`$form = $this->createForm(FormType::class)->getForm();`", correct: false }
+      - { value: "`$form = $this->createFormBuilder([])->getForm();`", correct: true }
+    help: |
+      Calling `createFormBuilder()` without any arguments or with an empty array creates a form not bound to a specific data object.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/without_class.rst#_snippet_0
+
+  -
+    question: >
+      What is the primary purpose of the `data_class` option in `configureOptions()` for a form type?
+    answers:
+      - { value: "To specify the fully qualified class name of the object that the form will map its data to.", correct: true }
+      - { value: "To define the default data for the form when it's initially rendered.", correct: false }
+      - { value: "To indicate whether the form should handle file uploads.", correct: false }
+      - { value: "To set the name of the database table associated with the form.", correct: false }
+    help: |
+      The `data_class` option tells the form which class to use for data mapping.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/dynamic_form_modification.rst#_snippet_0
+
+  -
+    question: >
+      When using `form_theme` to apply a custom theme, what is the default order of precedence if multiple themes are applied?
+    answers:
+      - { value: "Themes listed later in the array override themes listed earlier.", correct: true }
+      - { value: "Themes listed earlier in the array override themes listed later.", correct: false }
+      - { value: "Global themes always take precedence over local themes.", correct: false }
+      - { value: "The theme with the most specific block definitions takes precedence.", correct: false }
+    help: |
+      The order of themes in the array matters: later themes override earlier ones.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_themes.rst#_snippet_2
+
+  -
+    question: >
+      What is the purpose of the `entry_options` array when defining a `CollectionType`?
+    answers:
+      - { value: "To pass an array of options to each individual form type rendered within the collection.", correct: true }
+      - { value: "To define global options for the entire collection.", correct: false }
+      - { value: "To specify the default data for new entries in the collection.", correct: false }
+      - { value: "To configure validation constraints for each entry.", correct: false }
+    help: |
+      `entry_options` allows you to customize the options for each form type instance within the collection.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_3
+
+  -
+    question: >
+      Which of the following is a valid way to define validation constraints for an entity property in Symfony using PHP attributes?
+    answers:
+      - { value: |
+          ```php
+          use Symfony\Component\Validator\Constraints as Assert;
+
+          class MyEntity
+          {
+              #[Assert\NotBlank]
+              public string $name;
+          }
+          ```, correct: true }
+      - { value: |
+          ```php
+          class MyEntity
+          {
+              /**
+               * @Assert\NotBlank
+               */
+              public string $name;
+          }
+          ```, correct: false }
+      - { value: |
+          ```php
+          class MyEntity
+          {
+              public string $name;
+              public function __construct() {
+                  $this->addConstraint('name', new NotBlank());
+              }
+          }
+          ```, correct: false }
+      - { value: |
+          ```php
+          class MyEntity
+          {
+              public string $name;
+              #[Validation\NotBlank]
+              public string $name;
+          }
+          ```, correct: false }
+    help: |
+      PHP attributes are the modern way to define validation constraints directly on entity properties.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_13
+
+  -
+    question: >
+      What is a "type guesser" in Symfony Forms, and what is its primary function?
+    answers:
+      - { value: "A service that suggests form field types and options based on entity metadata (e.g., Doctrine mapping, validation constraints).", correct: true }
+      - { value: "A tool for debugging form submission issues.", correct: false }
+      - { value: "A mechanism for automatically generating form classes from entities.", correct: false }
+      - { value: "A component that predicts user input for form fields.", correct: false }
+    help: |
+      Type guessers inspect metadata (like Doctrine mapping or validation rules) to automatically determine the best form type and options for a given property.
+      https://symfony.com/doc/current/form/type_guesser.html
+
+  -
+    question: |
+      When using the Symfony Form component in a standalone PHP application (without the full Symfony Framework), how would you register a custom form type guesser?
+    answers:
+      - { value: "By adding it to the `FormFactoryBuilder` using `addTypeGuesser()`.", correct: true }
+      - { value: "By registering it as a service in a DIC configuration file.", correct: false }
+      - { value: "By extending the `AbstractTypeGuesser` class and placing it in the `src/Form/TypeGuesser` directory.", correct: false }
+      - { value: "Type guessers are only available within the full Symfony Framework.", correct: false }
+    help: |
+      In standalone usage, you explicitly add type guessers to the `FormFactoryBuilder`.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/type_guesser.rst#_snippet_5
+
+  -
+    question: >
+      What is the purpose of the `#[Route]` attribute in a Symfony controller, as shown in the context of form handling?
+    answers:
+      - { value: "To define the URL path, name, and HTTP methods for a controller action.", correct: true }
+      - { value: "To automatically generate a form based on the entity.", correct: false }
+      - { value: "To inject services into the controller action.", correct: false }
+      - { value: "To configure the Twig template to be rendered.", correct: false }
+    help: |
+      The `#[Route]` attribute is used for routing, mapping URLs to controller actions.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/dynamic_form_modification.rst#_snippet_13
+
+  -
+    question: >
+      Which of the following is a valid way to create a basic form factory when using the Symfony Form component standalone (outside of a full Symfony application)?
+    answers:
+      - { value: "`Forms::createFormFactory()`", correct: true }
+      - { value: "`FormFactory::create()`", correct: false }
+      - { value: "`new FormFactory()`", correct: false }
+      - { value: "`Forms::getFactory()`", correct: false }
+    help: |
+      The `Forms` class provides static methods for creating a form factory in a standalone environment.
+      https://github.com/symfony/symfony-docs/blob/7.3/components/form.rst#_snippet_1
+
+  -
+    question: |
+      When rendering a Symfony form in Twig, what is the purpose of the `form_start(form)` helper function?
+    answers:
+      - { value: "It generates the opening `<form>` tag, including `method`, `action`, and `enctype` attributes.", correct: true }
+      - { value: "It renders the first field of the form.", correct: false }
+      - { value: "It initializes the form object in the Twig template.", correct: false }
+      - { value: "It displays any global form errors.", correct: false }
+    help: |
+      `form_start` is responsible for rendering the opening HTML form tag.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_5
+
+  -
+    question: >
+      What is the purpose of the `data_class` option in the `configureOptions` method of a custom form type?
+    answers:
+      - { value: "It specifies the fully qualified class name of the object that the form will map its data to.", correct: true }
+      - { value: "It defines the default data for the form when it's initially rendered.", correct: false }
+      - { value: "It indicates whether the form should handle file uploads.", correct: false }
+      - { value: "It sets the name of the database table associated with the form.", correct: false }
+    help: |
+      The `data_class` option tells the form which class to use for data mapping.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/dynamic_form_modification.rst#_snippet_0
+
+  -
+    question: >
+      Which of the following is the most appropriate way to define a simple PHP object (POPO) for use as a data model with Symfony Forms?
+    answers:
+      - { value: "A plain PHP class with public or protected properties and public getters/setters.", correct: true }
+      - { value: "A class that extends `Symfony\Component\Form\Data\FormData`.", correct: false }
+      - { value: "An interface that defines the expected properties for the form.", correct: false }
+      - { value: "A class that implements `Serializable`.", correct: false }
+    help: |
+      Symfony Forms can bind to simple PHP objects (POPOs) as long as they have accessible properties (public or via getters/setters).
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_1
+
+  -
+    question: >
+      What is the primary benefit of using `Collection` constraint for validation in `configureOptions` compared to individual field constraints?
+    answers:
+      - { value: "It allows defining validation rules for multiple fields in a centralized manner within the form type's options.", correct: true }
+      - { value: "It enables client-side validation automatically.", correct: false }
+      - { value: "It is more performant for large forms.", correct: false }
+      - { value: "It allows for dynamic validation based on other form fields.", correct: false }
+    help: |
+      The `Collection` constraint allows you to define validation rules for a set of fields, making the configuration more organized.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/without_class.rst#_snippet_3
+
+  -
+    question: >
+      When embedding a custom form type (e.g., `ShippingType`) into another form (e.g., `OrderType`), what is the key advantage of this approach?
+    answers:
+      - { value: "Promotes modularity and reusability of complex form structures.", correct: true }
+      - { value: "Automatically handles database persistence for embedded data.", correct: false }
+      - { value: "Simplifies client-side JavaScript for dynamic form manipulation.", correct: false }
+      - { value: "Reduces the total number of form types needed in the application.", correct: false }
+    help: |
+      Embedding form types allows you to build complex forms from smaller, reusable components.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_1
+
+  -
+    question: >
+      What is the purpose of the `#[Assert\Type(\DateTimeInterface::class)]` attribute when applied to a `dueDate` property in a Symfony entity?
+    answers:
+      - { value: "It ensures that the `dueDate` property holds a value that is an instance of `DateTimeInterface` (or a class implementing it).", correct: true }
+      - { value: "It automatically converts the input to a `DateTimeInterface` object.", correct: false }
+      - { value: "It defines the display format for the date in the form.", correct: false }
+      - { value: "It marks the `dueDate` as a required field.", correct: false }
+    help: |
+      The `Type` constraint validates that a value is of a certain PHP type or an instance of a given class/interface.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_13
+
+  -
+    question: >
+      Which of the following is NOT a standard way to define validation constraints for an entity in Symfony?
+    answers:
+      - { value: "Directly within the `buildForm()` method of the form type using `add()` options.", correct: true }
+      - { value: "Using PHP attributes on entity properties.", correct: false }
+      - { value: "Using YAML configuration files.", correct: false }
+      - { value: "Using XML configuration files.", correct: false }
+    help: |
+      While you can add constraints directly in `buildForm()` using the `constraints` option, the standard practice for entity validation is via attributes, YAML, or XML on the entity itself.
+      https://symfony.com/doc/current/forms.rst#adding-validation
+
+  -
+    question: >
+      When creating a form type, what is the purpose of the `setDefaults()` method of the `OptionsResolver`?
+    answers:
+      - { value: "To define the default values for the options that can be passed to the form type.", correct: true }
+      - { value: "To set the default data for the form's initial display.", correct: false }
+      - { value: "To configure the default HTML attributes for the form's fields.", correct: false }
+      - { value: "To specify the default validation groups for the form.", correct: false }
+    help: |
+      `setDefaults()` is used to define the default values for the form type's options.
+      https://symfony.com/doc/current/form/create_custom_field_type.html#form-type-options
+
+  -
+    question: >
+      What is the main advantage of using `FormBuilderInterface` to define form fields in a custom form type's `buildForm()` method?
+    answers:
+      - { value: "It provides a fluent interface for adding fields and allows for dynamic form creation.", correct: true }
+      - { value: "It automatically generates getters and setters for form data.", correct: false }
+      - { value: "It handles form submission and validation automatically.", correct: false }
+      - { value: "It links the form directly to a database table.", correct: false }
+    help: |
+      `FormBuilderInterface` offers a flexible way to construct forms programmatically.
+      https://symfony.com/doc/current/form/create_custom_field_type.html#form-type-methods
+
+  -
+    question: >
+      When rendering a form in Twig, what is the purpose of the `form_row(form.field_name)` helper?
+    answers:
+      - { value: "It renders the label, errors, and widget for a single form field.", correct: true }
+      - { value: "It renders only the input widget for a field.", correct: false }
+      - { value: "It renders only the label for a field.", correct: false }
+      - { value: "It renders the entire form as a single row.", correct: false }
+    help: |
+      `form_row` is a convenience helper that renders the entire row for a field, including its label, errors, and widget.
+      https://symfony.com/doc/current/form/form_customization.html#form-row
+
+  -
+    question: >
+      What is the purpose of the `entry_options` key in a `CollectionType` field definition?
+    answers:
+      - { value: "To pass options to each individual form type instance within the collection.", correct: true }
+      - { value: "To define options for the `CollectionType` itself.", correct: false }
+      - { value: "To specify the default data for new entries.", correct: false }
+      - { value: "To configure the HTML attributes for the collection's container.", correct: false }
+    help: |
+      `entry_options` allows you to customize the options for each form within the collection.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_collections.rst#_snippet_3
+
+  -
+    question: >
+      When handling a form submission in a Symfony controller, after `$form->handleRequest($request);`, what is the typical next step to ensure data integrity before further processing?
+    answers:
+      - { value: "Check `$form->isValid()`.", correct: true }
+      - { value: "Call `$form->save()`.", correct: false }
+      - { value: "Access `$request->request->all()`.", correct: false }
+      - { value: "Redirect to a success page.", correct: false }
+    help: |
+      `isValid()` checks if the submitted data meets all defined validation constraints.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_11
+
+  -
+    question: >
+      What is the primary role of the `FormBuilderInterface` in Symfony Forms?
+    answers:
+      - { value: "To construct and configure forms by adding fields and their options.", correct: true }
+      - { value: "To render form HTML in Twig templates.", correct: false }
+      - { value: "To handle HTTP requests and populate form data.", correct: false }
+      - { value: "To validate submitted form data.", correct: false }
+    help: |
+      The `FormBuilderInterface` is used to build the form structure.
+      https://symfony.com/doc/current/form/create_custom_field_type.html#form-type-methods
+
+  -
+    question: >
+      Which of the following is a key advantage of using Symfony's built-in form types (e.g., `TextType`, `DateType`)?
+    answers:
+      - { value: "They provide pre-built HTML rendering, basic validation, and data transformation for common input types.", correct: true }
+      - { value: "They automatically integrate with any database ORM.", correct: false }
+      - { value: "They are the only way to create forms in Symfony.", correct: false }
+      - { value: "They allow for direct manipulation of the HTTP request.", correct: false }
+    help: |
+      Built-in types offer ready-to-use functionality for common form elements.
+      https://symfony.com/doc/current/reference/forms/types.html
+
+  -
+    question: >
+      What is the purpose of the `data_class` option when defining a form type, and where is it typically configured?
+    answers:
+      - { value: "It specifies the class of the underlying data object that the form will interact with, configured in `configureOptions()`.", correct: true }
+      - { value: "It defines the default values for the form fields, configured in `buildForm()`.", correct: false }
+      - { value: "It indicates the Twig template used for rendering the form, configured in `services.yaml`.", correct: false }
+      - { value: "It sets the name of the database table for form persistence, configured in `config/packages/doctrine.yaml`.", correct: false }
+    help: |
+      `data_class` is set in `configureOptions()` to link the form to a specific data object.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/dynamic_form_modification.rst#_snippet_0
+
+  -
+    question: >
+      When creating a custom form type, what is the purpose of the `getParent()` method (if overridden) and what should it return?
+    answers:
+      - { value: "It specifies the parent form type from which the current form type inherits its behavior and options; it should return the FQCN of the parent type.", correct: true }
+      - { value: "It returns the parent form object in the form hierarchy.", correct: false }
+      - { value: "It defines the parent Twig template for form theming.", correct: false }
+      - { value: "It is used to access the parent controller's methods.", correct: false }
+    help: |
+      The `getParent()` method defines the inheritance hierarchy of form types.
+      https://symfony.com/doc/current/form/create_custom_field_type.html#form-type-inheritance
+
+  -
+    question: >
+      What is the primary benefit of using Form Events (e.g., `FormEvents::PRE_SET_DATA`, `FormEvents::POST_SUBMIT`) in Symfony Forms?
+    answers:
+      - { value: "To allow for dynamic modification of form data or structure at different points in the form's lifecycle.", correct: true }
+      - { value: "To automatically log all form submissions to a database.", correct: false }
+      - { value: "To enable client-side JavaScript validation.", correct: false }
+      - { value: "To bypass the default form validation process.", correct: false }
+    help: |
+      Form events provide hooks to interact with and modify the form at various stages of its processing.
+      https://symfony.com/doc/current/form/events.html
+
+  -
+    question: >
+      When should you consider creating a custom form type extension instead of modifying an existing form type directly or creating a new custom form type?
+    answers:
+      - { value: "When you want to add new options or modify the behavior of an existing built-in or third-party form type without altering its source code.", correct: true }
+      - { value: "When you need to create a completely new form field type with unique rendering.", correct: false }
+      - { value: "When you want to define a form that is not bound to a data class.", correct: false }
+      - { value: "When you need to perform complex data transformations between the model and the view.", correct: false }
+    help: |
+      Form type extensions are ideal for extending existing types in a non-intrusive way.
+      https://symfony.com/doc/current/form/type_extensions.html
+
+  -
+    question: >
+      What is the purpose of the `#[AsCommand]` attribute in a Symfony console command class?
+    answers:
+      - { value: "To define the command's name, description, and other configuration directly within the class.", correct: true }
+      - { value: "To register the command as a service in the dependency injection container.", correct: false }
+      - { value: "To enable autowiring for command arguments.", correct: false }
+      - { value: "To specify the default input and output streams for the command.", correct: false }
+    help: |
+      The `#[AsCommand]` attribute provides a modern way to configure console commands.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: >
+      When rendering a form in Twig, what is the purpose of the `form_widget(form.field_name)` helper?
+    answers:
+      - { value: "It renders only the HTML input element (e.g., `<input>`, `<select>`, `<textarea>`) for a single form field.", correct: true }
+      - { value: "It renders the label, errors, and widget for a field.", correct: false }
+      - { value: "It renders only the label for a field.", correct: false }
+      - { value: "It renders the entire form as a single widget.", correct: false }
+    help: |
+      `form_widget` is used to render the main HTML input element of a form field.
+      https://symfony.com/doc/current/form/form_customization.html#form-widget
+
+  -
+    question: >
+      What is the primary role of the `OptionsResolver` in the `configureOptions()` method of a Symfony form type?
+    answers:
+      - { value: "To define, validate, and set default values for the options that can be passed to the form type.", correct: true }
+      - { value: "To resolve the data class associated with the form type.", correct: false }
+      - { value: "To manage the form's internal state during submission.", correct: false }
+      - { value: "To guess the form field types based on entity metadata.", correct: false }
+    help: |
+      `OptionsResolver` is a powerful component for managing configuration options, ensuring they are valid and providing default values.
+      https://symfony.com/doc/current/form/create_custom_field_type.html#form-type-options
+
+  -
+    question: >
+      Which of the following is a valid way to define validation constraints for an entity property in Symfony using YAML configuration?
+    answers:
+      - { value: |
+          ```yaml
+          # config/validator/validation.yaml
+          App\Entity\Task:
+              properties:
+                  task:
+                      - NotBlank: ~
+          ```, correct: true }
+      - { value: |
+          ```yaml
+          # config/validator/validation.yaml
+          App\Entity\Task:
+              task:
+                  NotBlank: true
+          ```, correct: false }
+      - { value: |
+          ```yaml
+          # config/validator/validation.yaml
+          validation:
+              App\Entity\Task:
+                  task:
+                      - NotBlank: ~
+          ```, correct: false }
+      - { value: |
+          ```yaml
+          # config/validator/validation.yaml
+          constraints:
+              App\Entity\Task:
+                  properties:
+                      task:
+                          - NotBlank: ~
+          ```, correct: false }
+    help: |
+      YAML is a supported format for defining validation constraints for entities.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_13
+
+  -
+    question: >
+      What is the purpose of the `#[Assert\NotBlank]` attribute when applied to a property in a Symfony entity?
+    answers:
+      - { value: "It ensures that the property's value is not empty, null, or a string containing only whitespace.", correct: true }
+      - { value: "It automatically populates the property with a default non-blank value.", correct: false }
+      - { value: "It prevents the form field from being rendered if the property is blank.", correct: false }
+      - { value: "It marks the property as a required field in the database schema.", correct: false }
+    help: |
+      The `NotBlank` constraint is a common validation rule to ensure a value is not empty.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_13
+
+  -
+    question: >
+      When creating a custom form type, what is the purpose of the `buildForm()` method?
+    answers:
+      - { value: "To configure the form by adding fields and their options to the `FormBuilderInterface`.", correct: true }
+      - { value: "To set default options for the form type.", correct: false }
+      - { value: "To render the form in a Twig template.", correct: false }
+      - { value: "To handle the form submission request.", correct: false }
+    help: |
+      `buildForm()` is where the form's structure is defined.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: >
+      Which of the following is a valid way to define validation constraints for an entity property in Symfony using XML configuration?
+    answers:
+      - { value: |
+          ```xml
+          <!-- config/validator/validation.xml -->
+          <?xml version="1.0" encoding="UTF-8" ?>
+          <constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping
+                          https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
+
+                      <class name="App\Entity\Task">
+                          <property name="task">
+                              <constraint name="NotBlank"/>
+                          </property>
+                      </class>
+                  </constraint-mapping>
+          ```, correct: true }
+      - { value: |
+          ```xml
+          <!-- config/validator/validation.xml -->
+          <validation>
+              <entity name="App\Entity\Task">
+                  <field name="task">
+                      <NotBlank/>
+                  </field>
+              </entity>
+          </validation>
+          ```, correct: false }
+      - { value: |
+          ```xml
+          <!-- config/validator/validation.xml -->
+          <constraints>
+              <class name="App\Entity\Task">
+                  <property name="task" constraint="NotBlank"/>
+              </class>
+          </constraints>
+          ```, correct: false }
+      - { value: |
+          ```xml
+          <!-- config/validator/validation.xml -->
+          <mapping>
+              <class name="App\Entity\Task">
+                  <property name="task" type="NotBlank"/>
+              </class>
+          </mapping>
+          ```, correct: false }
+    help: |
+      XML is a supported format for defining validation constraints for entities.
+      https://github.com/symfony/symfony-docs/blob/7.3/forms.rst#_snippet_13
+
+  -
+    question: >
+      What is the purpose of the `configureOptions()` method in a custom Symfony form type?
+    answers:
+      - { value: "To define and configure the options that can be passed to the form type, including default values and validation.", correct: true }
+      - { value: "To build the form fields and their structure.", correct: false }
+      - { value: "To handle the form submission and data mapping.", correct: false }
+      - { value: "To render the form in a Twig template.", correct: false }
+    help: |
+      `configureOptions()` is where you define the configurable options for your form type.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: >
+      When creating a custom form type, what is the purpose of the `buildView()` method?
+    answers:
+      - { value: "To set any extra variables needed when rendering the field in a form theme template.", correct: true }
+      - { value: "To define the form fields and their options.", correct: false }
+      - { value: "To configure the default options for the form type.", correct: false }
+      - { value: "To process the submitted data before validation.", correct: false }
+    help: |
+      `buildView()` is used to add or modify variables that will be available in the Twig template when rendering the form field.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: >
+      What is the purpose of the `finishView()` method in a custom Symfony form type, and when is it particularly useful compared to `buildView()`?
+    answers:
+      - { value: "It's useful for accessing child views (e.g., `\$view['child_name']`) when the form type consists of many fields, as all child views are guaranteed to be built.", correct: true }
+      - { value: "It's called before `buildView()` and is used for initial setup of the form view.", correct: false }
+      - { value: "It's used to finalize the form submission process.", correct: false }
+      - { value: "It's where you define the final HTML output for the form.", correct: false }
+    help: |
+      `finishView()` is called after all child views have been built, making it suitable for operations that depend on the complete view hierarchy.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/create_custom_field_type.rst#_snippet_4
+
+  -
+    question: >
+      What is the primary purpose of the `FormEvents::PRE_SET_DATA` event in Symfony Forms?
+    answers:
+      - { value: "To allow modification of the data before it's bound to the form, useful for adding default values or modifying initial data.", correct: true }
+      - { value: "To modify the submitted data before validation.", correct: false }
+      - { value: "To perform actions after the form has been submitted and validated.", correct: false }
+      - { value: "To set up dynamic form fields based on initial data.", correct: false }
+    help: |
+      `PRE_SET_DATA` is triggered before any data is set on the form, allowing you to modify the initial data.
+      https://symfony.com/doc/current/form/events.html#pre-set-data-and-post-set-data
+
+  -
+    question: >
+      What is the primary purpose of the `FormEvents::POST_SET_DATA` event in Symfony Forms?
+    answers:
+      - { value: "To allow modification of the form's structure after the initial data has been set, useful for adding or removing fields based on that data.", correct: true }
+      - { value: "To modify the submitted data after validation.", correct: false }
+      - { value: "To perform actions after the form has been submitted and validated.", correct: false }
+      - { value: "To add default values to the form before it's displayed.", correct: false }
+    help: |
+      `POST_SET_DATA` is triggered after the form's initial data has been set, allowing for dynamic form modifications based on that data.
+      https://symfony.com/doc/current/form/events.html#pre-set-data-and-post-set-data
+
+  -
+    question: >
+      When should you use `#[AsCommand]` attribute for a console command?
+    answers:
+      - { value: "When defining a console command in a Symfony application to configure its name and description.", correct: true }
+      - { value: "When creating a form type for a console application.", correct: false }
+      - { value: "When registering a service in the dependency injection container.", correct: false }
+      - { value: "When defining a custom Twig function for console output.", correct: false }
+    help: |
+      `#[AsCommand]` is specifically for configuring console commands.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: >
+      What is the purpose of the `attr` option when rendering a form field's widget using `form_widget()` in Twig?
+    answers:
+      - { value: "To add custom HTML attributes (e.g., `class`, `placeholder`, `data-*`) to the rendered input element.", correct: true }
+      - { value: "To define the data type of the form field.", correct: false }
+      - { value: "To specify the validation rules for the field.", correct: false }
+      - { value: "To set the default value of the field.", correct: false }
+    help: |
+      The `attr` option allows you to customize the HTML attributes of the rendered widget.
+      https://github.com/symfony/symfony-docs/blob/7.3/form/form_customization.rst#_snippet_14
+
+  -
+    question: >
+      Which of the following is a key advantage of using Symfony's Form component for building web forms?
+    answers:
+      - { value: "It handles form creation, submission, validation, and rendering in a structured and reusable way.", correct: true }
+      - { value: "It automatically generates database tables for form data.", correct: false }
+      - { value: "It provides a built-in JavaScript framework for client-side validation.", correct: false }
+      - { value: "It eliminates the need for Twig templates for form rendering.", correct: false }
+    help: |
+      The Form component provides a comprehensive solution for managing forms.
+      https://symfony.com/doc/current/forms.html
