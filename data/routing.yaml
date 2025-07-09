@@ -1,0 +1,1741 @@
+category: Routing
+
+questions:
+  -
+    question: >
+      What is the primary PHP attribute used to define a route on a controller method in Symfony 7?
+    answers:
+      - { value: "`#[Route]`", correct: true }
+      - { value: "`#[Path]`", correct: false }
+      - { value: "`#[Mapping]`", correct: false }
+      - { value: "`#[Url]`", correct: false }
+    help: |
+      The `#[Route]` attribute is used to define the path, name, and other options for a route directly on the controller method or class.
+      https://symfony.com/doc/current/routing.html#defining-routes-as-php-attributes
+
+  -
+    question: >
+      How do you define a basic route in a Symfony YAML configuration file?
+    answers:
+      - { value: "By specifying `path` and `controller` keys under a route name.", correct: true }
+      - { value: "By using `url` and `action` keys.", correct: false }
+      - { value: "By defining a `target` and `method`.", correct: false }
+      - { value: "By setting `route_name` and `handler`.", correct: false }
+    help: |
+      In YAML, routes are defined with a unique name, a `path`, and a `controller` key specifying the controller class and method.
+      https://symfony.com/doc/current/routing.html#defining-routes-in-yaml
+
+  -
+    question: |
+      Given the following PHP attribute route definition, which URL would successfully match this route?
+
+      ```php
+      #[Route('/blog/{page<\d+>}', name: 'blog_list')]
+      public function list(int $page): Response {}
+      ```
+    answers:
+      - { value: "/blog/123", correct: true }
+      - { value: "/blog/hello", correct: false }
+      - { value: "/blog/123/extra", correct: false }
+      - { value: "/blog/", correct: false }
+    help: |
+      The `<\\d+>` requirement in the path ensures that the `page` parameter must consist of one or more digits.
+      https://symfony.com/doc/current/routing.html#route-parameters-requirements
+
+  -
+    question: |
+      In YAML, how would you define a requirement for a route parameter `page` to only accept digits?
+    answers:
+      - { value: '''
+blog_list:
+    path: /blog/{page}
+    requirements:
+        page: '\d+'
+'''
+, correct: true }
+      - { value: '''
+blog_list:
+    path: /blog/{page<\d+>}
+'''
+, correct: false }
+      - { value: '''
+blog_list:
+    path: /blog/{page}
+    regex:
+        page: '\d+'
+'''
+, correct: false }
+      - { value: '''
+blog_list:
+    path: /blog/{page}
+    constraints:
+        page: '\d+'
+'''
+, correct: false }
+    help: |
+      In YAML, parameter requirements are defined under the `requirements` key, with the parameter name as the key and the regex as the value.
+      https://symfony.com/doc/current/routing.html#route-parameters-requirements
+
+  -
+    question: |
+      Consider the following route definition:
+
+      ```php
+      use Symfony\Component\Routing\Route;
+      $routes->add('hello', new Route('/hello/{name}', ['name' => 'World']));
+      ```
+      Which URL would resolve to the `hello` route with the `name` parameter defaulting to 'World'?
+    answers:
+      - { value: "/hello", correct: true }
+      - { value: "/hello/Symfony", correct: false }
+      - { value: "/hello/", correct: false }
+      - { value: "/hello?name=World", correct: false }
+    help: |
+      When a route parameter has a default value, the parameter becomes optional. If the parameter is not provided in the URL, the default value is used.
+      https://symfony.com/doc/current/create_framework/routing.html#defining-routes
+
+  -
+    question: >
+      Which Symfony method is commonly used in a controller to generate a URL for a given route name?
+    answers:
+      - { value: "`generateUrl()`", correct: true }
+      - { value: "`createUrl()`", correct: false }
+      - { value: "`getUrl()`", correct: false }
+      - { value: "`buildUrl()`", correct: false }
+    help: |
+      Controllers extending `AbstractController` provide a `generateUrl()` helper method to create URLs based on route names and parameters.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-controllers
+
+  -
+    question: >
+      To generate an absolute URL (e.g., `https://example.com/login`) for a route named `login`, what is the correct `referenceType` to pass as the third argument to `generateUrl()`?
+    answers:
+      - { value: "`UrlGeneratorInterface::ABSOLUTE_URL`", correct: true }
+      - { value: "`UrlGeneratorInterface::RELATIVE_PATH`", correct: false }
+      - { value: "`UrlGeneratorInterface::NETWORK_PATH`", correct: false }
+      - { value: "`UrlGeneratorInterface::ABSOLUTE_PATH`", correct: false }
+    help: |
+      The `UrlGeneratorInterface` defines constants for different URL generation types, including `ABSOLUTE_URL`.
+      https://symfony.com/doc/current/routing.html#generating-absolute-urls
+
+  -
+    question: >
+      What Symfony controller can be used to configure a route that performs a redirect to another route or external URL?
+    answers:
+      - { value: "`Symfony\\Bundle\\FrameworkBundle\\Controller\\RedirectController`", correct: true }
+      - { value: "`Symfony\\Component\\HttpFoundation\\RedirectResponse`", correct: false }
+      - { value: "`Symfony\\Component\\Routing\\Redirector`", correct: false }
+      - { value: "`Symfony\\Component\\HttpKernel\\Controller\\RedirectController`", correct: false }
+    help: |
+      The `RedirectController` is a built-in Symfony controller specifically designed for handling redirects via routing configuration.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      To configure a permanent (HTTP 301) redirect using the `RedirectController` in YAML, which `defaults` option should be set to `true`?
+    answers:
+      - { value: "`permanent`", correct: true }
+      - { value: "`statusCode`", correct: false }
+      - { value: "`isPermanent`", correct: false }
+      - { value: "`redirectType`", correct: false }
+    help: |
+      The `permanent` option in the `RedirectController` defaults config determines if the redirect is temporary (302/307) or permanent (301/308).
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      Which special route parameter is used by Symfony to set the locale on the `Request` object?
+    answers:
+      - { value: "`_locale`", correct: true }
+      - { value: "`locale`", correct: false }
+      - { value: "`lang`", correct: false }
+      - { value: "`language`", correct: false }
+    help: |
+      The `_locale` parameter is a special internal routing attribute that automatically sets the request locale.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      What is the purpose of the `_format` special route parameter in Symfony?
+    answers:
+      - { value: "To set the request format, influencing the `Content-Type` of the response.", correct: true }
+      - { value: "To define the URL path format.", correct: false }
+      - { value: "To specify the data serialization format for form submissions.", correct: false }
+      - { value: "To enforce a specific date format in route parameters.", correct: false }
+    help: |
+      The `_format` parameter is used to determine the request format, which in turn helps Symfony set the appropriate `Content-Type` header for the response.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      How would you define a route that only matches requests to `m.example.com` using PHP attributes?
+    answers:
+      - { value: "`#[Route('/', name: 'mobile_homepage', host: 'm.example.com')]`", correct: true }
+      - { value: "`#[Route('/', name: 'mobile_homepage', domain: 'm.example.com')]`", correct: false }
+      - { value: "`#[Route('/', name: 'mobile_homepage', hostname: 'm.example.com')]`", correct: false }
+      - { value: "`#[Route('/', name: 'mobile_homepage', server: 'm.example.com')]`", correct: false }
+    help: |
+      The `host` option in the `#[Route]` attribute is used to specify a hostname requirement for a route.
+      https://symfony.com/doc/current/routing.html#host-requirements
+
+  -
+    question: |
+      Given the following YAML route configuration:
+
+      ```yaml
+      mobile_homepage:
+          path:       /
+          host:       "{subdomain}.example.com"
+          controller: App\Controller\MainController::mobileHomepage
+          defaults:
+              subdomain: m
+          requirements:
+              subdomain: m|mobile
+      ```
+      Which of the following URLs would match this route?
+    answers:
+      - { value: "http://m.example.com/", correct: true }
+      - { value: "http://mobile.example.com/", correct: true }
+      - { value: "http://www.example.com/", correct: false }
+      - { value: "http://app.example.com/", correct: false }
+    help: |
+      The `host` option can contain dynamic parameters, and `requirements` can be used to validate these parameters against a regex.
+      https://symfony.com/doc/current/routing.html#host-requirements
+
+  -
+    question: >
+      Which of the following variables is available in Symfony's Expression Language for route conditions and represents the current `RequestContext`?
+    answers:
+      - { value: "`context`", correct: true }
+      - { value: "`requestContext`", correct: false }
+      - { value: "`routingContext`", correct: false }
+      - { value: "`appContext`", correct: false }
+    help: |
+      The `context` variable provides access to the `Symfony\\Component\\Routing\\RequestContext` object within route conditions.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      How can you use an environment variable named `APP_MAIN_HOST` within a Symfony route condition defined in YAML?
+    answers:
+      - { value: "`condition: \"context.getHost() == env('APP_MAIN_HOST')\"`", correct: true }
+      - { value: "`condition: \"context.getHost() == %env.APP_MAIN_HOST%\"`", correct: false }
+      - { value: "`condition: \"context.getHost() == getenv('APP_MAIN_HOST')\"`", correct: false }
+      - { value: "`condition: \"context.getHost() == parameter('APP_MAIN_HOST')\"`", correct: false }
+    help: |
+      The `env()` function in Expression Language allows accessing environment variables.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      To restrict a route named `contact` to only accept `GET` and `HEAD` HTTP methods using PHP attributes, what is the correct syntax?
+    answers:
+      - { value: "`#[Route('/contact', name: 'contact', methods: ['GET', 'HEAD'])]`", correct: true }
+      - { value: "`#[Route('/contact', name: 'contact', method: 'GET|HEAD')]`", correct: false }
+      - { value: "`#[Route('/contact', name: 'contact', httpMethods: ['GET', 'HEAD'])]`", correct: false }
+      - { value: "`#[Route('/contact', name: 'contact', allowMethods: ['GET', 'HEAD'])]`", correct: false }
+    help: |
+      The `methods` option in the `#[Route]` attribute accepts an array of allowed HTTP methods.
+      https://symfony.com/doc/current/routing.html#http-method-requirements
+
+  -
+    question: |
+      Consider the following YAML configuration for localized routes:
+
+      ```yaml
+      about_us:
+          path:
+              en: /about-us
+              nl: /over-ons
+          controller: App\Controller\CompanyController::about
+      ```
+      If the current request locale is `nl`, what URL path will be matched for the `about_us` route?
+    answers:
+      - { value: "/over-ons", correct: true }
+      - { value: "/about-us", correct: false }
+      - { value: "/nl/about-us", correct: false }
+      - { value: "/about-us/nl", correct: false }
+    help: |
+      When defining localized routes, Symfony matches the path corresponding to the active locale.
+      https://symfony.com/doc/current/routing.html#localized-routes
+
+  -
+    question: |
+      To apply a `/nl` prefix to all imported routes when the locale is `nl`, but no prefix for `en`, using YAML, which configuration is correct?
+    answers:
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    prefix:
+        en: ''
+        nl: '/nl'
+'''
+, correct: true }
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    locale_prefix:
+        en: ''
+        nl: '/nl'
+'''
+, correct: false }
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    localized_paths:
+        en: ''
+        nl: '/nl'
+'''
+, correct: false }
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    prefixes:
+        en: ''
+        nl: '/nl'
+'''
+, correct: false }
+    help: |
+      The `prefix` option can be an associative array mapping locales to their respective prefixes for imported routes.
+      https://symfony.com/doc/current/routing.html#localized-route-prefixes
+
+  -
+    question: >
+      Which command-line tool is used to list all registered routes in a Symfony application?
+    answers:
+      - { value: "`php bin/console debug:router`", correct: true }
+      - { value: "`php bin/console router:list`", correct: false }
+      - { value: "`php bin/console routes:show`", correct: false }
+      - { value: "`php bin/console routing:debug`", correct: false }
+    help: |
+      The `debug:router` command provides a comprehensive overview of all defined routes.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      You are debugging a routing issue and want to see which route matches the URL `/lucky/number/8`. Which command should you use?
+    answers:
+      - { value: "`php bin/console router:match /lucky/number/8`", correct: true }
+      - { value: "`php bin/console debug:router /lucky/number/8`", correct: false }
+      - { value: "`php bin/console router:test /lucky/number/8`", correct: false }
+      - { value: "`php bin/console route:check /lucky/number/8`", correct: false }
+    help: |
+      The `router:match` command helps identify the specific route that matches a given URL path.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      What is the typical error message you would encounter if you try to generate a URL for a route that requires a `slug` parameter but you don't provide it?
+    answers:
+      - { value: "\"Some mandatory parameters are missing (\\\"slug\\\") to generate a URL for route \\\"blog_show\\\".\"", correct: true }
+      - { value: "\"Route \\\"blog_show\\\" is missing required parameter \\\"slug\\\".\"", correct: false }
+      - { value: "\"Cannot generate URL for route \\\"blog_show\\\": parameter \\\"slug\\\" is null.\"", correct: false }
+      - { value: "\"The route \\\"blog_show\\\" expects a \\\"slug\\\" parameter, but none was provided.\"", correct: false }
+    help: |
+      Symfony provides a clear error message indicating which mandatory parameters are missing when generating a URL.
+      https://symfony.com/doc/current/routing.html#troubleshooting
+
+  -
+    question: |
+      In Symfony, how do you enable attribute-based routing by scanning a controller directory (e.g., `src/Controller/`) in `config/routes/attributes.yaml`?
+    answers:
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+'''
+, correct: true }
+      - { value: '''
+controllers:
+    path: '../../src/Controller/'
+    format: attribute
+'''
+, correct: false }
+      - { value: '''
+controllers:
+    directory: '../../src/Controller/'
+    loader: attribute
+'''
+, correct: false }
+      - { value: '''
+controllers:
+    import: '../../src/Controller/'
+    method: attribute
+'''
+, correct: false }
+    help: |
+      The `resource` and `type: attribute` options are used to import routes defined via PHP attributes from a specified directory.
+      https://symfony.com/doc/current/routing.html#loading-routes-from-annotations-or-attributes
+
+  -
+    question: |
+      When defining routes using the PHP routing configurator (e.g., `config/routes.php`), what is the correct way to specify the controller for a route?
+    answers:
+      - { value: "`->controller([BlogController::class, 'list'])`", correct: true }
+      - { value: "`->controller('App\\Controller\\BlogController::list')`", correct: false }
+      - { value: "`->controller(BlogController::class . '::list')`", correct: false }
+      - { value: "`->controller('list', BlogController::class)`", correct: false }
+    help: |
+      The `controller()` method of the `RoutingConfigurator` expects an array `[ControllerClass::class, 'methodName']`.
+      https://symfony.com/doc/current/routing.html#defining-routes-in-php-files
+
+  -
+    question: >
+      By default, Symfony route parameters do not match the `/` character. To allow a parameter named `token` to include slashes, which regex requirement should be used?
+    answers:
+      - { value: "`.+`", correct: true }
+      - { value: "`.`", correct: false }
+      - { value: "`[^/]+`", correct: false }
+      - { value: "`.*`", correct: false }
+    help: |
+      The `.+` regex matches one or more characters, including slashes, allowing them within the parameter value.
+      https://symfony.com/doc/current/routing.html#allowing-a-slash-in-a-route-parameter
+
+  -
+    question: >
+      If a route parameter is type-hinted with a PHP backed enum (e.g., `OrderStatusEnum $status`), how does Symfony handle the parameter value from the URL?
+    answers:
+      - { value: "Symfony automatically converts the scalar URL value to the corresponding enum instance.", correct: true }
+      - { value: "Symfony requires manual conversion of the scalar value to an enum instance.", correct: false }
+      - { value: "Symfony passes the scalar value directly, and the enum type hint is ignored.", correct: false }
+      - { value: "Symfony throws an error if the URL value doesn't exactly match an enum case name.", correct: false }
+    help: |
+      Symfony's routing component is capable of automatically converting scalar route parameter values to PHP backed enum instances.
+      https://symfony.com/doc/current/routing.html#route-parameters-php-backed-enums
+
+  -
+    question: >
+      To generate URLs within a Symfony service, which interface should you inject?
+    answers:
+      - { value: "`Symfony\\Component\\Routing\\Generator\\UrlGeneratorInterface`", correct: true }
+      - { value: "`Symfony\\Component\\Routing\\RouterInterface`", correct: false }
+      - { value: "`Symfony\\Component\\HttpFoundation\\UrlGenerator`", correct: false }
+      - { value: "`Symfony\\Component\\HttpKernel\\UriGeneratorInterface`", correct: false }
+    help: |
+      The `UrlGeneratorInterface` provides the `generate()` method for creating URLs from route names and parameters.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-services
+
+  -
+    question: >
+      When passing an object (e.g., a UUID object) as an "extra" parameter (not part of the route path) to `generateUrl()`, what is the recommended practice to avoid issues?
+    answers:
+      - { value: "Explicitly cast the object to a string: `(string) $entity->getUuid()`", correct: true }
+      - { value: "Pass the object directly; Symfony handles the conversion automatically.", correct: false }
+      - { value: "Serialize the object to JSON before passing it.", correct: false }
+      - { value: "Implement a `__toString()` method on the object.", correct: false }
+    help: |
+      While Symfony can often handle simple objects, explicitly casting complex objects like Uuids to strings ensures correct URL generation.
+      https://symfony.com/doc/current/routing.html#extra-parameters-in-generated-urls
+
+  -
+    question: >
+      When using `RedirectController` in Symfony, which `defaults` option ensures that the original query string parameters are preserved during the redirect?
+    answers:
+      - { value: "`keepQueryParams: true`", correct: true }
+      - { value: "`preserveQuery: true`", correct: false }
+      - { value: "`includeQuery: true`", correct: false }
+      - { value: "`passQuery: true`", correct: false }
+    help: |
+      The `keepQueryParams` option is specifically designed to retain query parameters from the original request during a redirect.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      You want to redirect a `POST` request to another URL while preserving the `POST` method. Which `defaults` option should you set in `RedirectController` configuration, and what HTTP status code will be used for a temporary redirect?
+    answers:
+      - { value: "`keepRequestMethod: true`, HTTP 307", correct: true }
+      - { value: "`keepRequestMethod: true`, HTTP 302", correct: false }
+      - { value: "`preserveMethod: true`, HTTP 307", correct: false }
+      - { value: "`followMethod: true`, HTTP 308", correct: false }
+    help: |
+      Setting `keepRequestMethod` to `true` changes the temporary redirect status code from 302 to 307 (and permanent from 301 to 308) to ensure the method is preserved.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: |
+      Which of the following YAML configurations correctly defines a route with default `_locale` and `_format` values, along with requirements for them?
+    answers:
+      - { value: '''
+article_search:
+  path:        /articles/{_locale}/search.{_format}
+  controller:  App\\Controller\\ArticleController::search
+  locale:      en
+  format:      html
+  requirements:
+      _locale: en|fr
+      _format: html|xml
+'''
+, correct: true }
+      - { value: '''
+article_search:
+  path:        /articles/{_locale}/search.{_format}
+  controller:  App\\Controller\\ArticleController::search
+  defaults:
+      _locale: en
+      _format: html
+  regex:
+      _locale: en|fr
+      _format: html|xml
+'''
+, correct: false }
+      - { value: '''
+article_search:
+  path:        /articles/{_locale}/search.{_format}
+  controller:  App\\Controller\\ArticleController::search
+  default_locale: en
+  default_format: html
+  validation:
+      _locale: en|fr
+      _format: html|xml
+'''
+, correct: false }
+      - { value: '''
+article_search:
+  path:        /articles/{_locale}/search.{_format}
+  controller:  App\\Controller\\ArticleController::search
+  options:
+      locale: en
+      format: html
+  rules:
+      _locale: en|fr
+      _format: html|xml
+'''
+, correct: false }
+    help: |
+      The `locale` and `format` keys directly set default values, while `requirements` defines the regex for validation.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      In Symfony's Expression Language for route conditions, what does the `request` variable represent?
+    answers:
+      - { value: "The `Symfony\\Component\\HttpFoundation\\Request` object for the current request.", correct: true }
+      - { value: "An array of request parameters.", correct: false }
+      - { value: "The raw HTTP request string.", correct: false }
+      - { value: "The `RequestStack` service.", correct: false }
+    help: |
+      The `request` variable provides full access to the current `Request` object, allowing conditions based on headers, query parameters, etc.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      How can you access the value of a route parameter named `id` within a route condition using Expression Language?
+    answers:
+      - { value: "`params['id']`", correct: true }
+      - { value: "`route.params.id`", correct: false }
+      - { value: "`request.attributes.get('id')`", correct: false }
+      - { value: "`id`", correct: false }
+    help: |
+      The `params` variable is an array containing all matched route parameters.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      To use a custom service, `App\\Service\\MyConditionService`, in a route condition, what is the correct Expression Language syntax, assuming the service is properly tagged?
+    answers:
+      - { value: "`service('App\\\\Service\\\\MyConditionService').checkCondition()`", correct: true }
+      - { value: "`MyConditionService.checkCondition()`", correct: false }
+      - { value: "`get_service('App\\\\Service\\\\MyConditionService').checkCondition()`", correct: false }
+      - { value: "`container.get('App\\\\Service\\\\MyConditionService').checkCondition()`", correct: false }
+    help: |
+      The `service()` function allows retrieving a service instance by its alias or FQCN for use in route conditions. Services must be tagged with `#[AsRoutingConditionService]` or `routing.condition_service`.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      You want to list only the routes that accept `GET` requests using the `debug:router` command. What option should you use?
+    answers:
+      - { value: "`--method=GET`", correct: true }
+      - { value: "`--get-only`", correct: false }
+      - { value: "`--http-method=GET`", correct: false }
+      - { value: "`--filter-method=GET`", correct: false }
+    help: |
+      The `--method` option allows filtering the `debug:router` output by HTTP method.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      Which `debug:router` option will display all defined route aliases in addition to the main routes?
+    answers:
+      - { value: "`--show-aliases`", correct: true }
+      - { value: "`--with-aliases`", correct: false }
+      - { value: "`--list-aliases`", correct: false }
+      - { value: "`--aliases`", correct: false }
+    help: |
+      The `--show-aliases` option provides a more complete view of the routing table, including aliases.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      To apply a common URL prefix of `/blog` and a name prefix of `blog_` to all routes within a `BlogController` using PHP attributes, what is the correct placement and syntax?
+    answers:
+      - { value: "Place `#[Route('/blog', name: 'blog_')]` on the `BlogController` class.", correct: true }
+      - { value: "Place `#[Route(prefix: '/blog', namePrefix: 'blog_')]` on each method.", correct: false }
+      - { value: "Define a separate `#[RouteGroup]` attribute on the class.", correct: false }
+      - { value: "Use a `#[RouteCollection]` attribute on the class.", correct: false }
+    help: |
+      The `#[Route]` attribute can be applied to a controller class to define common settings for all routes within that controller.
+      https://symfony.com/doc/current/routing.html#route-groups
+
+  -
+    question: |
+      In YAML, how do you define a route group that imports routes from `src/Controller/` with a `/admin` prefix and `admin_` name prefix?
+    answers:
+      - { value: '''
+admin_controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    prefix: '/admin'
+    name_prefix: 'admin_'
+'''
+, correct: true }
+      - { value: '''
+admin_group:
+    path_prefix: '/admin'
+    name_prefix: 'admin_'
+    import: '../../src/Controller/'
+    type: attribute
+'''
+, correct: false }
+      - { value: '''
+admin_routes:
+    source: '../../src/Controller/'
+    format: attribute
+    url_prefix: '/admin'
+    route_prefix: 'admin_'
+'''
+, correct: false }
+      - { value: '''
+admin:
+    imports:
+        - { resource: '../../src/Controller/', type: attribute, prefix: '/admin', name_prefix: 'admin_' }
+'''
+, correct: false }
+    help: |
+      When importing routes, `prefix` and `name_prefix` options can be applied at the import level to group routes.
+      https://symfony.com/doc/current/routing.html#route-groups
+
+  -
+    question: >
+      When importing routes from a directory using the PHP routing configurator, how can you exclude specific files, such as `Debug*Controller.php`?
+    answers:
+      - { value: "Pass a glob pattern `../../src/Controller/{Debug*Controller.php}` as the fourth argument to `import()`.", correct: true }
+      - { value: "Use an `exclude()` method after `import()`.", correct: false }
+      - { value: "Define a `filter` option in the `import()` call.", correct: false }
+      - { value: "Manually filter the `RouteCollection` after import.", correct: false }
+    help: |
+      The `import()` method allows specifying an `exclude` option (string or array of glob patterns) to ignore certain files during attribute loading.
+      https://symfony.com/doc/current/routing.html#excluding-files-when-loading-routes
+
+  -
+    question: >
+      You have an existing route named `product_show`. To create an alias `product_details` that points to `product_show` using PHP attributes, what is the correct syntax?
+    answers:
+      - { value: "`#[Route('/product/{id}', name: 'product_show', alias: ['product_details'])]`", correct: true }
+      - { value: "`#[RouteAlias('product_details', route: 'product_show')]`", correct: false }
+      - { value: "`#[Route('/product/{id}', name: 'product_show', aliases: 'product_details')]`", correct: false }
+      - { value: "`#[Route('/product/{id}', name: 'product_show')] #[Alias('product_details')]`", correct: false }
+    help: |
+      The `alias` option in the `#[Route]` attribute allows defining one or more alternate names for a route.
+      https://symfony.com/doc/current/routing.html#route-aliases
+
+  -
+    question: |
+      To deprecate a route alias `product_show` in favor of `product_details` and provide a custom deprecation message in YAML, which configuration is correct?
+    answers:
+      - { value: '''
+product_details:
+    path: /product/{id}
+    controller: App\\Controller\\ProductController::show
+product_show:
+    alias: product_details
+    deprecated:
+        package: 'acme/package'
+        version: '1.2'
+        message: 'The "%alias_id%" route alias is deprecated. Please use "product_details" instead.'
+'''
+, correct: true }
+      - { value: '''
+product_show:
+    path: /product/{id}
+    controller: App\\Controller\\ProductController::show
+    deprecate_alias:
+        name: product_details
+        message: '...'
+'''
+, correct: false }
+      - { value: '''
+product_show:
+    alias_of: product_details
+    deprecation_message: 'The "product_show" route alias is deprecated. Please use "product_details" instead.'
+'''
+, correct: false }
+      - { value: '''
+product_show:
+    redirect_to: product_details
+    deprecated_message: '...'
+'''
+, correct: false }
+    help: |
+      Deprecating an alias involves defining the alias and then adding a `deprecated` key with `package`, `version`, and an optional `message`.
+      https://symfony.com/doc/current/routing.html#deprecating-route-aliases
+
+  -
+    question: >
+      What is the primary benefit of marking a Symfony route as `stateless: true`?
+    answers:
+      - { value: "It prevents session usage during request matching, improving caching.", correct: true }
+      - { value: "It makes the route accessible without authentication.", correct: false }
+      - { value: "It forces the route to use HTTP/2.", correct: false }
+      - { value: "It disables CSRF protection for forms submitted to this route.", correct: false }
+    help: |
+      Stateless routes are optimized for caching as they do not rely on session state.
+      https://symfony.com/doc/current/routing.html#stateless-routes
+
+  -
+    question: >
+      You have two routes: `/blog/{slug}` (name: `blog_show`) and `/blog/list` (name: `blog_list`). By default, `/blog/{slug}` might greedily match `/blog/list`. How can you ensure `/blog/list` is matched first using PHP attributes?
+    answers:
+      - { value: "Set `priority: 2` (or any value > 0) on `#[Route('/blog/list', name: 'blog_list')]`.", correct: true }
+      - { value: "Set `priority: -1` on `#[Route('/blog/{slug}', name: 'blog_show')]`.", correct: false }
+      - { value: "Define `blog_list` before `blog_show` in the routing file.", correct: false }
+      - { value: "Use a more specific regex for `blog_list`.", correct: false }
+    help: |
+      Routes with a higher `priority` value are matched before those with lower or default priority (0).
+      https://symfony.com/doc/current/routing.html#route-priority
+
+  -
+    question: |
+      To force all routes imported from `src/Controller/` to use HTTPS, what is the correct YAML configuration?
+    answers:
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    schemes: [https]
+'''
+, correct: true }
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    security: { requires_channel: https }
+'''
+, correct: false }
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    protocol: https
+'''
+, correct: false }
+      - { value: '''
+controllers:
+    resource: '../../src/Controller/'
+    type: attribute
+    secure: true
+'''
+, correct: false }
+    help: |
+      The `schemes` option can be applied to imported route collections to enforce specific URL schemes.
+      https://symfony.com/doc/current/routing.html#forcing-a-url-scheme-https
+
+  -
+    question: >
+      What is the recommended way to check if a route exists in Symfony without negatively impacting performance by regenerating the routing cache?
+    answers:
+      - { value: "Attempt to generate the URL and catch `Symfony\\Component\\Routing\\Exception\\RouteNotFoundException`.", correct: true }
+      - { value: "Inspect the `RouteCollection` directly using `get()` or `has()`.", correct: false }
+      - { value: "Use `php bin/console debug:router` programmatically.", correct: false }
+      - { value: "Check if the route name is present in `Request::attributes->get('_route')`.", correct: false }
+    help: |
+      Catching `RouteNotFoundException` is the most robust and performant way to check for route existence at runtime.
+      https://symfony.com/doc/current/routing.html#checking-if-a-route-exists
+
+  -
+    question: >
+      How can you retrieve the name of the currently matched route and its parameters from the `Request` object within a Symfony controller?
+    answers:
+      - { value: "`$request->attributes->get('_route')` and `$request->attributes->get('_route_params')`", correct: true }
+      - { value: "`$request->getRouteName()` and `$request->getRouteParameters()`", correct: false }
+      - { value: "`$request->routing->name` and `$request->routing->params`", correct: false }
+      - { value: "`$request->getPathInfo()` and `$request->query->all()`", correct: false }
+    help: |
+      Symfony stores the matched route name and parameters as attributes on the `Request` object under `_route` and `_route_params`.
+      https://symfony.com/doc/current/routing.html#accessing-route-parameters-from-the-request
+
+  -
+    question: >
+      In a standalone Symfony Routing component usage, what class is responsible for matching an incoming URL path against a `RouteCollection`?
+    answers:
+      - { value: "`Symfony\\Component\\Routing\\Matcher\\UrlMatcher`", correct: true }
+      - { value: "`Symfony\\Component\\Routing\\Router`", correct: false }
+      - { value: "`Symfony\\Component\\Routing\\UrlMatcherInterface`", correct: false }
+      - { value: "`Symfony\\Component\\Routing\\Matcher\\RequestMatcher`", correct: false }
+    help: |
+      `UrlMatcher` is the concrete implementation for matching URLs.
+      https://symfony.com/doc/current/create_framework/routing.html#matching-an-incoming-url
+
+  -
+    question: >
+      Before using `UrlMatcher` to match a URL, what object needs to be created and populated with information about the current request (like host, method, scheme)?
+    answers:
+      - { value: "`Symfony\\Component\\Routing\\RequestContext`", correct: true }
+      - { value: "`Symfony\\Component\\HttpFoundation\\Request`", correct: false }
+      - { value: "`Symfony\\Component\\Routing\\RequestConfiguration`", correct: false }
+      - { value: "`Symfony\\Component\\HttpKernel\\RequestContext`", correct: false }
+    help: |
+      `RequestContext` provides the necessary context for the `UrlMatcher` to perform its matching logic.
+      https://symfony.com/doc/current/create_framework/routing.html#matching-an-incoming-url
+
+  -
+    question: >
+      What is the primary container for all defined `Route` objects in the Symfony Routing component?
+    answers:
+      - { value: "`Symfony\\Component\\Routing\\RouteCollection`", correct: true }
+      - { value: "`Symfony\\Component\\Routing\\RouteRegistry`", correct: false }
+      - { value: "`Symfony\\Component\\Routing\\RouteMap`", correct: false }
+      - { value: "`Symfony\\Component\\Routing\\RouteContainer`", correct: false }
+    help: |
+      `RouteCollection` is used to store and manage multiple `Route` instances.
+      https://symfony.com/doc/current/create_framework/routing.html#defining-routes
+
+  -
+    question: >
+      How can you define a route that is only active in the `dev` environment using PHP attributes?
+    answers:
+      - { value: "`#[Route('/tools', name: 'tools', env: 'dev')]`", correct: true }
+      - { value: "`#[Route('/tools', name: 'tools', environments: ['dev'])]`", correct: false }
+      - { value: "`#[Route('/tools', name: 'tools', ifEnv: 'dev')]`", correct: false }
+      - { value: "`#[Route('/tools', name: 'tools', context: 'dev')]`", correct: false }
+    help: |
+      The `env` option in the `#[Route]` attribute restricts the route to a specific environment.
+      https://symfony.com/doc/current/routing.html#environment-specific-routes
+
+  -
+    question: >
+      You define a route `/blog/{slug}` but your controller method is `public function show(): Response {}` (without a `$slug` argument). What type of error will Symfony likely throw?
+    answers:
+      - { value: "An error indicating that the controller method requires a value for the `$slug` argument.", correct: true }
+      - { value: "A `RouteNotFoundException`.", correct: false }
+      - { value: "A `MissingParameterException`.", correct: false }
+      - { value: "A `500 Internal Server Error` without specific details.", correct: false }
+    help: |
+      Symfony's routing system ensures that all required route parameters are passed as arguments to the controller method. If a parameter is missing, it will explicitly state this.
+      https://symfony.com/doc/current/routing.html#troubleshooting
+
+  -
+    question: >
+      Which special internal routing attribute is used to determine which controller and action is executed when a route is matched?
+    answers:
+      - { value: "`_controller`", correct: true }
+      - { value: "`_action`", correct: false }
+      - { value: "`_handler`", correct: false }
+      - { value: "`_target`", correct: false }
+    help: |
+      The `_controller` parameter is a special internal routing attribute that points to the controller and method responsible for handling the request.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      When defining a route with a parameter that should be optional and have a default value, which key is used in YAML configuration?
+    answers:
+      - { value: "`defaults`", correct: true }
+      - { value: "`optional`", correct: false }
+      - { value: "`default_values`", correct: false }
+      - { value: "`parameters`", correct: false }
+    help: |
+      The `defaults` key is used to set default values for route parameters, making them optional.
+      https://symfony.com/doc/current/routing.html#default-values-for-parameters
+
+  -
+    question: >
+      What is the purpose of the `_fragment` special routing parameter?
+    answers:
+      - { value: "To set the fragment identifier, which is the optional last part of a URL that starts with a # character.", correct: true }
+      - { value: "To define a URL fragment for client-side routing.", correct: false }
+      - { value: "To specify a partial template to render for the route.", correct: false }
+      - { value: "To indicate that the route should return an HTML fragment.", correct: false }
+    help: |
+      The `_fragment` parameter is used to define the URL fragment, often used for internal page navigation.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      Which of the following `UrlGeneratorInterface` constants generates a URL relative to the current host, but with an absolute path (e.g., `/blog/my-post`)?
+    answers:
+      - { value: "`UrlGeneratorInterface::ABSOLUTE_PATH`", correct: true }
+      - { value: "`UrlGeneratorInterface::RELATIVE_PATH`", correct: false }
+      - { value: "`UrlGeneratorInterface::NETWORK_PATH`", correct: false }
+      - { value: "`UrlGeneratorInterface::ABSOLUTE_URL`", correct: false }
+    help: |
+      `ABSOLUTE_PATH` generates a URL that includes the path from the root of the domain.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-controllers
+
+  -
+    question: >
+      You want to redirect from `/old-path` to `/new-path` using `RedirectController` in Symfony. What `defaults` key should specify the target path?
+    answers:
+      - { value: "`path`", correct: true }
+      - { value: "`target_path`", correct: false }
+      - { value: "`url`", correct: false }
+      - { value: "`redirect_path`", correct: false }
+    help: |
+      When redirecting to an absolute path or external URL, the `path` key in `defaults` is used.
+      https://symfony.com/doc/current/routing.html#redirecting-to-an-absolute-path-or-external-url
+
+  -
+    question: >
+      Which of the following is a valid Expression Language variable for accessing matched route parameters in a route condition?
+    answers:
+      - { value: "`params`", correct: true }
+      - { value: "`route_params`", correct: false }
+      - { value: "`attributes`", correct: false }
+      - { value: "`data`", correct: false }
+    help: |
+      The `params` variable provides an array of all matched route parameters within a condition expression.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      When debugging routes, what is the purpose of the `router:match` command?
+    answers:
+      - { value: "To identify which route matches a given URL.", correct: true }
+      - { value: "To list all defined routes.", correct: false }
+      - { value: "To test route generation with specific parameters.", correct: false }
+      - { value: "To clear the routing cache.", correct: false }
+    help: |
+      The `router:match` command is specifically designed to help debug route matching by showing which route corresponds to a provided URL.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      If you define a route with a dynamic host parameter, e.g., `{subdomain}.example.com`, how would you specify a default value for `subdomain` in PHP attributes?
+    answers:
+      - { value: "`defaults: ['subdomain' => 'www']`", correct: true }
+      - { value: "`defaultSubdomain: 'www'`", correct: false }
+      - { value: "`hostDefaults: ['subdomain' => 'www']`", correct: false }
+      - { value: "`options: { subdomain: 'www' }`", correct: false }
+    help: |
+      The `defaults` option can be used to provide default values for dynamic host parameters, similar to path parameters.
+      https://symfony.com/doc/current/routing.html#host-requirements
+
+  -
+    question: >
+      What is the correct way to specify multiple HTTP methods for a route in YAML?
+    answers:
+      - { value: "`methods: [GET, POST]`", correct: true }
+      - { value: "`method: GET|POST`", correct: false }
+      - { value: "`http_methods: [GET, POST]`", correct: false }
+      - { value: "`allow_methods: [GET, POST]`", correct: false }
+    help: |
+      The `methods` key in YAML accepts a list of HTTP methods that the route should match.
+      https://symfony.com/doc/current/routing.html#http-method-requirements
+
+  -
+    question: >
+      To define a route with a required `slug` parameter in PHP attributes, what is the correct syntax?
+    answers:
+      - { value: "`#[Route('/blog/{slug}', name: 'blog_show')]`", correct: true }
+      - { value: "`#[Route('/blog/{slug?}', name: 'blog_show')]`", correct: false }
+      - { value: "`#[Route('/blog/:slug', name: 'blog_show')]`", correct: false }
+      - { value: "`#[Route('/blog/[slug]', name: 'blog_show')]`", correct: false }
+    help: |
+      Parameters enclosed in curly braces `{}` are required by default.
+      https://symfony.com/doc/current/routing.html#route-parameters
+
+  -
+    question: >
+      What is the purpose of the `name` option in a Symfony route definition?
+    answers:
+      - { value: "To provide a unique identifier for the route, used for URL generation and referencing.", correct: true }
+      - { value: "To define the URL path for the route.", correct: false }
+      - { value: "To specify the controller method that handles the route.", correct: false }
+      - { value: "To set the title of the page associated with the route.", correct: false }
+    help: |
+      The `name` option is crucial for generating URLs and referring to routes programmatically.
+      https://symfony.com/doc/current/routing.html#route-names
+
+  -
+    question: >
+      When importing routes with a prefix in the PHP routing configurator, how can you prevent an imported route with an empty URL from becoming `/prefix/` and instead make it `/prefix`?
+    answers:
+      - { value: "Pass `false` as the second argument to `prefix()`: `->prefix('/blog', false)`.", correct: true }
+      - { value: "Set `trailingSlashOnRoot: false` in the import options.", correct: false }
+      - { value: "Use `stripTrailingSlash()` after `prefix()`.", correct: false }
+      - { value: "Configure `trailing_slash_on_root: false` in `framework.yaml`.", correct: false }
+    help: |
+      The `prefix()` method allows controlling the trailing slash behavior for imported routes.
+      https://symfony.com/doc/current/routing.html#route-groups
+
+  -
+    question: >
+      Which of the following is NOT a special internal routing attribute in Symfony?
+    answers:
+      - { value: "`_id`", correct: true }
+      - { value: "`_controller`", correct: false }
+      - { value: "`_format`", correct: false }
+      - { value: "`_locale`", correct: false }
+    help: |
+      `_id` is not a predefined special internal routing attribute. The others are used by Symfony for specific purposes.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      What is the primary benefit of using route groups in Symfony?
+    answers:
+      - { value: "To apply common configurations (like prefixes, requirements) to multiple routes efficiently.", correct: true }
+      - { value: "To define a hierarchy of routes for better organization.", correct: false }
+      - { value: "To enable lazy loading of route definitions.", correct: false }
+      - { value: "To restrict access to a set of routes based on user roles.", correct: false }
+    help: |
+      Route groups allow applying shared settings to a collection of routes, reducing redundancy and improving maintainability.
+      https://symfony.com/doc/current/routing.html#route-groups
+
+  -
+    question: >
+      When defining a route in YAML, how do you specify that it should only respond to requests from a specific host, e.g., `api.example.com`?
+    answers:
+      - { value: "Use the `host` key: `host: api.example.com`", correct: true }
+      - { value: "Use the `domain` key: `domain: api.example.com`", correct: false }
+      - { value: "Use the `server` key: `server: api.example.com`", correct: false }
+      - { value: "Use a `condition` with `context.getHost()`.", correct: false }
+    help: |
+      The `host` key is used to define host requirements for a route in YAML.
+      https://symfony.com/doc/current/routing.html#host-requirements
+
+  -
+    question: >
+      What is the purpose of the `RoutingConfigurator` class when defining routes in PHP files?
+    answers:
+      - { value: "It provides a fluent interface for defining and configuring routes programmatically.", correct: true }
+      - { value: "It loads routes from external configuration files.", correct: false }
+      - { value: "It matches incoming requests to defined routes.", correct: false }
+      - { value: "It generates URLs based on route names.", correct: false }
+    help: |
+      `RoutingConfigurator` simplifies the process of defining routes in PHP by offering a convenient, method-chaining API.
+      https://symfony.com/doc/current/routing.html#defining-routes-in-php-files
+
+  -
+    question: >
+      Which command would you use to get detailed information about a specific route, for example, `app_lucky_number`?
+    answers:
+      - { value: "`php bin/console debug:router app_lucky_number`", correct: true }
+      - { value: "`php bin/console router:show app_lucky_number`", correct: false }
+      - { value: "`php bin/console route:info app_lucky_number`", correct: false }
+      - { value: "`php bin/console router:details app_lucky_number`", correct: false }
+    help: |
+      Passing the route name to `debug:router` displays its specific properties.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      When configuring a redirect using `RedirectController`, what is the default HTTP status code for a temporary redirect?
+    answers:
+      - { value: "302 (Found)", correct: true }
+      - { value: "301 (Moved Permanently)", correct: false }
+      - { value: "307 (Temporary Redirect)", correct: false }
+      - { value: "303 (See Other)", correct: false }
+    help: |
+      By default, redirects configured via `RedirectController` are temporary (302). This changes to 307 if `keepRequestMethod` is true.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      What is the purpose of the `#[AsRoutingConditionService]` attribute?
+    answers:
+      - { value: "To tag a service so it can be used within Symfony's Expression Language for route conditions.", correct: true }
+      - { value: "To define a service that handles route matching.", correct: false }
+      - { value: "To mark a service as a route loader.", correct: false }
+      - { value: "To automatically register a service as a controller.", correct: false }
+    help: |
+      Services tagged with `#[AsRoutingConditionService]` (or `routing.condition_service`) can be accessed via the `service()` function in route conditions.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      Which of the following describes the `Symfony\\Component\\Routing\\Loader\\LoaderInterface`?
+    answers:
+      - { value: "An interface for all Symfony loaders, defining `supports()` and `load()` methods.", correct: true }
+      - { value: "A concrete class for loading routes from YAML files.", correct: false }
+      - { value: "An abstract class for creating custom route loaders.", correct: false }
+      - { value: "An interface for services that generate URLs.", correct: false }
+    help: |
+      `LoaderInterface` is fundamental for Symfony's routing component, enabling various resource types to be loaded.
+      https://symfony.com/doc/current/routing/custom_route_loader.html
+
+  -
+    question: >
+      When defining localized routes using PHP attributes, how do you specify different paths for different locales (e.g., `/about-us` for `en` and `/over-ons` for `nl`)?
+    answers:
+      - { value: "`path: ['en' => '/about-us', 'nl' => '/over-ons']`", correct: true }
+      - { value: "`paths: { en: '/about-us', nl: '/over-ons' }`", correct: false }
+      - { value: "`localePaths: ['en' => '/about-us', 'nl' => '/over-ons']`", correct: false }
+      - { value: "`localized: { en: '/about-us', nl: '/over-ons' }`", correct: false }
+    help: |
+      The `path` option in the `#[Route]` attribute can accept an associative array mapping locales to their specific paths.
+      https://symfony.com/doc/current/routing.html#localized-routes
+
+  -
+    question: >
+      What is the effect of setting `trailing_slash_on_root: false` when importing routes with a prefix in YAML?
+    answers:
+      - { value: "An imported route with an empty URL will become `/prefix` instead of `/prefix/`.", correct: true }
+      - { value: "All generated URLs for imported routes will remove trailing slashes.", correct: false }
+      - { value: "It prevents the root route (`/`) from having a trailing slash.", correct: false }
+      - { value: "It forces a trailing slash on all imported routes.", correct: false }
+    help: |
+      This option specifically controls the trailing slash behavior for the root path of an imported group.
+      https://symfony.com/doc/current/routing.html#route-groups
+
+  -
+    question: >
+      Which of the following is a valid method to define a route in Symfony?
+    answers:
+      - { value: "PHP Attributes (e.g., `#[Route]`)", correct: true }
+      - { value: "YAML configuration files", correct: true }
+      - { value: "XML configuration files", correct: true }
+      - { value: "PHP routing configurator files", correct: true }
+    help: |
+      Symfony supports multiple formats for defining routes, including PHP attributes, YAML, XML, and PHP files using the RoutingConfigurator.
+      https://symfony.com/doc/current/routing.html#defining-routes
+
+  -
+    question: >
+      When generating a URL for a localized route, if no `_locale` parameter is explicitly passed, what locale does Symfony use by default?
+    answers:
+      - { value: "The current request locale.", correct: true }
+      - { value: "The default locale configured in `framework.yaml`.", correct: false }
+      - { value: "The locale of the user's browser.", correct: false }
+      - { value: "The first locale defined in the route's `path` configuration.", correct: false }
+    help: |
+      Symfony's URL generator defaults to the current request's locale when generating URLs for localized routes.
+      https://symfony.com/doc/current/routing.html#generating-urls-for-localized-routes
+
+  -
+    question: >
+      What is the primary purpose of the `#[AsCommand]` attribute in Symfony?
+    answers:
+      - { value: "To define the name and description of a console command.", correct: false }
+      - { value: "To mark a class as a service that can be autowired.", correct: false }
+      - { value: "To define a route for an HTTP request.", correct: false }
+      - { value: "This attribute is not related to routing.", correct: true }
+    help: |
+      The `#[AsCommand]` attribute is used for Symfony Console commands, not for HTTP routing. This question tests knowledge of attribute context.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: >
+      Which component is primarily responsible for generating URLs from route names and parameters in Symfony?
+    answers:
+      - { value: "`UrlGenerator`", correct: true }
+      - { value: "`Router`", correct: false }
+      - { value: "`RouteBuilder`", correct: false }
+      - { value: "`LinkGenerator`", correct: false }
+    help: |
+      The `UrlGenerator` (or `UrlGeneratorInterface`) is the core component for URL generation.
+      https://symfony.com/doc/current/create_framework/routing.html#generating-urls
+
+  -
+    question: >
+      When debugging a routing issue, if `router:match` indicates a route is matched but the wrong controller is executed, what might be the problem?
+    answers:
+      - { value: "The `_controller` special parameter is incorrectly defined or overridden.", correct: true }
+      - { value: "The route's HTTP method requirements are too strict.", correct: false }
+      - { value: "The route has a low priority.", correct: false }
+      - { value: "The URL parameters are not correctly type-hinted in the controller.", correct: false }
+    help: |
+      The `_controller` parameter explicitly determines which controller and action are executed. If it's wrong, the wrong code runs.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      What is the primary difference between `UrlGeneratorInterface::ABSOLUTE_URL` and `UrlGeneratorInterface::NETWORK_PATH` when generating URLs?
+    answers:
+      - { value: "`ABSOLUTE_URL` includes the scheme and host (e.g., `https://example.com`), while `NETWORK_PATH` starts with `//` and omits the scheme (e.g., `//example.com`).", correct: true }
+      - { value: "`ABSOLUTE_URL` is for internal links, `NETWORK_PATH` is for external links.", correct: false }
+      - { value: "`ABSOLUTE_URL` includes query parameters, `NETWORK_PATH` does not.", correct: false }
+      - { value: "`ABSOLUTE_URL` is for production, `NETWORK_PATH` is for development.", correct: false }
+    help: |
+      These constants control the format of the generated URL, with `NETWORK_PATH` being protocol-relative.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-controllers
+
+  -
+    question: >
+      If a route is defined with a `condition` using Expression Language, and the condition evaluates to `false`, what happens?
+    answers:
+      - { value: "The route is not matched, and Symfony continues to try matching other routes.", correct: true }
+      - { value: "Symfony throws an `AccessDeniedHttpException`.", correct: false }
+      - { value: "The request is redirected to a default error page.", correct: false }
+      - { value: "The controller method is executed, but with an empty request.", correct: false }
+    help: |
+      Route conditions act as an additional filter; if the condition is not met, the route is effectively ignored for the current request.
+      https://symfony.com/doc/current/routing.html#conditional-request-matching
+
+  -
+    question: >
+      What is the default priority value for a Symfony route if not explicitly set?
+    answers:
+      - { value: "0", correct: true }
+      - { value: "100", correct: false }
+      - { value: "-1", correct: false }
+      - { value: "No default priority; routes are matched in definition order.", correct: false }
+    help: |
+      Routes have a default priority of 0. Routes with higher positive priority are matched first.
+      https://symfony.com/doc/current/routing.html#route-priority
+
+  -
+    question: >
+      When defining a route using PHP attributes, how can you make a parameter optional without providing a default value in the route definition itself?
+    answers:
+      - { value: "By making the corresponding controller argument nullable (e.g., `?string $param`).", correct: true }
+      - { value: "By adding a `?` after the parameter name in the route path (e.g., `{param?}`).", correct: false }
+      - { value: "By setting `optional: true` for the parameter in the attribute.", correct: false }
+      - { value: "This is not possible; all route parameters must have a default or be required.", correct: false }
+    help: |
+      Symfony's argument resolver can handle optional parameters in controller methods if they are nullable.
+      https://symfony.com/doc/current/routing.html#route-parameters-optional-parameters
+
+  -
+    question: >
+      Which of the following best describes the role of `Symfony\\Component\\Routing\\RequestContext`?
+    answers:
+      - { value: "It holds fundamental information about the current request, such as the host, scheme, and HTTP method, used by the URL matcher.", correct: true }
+      - { value: "It stores the matched route's name and parameters after a successful match.", correct: false }
+      - { value: "It is a service container for routing-related services.", correct: false }
+      - { value: "It defines the global routing configuration for the application.", correct: false }
+    help: |
+      `RequestContext` provides the necessary environmental data for the routing system to correctly match URLs and generate new ones.
+      https://symfony.com/doc/current/create_framework/routing.html#matching-an-incoming-url
+
+  -
+    question: >
+      What happens if multiple routes match an incoming URL in Symfony?
+    answers:
+      - { value: "The route with the highest priority is matched.", correct: true }
+      - { value: "The first route defined in the configuration files is matched.", correct: false }
+      - { value: "Symfony throws a `MultipleRoutesMatchedException`.", correct: false }
+      - { value: "Symfony picks a route arbitrarily, which can lead to unpredictable behavior.", correct: false }
+    help: |
+      Symfony uses a priority system to resolve ambiguities when multiple routes could potentially match a URL.
+      https://symfony.com/doc/current/routing.html#route-priority
+
+  -
+    question: >
+      When defining a route with a dynamic host, such as `admin.{domain}`, how would you ensure that `domain` is restricted to `example.com` or `example.org` using PHP attributes?
+    answers:
+      - { value: "`requirements: ['domain' => 'example.com|example.org']`", correct: true }
+      - { value: "`hostRequirements: ['domain' => 'example.com|example.org']`", correct: false }
+      - { value: "`domainRegex: 'example.com|example.org'`", correct: false }
+      - { value: "`validateHost: ['domain' => 'example.com|example.org']`", correct: false }
+    help: |
+      The `requirements` option can be used to apply regular expression validation to dynamic host parameters.
+      https://symfony.com/doc/current/routing.html#host-requirements
+
+  -
+    question: >
+      Which of the following is the correct way to define a route that only accepts `POST` requests in YAML?
+    answers:
+      - { value: '''
+my_post_route:
+    path: /submit
+    controller: App\\Controller\\MyController::submit
+    methods: [POST]
+'''
+, correct: true }
+      - { value: '''
+my_post_route:
+    path: /submit
+    controller: App\\Controller\\MyController::submit
+    method: POST
+'''
+, correct: false }
+      - { value: '''
+my_post_route:
+    path: /submit
+    controller: App\\Controller\\MyController::submit
+    http_method: POST
+'''
+, correct: false }
+      - { value: '''
+my_post_route:
+    path: /submit
+    controller: App\\Controller\\MyController::submit
+    accepts: POST
+'''
+, correct: false }
+    help: |
+      The `methods` key in YAML is used to specify the allowed HTTP methods for a route.
+      https://symfony.com/doc/current/routing.html#http-method-requirements
+
+  -
+    question: >
+      What is the purpose of the `namePrefix` option when importing routes in the PHP routing configurator?
+    answers:
+      - { value: "It adds a prefix to the name of all imported routes.", correct: true }
+      - { value: "It adds a prefix to the URL path of all imported routes.", correct: false }
+      - { value: "It defines a namespace for the imported controllers.", correct: false }
+      - { value: "It sets a default name for routes that don't have one.", correct: false }
+    help: |
+      The `namePrefix` option is used to ensure unique and organized naming for routes within an imported group.
+      https://symfony.com/doc/current/routing.html#route-groups
+
+  -
+    question: >
+      When using `RedirectController`, which `defaults` option can be used to remove specific original route attributes (e.g., `offset`, `limit`) when redirecting?
+    answers:
+      - { value: "`ignoreAttributes: ['offset', 'limit']`", correct: true }
+      - { value: "`removeAttributes: ['offset', 'limit']`", correct: false }
+      - { value: "`excludeAttributes: ['offset', 'limit']`", correct: false }
+      - { value: "`clearAttributes: ['offset', 'limit']`", correct: false }
+    help: |
+      The `ignoreAttributes` option allows fine-grained control over which attributes are preserved during a redirect.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      What is the primary function of the `Symfony\\Bundle\\FrameworkBundle\\Routing\\DelegatingLoader`?
+    answers:
+      - { value: "It is the main loader responsible for delegating route loading to specialized loaders (e.g., for YAML, XML, attributes).", correct: true }
+      - { value: "It loads routes from a database.", correct: false }
+      - { value: "It handles caching of route definitions.", correct: false }
+      - { value: "It generates URLs based on route names.", correct: false }
+    help: |
+      The `DelegatingLoader` acts as a central point for loading routes from various sources by delegating to appropriate sub-loaders.
+      https://symfony.com/doc/current/routing/custom_route_loader.html
+
+  -
+    question: >
+      You have a route defined as `#[Route('/products/{id}', name: 'product_details')]`. If you try to generate a URL for `product_details` without providing an `id`, what will happen?
+    answers:
+      - { value: "A `Symfony\\Component\\Routing\\Exception\\MissingMandatoryParametersException` will be thrown.", correct: true }
+      - { value: "Symfony will generate a URL with an empty `id` parameter.", correct: false }
+      - { value: "The route will not be found, resulting in a `RouteNotFoundException`.", correct: false }
+      - { value: "Symfony will attempt to guess a default `id` value.", correct: false }
+    help: |
+      Required route parameters must always be provided when generating a URL, unless they have a default value defined.
+      https://symfony.com/doc/current/routing.html#generating-urls-with-parameters
+
+  -
+    question: >
+      Which of the following is a valid way to define a route using the PHP routing configurator, including a default value for a parameter?
+    answers:
+      - { value: '''
+$routes->add('blog_post', '/blog/{slug}')
+    ->controller([BlogPostController::class, 'show'])
+    ->defaults(['slug' => 'default-post']);
+'''
+, correct: true }
+      - { value: '''
+$routes->add('blog_post', '/blog/{slug?}')
+    ->controller([BlogPostController::class, 'show']);
+'''
+, correct: false }
+      - { value: '''
+$routes->add('blog_post', '/blog/{slug}', ['slug' => 'default-post'])
+    ->controller([BlogPostController::class, 'show']);
+'''
+, correct: false }
+      - { value: '''
+$routes->add('blog_post', '/blog/{slug}')
+    ->controller([BlogPostController::class, 'show'])
+    ->parameterDefaults(['slug' => 'default-post']);
+'''
+, correct: false }
+    help: |
+      The `defaults()` method of the `RoutingConfigurator` is used to set default values for route parameters.
+      https://symfony.com/doc/current/routing.html#default-values-for-parameters
+
+  -
+    question: >
+      What is the purpose of the `#[Route(..., condition: "...")]` attribute?
+    answers:
+      - { value: "To add an Expression Language condition that must evaluate to true for the route to match.", correct: true }
+      - { value: "To define a database query condition for the route.", correct: false }
+      - { value: "To specify a security access control expression for the route.", correct: false }
+      - { value: "To conditionally enable or disable the route based on environment variables.", correct: false }
+    help: |
+      The `condition` option allows for complex, dynamic matching logic using Symfony's Expression Language.
+      https://symfony.com/doc/current/routing.html#conditional-request-matching
+
+  -
+    question: >
+      When using `RedirectController`, what is the effect of setting `ignoreAttributes: true` in the defaults?
+    answers:
+      - { value: "It removes all original route attributes when redirecting.", correct: true }
+      - { value: "It prevents the redirect from being logged.", correct: false }
+      - { value: "It ignores any query parameters from the original request.", correct: false }
+      - { value: "It disables the redirect if any attributes are present.", correct: false }
+    help: |
+      Setting `ignoreAttributes: true` ensures that no attributes from the original route are passed to the target route during the redirect.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      Which of the following is a valid way to define a route with a specific HTTP method (e.g., `GET`) using the PHP routing configurator?
+    answers:
+      - { value: "`->methods(['GET'])`", correct: true }
+      - { value: "`->method('GET')`", correct: false }
+      - { value: "`->allowMethods(['GET'])`", correct: false }
+      - { value: "`->httpMethod('GET')`", correct: false }
+    help: |
+      The `methods()` method of the `RoutingConfigurator` accepts an array of allowed HTTP methods.
+      https://symfony.com/doc/current/routing.html#http-method-requirements
+
+  -
+    question: >
+      What is the primary reason for using `#[Route(..., priority: X)]` in Symfony?
+    answers:
+      - { value: "To explicitly control the order in which routes are evaluated, preventing greedy routes from matching before more specific ones.", correct: true }
+      - { value: "To define the importance of a route for SEO purposes.", correct: false }
+      - { value: "To set a caching priority for the route's response.", correct: false }
+      - { value: "To determine the order of middleware execution for the route.", correct: false }
+    help: |
+      Route priority is essential for resolving conflicts when multiple routes could match a given URL.
+      https://symfony.com/doc/current/routing.html#route-priority
+
+  -
+    question: >
+      When defining a route using PHP attributes, what is the purpose of the `name` parameter?
+    answers:
+      - { value: "It provides a unique identifier for the route, used for URL generation and referencing.", correct: true }
+      - { value: "It specifies the display name of the route in debugging tools.", correct: false }
+      - { value: "It defines the name of the controller method associated with the route.", correct: false }
+      - { value: "It is an optional descriptive label for the route.", correct: false }
+    help: |
+      The `name` parameter is crucial for programmatically interacting with routes, such as generating URLs.
+      https://symfony.com/doc/current/routing.html#defining-routes-as-php-attributes
+
+  -
+    question: >
+      Which of the following is a valid way to define a route that allows a parameter `id` to contain any character (including `/`) in YAML?
+    answers:
+      - { value: '''
+my_route:
+    path: /path/{id}
+    requirements:
+        id: '.+'
+'''
+, correct: true }
+      - { value: '''
+my_route:
+    path: /path/{id<.*>}
+'''
+, correct: false }
+      - { value: '''
+my_route:
+    path: /path/{id}
+    allow_slash: true
+'''
+, correct: false }
+      - { value: '''
+my_route:
+    path: /path/{id}
+    regex:
+        id: '.*'
+'''
+, correct: false }
+    help: |
+      The `.+` regex matches one or more of any character, including slashes.
+      https://symfony.com/doc/current/routing.html#allowing-a-slash-in-a-route-parameter
+
+  -
+    question: >
+      What is the purpose of the `_locale` special parameter in Symfony routing?
+    answers:
+      - { value: "It automatically sets the locale on the `Request` object based on the matched URL segment.", correct: true }
+      - { value: "It defines the default language for the application.", correct: false }
+      - { value: "It is used to translate route names.", correct: false }
+      - { value: "It indicates that the route should only be accessible in specific locales.", correct: false }
+    help: |
+      The `_locale` parameter is a powerful feature for building multilingual applications.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      When using `RedirectController` to redirect to an external URL, what `defaults` key is used to specify the target URL?
+    answers:
+      - { value: "`path`", correct: true }
+      - { value: "`url`", correct: false }
+      - { value: "`external_url`", correct: false }
+      - { value: "`target_url`", correct: false }
+    help: |
+      The `path` key can accept an absolute path or an absolute URL for redirection.
+      https://symfony.com/doc/current/routing.html#redirecting-to-an-absolute-path-or-external-url
+
+  -
+    question: >
+      How can you check if a route alias exists using the `debug:router` command?
+    answers:
+      - { value: "By running `php bin/console debug:router --show-aliases`.", correct: true }
+      - { value: "Aliases are not displayed by `debug:router`.", correct: false }
+      - { value: "By running `php bin/console debug:router --type=alias`.", correct: false }
+      - { value: "By running `php bin/console router:alias-list`.", correct: false }
+    help: |
+      The `--show-aliases` option explicitly includes route aliases in the `debug:router` output.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      What is the primary use case for `Symfony\\Component\\Routing\\RouteCollection`?
+    answers:
+      - { value: "To store and manage a set of `Route` objects.", correct: true }
+      - { value: "To define a single route.", correct: false }
+      - { value: "To match a URL to a route.", correct: false }
+      - { value: "To generate a URL from a route.", correct: false }
+    help: |
+      `RouteCollection` acts as a container for all the individual route definitions within an application.
+      https://symfony.com/doc/current/create_framework/routing.html#defining-routes
+
+  -
+    question: >
+      Which of the following is a valid Expression Language function for accessing environment variables in a route condition?
+    answers:
+      - { value: "`env()`", correct: true }
+      - { value: "`getenv()`", correct: false }
+      - { value: "`parameter()`", correct: false }
+      - { value: "`config()`", correct: false }
+    help: |
+      The `env()` function is specifically provided in Expression Language for this purpose.
+      https://symfony.com/doc/current/routing.html#expression-language
+
+  -
+    question: >
+      When defining a route in PHP attributes, how do you specify that it should only be active in the `prod` environment?
+    answers:
+      - { value: "`#[Route('/admin', name: 'admin_dashboard', env: 'prod')]`", correct: true }
+      - { value: "`#[Route('/admin', name: 'admin_dashboard', environments: ['prod'])]`", correct: false }
+      - { value: "`#[Route('/admin', name: 'admin_dashboard', if_env: 'prod')]`", correct: false }
+      - { value: "`#[Route('/admin', name: 'admin_dashboard', context: 'prod')]`", correct: false }
+    help: |
+      The `env` option allows you to restrict a route's availability to one or more specific environments.
+      https://symfony.com/doc/current/routing.html#environment-specific-routes
+
+  -
+    question: >
+      What is the purpose of the `_format` special parameter in a route path like `/articles.{_format}`?
+    answers:
+      - { value: "It allows the URL to specify the desired response format (e.g., `.html`, `.json`).", correct: true }
+      - { value: "It defines the file extension for the controller.", correct: false }
+      - { value: "It is a placeholder for a date format.", correct: false }
+      - { value: "It indicates that the route should only be accessed via a specific file type.", correct: false }
+    help: |
+      The `_format` parameter is commonly used to negotiate the content type of the response.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      Which of the following describes a scenario where `RouteNotFoundException` would typically be thrown?
+    answers:
+      - { value: "Attempting to generate a URL for a route name that does not exist.", correct: true }
+      - { value: "An incoming URL does not match any defined route.", correct: false }
+      - { value: "A controller method requires an argument that is not provided by the route.", correct: false }
+      - { value: "A route's `condition` expression evaluates to `false`.", correct: false }
+    help: |
+      `RouteNotFoundException` specifically indicates that the requested route name could not be found in the routing table for URL generation.
+      https://symfony.com/doc/current/routing.html#checking-if-a-route-exists
+
+  -
+    question: >
+      When defining a route with a dynamic host parameter (e.g., `{subdomain}.example.com`), how can you ensure the `subdomain` parameter is passed to the controller method?
+    answers:
+      - { value: "By defining a corresponding argument in the controller method signature (e.g., `public function myAction(string $subdomain)`).", correct: true }
+      - { value: "It is automatically injected into the `Request` object as a query parameter.", correct: false }
+      - { value: "You must manually retrieve it from `$_SERVER['HTTP_HOST']`.", correct: false }
+      - { value: "Host parameters are not passed to controller methods directly.", correct: false }
+    help: |
+      Symfony's argument resolver automatically maps route parameters (from path or host) to controller method arguments.
+      https://symfony.com/doc/current/routing.html#host-requirements
+
+  -
+    question: >
+      What is the main advantage of defining routes using PHP attributes directly in controllers?
+    answers:
+      - { value: "It keeps route definitions close to the code that handles them, improving readability and maintainability.", correct: true }
+      - { value: "It offers better performance compared to YAML or XML configuration.", correct: false }
+      - { value: "It allows for more complex routing logic than other formats.", correct: false }
+      - { value: "It eliminates the need for a routing cache.", correct: false }
+    help: |
+      PHP attributes provide a convenient way to colocate routing information with controller logic.
+      https://symfony.com/doc/current/routing.html#defining-routes-as-php-attributes
+
+  -
+    question: >
+      Which command is useful for inspecting the details of a specific route, including its requirements, defaults, and methods?
+    answers:
+      - { value: "`php bin/console debug:router <route_name>`", correct: true }
+      - { value: "`php bin/console router:info <route_name>`", correct: false }
+      - { value: "`php bin/console route:describe <route_name>`", correct: false }
+      - { value: "`php bin/console router:inspect <route_name>`", correct: false }
+    help: |
+      The `debug:router` command, when given a route name, provides a detailed breakdown of that route's configuration.
+      https://symfony.com/doc/current/routing.html#router-debugging
+
+  -
+    question: >
+      When using the `RedirectController`, what is the purpose of the `keepRequestMethod: true` option?
+    answers:
+      - { value: "It ensures that the HTTP method of the original request (e.g., POST, PUT) is preserved during the redirect.", correct: true }
+      - { value: "It forces the redirect to use a `GET` method, regardless of the original request.", correct: false }
+      - { value: "It prevents the browser from changing the HTTP method during a redirect.", correct: false }
+      - { value: "It only allows redirects for `GET` requests.", correct: false }
+    help: |
+      This option is crucial for correctly handling redirects for non-GET requests, changing the status code to 307 or 308.
+      https://symfony.com/doc/current/routing.html#redirecting-routes
+
+  -
+    question: >
+      What is the primary role of `Symfony\\Component\\Routing\\Route` in the Symfony Routing component?
+    answers:
+      - { value: "It represents a single route definition, including its path, requirements, defaults, and options.", correct: true }
+      - { value: "It is a collection of routes.", correct: false }
+      - { value: "It is responsible for matching URLs.", correct: false }
+      - { value: "It generates URLs.", correct: false }
+    help: |
+      The `Route` class encapsulates all the configuration for an individual route.
+      https://symfony.com/doc/current/create_framework/routing.html#defining-routes
+
+  -
+    question: >
+      Which of the following is a valid way to define a route with a default value for a parameter in YAML?
+    answers:
+      - { value: '''
+my_route:
+    path: /articles/{page}
+    defaults:
+        page: 1
+'''
+, correct: true }
+      - { value: '''
+my_route:
+    path: /articles/{page=1}
+'''
+, correct: false }
+      - { value: '''
+my_route:
+    path: /articles/{page}
+    default_page: 1
+'''
+, correct: false }
+      - { value: '''
+my_route:
+    path: /articles/{page}
+    options:
+        default: { page: 1 }
+'''
+, correct: false }
+    help: |
+      The `defaults` key is used to specify default values for route parameters.
+      https://symfony.com/doc/current/routing.html#default-values-for-parameters
+
+  -
+    question: >
+      What is the purpose of the `#[Route(..., locale: 'en')]` and `#[Route(..., format: 'html')]` options in PHP attributes?
+    answers:
+      - { value: "They set default values for the `_locale` and `_format` special parameters for that route.", correct: true }
+      - { value: "They define the required locale and format for the route to match.", correct: false }
+      - { value: "They are used for translating the route's path.", correct: false }
+      - { value: "They specify the preferred content type and language for the response.", correct: false }
+    help: |
+      These options provide a convenient way to set default values for the `_locale` and `_format` special parameters.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      When debugging routing, if you encounter an error like "Controller 'App\\Controller\\BlogController::show()' requires that you provide a value for the '$slug' argument.", what does it indicate?
+    answers:
+      - { value: "The route path is missing a parameter that the controller method expects.", correct: true }
+      - { value: "The controller method is not publicly accessible.", correct: false }
+      - { value: "The route name is misspelled.", correct: false }
+      - { value: "The service container cannot inject a dependency into the controller.", correct: false }
+    help: |
+      This error specifically points to a mismatch between the route's defined parameters and the controller method's expected arguments.
+      https://symfony.com/doc/current/routing.html#troubleshooting
+
+  -
+    question: >
+      What is the primary benefit of using `UrlGeneratorInterface` for URL generation in services instead of relying on `AbstractController::generateUrl()`?
+    answers:
+      - { value: "It promotes dependency injection and makes the service more testable and decoupled from the controller layer.", correct: true }
+      - { value: "It offers better performance for URL generation.", correct: false }
+      - { value: "It allows generating URLs for routes that are not accessible from controllers.", correct: false }
+      - { value: "It provides more advanced URL generation options.", correct: false }
+    help: |
+      Injecting interfaces like `UrlGeneratorInterface` is a best practice for building maintainable and testable services.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-services
+
+  -
+    question: >
+      When defining a route in YAML, how do you specify that it should only be active in the `test` environment?
+    answers:
+      - { value: '''
+my_route:
+    path: /test-route
+    controller: App\\Controller\\TestController::index
+    env: test
+'''
+, correct: true }
+      - { value: '''
+my_route:
+    path: /test-route
+    controller: App\\Controller\\TestController::index
+    environment: test
+'''
+, correct: false }
+      - { value: '''
+my_route:
+    path: /test-route
+    controller: App\\Controller\\TestController::index
+    environments: [test]
+'''
+, correct: false }
+      - { value: '''
+my_route:
+    path: /test-route
+    controller: App\\Controller\\TestController::index
+    if_env: test
+'''
+, correct: false }
+    help: |
+      The `env` key in YAML is used to restrict a route to a specific environment.
+      https://symfony.com/doc/current/routing.html#environment-specific-routes
+
+  -
+    question: >
+      Which of the following is a key advantage of using PHP backed enums as route parameters in Symfony 7?
+    answers:
+      - { value: "Automatic type conversion from URL string to enum instance, improving type safety in controllers.", correct: true }
+      - { value: "Improved routing performance due to optimized enum matching.", correct: false }
+      - { value: "Enums can be used to define dynamic route paths without explicit regex.", correct: false }
+      - { value: "They allow for automatic translation of route parameter values.", correct: false }
+    help: |
+      PHP backed enums simplify controller signatures and add type safety by handling the conversion automatically.
+      https://symfony.com/doc/current/routing.html#route-parameters-php-backed-enums
+
+  -
+    question: >
+      What is the purpose of the `_controller` special parameter in Symfony?
+    answers:
+      - { value: "It determines which controller and action are executed when the route is matched.", correct: true }
+      - { value: "It defines the default controller for routes without an explicit controller.", correct: false }
+      - { value: "It specifies the service ID of the controller.", correct: false }
+      - { value: "It is used for internal routing optimization and should not be manually set.", correct: false }
+    help: |
+      The `_controller` parameter is fundamental to Symfony's architecture, linking a route to its handling logic.
+      https://symfony.com/doc/current/routing.html#special-routing-parameters
+
+  -
+    question: >
+      When defining a route alias, what is the relationship between the alias and the original route?
+    answers:
+      - { value: "The alias points to the original route's definition, allowing it to be referenced by multiple names.", correct: true }
+      - { value: "The alias creates a copy of the original route with a new name.", correct: false }
+      - { value: "The alias replaces the original route's name.", correct: false }
+      - { value: "The alias is a separate route that redirects to the original route.", correct: false }
+    help: |
+      Aliases are a way to provide alternative names for existing routes, useful for backward compatibility.
+      https://symfony.com/doc/current/routing.html#route-aliases
