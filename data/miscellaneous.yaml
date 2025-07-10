@@ -3,1435 +3,3184 @@ category: Miscellaneous
 questions:
   -
     question: >
-      Which of the following is the correct order of precedence for Symfony configuration files, from lowest to highest?
+      Which Symfony component is primarily used for handling environment variables and loading them from `.env` files?
     answers:
-      - { value: '`config/packages/*.yaml`, `config/services.yaml`, `config/routes.yaml`', correct: false }
-      - { value: '`config/packages/*.yaml`, `config/packages/{env}/*.yaml`, `config/services.yaml`', correct: true }
-      - { value: '`config/services.yaml`, `config/packages/*.yaml`, `config/packages/{env}/*.yaml`', correct: false }
-      - { value: '`config/routes.yaml`, `config/services.yaml`, `config/packages/*.yaml`', correct: false }
+      -
+        value: >
+          DotEnv
+        correct: true
+      -
+        value: >
+          Config
+        correct: false
+      -
+        value: >
+          Yaml
+        correct: false
+      -
+        value: >
+          DependencyInjection
+        correct: false
     help: |
-      Symfony loads configuration files in a specific order, with environment-specific files overriding general ones.
-      https://symfony.com/doc/current/configuration.html#configuration-environments
-
-  -
-    question: |
-      How can you access an environment variable named `DATABASE_URL` within a Symfony service definition in `config/services.yaml`?
-
-      ```yaml
-      # config/services.yaml
-      services:
-          App\Service\DatabaseConnector:
-              arguments:
-                  $dsn: '%env(DATABASE_URL)%'
-      ```
-    answers:
-      - { value: '`%env(DATABASE_URL)%`', correct: true }
-      - { value: '`%env.DATABASE_URL%`', correct: false }
-      - { value: '`$_ENV[''DATABASE_URL'']`', correct: false }
-      - { value: '`%parameter(DATABASE_URL)%`', correct: false }
-    help: |
-      Symfony's configuration allows accessing environment variables using the `%env(...)%` syntax.
-      https://symfony.com/doc/current/configuration.html#environment-variables-in-service-definitions
-
-  -
-    question: >
-      What is the primary purpose of the Symfony DotEnv component?
-    answers:
-      - { value: 'To manage database migrations.', correct: false }
-      - { value: 'To load environment variables from a `.env` file into `$_ENV` and `$_SERVER`.', correct: true }
-      - { value: 'To compile Twig templates.', correct: false }
-      - { value: 'To handle HTTP requests and responses.', correct: false }
-    help: |
-      The DotEnv component simplifies the management of environment variables by loading them from a `.env` file.
+      The DotEnv component loads environment variables from `.env` files into `$_ENV` or `$_SERVER`.
       https://symfony.com/doc/current/components/dotenv.html
 
   -
-    question: |
-      Which of the following ExpressionLanguage expressions would correctly check if the current user has the `ROLE_ADMIN` role within a Symfony configuration or security rule?
-    answers:
-      - { value: '`is_granted(''ROLE_ADMIN'')`', correct: true }
-      - { value: '`user.hasRole(''ROLE_ADMIN'')`', correct: false }
-      - { value: '`security.isGranted(''ROLE_ADMIN'')`', correct: false }
-      - { value: '`has_role(''ROLE_ADMIN'')`', correct: false }
-    help: |
-      The `is_granted()` function is the correct way to check for roles using Symfony's ExpressionLanguage.
-      https://symfony.com/doc/current/components/expression_language.html#security-expressions
-
-  -
     question: >
-      How can you customize the error pages (e.g., 404, 500) in a Symfony application?
-    answers:
-      - { value: 'By creating Twig templates named `error404.html.twig` and `error500.html.twig` in the `templates/bundles/TwigBundle/Exception/` directory.', correct: true }
-      - { value: 'By configuring routes for each error code in `config/routes.yaml`.', correct: false }
-      - { value: 'By overriding the `Kernel::handleException()` method.', correct: false }
-      - { value: 'By defining custom error controllers in `config/services.yaml`.', correct: false }
-    help: |
-      Symfony allows customizing error pages by placing Twig templates in a specific directory structure within your `templates` folder.
-      https://symfony.com/doc/current/controller/error_pages.html
-
-  -
-    question: >
-      What is the primary effect of setting `APP_DEBUG=0` in your `.env` file for a production Symfony application?
-    answers:
-      - { value: 'It enables verbose logging for all services.', correct: false }
-      - { value: 'It disables the Web Profiler and hides detailed error messages from end-users.', correct: true }
-      - { value: 'It forces all cache to be regenerated on every request.', correct: false }
-      - { value: 'It switches the application to maintenance mode.', correct: false }
-    help: |
-      Setting `APP_DEBUG` to `0` is crucial for production environments as it disables debugging tools and prevents sensitive error information from being exposed.
-      https://symfony.com/doc/current/configuration/environments.html#the-app-env-and-app-debug-variables
-
-  -
-    question: |
-      Consider the following controller action. Which of the following is the correct way to catch a specific `NotFoundHttpException` and render a custom response?
-
-      ```php
-      namespace App\Controller;
-
-      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-      use Symfony\Component\HttpFoundation\Response;
-      use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-      use Symfony\Component\Routing\Annotation\Route;
-
-      class ProductController extends AbstractController
-      {
-          #[Route('/product/{id}', name: 'app_product_show')]
-          public function show(int $id): Response
-          {
-              if ($id === 0) {
-                  // How to handle this specific case?
-              }
-              return new Response('Product ' . $id);
-          }
-      }
-      ```
-    answers:
-      - { value: 'Throw a `NotFoundHttpException` directly: `throw new NotFoundHttpException(''Product not found.'');`', correct: true }
-      - { value: 'Use a `try-catch` block around the `if` statement.', correct: false }
-      - { value: 'Return `$this->render(''error/404.html.twig'');` directly.', correct: false }
-      - { value: 'Use the `#[Catch]` attribute above the method.', correct: false }
-    help: |
-      For HTTP exceptions like `NotFoundHttpException`, throwing the exception is the standard Symfony way. The kernel's exception listener will then handle rendering the appropriate error page.
-      https://symfony.com/doc/current/controller/error_pages.html#handling-404-errors
-
-  -
-    question: >
-      What is the primary difference between `dump()` and `dd()` functions provided by Symfony's VarDumper component?
-    answers:
-      - { value: '`dump()` outputs data and continues script execution, while `dd()` outputs data and then terminates script execution.', correct: true }
-      - { value: '`dump()` is for production, `dd()` is for development.', correct: false }
-      - { value: '`dump()` only works with arrays, `dd()` works with objects.', correct: false }
-      - { value: '`dd()` is a deprecated alias for `dump()`.', correct: false }
-    help: |
-      `dump()` is used for inspecting variables without stopping execution, whereas `dd()` (dump and die) is useful for quickly debugging and stopping the script.
-      https://symfony.com/doc/current/components/var_dumper.html#dump-and-die-dd
-
-  -
-    question: >
-      Which Symfony command is most useful for inspecting the registered services in your application's dependency injection container?
-    answers:
-      - { value: '`bin/console debug:container`', correct: true }
-      - { value: '`bin/console cache:clear`', correct: false }
-      - { value: '`bin/console config:dump`', correct: false }
-      - { value: '`bin/console router:debug`', correct: false }
-    help: |
-      The `debug:container` command provides a comprehensive list of all public and private services, their aliases, and their definitions.
-      https://symfony.com/doc/current/console/usage.html#debugging-commands
-
-  -
-    question: >
-      When debugging a Symfony application, where would you typically find detailed information about HTTP requests, responses, and performance metrics?
-    answers:
-      - { value: 'In the `var/log/dev.log` file.', correct: false }
-      - { value: 'In the browser''s developer console network tab.', correct: false }
-      - { value: 'In the Symfony Web Profiler, accessible via the Web Debug Toolbar.', correct: true }
-      - { value: 'In the PHP error log.', correct: false }
-    help: |
-      The Symfony Web Profiler is an invaluable tool for debugging, providing a wealth of information about each request.
-      https://symfony.com/doc/current/profiler.html
-
-  -
-    question: >
-      Which Composer command is recommended for deploying a Symfony application to a production server?
-    answers:
-      - { value: '`composer update`', correct: false }
-      - { value: '`composer install --no-dev --optimize-autoloader`', correct: true }
-      - { value: '`composer require --no-dev`', correct: false }
-      - { value: '`composer dump-autoload`', correct: false }
-    help: |
-      `composer install --no-dev --optimize-autoloader` ensures that development dependencies are not installed and the autoloader is optimized for performance.
-      https://symfony.com/doc/current/deployment.html#install-your-dependencies
-
-  -
-    question: >
-      Before deploying a Symfony application to production, which environment variable should typically be set to `prod`?
-    answers:
-      - { value: '`APP_ENV`', correct: true }
-      - { value: '`SYMFONY_ENV`', correct: false }
-      - { value: '`ENV`', correct: false }
-      - { value: '`DEBUG_ENV`', correct: false }
-    help: |
-      The `APP_ENV` environment variable determines the current environment (e.g., `dev`, `prod`, `test`), influencing configuration and behavior.
-      https://symfony.com/doc/current/configuration/environments.html#the-app-env-and-app-debug-variables
-
-  -
-    question: >
-      What is the primary benefit of running `bin/console cache:clear --env=prod` during deployment?
-    answers:
-      - { value: 'It removes all log files to free up disk space.', correct: false }
-      - { value: 'It clears and warms up the production cache, ensuring the latest code and configuration are used.', correct: true }
-      - { value: 'It deletes all user sessions.', correct: false }
-      - { value: 'It rebuilds the database schema.', correct: false }
-    help: |
-      Clearing and warming up the cache is a critical step in deployment to ensure that the application runs with the latest compiled assets and configuration.
-      https://symfony.com/doc/current/deployment.html#clear-and-warm-up-the-cache
-
-  -
-    question: >
-      Which of the following cache adapters is generally recommended for production environments in Symfony due to its performance characteristics for storing PHP objects?
-    answers:
-      - { value: 'FilesystemAdapter', correct: false }
-      - { value: 'ApcuAdapter', correct: true }
-      - { value: 'ArrayAdapter', correct: false }
-      - { value: 'Psr6Adapter', correct: false }
-    help: |
-      APCu (Alternative PHP Cache) is a highly performant in-memory cache for PHP data and is often recommended for production.
-      https://symfony.com/doc/current/components/cache/adapters.html#apcu-cache
-
-  -
-    question: |
-      You want to cache the result of a computationally expensive operation. Given a `CacheInterface` service injected as `$cache`, how would you store and retrieve data with a specific lifetime?
-
-      ```php
-      use Psr\Cache\CacheItemPoolInterface;
-
-      class MyService
-      {
-          public function __construct(private CacheItemPoolInterface $cache) {}
-
-          public function getExpensiveData(): array
-          {
-              $item = $this->cache->getItem('my_expensive_data');
-              if (!$item->isHit()) {
-                  $data = $this->computeExpensiveData(); // Imagine this is slow
-                  $item->set($data);
-                  $item->expiresAfter(3600); // Cache for 1 hour
-                  $this->cache->save($item);
-              }
-              return $item->get();
-          }
-
-          private function computeExpensiveData(): array
-          {
-              // ... actual computation ...
-              return ['foo' => 'bar'];
-          }
-      }
-      ```
-    answers:
-      - { value: 'The code snippet correctly demonstrates storing and retrieving data with a lifetime.', correct: true }
-      - { value: 'The `expiresAfter()` method should be called before `set()`.', correct: false }
-      - { value: 'You must use `CacheItemPoolInterface` for `getItem()` and `CacheItemInterface` for `set()` and `expiresAfter()`.', correct: false }
-      - { value: 'The `save()` method is not necessary; `set()` automatically persists the item.', correct: false }
-    help: |
-      The example correctly uses `getItem()`, `isHit()`, `set()`, `expiresAfter()`, and `save()` to manage cached items.
-      https://symfony.com/doc/current/components/cache/cache_items.html
-
-  -
-    question: >
-      Which of the following is a valid strategy for cache invalidation in Symfony?
-    answers:
-      - { value: 'Manually deleting cache files via FTP.', correct: false }
-      - { value: 'Using cache tags to invalidate groups of related items.', correct: true }
-      - { value: 'Restarting the web server after every cache update.', correct: false }
-      - { value: 'Setting an extremely short cache lifetime for all items.', correct: false }
-    help: |
-      Cache tags provide a powerful mechanism to invalidate multiple related cache items efficiently.
-      https://symfony.com/doc/current/components/cache/cache_tags.html
-
-  -
-    question: >
-      What is the purpose of the `Symfony\Component\Process\Process` component?
-    answers:
-      - { value: 'To manage background jobs and queues.', correct: false }
-      - { value: 'To execute external commands and programs from PHP.', correct: true }
-      - { value: 'To handle file uploads securely.', correct: false }
-      - { value: 'To interact with databases.', correct: false }
-    help: |
-      The Process component allows you to run shell commands and external processes, providing control over input, output, and error streams.
-      https://symfony.com/doc/current/components/process.html
-
-  -
-    question: |
-      Given the following code, how would you capture the standard output of the `ls -la` command?
-
-      ```php
-      use Symfony\Component\Process\Process;
-
-      $process = new Process(['ls', '-la']);
-      $process->run();
-
-      if ($process->isSuccessful()) {
-          $output = /* ??? */;
-          echo $output;
-      }
-      ```
-    answers:
-      - { value: '`$process->getOutput()`', correct: true }
-      - { value: '`$process->getStdout()`', correct: false }
-      - { value: '`$process->getIncrementalOutput()`', correct: false }
-      - { value: '`$process->getResults()`', correct: false }
-    help: |
-      The `getOutput()` method returns the standard output of the process after it has finished running.
-      https://symfony.com/doc/current/components/process.html#getting-the-output
-
-  -
-    question: >
-      Which method of the `Process` class allows you to execute a command asynchronously, without blocking the PHP script's execution?
-    answers:
-      - { value: '`run()`', correct: false }
-      - { value: '`start()`', correct: true }
-      - { value: '`execute()`', correct: false }
-      - { value: '`wait()`', correct: false }
-    help: |
-      The `start()` method initiates the process and returns immediately, allowing your PHP script to continue execution while the process runs in the background.
-      https://symfony.com/doc/current/components/process.html#running-processes-asynchronously
-
-  -
-    question: >
-      What is the primary role of the Symfony Serializer component?
-    answers:
-      - { value: 'To convert PHP objects into various formats (e.g., JSON, XML) and vice-versa.', correct: true }
-      - { value: 'To handle data validation for forms.', correct: false }
-      - { value: 'To manage database connections and queries.', correct: false }
-      - { value: 'To encrypt and decrypt data.', correct: false }
-    help: |
-      The Serializer component provides a flexible way to serialize and deserialize PHP objects into different formats.
-      https://symfony.com/doc/current/components/serializer.html
-
-  -
-    question: |
-      You have a `User` object with sensitive `password` and `roles` properties. How can you prevent these properties from being serialized when exposing user data via an API, while still serializing other properties like `id` and `email`?
-    answers:
-      - { value: 'Use serialization groups with the `#[Groups]` attribute on the properties.', correct: true }
-      - { value: 'Mark the properties as `private` or `protected`.', correct: false }
-      - { value: 'Implement the `JsonSerializable` interface and manually exclude them.', correct: false }
-      - { value: 'Configure a custom normalizer for each sensitive property.', correct: false }
-    help: |
-      Serialization groups allow you to define different sets of properties to be serialized based on the context.
-      https://symfony.com/doc/current/components/serializer.html#using-serialization-groups
-
-  -
-    question: >
-      In the context of the Serializer component, what is the difference between a "Normalizer" and an "Encoder"?
-    answers:
-      - { value: 'A Normalizer converts objects to arrays and vice-versa, while an Encoder converts arrays to a specific format (e.g., JSON, XML) and vice-versa.', correct: true }
-      - { value: 'A Normalizer handles data validation, while an Encoder handles data encryption.', correct: false }
-      - { value: 'A Normalizer is for database operations, while an Encoder is for API responses.', correct: false }
-      - { value: 'They are interchangeable terms for the same functionality.', correct: false }
-    help: |
-      Normalizers handle the object-to-array (and array-to-object) conversion, while Encoders handle the array-to-format (and format-to-array) conversion.
-      https://symfony.com/doc/current/components/serializer.html#normalizers-and-encoders
-
-  -
-    question: >
-      How does the Symfony Serializer component typically handle circular references (e.g., an object referencing itself or another object that references the first)?
-    answers:
-      - { value: 'It throws a `CircularReferenceException` by default, but this can be configured to ignore or limit depth.', correct: true }
-      - { value: 'It automatically detects and skips the problematic reference without configuration.', correct: false }
-      - { value: 'It creates an infinite loop, leading to a memory exhaustion error.', correct: false }
-      - { value: 'It requires manual detection and breaking of the reference in your entities.', correct: false }
-    help: |
-      By default, the Serializer throws an exception for circular references to prevent infinite loops, but you can configure it to handle them gracefully.
-      https://symfony.com/doc/current/components/serializer.html#handling-circular-references
-
-  -
-    question: >
-      What is the primary purpose of the Symfony Messenger component?
-    answers:
-      - { value: 'To send real-time notifications to users.', correct: false }
-      - { value: 'To send and receive messages (commands and events) to/from applications and queues.', correct: true }
-      - { value: 'To manage user authentication and authorization.', correct: false }
-      - { value: 'To handle HTTP requests and responses efficiently.', correct: false }
-    help: |
-      The Messenger component provides a robust solution for sending and processing messages asynchronously or synchronously.
-      https://symfony.com/doc/current/components/messenger.html
-
-  -
-    question: |
-      You want to create a new message and its handler in Symfony Messenger. Which of the following is the correct approach?
-    answers:
-      - { value: 'Define a PHP class for the message (e.g., `SendEmailMessage`) and a separate handler class (e.g., `SendEmailHandler`) that implements `MessageHandlerInterface` or uses the `#[AsMessageHandler]` attribute.', correct: true }
-      - { value: 'Create a new service in `services.yaml` with a `messenger.message_handler` tag.', correct: false }
-      - { value: 'Extend `AbstractMessage` for the message and `AbstractHandler` for the handler.', correct: false }
-      - { value: 'Messages are automatically generated by Symfony; you only need to create handlers.', correct: false }
-    help: |
-      Messages are plain PHP objects, and handlers are services that process these messages. The `#[AsMessageHandler]` attribute is the modern way to register handlers.
-      https://symfony.com/doc/current/messenger.html#creating-a-message-and-handler
-
-  -
-    question: >
-      Which of the following is NOT a valid transport type for Symfony Messenger?
-    answers:
-      - { value: '`sync`', correct: false }
-      - { value: '`amqp`', correct: false }
-      - { value: '`database`', correct: false }
-      - { value: '`http`', correct: true }
-      - { value: '`redis`', correct: false }
-    help: |
-      Symfony Messenger supports various transports like `sync`, `amqp`, `redis`, `doctrine` (for database), but not a direct `http` transport for message queuing.
-      https://symfony.com/doc/current/messenger.html#transports
-
-  -
-    question: >
-      How does Symfony Messenger handle failed messages by default when using an asynchronous transport?
-    answers:
-      - { value: 'It immediately discards the message.', correct: false }
-      - { value: 'It retries the message a configurable number of times before moving it to a "failure" or "dead-letter" queue.', correct: true }
-      - { value: 'It stops the worker process.', correct: false }
-      - { value: 'It sends an email notification to the administrator.', correct: false }
-    help: |
-      The Messenger component includes a retry mechanism that attempts to re-process failed messages, eventually moving them to a dedicated failure transport if retries are exhausted.
-      https://symfony.com/doc/current/messenger.html#retrying-failed-messages
-
-  -
-    question: >
-      What is the role of "middleware" in Symfony Messenger?
-    answers:
-      - { value: 'To define the routing of messages to handlers.', correct: false }
-      - { value: 'To intercept and process messages before or after they are handled, allowing for cross-cutting concerns like logging or doctrine transaction management.', correct: true }
-      - { value: 'To serialize and deserialize messages.', correct: false }
-      - { value: 'To configure the message transports.', correct: false }
-    help: |
-      Middleware provides a powerful way to add custom logic to the message handling pipeline, such as logging, validation, or database transactions.
-      https://symfony.com/doc/current/messenger.html#middleware
-
-  -
-    question: |
-      To send an email using Symfony Mailer, which service should you inject into your controller or service?
-    answers:
-      - { value: '`MailerInterface`', correct: true }
-      - { value: '`Swift_Mailer`', correct: false }
-      - { value: '`EmailSender`', correct: false }
-      - { value: '`MailService`', correct: false }
-    help: |
-      The `MailerInterface` is the primary interface for sending emails with the Symfony Mailer component.
-      https://symfony.com/doc/current/mailer.html#sending-emails
-
-  -
-    question: |
-      You want to attach a file from your application's `public/uploads/report.pdf` directory to an email. Which `Email` method should you use?
-    answers:
-      - { value: '`attachFromPath(''public/uploads/report.pdf'')`', correct: true }
-      - { value: '`addAttachment(''public/uploads/report.pdf'')`', correct: false }
-      - { value: '`attachFile(''public/uploads/report.pdf'')`', correct: false }
-      - { value: '`addFile(''public/uploads/report.pdf'')`', correct: false }
-    help: |
-      The `attachFromPath()` method is used to attach a file from a given path.
-      https://symfony.com/doc/current/mailer.html#attaching-files
-
-  -
-    question: |
-      How can you render the content of an email using a Twig template in Symfony Mailer?
-    answers:
-      - { value: 'Use the `htmlTemplate()` method on the `Email` object, providing the template path and context.', correct: true }
-      - { value: 'Call `$this->renderView()` in your controller and pass the result to `html()`.', correct: false }
-      - { value: 'Twig templates are not supported for email content; you must use plain HTML strings.', correct: false }
-      - { value: 'Configure the template in `config/packages/mailer.yaml`.', correct: false }
-    help: |
-      The `htmlTemplate()` method allows you to specify a Twig template for the email's HTML content, passing variables as context.
-      https://symfony.com/doc/current/mailer.html#rendering-email-content-with-twig
-
-  -
-    question: >
-      What is the primary function of the `Symfony\Component\Filesystem\Filesystem` component?
-    answers:
-      - { value: 'To manage database files.', correct: false }
-      - { value: 'To provide utility methods for common filesystem operations like copying, moving, and deleting files/directories.', correct: true }
-      - { value: 'To handle file uploads from web forms.', correct: false }
-      - { value: 'To compress and decompress archives.', correct: false }
-    help: |
-      The Filesystem component offers a convenient and robust API for interacting with the filesystem.
-      https://symfony.com/doc/current/components/filesystem.html
-
-  -
-    question: |
-      You need to find all `.log` files within the `var/log` directory and its subdirectories. Which `Finder` component method is most appropriate for this task?
-    answers:
-      - { value: '`$finder->files()->in(''var/log'')->name(''*.log'')`', correct: true }
-      - { value: '`$finder->directories()->in(''var/log'')->name(''*.log'')`', correct: false }
-      - { value: '`$finder->in(''var/log'')->contains(''*.log'')`', correct: false }
-      - { value: '`$finder->files()->in(''var/log'')->filter(fn($file) => str_ends_with($file->getFilename(), ''.log''))`', correct: false }
-    help: |
-      The `files()` method filters for files, `in()` specifies the directory, and `name()` filters by filename pattern.
-      https://symfony.com/doc/current/components/finder.html#basic-usage
-
-  -
-    question: >
-      Which of the following `Filesystem` methods would you use to create a directory named `my_new_dir` and all its parent directories if they don't exist?
-    answers:
-      - { value: '`$filesystem->mkdir(''my_new_dir'', 0777, true)`', correct: true }
-      - { value: '`$filesystem->createDirectory(''my_new_dir'')`', correct: false }
-      - { value: '`$filesystem->makeDir(''my_new_dir'', true)`', correct: false }
-      - { value: '`$filesystem->ensureDirectoryExists(''my_new_dir'')`', correct: false }
-    help: |
-      The `mkdir()` method with the third argument set to `true` (or `recursive`) will create parent directories if they don't exist.
-      https://symfony.com/doc/current/components/filesystem.html#mkdir
-
-  -
-    question: >
-      What is the primary purpose of the Symfony Lock component?
-    answers:
-      - { value: 'To manage database transactions.', correct: false }
-      - { value: 'To prevent race conditions when multiple processes or requests try to access or modify a shared resource simultaneously.', correct: true }
-      - { value: 'To encrypt and decrypt sensitive data.', correct: false }
-      - { value: 'To control access to files on the filesystem.', correct: false }
-    help: |
-      The Lock component provides a mechanism for acquiring and releasing locks to ensure that critical sections of code are executed by only one process at a time.
-      https://symfony.com/doc/current/components/lock.html
-
-  -
-    question: |
-      You need to ensure that a specific console command can only run one instance at a time. How would you achieve this using the Lock component?
-    answers:
-      - { value: 'Inject `LockFactory` and use `LockFactory::createLock()` to acquire a lock before execution, then release it.', correct: true }
-      - { value: 'Use a `flock()` call directly in the command.', correct: false }
-      - { value: 'Configure a unique process ID for the command in `services.yaml`.', correct: false }
-      - { value: 'The Lock component is not suitable for console commands.', correct: false }
-    help: |
-      The `LockFactory` is used to create `Lock` objects, which can then be acquired and released to manage concurrent access.
-      https://symfony.com/doc/current/components/lock.html#using-the-lock-component
-
-  -
-    question: >
-      Which of the following is NOT a supported store for the Symfony Lock component?
-    answers:
-      - { value: 'FlockStore', correct: false }
-      - { value: 'RedisStore', correct: false }
-      - { value: 'MemcachedStore', correct: false }
-      - { value: 'DatabaseStore (using Doctrine DBAL)', correct: false }
-      - { value: 'SessionStore', correct: true }
-    help: |
-      The Lock component supports various stores like Flock, Redis, Memcached, and Doctrine DBAL, but not a SessionStore.
-      https://symfony.com/doc/current/components/lock.html#stores
-
-  -
-    question: >
-      What is the primary purpose of the Symfony Web Profiler?
-    answers:
-      - { value: 'To generate API documentation.', correct: false }
-      - { value: 'To collect and display detailed information about each HTTP request during development.', correct: true }
-      - { value: 'To manage user authentication and authorization.', correct: false }
-      - { value: 'To optimize database queries.', correct: false }
-    help: |
-      The Web Profiler is a powerful debugging and development tool that provides insights into various aspects of a Symfony request.
-      https://symfony.com/doc/current/profiler.html
-
-  -
-    question: >
-      How do you typically enable the Web Debug Toolbar and Web Profiler in a Symfony application?
-    answers:
-      - { value: 'They are enabled by default in the `dev` environment and disabled in `prod`.', correct: true }
-      - { value: 'By manually adding a `<script>` tag to your Twig templates.', correct: false }
-      - { value: 'By setting `profiler.enabled: true` in `config/services.yaml`.', correct: false }
-      - { value: 'By running `bin/console profiler:enable`.', correct: false }
-    help: |
-      The Web Profiler and Web Debug Toolbar are automatically enabled in the `dev` environment via the `framework.profiler` configuration.
-      https://symfony.com/doc/current/profiler.html#enabling-the-profiler
-
-  -
-    question: >
-      Which of the following information is typically NOT displayed by default in the Symfony Web Debug Toolbar?
-    answers:
-      - { value: 'Current route and controller.', correct: false }
-      - { value: 'Number of database queries.', correct: false }
-      - { value: 'Execution time.', correct: false }
-      - { value: 'Client-side JavaScript errors.', correct: true }
-      - { value: 'Memory usage.', correct: false }
-    help: |
-      The Web Debug Toolbar focuses on server-side Symfony application data. Client-side JavaScript errors are typically found in the browser's developer console.
-      https://symfony.com/doc/current/profiler.html#the-web-debug-toolbar
-
-  -
-    question: >
-      What is the purpose of a "Data Collector" in the Symfony Web Profiler?
-    answers:
-      - { value: 'To collect data from user input forms.', correct: false }
-      - { value: 'To gather specific data points (e.g., mailer events, Twig data, logger messages) during a request for display in the Web Profiler.', correct: true }
-      - { value: 'To store data in the database.', correct: false }
-      - { value: 'To encrypt data before it''s sent to the browser.', correct: false }
-    help: |
-      Data Collectors are services that implement `DataCollectorInterface` and are responsible for collecting and presenting specific data in the Web Profiler.
-      https://symfony.com/doc/current/profiler/data_collectors.html
-
-  -
-    question: >
-      To translate a string in a Twig template, which function should you use?
-    answers:
-      - { value: '`trans(''Hello World'')`', correct: true }
-      - { value: '`_(''Hello World'')`', correct: false }
-      - { value: '`translate(''Hello World'')`', correct: false }
-      - { value: '`i18n(''Hello World'')`', correct: false }
-    help: |
-      The `trans` filter or function is used for translating strings in Twig templates.
-      https://symfony.com/doc/current/translation.html#translating-in-twig-templates
-
-  -
-    question: >
-      What is a "translation domain" in Symfony, and why is it useful?
-    answers:
-      - { value: 'It''s the language code (e.g., `en`, `fr`) for the translation.', correct: false }
-      - { value: 'It''s a logical grouping of translation messages, allowing you to organize translations and load only necessary ones.', correct: true }
-      - { value: 'It defines the database table where translations are stored.', correct: false }
-      - { value: 'It specifies the external translation service to use.', correct: false }
-    help: |
-      Translation domains help organize messages into logical groups, improving maintainability and performance by loading only relevant translations.
-      https://symfony.com/doc/current/translation.html#translation-domains
-
-  -
-    question: |
-      You need to translate a message that changes based on a count (e.g., "1 apple", "2 apples"). Which translation feature should you use?
-    answers:
-      - { value: 'Pluralization.', correct: true }
-      - { value: 'Contextual translation.', correct: false }
-      - { value: 'Message formatting.', correct: false }
-      - { value: 'Domain switching.', correct: false }
-    help: |
-      Symfony's translation component supports pluralization rules to handle messages that vary based on a count.
-      https://symfony.com/doc/current/translation/pluralization.html
-
-  -
-    question: >
-      The Symfony Intl component provides tools for which of the following?
-    answers:
-      - { value: 'Internationalized number, date, and currency formatting.', correct: true }
-      - { value: 'Interacting with international payment gateways.', correct: false }
-      - { value: 'Managing international shipping logistics.', correct: false }
-      - { value: 'Translating strings into different languages.', correct: false }
-    help: |
-      The Intl component leverages PHP's Intl extension to provide locale-aware formatting for numbers, dates, currencies, and more.
-      https://symfony.com/doc/current/components/intl.html
-
-  -
-    question: >
-      What is the primary goal of the Symfony Runtime component?
-    answers:
-      - { value: 'To provide a standardized way to boot Symfony applications in different PHP environments (e.g., Apache, Nginx, RoadRunner, CLI) without modifying `public/index.php`.', correct: true }
-      - { value: 'To manage runtime dependencies of your application.', correct: false }
-      - { value: 'To compile PHP code into bytecode for faster execution.', correct: false }
-      - { value: 'To monitor application performance in real-time.', correct: false }
-    help: |
-      The Runtime component abstracts the application bootstrap process, making it easier to run Symfony applications in various SAPI environments.
-      https://symfony.com/doc/current/components/runtime.html
-
-  -
-    question: |
-      Consider a typical Symfony `public/index.php` file. How does the Runtime component simplify this entry point?
-    answers:
-      - { value: 'It replaces the entire file with a single `require` statement to `vendor/autoload.php`.', correct: false }
-      - { value: 'It allows the file to be very minimal, often just a `require_once` to `vendor/autoload_runtime.php` and a call to `App\Kernel::create()`.', correct: true }
-      - { value: 'It removes the need for a `public/index.php` file entirely.', correct: false }
-      - { value: 'It automatically detects the environment and loads the correct kernel.', correct: false }
-    help: |
-      The Runtime component reduces the boilerplate in `index.php` by handling the environment setup and kernel instantiation.
-      https://symfony.com/doc/current/components/runtime.html#usage
-
-  -
-    question: >
-      What is the main benefit of using the Symfony Clock component?
-    answers:
-      - { value: 'To synchronize the application''s time with an external NTP server.', correct: false }
-      - { value: 'To provide a consistent and testable way to get the current time, making time-dependent code easier to test.', correct: true }
-      - { value: 'To measure the execution time of specific code blocks.', correct: false }
-      - { value: 'To schedule cron jobs within the application.', correct: false }
-    help: |
-      The Clock component provides a `ClockInterface` that can be injected, allowing you to control the "current time" during testing.
-      https://symfony.com/doc/current/components/clock.html
-
-  -
-    question: |
-      You have a service that depends on the current time. How would you inject the `ClockInterface` to make your service easily testable with different time values?
-
-      ```php
-      namespace App\Service;
-
-      use Symfony\Component\Clock\ClockInterface;
-
-      class TimeSensitiveService
-      {
-          public function __construct(
-              private ClockInterface $clock
-          ) {}
-
-          public function isAfternoon(): bool
-          {
-              return $this->clock->now()->format('H') >= 12;
-          }
-      }
-      ```
-    answers:
-      - { value: 'The service correctly injects `ClockInterface` via constructor.', correct: true }
-      - { value: 'You should inject `\DateTimeImmutable` instead of `ClockInterface`.', correct: false }
-      - { value: 'The `ClockInterface` is not autowirable; you must define it manually.', correct: false }
-      - { value: 'You should use `new \DateTimeImmutable()` directly in the method.', correct: false }
-    help: |
-      Autowiring `ClockInterface` is the recommended way to get a clock instance, which can be easily mocked or replaced in tests.
-      https://symfony.com/doc/current/components/clock.html#usage
-
-  -
-    question: >
-      When writing unit tests for time-dependent logic, how does the Symfony Clock component facilitate testing?
-    answers:
-      - { value: 'It automatically fast-forwards time during test execution.', correct: false }
-      - { value: 'It allows you to "freeze" the current time or set it to a specific point, ensuring consistent test results regardless of when the test is run.', correct: true }
-      - { value: 'It provides a `sleep()` function that is faster than PHP''s built-in one.', correct: false }
-      - { value: 'It automatically mocks all `DateTime` objects.', correct: false }
-    help: |
-      The Clock component's `TestClock` implementation allows precise control over the perceived current time during tests.
-      https://symfony.com/doc/current/components/clock.html#testing
-
-  -
-    question: >
-      Which of the following is considered a best practice for managing sensitive credentials (e.g., database passwords, API keys) in a Symfony application?
-    answers:
-      - { value: 'Hardcoding them directly in `config/services.yaml`.', correct: false }
-      - { value: 'Storing them in version control (Git) in plain text.', correct: false }
-      - { value: 'Using environment variables, potentially managed by `.env` files or a secrets management service.', correct: true }
-      - { value: 'Encrypting them and storing the decryption key in the repository.', correct: false }
-    help: |
-      Environment variables are the recommended way to handle sensitive information, keeping it out of version control.
-      https://symfony.com/doc/current/configuration/secrets.html
-
-  -
-    question: >
-      When configuring a Symfony application, what is the purpose of the `parameters` section in `config/services.yaml`?
-    answers:
-      - { value: 'To define global variables accessible anywhere in the application.', correct: false }
-      - { value: 'To define simple scalar values or arrays that can be injected into services or used in other configuration files.', correct: true }
-      - { value: 'To list all available services in the container.', correct: false }
-      - { value: 'To configure database connection details.', correct: false }
-    help: |
-      Parameters are used to store simple configuration values that can be reused across your service definitions and other configuration files.
-      https://symfony.com/doc/current/service_container/parameters.html
-
-  -
-    question: >
-      Which command would you use to clear the Symfony cache for the `test` environment?
-    answers:
-      - { value: '`bin/console cache:clear --env=test`', correct: true }
-      - { value: '`bin/console cache:clear test`', correct: false }
-      - { value: '`bin/console clear-cache test`', correct: false }
-      - { value: '`bin/console cache:clear --environment=test`', correct: false }
-    help: |
-      The `--env` option specifies the environment for which the cache should be cleared.
-      https://symfony.com/doc/current/console.html#clearing-the-cache
-
-  -
-    question: >
-      What is the primary benefit of using `#[AsCommand]` attribute over defining commands in `services.yaml` or overriding `static $defaultName`?
-    answers:
-      - { value: 'It allows for easier dependency injection into the command.', correct: false }
-      - { value: 'It makes the command definition more discoverable and self-contained within the command class itself.', correct: true }
-      - { value: 'It provides better performance for command execution.', correct: false }
-      - { value: 'It enables automatic command registration without requiring `make:command`.', correct: false }
-    help: |
-      The `#[AsCommand]` attribute, introduced in Symfony 5.3, simplifies command configuration by allowing it directly on the class.
-      https://symfony.com/doc/current/console.html#configuring-the-command
-
-  -
-    question: >
-      When debugging a Symfony application, what does the `X-Debug-Token` header in an HTTP response indicate?
-    answers:
-      - { value: 'It''s a security token to prevent CSRF attacks.', correct: false }
-      - { value: 'It''s a unique identifier for the current request, used to access its profile in the Web Profiler.', correct: true }
-      - { value: 'It indicates that the request was successful.', correct: false }
-      - { value: 'It''s a token for API authentication.', correct: false }
-    help: |
-      The `X-Debug-Token` is crucial for debugging, allowing you to directly access the profiler page for a specific request.
-      https://symfony.com/doc/current/profiler.html#accessing-the-profiler
-
-  -
-    question: >
-      Which component would you use to programmatically interact with the user's terminal, for example, to ask questions or display progress bars in a console command?
-    answers:
-      - { value: '`Symfony\Component\Console\Style\SymfonyStyle`', correct: true }
-      - { value: '`Symfony\Component\Process\Process`', correct: false }
-      - { value: '`Symfony\Component\HttpFoundation\Request`', correct: false }
-      - { value: '`Symfony\Component\Filesystem\Filesystem`', correct: false }
-    help: |
-      `SymfonyStyle` provides a set of helper methods for styling and interacting with the console output.
-      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-style
-
-  -
-    question: >
-      When deploying a Symfony application, why is it important to ensure that `var/cache` and `var/log` directories are writable by the web server user?
-    answers:
-      - { value: 'Because the web server needs to store static assets in these directories.', correct: false }
-      - { value: 'Because Symfony writes cache files and log entries to these directories, and without write permissions, the application will fail.', correct: true }
-      - { value: 'Because these directories contain sensitive user data that needs to be accessed by the web server.', correct: false }
-      - { value: 'Because they are used for database connections.', correct: false }
-    help: |
-      Proper file permissions for `var/cache` and `var/log` are essential for Symfony to function correctly in a production environment.
-      https://symfony.com/doc/current/setup/file_permissions.html
-
-  -
-    question: >
-      Which of the following is a common reason for a `500 Internal Server Error` in a Symfony application during development?
-    answers:
-      - { value: 'A syntax error in a PHP file, an unhandled exception, or incorrect service configuration.', correct: true }
-      - { value: 'The user entered an invalid URL.', correct: false }
-      - { value: 'The database server is offline.', correct: true }
-      - { value: 'The web server is not running.', correct: false }
-    help: |
-      500 errors typically indicate a server-side problem, often related to application code errors, unhandled exceptions, or infrastructure issues like database connectivity.
-      https://symfony.com/doc/current/controller/error_pages.html
-
-  -
-    question: >
-      What is the purpose of the `#[Cache]` attribute in Symfony?
-    answers:
-      - { value: 'To automatically cache the output of a controller action or a method.', correct: true }
-      - { value: 'To define a cache pool for a service.', correct: false }
-      - { value: 'To clear the application cache.', correct: false }
-      - { value: 'To mark a service as cacheable.', correct: false }
-    help: |
-      The `#[Cache]` attribute (from `Symfony\Component\HttpKernel\Attribute\Cache`) allows you to define HTTP caching headers directly on controllers or methods.
-      https://symfony.com/doc/current/http_cache.html#http-cache-in-controllers
-
-  -
-    question: >
-      When using the Serializer component, what is the purpose of a "context" array during serialization or deserialization?
-    answers:
-      - { value: 'To define the output format (e.g., JSON, XML).', correct: false }
-      - { value: 'To pass additional options or parameters to normalizers and encoders, influencing how data is processed.', correct: true }
-      - { value: 'To specify the input data source.', correct: false }
-      - { value: 'To define the serialization groups.', correct: false }
-    help: |
-      The context array allows for dynamic behavior during serialization/deserialization, enabling custom logic based on the provided options.
-      https://symfony.com/doc/current/components/serializer.html#context
-
-  -
-    question: >
-      What is the main advantage of using asynchronous message processing with Symfony Messenger?
-    answers:
-      - { value: 'It makes the application run faster by executing all tasks in parallel.', correct: false }
-      - { value: 'It improves user experience by offloading long-running tasks from the request-response cycle, allowing the web server to respond quickly.', correct: true }
-      - { value: 'It eliminates the need for a database.', correct: false }
-      - { value: 'It simplifies debugging of complex operations.', correct: false }
-    help: |
-      Asynchronous processing is key for scalability and responsiveness, as it prevents slow operations from blocking user requests.
-      https://symfony.com/doc/current/messenger.html#asynchronous-processing
-
-  -
-    question: >
-      Which of the following is a key feature provided by the Symfony Mime component?
-    answers:
-      - { value: 'Parsing and creating MIME messages (e.g., emails) with attachments and various content types.', correct: true }
-      - { value: 'Handling HTTP request headers.', correct: false }
-      - { value: 'Generating unique identifiers for files.', correct: false }
-      - { value: 'Compressing files into ZIP archives.', correct: false }
-    help: |
-      The Mime component provides a powerful API for working with MIME messages, which is fundamental for email creation.
-      https://symfony.com/doc/current/components/mime.html
-
-  -
-    question: >
-      What is the primary use case for the `Symfony\Component\Finder\Finder` component?
-    answers:
-      - { value: 'To search for text within files.', correct: false }
-      - { value: 'To find files and directories based on various criteria (name, path, size, content) in a filesystem.', correct: true }
-      - { value: 'To locate specific lines of code in PHP files.', correct: false }
-      - { value: 'To find and replace strings in a database.', correct: false }
-    help: |
-      The Finder component provides an intuitive API for iterating over files and directories with powerful filtering capabilities.
-      https://symfony.com/doc/current/components/finder.html
-
-  -
-    question: >
-      When should you consider using the Symfony Lock component?
-    answers:
-      - { value: 'When you need to prevent multiple concurrent executions of a console command.', correct: true }
-      - { value: 'When you need to protect a shared resource (e.g., a file, a database record) from simultaneous modifications by different processes.', correct: true }
-      - { value: 'When you want to secure user sessions.', correct: false }
-      - { value: 'When you are building a real-time chat application.', correct: false }
-    help: |
-      The Lock component is designed for concurrency control, ensuring that critical operations are performed exclusively.
-      https://symfony.com/doc/current/components/lock.html#when-to-use-the-lock-component
-
-  -
-    question: >
-      What is the purpose of the `#[DataCollector]` attribute in Symfony?
-    answers:
-      - { value: 'To mark a class as a service that collects data for the Web Profiler.', correct: true }
-      - { value: 'To define a data source for a form.', correct: false }
-      - { value: 'To automatically populate an entity with data.', correct: false }
-      - { value: 'To enable data encryption for a specific service.', correct: false }
-    help: |
-      The `#[DataCollector]` attribute (from `Symfony\Component\HttpKernel\Attribute\DataCollector`) simplifies the registration of custom data collectors for the Web Profiler.
-      https://symfony.com/doc/current/profiler/data_collectors.html#registering-a-data-collector
-
-  -
-    question: >
-      Which of the following is a correct way to define a translation message with a placeholder in Symfony?
-    answers:
-      - { value: '`Hello %name%!`', correct: true }
-      - { value: '`Hello {name}!`', correct: false }
-      - { value: '`Hello $name!`', correct: false }
-      - { value: '`Hello {{ name }}!`', correct: false }
-    help: |
-      Placeholders are defined using `%placeholder_name%` in translation messages.
-      https://symfony.com/doc/current/translation.html#message-placeholders
-
-  -
-    question: >
-      What is the primary advantage of using `DateTimeImmutable` objects over `DateTime` objects in Symfony applications?
-    answers:
-      - { value: '`DateTimeImmutable` objects are faster to create.', correct: false }
-      - { value: '`DateTimeImmutable` objects are mutable, allowing for easier modification.', correct: false }
-      - { value: '`DateTimeImmutable` objects are immutable, meaning their state cannot be changed after creation, which helps prevent unintended side effects and makes code more predictable.', correct: true }
-      - { value: '`DateTimeImmutable` objects are automatically serialized by Symfony.', correct: false }
-    help: |
-      Immutability is a key principle for robust and predictable code, especially when dealing with objects like dates and times.
-      https://www.php.net/manual/en/class.datetimeimmutable.php
-
-  -
-    question: >
-      When deploying a Symfony application, what is the purpose of running `composer dump-autoload --optimize --no-dev --classmap`?
-    answers:
-      - { value: 'To regenerate the Composer autoloader for production, optimizing it for performance by creating a classmap.', correct: true }
-      - { value: 'To install all project dependencies, including development ones.', correct: false }
-      - { value: 'To clear the Symfony cache.', correct: false }
-      - { value: 'To update all Composer packages to their latest versions.', correct: false }
-    help: |
-      This command optimizes the autoloader for production, reducing file lookups and improving performance.
-      https://symfony.com/doc/current/deployment.html#install-your-dependencies
-
-  -
-    question: >
-      Which Symfony component provides a standardized way to configure and access secrets (e.g., API keys, database credentials) securely?
-    answers:
-      - { value: 'The `Secrets` component.', correct: true }
-      - { value: 'The `Security` component.', correct: false }
-      - { value: 'The `DotEnv` component.', correct: false }
-      - { value: 'The `Vault` component.', correct: false }
-    help: |
-      The Secrets component provides a secure way to manage sensitive configuration values, often encrypted.
-      https://symfony.com/doc/current/configuration/secrets.html
-
-  -
-    question: >
-      What is the recommended way to handle application-level exceptions that should result in a specific HTTP response (e.g., a 403 Forbidden) in Symfony?
-    answers:
-      - { value: 'Throwing a specific HTTP exception (e.g., `AccessDeniedHttpException`, `NotFoundHttpException`).', correct: true }
-      - { value: 'Using a `try-catch` block around the entire controller action.', correct: false }
-      - { value: 'Returning a `Response` object with the appropriate status code directly.', correct: false }
-      - { value: 'Configuring an event listener for `kernel.exception` that checks the exception type.', correct: true }
-    help: |
-      Throwing HTTP exceptions is the idiomatic Symfony way, allowing the ExceptionListener to handle the response. Custom listeners on `kernel.exception` provide more granular control.
-      https://symfony.com/doc/current/controller/error_pages.html#handling-404-errors
-      https://symfony.com/doc/current/event_dispatcher/before_after_filters.html#the-kernel-exception-event
-
-  -
-    question: >
-      When debugging a Symfony application, if you see a blank page or a generic "Whoops! Something went wrong." error, what is the first step you should take?
-    answers:
-      - { value: 'Check the web server logs (e.g., Apache error log, Nginx error log).', correct: true }
-      - { value: 'Clear the Symfony cache.', correct: false }
-      - { value: 'Restart the PHP-FPM service.', correct: false }
-      - { value: 'Reinstall all Composer dependencies.', correct: false }
-    help: |
-      Blank pages or generic errors often indicate a fatal PHP error or an unhandled exception before Symfony's error handler can kick in. The web server error logs are the first place to look.
-      https://symfony.com/doc/current/setup/file_permissions.html#troubleshooting-permissions
-
-  -
-    question: >
-      Which of the following cache types is primarily used by Symfony internally for compiled service containers and Twig templates in a production environment?
-    answers:
-      - { value: 'HTTP Cache (reverse proxy)', correct: false }
-      - { value: 'Application Cache (e.g., APCu, Redis)', correct: true }
-      - { value: 'Doctrine Cache', correct: false }
-      - { value: 'Browser Cache', correct: false }
-    help: |
-      The application cache stores compiled PHP code, container definitions, and other internal Symfony artifacts for performance.
-      https://symfony.com/doc/current/components/cache.html
-
-  -
-    question: >
-      What is the recommended way to configure multiple mailer transports (e.g., one for transactional emails, one for marketing emails) in Symfony Mailer?
-    answers:
-      - { value: 'Define multiple mailer configurations under the `framework.mailer.mailers` key in `config/packages/mailer.yaml`.', correct: true }
-      - { value: 'Create separate `MailerInterface` services for each transport.', correct: false }
-      - { value: 'Use a single mailer and dynamically change the transport during runtime.', correct: false }
-      - { value: 'It''s not possible to configure multiple mailers in Symfony.', correct: false }
-    help: |
-      Symfony Mailer allows defining multiple named mailers, each with its own transport configuration.
-      https://symfony.com/doc/current/mailer.html#multiple-mailers
-
-  -
-    question: >
-      When using the `Symfony\Component\Filesystem\Filesystem` component, what is the purpose of the `dumpFile()` method?
-    answers:
-      - { value: 'To read the content of a file into a string.', correct: false }
-      - { value: 'To write content to a file, creating the file and its parent directories if they don''t exist.', correct: true }
-      - { value: 'To create a temporary file.', correct: false }
-      - { value: 'To copy the content of one file to another.', correct: false }
-    help: |
-      `dumpFile()` is a convenient method for writing content to a file, ensuring the directory structure exists.
-      https://symfony.com/doc/current/components/filesystem.html#dumpfile
-
-  -
-    question: >
-      What is the main difference between `Lock::acquire()` and `Lock::acquire(false)` (non-blocking acquire)?
-    answers:
-      - { value: '`Lock::acquire()` blocks execution until the lock is obtained or a timeout occurs, while `Lock::acquire(false)` attempts to acquire the lock immediately and returns `true` or `false` without blocking.', correct: true }
-      - { value: '`Lock::acquire()` is for shared locks, `Lock::acquire(false)` is for exclusive locks.', correct: false }
-      - { value: '`Lock::acquire(false)` is deprecated.', correct: false }
-      - { value: 'There is no difference; the argument is ignored.', correct: false }
-    help: |
-      The non-blocking acquire is useful when you want to try to get a lock without waiting indefinitely.
-      https://symfony.com/doc/current/components/lock.html#acquiring-a-lock
-
-  -
-    question: >
-      Which of the following is a valid way to enable or disable the Web Debug Toolbar programmatically in a Symfony application?
-    answers:
-      - { value: 'By setting the `kernel.debug` parameter in the container.', correct: false }
-      - { value: 'By modifying the `framework.profiler.enabled` configuration in `config/packages/dev/profiler.yaml`.', correct: true }
-      - { value: 'By calling `$profiler->disable()` in a controller.', correct: false }
-      - { value: 'It cannot be enabled or disabled programmatically.', correct: false }
-    help: |
-      The profiler's enablement is controlled by configuration, typically environment-specific.
-      https://symfony.com/doc/current/profiler.html#enabling-the-profiler
-
-  -
-    question: >
-      When configuring internationalization in Symfony, where would you typically store your translation files (e.g., `messages.en.yaml`, `messages.fr.yaml`)?
-    answers:
-      - { value: '`translations/` directory at the root of your project.', correct: true }
-      - { value: '`config/translations/` directory.', correct: false }
-      - { value: '`src/Translations/` directory.', correct: false }
-      - { value: '`public/assets/translations/` directory.', correct: false }
-    help: |
-      The `translations/` directory is the default location for translation files in Symfony.
-      https://symfony.com/doc/current/translation.html#translation-resource-locations
-
-  -
-    question: >
-      What is the purpose of the `IntlDateFormatter` class (from PHP's Intl extension, often used with Symfony's Intl component)?
-    answers:
-      - { value: 'To format dates and times according to specific locales and patterns.', correct: true }
-      - { value: 'To perform date calculations (e.g., add days, subtract months).', correct: false }
-      - { value: 'To validate date strings.', correct: false }
-      - { value: 'To convert dates between different timezones.', correct: false }
-    help: |
-      `IntlDateFormatter` provides powerful, locale-aware date and time formatting capabilities.
-      https://www.php.net/manual/en/class.intldateformatter.php
-
-  -
-    question: >
-      Which Symfony component is responsible for providing a consistent API for dealing with time, regardless of the underlying PHP version or environment?
-    answers:
-      - { value: '`Clock` component.', correct: true }
-      - { value: '`DateTime` component.', correct: false }
-      - { value: '`Time` component.', correct: false }
-      - { value: '`Date` component.', correct: false }
-    help: |
-      The Clock component provides an abstraction layer over PHP's date/time functions, making time-dependent code more robust and testable.
-      https://symfony.com/doc/current/components/clock.html
-
-  -
-    question: >
-      What is the primary role of the `ExpressionLanguage` component in Symfony?
-    answers:
-      - { value: 'To parse and evaluate simple expressions (e.g., in configuration, security rules, or routing conditions).', correct: true }
-      - { value: 'To define regular expressions for validation.', correct: false }
-      - { value: 'To create complex mathematical formulas.', correct: false }
-      - { value: 'To generate dynamic SQL queries.', correct: false }
-    help: |
-      The ExpressionLanguage component provides a powerful way to define and evaluate expressions, often used for flexible configuration.
+      What is the purpose of Symfony's ExpressionLanguage component?
+    answers:
+      -
+        value: >
+          To provide a way to define complex routing rules.
+        correct: false
+      -
+        value: >
+          To allow writing simple expressions in configuration, templates, or other parts of the application.
+        correct: true
+      -
+        value: >
+          To compile PHP code into machine code for performance optimization.
+        correct: false
+      -
+        value: >
+          To define database queries using a custom syntax.
+        correct: false
+    help: |
+      The ExpressionLanguage component allows you to compile and evaluate expressions. It's commonly used in security, routing, and other configuration contexts.
       https://symfony.com/doc/current/components/expression_language.html
 
   -
     question: >
-      Which of the following is a best practice for managing environment variables in production Symfony applications, especially when deploying to cloud platforms?
+      Which of the following is a recommended practice for debugging a Symfony application in a development environment?
     answers:
-      - { value: 'Relying solely on `.env` files committed to version control.', correct: false }
-      - { value: 'Using the cloud provider''s native environment variable management features (e.g., Kubernetes secrets, AWS Systems Manager Parameter Store).', correct: true }
-      - { value: 'Hardcoding them directly in `public/index.php`.', correct: false }
-      - { value: 'Storing them in a publicly accessible JSON file.', correct: false }
+      -
+        value: >
+          Disabling the Web Profiler to reduce overhead.
+        correct: false
+      -
+        value: >
+          Enabling XDebug and using a debugger.
+        correct: true
+      -
+        value: >
+          Relying solely on `var_dump()` for all debugging.
+        correct: false
+      -
+        value: >
+          Deploying to production and checking server logs.
+        correct: false
     help: |
-      Cloud platforms offer secure and robust ways to manage environment variables and secrets, which should be preferred over `.env` files in production.
-      https://symfony.com/doc/current/configuration/secrets.html#cloud-environments
+      XDebug is an essential tool for debugging PHP applications, including Symfony, allowing for breakpoints, step-through execution, and inspection of variables.
+      https://symfony.com/doc/current/profiler.html
 
   -
     question: >
-      When debugging a Symfony application, if you encounter a `ClassNotFoundException`, what is the most likely cause?
+      When deploying a Symfony application to production, which `APP_ENV` value is typically used?
     answers:
-      - { value: 'A missing `use` statement, an incorrect namespace, or the class file is not correctly loaded by the autoloader.', correct: true }
-      - { value: 'A database connection error.', correct: false }
-      - { value: 'An invalid route definition.', correct: false }
-      - { value: 'A Twig template syntax error.', correct: false }
+      -
+        value: >
+          `dev`
+        correct: false
+      -
+        value: >
+          `test`
+        correct: false
+      -
+        value: >
+          `prod`
+        correct: true
+      -
+        value: >
+          `staging`
+        correct: false
     help: |
-      `ClassNotFoundException` indicates that PHP cannot locate the definition of a class, usually due to autoloading issues or typos.
-      https://symfony.com/doc/current/components/debug.html
+      In a production environment, the `APP_ENV` variable should be set to `prod` to ensure optimal performance and security settings are applied.
+      https://symfony.com/doc/current/deployment.html#environment-variables
 
   -
     question: >
-      What is the primary benefit of using `#[AsMessageHandler]` attribute for Messenger handlers?
+      Which Symfony component provides tools for interacting with the filesystem, such as creating directories, copying files, and checking file existence?
     answers:
-      - { value: 'It automatically registers the class as a message handler without requiring explicit service definition in `services.yaml`.', correct: true }
-      - { value: 'It enables asynchronous processing for the handler.', correct: false }
-      - { value: 'It provides built-in error handling for the handler.', correct: false }
-      - { value: 'It allows the handler to be used as a controller.', correct: false }
+      -
+        value: >
+          `Finder`
+        correct: false
+      -
+        value: >
+          `Filesystem`
+        correct: true
+      -
+        value: >
+          `IO`
+        correct: false
+      -
+        value: >
+          `Process`
+        correct: false
     help: |
-      The `#[AsMessageHandler]` attribute simplifies handler registration, leveraging autoconfiguration.
-      https://symfony.com/doc/current/messenger.html#creating-a-message-and-handler
+      The Filesystem component provides basic utilities for filesystem operations.
+      https://symfony.com/doc/current/components/filesystem.html
 
   -
     question: >
-      Which of the following describes the purpose of the `MessageBusInterface` in Symfony Messenger?
+      What is the primary purpose of the Symfony Cache component?
     answers:
-      - { value: 'To define the structure of a message.', correct: false }
-      - { value: 'To dispatch messages to be handled by one or more message handlers.', correct: true }
-      - { value: 'To configure the message transports.', correct: false }
-      - { value: 'To log messages to a file.', correct: false }
+      -
+        value: >
+          To manage HTTP caching headers.
+        correct: false
+      -
+        value: >
+          To provide a unified API for various caching backends (e.g., Redis, Memcached, filesystem).
+        correct: true
+      -
+        value: >
+          To store user session data.
+        correct: false
+      -
+        value: >
+          To optimize database queries.
+        correct: false
     help: |
-      The `MessageBusInterface` is the central component for sending messages through the Messenger system.
-      https://symfony.com/doc/current/messenger.html#dispatching-messages
+      The Cache component provides a PSR-6 and PSR-16 compliant API for caching data, abstracting different caching implementations.
+      https://symfony.com/doc/current/components/cache.html
 
   -
     question: >
-      When internationalizing a Symfony application, what is the purpose of the `locale` parameter in a route definition?
+      Which Symfony component allows you to execute external commands and manage their input/output streams?
     answers:
-      - { value: 'To specify the default language for the entire application.', correct: false }
-      - { value: 'To allow the URL to contain the locale (e.g., `/en/about`, `/fr/about`), making the locale part of the routing.', correct: true }
-      - { value: 'To define a fallback locale if the requested one is not available.', correct: false }
-      - { value: 'To automatically translate the route path.', correct: false }
+      -
+        value: >
+          `Console`
+        correct: false
+      -
+        value: >
+          `Process`
+        correct: true
+      -
+        value: >
+          `Runtime`
+        correct: false
+      -
+        value: >
+          `Exec`
+        correct: false
     help: |
-      The `_locale` route parameter (or `locale` if configured) allows embedding the locale directly in the URL, which is a common strategy for internationalization.
-      https://symfony.com/doc/current/routing/localized_routes.html
+      The Process component executes commands in sub-processes.
+      https://symfony.com/doc/current/components/process.html
 
   -
     question: >
-      What is the primary role of the `Symfony\Component\Mime\Address` class?
+      What is the main responsibility of the Symfony Serializer component?
     answers:
-      - { value: 'To represent an email address with an optional name, used in Mailer and Mime components.', correct: true }
-      - { value: 'To define a physical address for shipping.', correct: false }
-      - { value: 'To store IP addresses.', correct: false }
-      - { value: 'To validate email address formats.', correct: false }
+      -
+        value: >
+          To convert PHP objects into various formats (e.g., JSON, XML) and vice-versa.
+        correct: true
+      -
+        value: >
+          To handle database migrations.
+        correct: false
+      -
+        value: >
+          To encrypt and decrypt data.
+        correct: false
+      -
+        value: >
+          To manage user authentication tokens.
+        correct: false
     help: |
-      The `Address` class provides a structured way to handle email addresses, including the recipient's name.
-      https://symfony.com/doc/current/components/mime.html#creating-an-email
+      The Serializer component converts PHP objects to and from various formats like JSON, XML, and YAML.
+      https://symfony.com/doc/current/components/serializer.html
 
   -
     question: >
-      Which of the following is a valid way to get a `Filesystem` service instance in a Symfony controller or service?
+      Which of the following best describes the Symfony Messenger component's role?
     answers:
-      - { value: 'Inject `Filesystem` via constructor or method argument type-hinting.', correct: true }
-      - { value: 'Instantiate it directly with `new Filesystem()`.', correct: false }
-      - { value: 'Call `$this->get(''filesystem'')` in a controller.', correct: false }
-      - { value: 'It''s a static class and doesn''t require instantiation.', correct: false }
+      -
+        value: >
+          To send real-time notifications to users.
+        correct: false
+      -
+        value: >
+          To handle asynchronous messages (commands and events) by sending them to message buses and consuming them.
+        correct: true
+      -
+        value: >
+          To manage chat functionalities within a web application.
+        correct: false
+      -
+        value: >
+          To send SMS messages.
+        correct: false
     help: |
-      The `Filesystem` component is registered as a service and can be autowired.
-      https://symfony.com/doc/current/components/filesystem.html#usage
+      The Messenger component helps applications send and receive messages, enabling asynchronous processing and decoupling.
+      https://symfony.com/doc/current/components/messenger.html
 
   -
     question: >
-      What is the purpose of the `#[Cache('expires=tomorrow')]` attribute on a controller method?
+      Which Symfony component is used for creating and sending emails?
     answers:
-      - { value: 'It sets the HTTP `Expires` header to tomorrow''s date, instructing clients and proxies to cache the response until then.', correct: true }
-      - { value: 'It stores the method''s return value in Symfony''s internal cache for one day.', correct: false }
-      - { value: 'It invalidates the cache for this route every day.', correct: false }
-      - { value: 'It marks the method as deprecated and to be removed tomorrow.', correct: false }
+      -
+        value: >
+          `Mailer`
+        correct: true
+      -
+        value: >
+          `Swiftmailer` (deprecated in Symfony 5.4)
+        correct: false
+      -
+        value: >
+          `EmailSender`
+        correct: false
+      -
+        value: >
+          `Mime`
+        correct: false
     help: |
-      The `#[Cache]` attribute allows you to control HTTP caching directly from your controllers.
-      https://symfony.com/doc/current/http_cache.html#http-cache-in-controllers
+      The Mailer component provides an abstraction layer for sending emails, supporting various transports. The Mime component helps create email messages.
+      https://symfony.com/doc/current/mailer.html
 
   -
     question: >
-      When debugging a Symfony application, what is the primary benefit of using `var/log/dev.log`?
+      What is the primary function of the Symfony Lock component?
     answers:
-      - { value: 'It contains all database queries executed during a request.', correct: false }
-      - { value: 'It provides a detailed log of application events, errors, and debugging information specific to the development environment.', correct: true }
-      - { value: 'It stores user session data.', correct: false }
-      - { value: 'It is a temporary file that is cleared after each request.', correct: false }
+      -
+        value: >
+          To secure sensitive data in the application.
+        correct: false
+      -
+        value: >
+          To prevent race conditions by providing a mechanism for exclusive access to shared resources.
+        correct: true
+      -
+        value: >
+          To lock user accounts after multiple failed login attempts.
+        correct: false
+      -
+        value: >
+          To manage database table locks.
+        correct: false
     help: |
-      The `dev.log` file is configured to capture extensive logging information during development, which is invaluable for debugging.
-      https://symfony.com/doc/current/logging.html#logging-to-files
+      The Lock component provides a way to acquire and release locks, useful for preventing concurrent execution of critical code sections.
+      https://symfony.com/doc/current/components/lock.html
 
   -
     question: >
-      What is the main difference between `Filesystem::exists()` and `Finder::hasResults()`?
+      Which tool provides a visual interface for debugging and profiling Symfony applications in the browser?
     answers:
-      - { value: '`Filesystem::exists()` checks if a single file or directory exists, while `Finder::hasResults()` checks if the Finder object found any files or directories matching its criteria.', correct: true }
-      - { value: '`Filesystem::exists()` is for local files, `Finder::hasResults()` is for remote files.', correct: false }
-      - { value: 'They are synonyms and can be used interchangeably.', correct: false }
-      - { value: '`Filesystem::exists()` checks for files only, `Finder::hasResults()` checks for directories only.', correct: false }
+      -
+        value: >
+          Symfony CLI
+        correct: false
+      -
+        value: >
+          PHPUnit
+        correct: false
+      -
+        value: >
+          Web Profiler
+        correct: true
+      -
+        value: >
+          Blackfire
+        correct: false
     help: |
-      `Filesystem` operates on individual paths, while `Finder` is designed for searching collections of files/directories.
-      https://symfony.com/doc/current/components/filesystem.html#exists
-      https://symfony.com/doc/current/components/finder.html#iterating-on-results
+      The Web Profiler is a built-in Symfony tool that collects and displays information about requests, helping in debugging and performance analysis.
+      https://symfony.com/doc/current/profiler.html
 
   -
     question: >
-      Which of the following is a best practice for managing configuration differences between development and production environments in Symfony?
+      What is the purpose of the Web Debug Toolbar in Symfony?
     answers:
-      - { value: 'Using environment-specific configuration files (e.g., `config/packages/dev/*.yaml`, `config/packages/prod/*.yaml`).', correct: true }
-      - { value: 'Manually changing configuration values before each deployment.', correct: false }
-      - { value: 'Storing all configuration in a single file and commenting out production-specific settings in development.', correct: false }
-      - { value: 'Using separate Git branches for each environment''s configuration.', correct: false }
+      -
+        value: >
+          To provide quick access to common debugging information for the current request.
+        correct: true
+      -
+        value: >
+          To manage database connections.
+        correct: false
+      -
+        value: >
+          To display real-time server metrics.
+        correct: false
+      -
+        value: >
+          To allow users to modify application settings directly in the browser.
+        correct: false
     help: |
-      Symfony's environment-based configuration loading is designed to handle differences between environments cleanly.
-      https://symfony.com/doc/current/configuration/environments.html
+      The Web Debug Toolbar is a small bar displayed at the bottom of pages in development environments, offering quick insights into the current request.
+      https://symfony.com/doc/current/profiler.html#web-debug-toolbar
 
   -
     question: >
-      What is the primary role of the `symfony/runtime` component?
+      Which Symfony component is primarily used for managing translations and adapting the application to different languages and regions?
     answers:
-      - { value: 'To provide a low-level abstraction for bootstrapping PHP applications in different SAPI environments.', correct: true }
-      - { value: 'To manage application dependencies at runtime.', correct: false }
-      - { value: 'To execute long-running background processes.', correct: false }
-      - { value: 'To handle real-time communication with web sockets.', correct: false }
+      -
+        value: >
+          `Intl`
+        correct: false
+      -
+        value: >
+          `Translator`
+        correct: true
+      -
+        value: >
+          `Locale`
+        correct: false
+      -
+        value: >
+          `I18n`
+        correct: false
     help: |
-      The Runtime component aims to make PHP applications more portable across various execution environments.
-      https://symfony.com/doc/current/components/runtime.html
+      The Translator component provides tools for internationalization (i18n) and localization (l10n), allowing applications to be translated into multiple languages.
+      https://symfony.com/doc/current/translation.html
 
   -
     question: >
-      When using the Symfony Mailer component, what is the purpose of the `Envelope` class?
+      What does the `Intl` component in Symfony provide?
     answers:
-      - { value: 'To define the email''s subject and body.', correct: false }
-      - { value: 'To specify the sender and recipient addresses that are actually used for the SMTP transaction, which might differ from the `From` and `To` headers visible to the user.', correct: true }
-      - { value: 'To attach files to the email.', correct: false }
-      - { value: 'To encrypt the email content.', correct: false }
+      -
+        value: >
+          Integration with the ICU library for advanced internationalization features like message formatting and collation.
+        correct: true
+      -
+        value: >
+          Tools for managing application security.
+        correct: false
+      -
+        value: >
+          A database abstraction layer.
+        correct: false
+      -
+        value: >
+          HTTP client functionalities.
+        correct: false
     help: |
-      The `Envelope` allows separating the visible email addresses from the actual addresses used for delivery, which is useful for bounce management or mailing lists.
-      https://symfony.com/doc/current/mailer.html#the-envelope
-
-  -
-    question: >
-      Which of the following is a common use case for the `Symfony\Component\Process\Process` component in a Symfony application?
-    answers:
-      - { value: 'Running a `composer install` command during deployment.', correct: true }
-      - { value: 'Executing a `git pull` command to update the application code.', correct: true }
-      - { value: 'Generating a PDF report using an external command-line tool (e.g., wkhtmltopdf).', correct: true }
-      - { value: 'Sending an HTTP request to an external API.', correct: false }
-    help: |
-      The Process component is ideal for interacting with external shell commands and programs.
-      https://symfony.com/doc/current/components/process.html#running-processes
-
-  -
-    question: >
-      What is the primary purpose of the `#[Ignore]` attribute in the Symfony Serializer component?
-    answers:
-      - { value: 'To mark a property or method to be ignored during serialization and deserialization.', correct: true }
-      - { value: 'To prevent a class from being autowired as a service.', correct: false }
-      - { value: 'To exclude a file from Composer''s autoloader.', correct: false }
-      - { value: 'To disable logging for a specific method.', correct: false }
-    help: |
-      The `#[Ignore]` attribute provides a simple way to exclude properties or methods from the serialization/deserialization process.
-      https://symfony.com/doc/current/components/serializer.html#ignoring-properties
-
-  -
-    question: >
-      Which of the following is a key feature of the Symfony Messenger component regarding message handling?
-    answers:
-      - { value: 'It enforces synchronous processing of all messages.', correct: false }
-      - { value: 'It allows for retries and error handling of failed messages.', correct: true }
-      - { value: 'It automatically scales worker processes based on message volume.', correct: false }
-      - { value: 'It provides a built-in UI for managing message queues.', correct: false }
-    help: |
-      The retry mechanism and failure transports are crucial for building resilient message-driven applications.
-      https://symfony.com/doc/current/messenger.html#retrying-failed-messages
-
-  -
-    question: >
-      When using the Symfony Filesystem component, what is the difference between `copy()` and `mirror()`?
-    answers:
-      - { value: '`copy()` copies a single file, while `mirror()` copies an entire directory recursively, ensuring the destination mirrors the source.', correct: true }
-      - { value: '`copy()` is for local files, `mirror()` is for remote files.', correct: false }
-      - { value: '`copy()` moves the file, `mirror()` duplicates it.', correct: false }
-      - { value: 'They are identical in functionality.', correct: false }
-    help: |
-      `mirror()` is useful for synchronizing directories, ensuring the target directory exactly matches the source.
-      https://symfony.com/doc/current/components/filesystem.html#mirror
-
-  -
-    question: >
-      What is the primary benefit of using `ClockInterface` instead of `new \DateTimeImmutable()` directly in your services?
-    answers:
-      - { value: 'It makes your code more performant by reducing object creation overhead.', correct: false }
-      - { value: 'It allows you to easily control and manipulate time during testing, making time-dependent logic deterministic.', correct: true }
-      - { value: 'It automatically handles timezone conversions.', correct: false }
-      - { value: 'It provides a more secure way to get the current time.', correct: false }
-    help: |
-      Injecting `ClockInterface` is a best practice for testability, as it allows you to substitute the real clock with a test clock.
-      https://symfony.com/doc/current/components/clock.html#testing
-
-  -
-    question: >
-      Which of the following is a common deployment best practice for Symfony applications to ensure minimal downtime during updates?
-    answers:
-      - { value: 'Performing updates directly on the production server without any staging.', correct: false }
-      - { value: 'Using blue/green deployments or rolling updates with a load balancer.', correct: true }
-      - { value: 'Taking the application offline for several hours during updates.', correct: false }
-      - { value: 'Manually copying files via FTP.', correct: false }
-    help: |
-      Modern deployment strategies like blue/green or rolling updates minimize downtime and risk.
-      https://symfony.com/doc/current/deployment.html#zero-downtime-deployment
-
-  -
-    question: >
-      What is the main advantage of using the `#[Cache('public', 'max-age=3600')]` attribute on a controller method?
-    answers:
-      - { value: 'It instructs the browser to cache the response for 3600 seconds, and allows shared caches (proxies) to cache it.', correct: true }
-      - { value: 'It caches the method''s return value in the database for one hour.', correct: false }
-      - { value: 'It makes the method accessible only to public users for 3600 seconds.', correct: false }
-      - { value: 'It clears the cache every 3600 seconds.', correct: false }
-    help: |
-      The `public` directive allows shared caches, and `max-age` sets the cache lifetime.
-      https://symfony.com/doc/current/http_cache.html#http-cache-in-controllers
-
-  -
-    question: >
-      When dealing with multiple languages in a Symfony application, what is the purpose of the `Intl` component?
-    answers:
-      - { value: 'To provide locale-aware formatting for numbers, dates, currencies, and other data types.', correct: true }
-      - { value: 'To manage the translation of strings.', correct: false }
-      - { value: 'To detect the user''s preferred language from their browser settings.', correct: false }
-      - { value: 'To handle character encoding conversions.', correct: false }
-    help: |
-      The `Intl` component focuses on formatting and parsing locale-specific data, complementing the Translation component.
+      The Intl component provides an object-oriented wrapper for the PHP Intl extension, which leverages the ICU library for advanced internationalization features.
       https://symfony.com/doc/current/components/intl.html
 
   -
     question: >
-      Which of the following is a valid way to create a `Process` object to run a command in Symfony?
+      Which Symfony component allows you to interact with the PHP runtime, for example, to get information about the current PHP version or manage opcache?
     answers:
-      - { value: '`new Process([''php'', ''bin/console'', ''app:my-command''])`', correct: true }
-      - { value: '`Process::runCommand(''php bin/console app:my-command'')`', correct: false }
-      - { value: '`$this->get(''process_factory'')->create(''php bin/console app:my-command'')`', correct: false }
-      - { value: '`Process::create([''php'', ''bin/console'', ''app:my-command''])`', correct: false }
+      -
+        value: >
+          `Kernel`
+        correct: false
+      -
+        value: >
+          `Runtime`
+        correct: true
+      -
+        value: >
+          `System`
+        correct: false
+      -
+        value: >
+          `PhpInfo`
+        correct: false
     help: |
-      The `Process` class constructor takes an array of command parts or a single command string.
-      https://symfony.com/doc/current/components/process.html#usage
+      The Runtime component provides tools to interact with the PHP runtime environment.
+      https://symfony.com/doc/current/components/runtime.html
 
   -
     question: >
-      What is the primary purpose of the `#[Groups]` attribute in the Symfony Serializer component?
+      What is the primary role of the Symfony Clock component?
     answers:
-      - { value: 'To define which properties of an object should be included or excluded during serialization/deserialization based on a context.', correct: true }
-      - { value: 'To group related services in the dependency injection container.', correct: false }
-      - { value: 'To define security roles for accessing specific data.', correct: false }
-      - { value: 'To organize translation messages into domains.', correct: false }
+      -
+        value: >
+          To provide a testable and controllable way to get the current time, useful for testing time-sensitive logic.
+        correct: true
+      -
+        value: >
+          To manage cron jobs.
+        correct: false
+      -
+        value: >
+          To synchronize time across distributed systems.
+        correct: false
+      -
+        value: >
+          To measure application execution time.
+        correct: false
     help: |
-      Serialization groups are fundamental for controlling data exposure in APIs or other serialization contexts.
-      https://symfony.com/doc/current/components/serializer.html#using-serialization-groups
+      The Clock component provides an abstraction for the current time, making it easier to test time-dependent code.
+      https://symfony.com/doc/current/components/clock.html
 
   -
-    question: >
-      Which of the following is a key advantage of using the Symfony Messenger component for sending emails?
-    answers:
-      - { value: 'It allows sending emails synchronously, ensuring immediate delivery.', correct: false }
-      - { value: 'It enables asynchronous email sending, preventing slow email operations from blocking the user''s request.', correct: true }
-      - { value: 'It provides a built-in email template engine.', correct: false }
-      - { value: 'It automatically handles email bounces and spam reports.', correct: false }
-    help: |
-      By dispatching email messages to Messenger, the actual sending can be offloaded to a background worker, improving responsiveness.
-      https://symfony.com/doc/current/mailer.html#sending-emails-asynchronously
+    question: |
+      Consider the following `.env` file:
 
-  -
-    question: >
-      What is the purpose of the `Symfony\Component\Finder\SplFileInfo` object returned by the Finder component when iterating over results?
-    answers:
-      - { value: 'It''s a standard PHP object that provides methods to access file properties like name, path, size, and modification time.', correct: true }
-      - { value: 'It''s a Symfony-specific object that only contains the file path.', correct: false }
-      - { value: 'It''s a database record representing the file.', correct: false }
-      - { value: 'It''s a temporary object that must be converted to a string before use.', correct: false }
-    help: |
-      The Finder component leverages PHP's `SplFileInfo` for rich file information.
-      https://symfony.com/doc/current/components/finder.html#iterating-on-results
+      ```dotenv
+      APP_ENV=dev
+      DATABASE_URL="mysql://user:pass@127.0.0.1:3306/app?serverVersion=5.7"
+      ```
 
-  -
-    question: >
-      When using the Symfony Lock component, what happens if `Lock::acquire()` is called and the lock is already held by another process?
+      How does Symfony typically load these variables into the application's environment?
     answers:
-      - { value: 'The call will block (wait) until the lock is released or a timeout occurs.', correct: true }
-      - { value: 'It will immediately throw a `LockAcquireException`.', correct: false }
-      - { value: 'It will silently fail and return `false`.', correct: false }
-      - { value: 'It will attempt to steal the lock from the other process.', correct: false }
+      -
+        value: >
+          They are automatically loaded into `$_ENV` and `$_SERVER` by the DotEnv component.
+        correct: true
+      -
+        value: >
+          They are only accessible via the `ContainerBuilder`.
+        correct: false
+      -
+        value: >
+          They must be manually parsed and assigned in `public/index.php`.
+        correct: false
+      -
+        value: >
+          They are compiled into a static PHP file at deployment.
+        correct: false
     help: |
-      The default behavior of `acquire()` is blocking, ensuring exclusive access.
-      https://symfony.com/doc/current/components/lock.html#acquiring-a-lock
-
-  -
-    question: >
-      Which of the following is a primary benefit of the Symfony Web Debug Toolbar?
-    answers:
-      - { value: 'It provides a quick overview of key request information (e.g., status code, memory usage, execution time) directly in the browser.', correct: true }
-      - { value: 'It allows real-time editing of Twig templates.', correct: false }
-      - { value: 'It serves as a full-featured IDE within the browser.', correct: false }
-      - { value: 'It automatically fixes common coding errors.', correct: false }
-    help: |
-      The Web Debug Toolbar offers immediate feedback on request details without navigating to the full profiler.
-      https://symfony.com/doc/current/profiler.html#the-web-debug-toolbar
-
-  -
-    question: >
-      What is the purpose of the `trans_default_domain` configuration in Symfony?
-    answers:
-      - { value: 'To set the default locale for all translations.', correct: false }
-      - { value: 'To define the default translation domain to be used when no explicit domain is specified for a message.', correct: true }
-      - { value: 'To enable or disable translation for a specific domain.', correct: false }
-      - { value: 'To specify the default translation file format.', correct: false }
-    help: |
-      `trans_default_domain` simplifies translation by avoiding the need to specify the domain for common messages.
-      https://symfony.com/doc/current/translation.html#translation-domains
-
-  -
-    question: >
-      What is the main reason for using the `ClockInterface` in a Symfony application, especially for new code?
-    answers:
-      - { value: 'To ensure all date and time operations are performed in UTC.', correct: false }
-      - { value: 'To decouple your code from the system clock, making it more testable and predictable.', correct: true }
-      - { value: 'To automatically handle daylight saving time adjustments.', correct: false }
-      - { value: 'To provide a faster way to get the current timestamp.', correct: false }
-    help: |
-      The `ClockInterface` promotes dependency inversion, allowing for easy substitution of the clock implementation.
-      https://symfony.com/doc/current/components/clock.html#usage
-
-  -
-    question: >
-      Which of the following is a best practice for handling errors in console commands in Symfony?
-    answers:
-      - { value: 'Catching specific exceptions and returning a non-zero exit code to indicate failure.', correct: true }
-      - { value: 'Using `die()` or `exit()` to terminate the command on error.', correct: false }
-      - { value: 'Logging all errors to `var/log/prod.log` and always returning `0`.', correct: false }
-      - { value: 'Relying solely on PHP''s default error handling.', correct: false }
-    help: |
-      Returning a non-zero exit code is standard practice for console commands to signal success or failure to the shell or automation scripts.
-      https://symfony.com/doc/current/console.html#handling-errors
-
-  -
-    question: >
-      What is the purpose of the `symfony/dotenv` component?
-    answers:
-      - { value: 'To manage environment variables from `.env` files.', correct: true }
-      - { value: 'To encrypt sensitive data in `.env` files.', correct: false }
-      - { value: 'To parse `.env` files for configuration, making environment variables available to the application.', correct: true }
-      - { value: 'To validate the format of `.env` files.', correct: false }
-    help: |
-      The DotEnv component loads environment variables, making application configuration flexible.
+      The DotEnv component, typically enabled by default in Symfony applications, reads `.env` files and populates the `$_ENV` and `$_SERVER` superglobals.
       https://symfony.com/doc/current/components/dotenv.html
 
   -
     question: >
-      When deploying a Symfony application, why is it crucial to run `composer install --no-dev`?
+      Which of the following is a benefit of using the Symfony Messenger component for handling long-running tasks?
     answers:
-      - { value: 'To ensure that only production dependencies are installed, reducing the application''s footprint and potential security risks.', correct: true }
-      - { value: 'To prevent any Composer packages from being installed.', correct: false }
-      - { value: 'To force Composer to update all packages to their latest versions.', correct: false }
-      - { value: 'To remove all cached Composer files.', correct: false }
+      -
+        value: >
+          It ensures the task completes synchronously, blocking the user interface.
+        correct: false
+      -
+        value: >
+          It allows offloading tasks to background processes, improving response times for web requests.
+        correct: true
+      -
+        value: >
+          It provides real-time communication channels for users.
+        correct: false
+      -
+        value: >
+          It automatically retries failed HTTP requests.
+        correct: false
     help: |
-      Excluding development dependencies is a standard practice for production deployments.
-      https://symfony.com/doc/current/deployment.html#install-your-dependencies
+      Messenger enables asynchronous processing, which is ideal for long-running tasks as it prevents them from blocking the main request-response cycle.
+      https://symfony.com/doc/current/components/messenger.html#long-running-tasks
+
+  -
+    question: >
+      Which of the following is NOT a valid cache adapter supported by the Symfony Cache component out-of-the-box?
+    answers:
+      -
+        value: >
+          `FilesystemAdapter`
+        correct: false
+      -
+        value: >
+          `RedisAdapter`
+        correct: false
+      -
+        value: >
+          `DatabaseAdapter`
+        correct: true
+      -
+        value: >
+          `MemcachedAdapter`
+        correct: false
+    help: |
+      Symfony's Cache component provides adapters for various caching systems like filesystem, Redis, Memcached, APCu, and Doctrine Cache, but not a generic `DatabaseAdapter` out-of-the-box.
+      https://symfony.com/doc/current/components/cache/adapters.html
+
+  -
+    question: >
+      What is the purpose of the `#[AsCommand]` attribute in a Symfony console command?
+    answers:
+      -
+        value: >
+          To define the command's name and description directly in the class.
+        correct: true
+      -
+        value: >
+          To mark the command as a service for autowiring.
+        correct: false
+      -
+        value: >
+          To specify the command's arguments and options.
+        correct: false
+      -
+        value: >
+          To register the command with the application kernel.
+        correct: false
+    help: |
+      The `#[AsCommand]` attribute, introduced in Symfony 5.3, allows configuring the command's name, description, and other options directly on the command class.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: >
+      When debugging a Symfony application, what information can you typically find in the "Logger" panel of the Web Profiler?
+    answers:
+      -
+        value: >
+          Database queries executed during the request.
+        correct: false
+      -
+        value: >
+          Logs from the application, including deprecations, errors, and custom messages.
+        correct: true
+      -
+        value: >
+          HTTP request and response headers.
+        correct: false
+      -
+        value: >
+          Twig template rendering times.
+        correct: false
+    help: |
+      The Logger panel in the Web Profiler displays all log messages generated during the request, which is crucial for identifying issues.
+      https://symfony.com/doc/current/profiler/panels.html#logger-panel
+
+  -
+    question: >
+      Which command is used to clear the Symfony cache in a production environment?
+    answers:
+      -
+        value: >
+          `php bin/console cache:clear --env=dev`
+        correct: false
+      -
+        value: >
+          `php bin/console cache:clear --env=prod`
+        correct: true
+      -
+        value: >
+          `php bin/console cache:warmup`
+        correct: false
+      -
+        value: >
+          `rm -rf var/cache/*`
+        correct: false
+    help: |
+      The `cache:clear` command removes the cache files. It's important to specify `--env=prod` for production.
+      https://symfony.com/doc/current/console/usage.html#clearing-the-cache
+
+  -
+    question: >
+      What is a "message handler" in the context of the Symfony Messenger component?
+    answers:
+      -
+        value: >
+          A class responsible for sending messages to external APIs.
+        correct: false
+      -
+        value: >
+          A service that processes a specific type of message (command or event).
+        correct: true
+      -
+        value: >
+          A configuration setting for message queues.
+        correct: false
+      -
+        value: >
+          A utility for creating new message classes.
+        correct: false
+    help: |
+      A message handler is a PHP callable (usually a service) that contains the logic to process a specific message.
+      https://symfony.com/doc/current/components/messenger.html#message-handlers
+
+  -
+    question: |
+      Given the following code snippet using the Symfony Filesystem component:
+
+      ```php
+      use Symfony\Component\Filesystem\Filesystem;
+
+      $filesystem = new Filesystem();
+      $filesystem->mkdir('/tmp/my_directory');
+      ```
+
+      What will be the outcome if `/tmp/my_directory` already exists?
+    answers:
+      -
+        value: >
+          An exception will be thrown.
+        correct: false
+      -
+        value: >
+          The directory will be silently created (no error).
+        correct: false
+      -
+        value: >
+          The method will do nothing and return `true`.
+        correct: true
+      -
+        value: >
+          The existing directory will be deleted and recreated.
+        correct: false
+    help: |
+      The `mkdir()` method of the Filesystem component will create the directory if it doesn't exist. If it already exists, it does nothing and no exception is thrown by default.
+      https://symfony.com/doc/current/components/filesystem.html#mkdir
+
+  -
+    question: >
+      Which of the following best describes the purpose of a "data collector" in the Symfony Web Profiler?
+    answers:
+      -
+        value: >
+          To collect user input from forms.
+        correct: false
+      -
+        value: >
+          To gather specific data about the application's state during a request for display in the Web Profiler.
+        correct: true
+      -
+        value: >
+          To collect analytics data for external services.
+        correct: false
+      -
+        value: >
+          To store session data for the current user.
+        correct: false
+    help: |
+      Data collectors are services that implement `DataCollectorInterface` and are responsible for collecting specific data points (e.g., database queries, mailer events, Twig data) for the Web Profiler.
+      https://symfony.com/doc/current/profiler/data_collectors.html
+
+  -
+    question: >
+      Which of the following is a valid way to define a translation message with pluralization using ICU MessageFormat in Symfony?
+    answers:
+      -
+        value: >
+          `{count, plural, one {one apple} other {# apples}}`
+        correct: true
+      -
+        value: >
+          `{count} apple|{count} apples`
+        correct: false
+      -
+        value: >
+          `count: {1: 'one apple', default: '# apples'}`
+        correct: false
+      -
+        value: >
+          `pluralize(count, 'apple', 'apples')`
+        correct: false
+    help: |
+      ICU MessageFormat provides robust pluralization rules using the `plural` function, allowing for different forms based on quantity.
+      https://symfony.com/doc/current/reference/formats/message_format.html#plural-format
+
+  -
+    question: >
+      What is the purpose of the `Finder` component in Symfony?
+    answers:
+      -
+        value: >
+          To locate and load services from the dependency injection container.
+        correct: false
+      -
+        value: >
+          To find files and directories based on various criteria (e.g., name, size, type, content).
+        correct: true
+      -
+        value: >
+          To search for specific text within application logs.
+        correct: false
+      -
+        value: >
+          To discover available console commands.
+        correct: false
+    help: |
+      The Finder component helps find files and directories in a flexible way, supporting complex search criteria.
+      https://symfony.com/doc/current/components/finder.html
+
+  -
+    question: >
+      Which of the following is a best practice for handling sensitive configuration data in Symfony (e.g., API keys, database passwords) in a production environment?
+    answers:
+      -
+        value: >
+          Hardcoding them directly in `config/services.yaml`.
+        correct: false
+      -
+        value: >
+          Storing them in version control in plain text.
+        correct: false
+      -
+        value: >
+          Using environment variables or Symfony Secrets.
+        correct: true
+      -
+        value: >
+          Encrypting them with a custom algorithm and decrypting in the kernel.
+        correct: false
+    help: |
+      Environment variables (via DotEnv) and Symfony Secrets are the recommended ways to manage sensitive configuration data in production, keeping them out of version control.
+      https://symfony.com/doc/current/configuration/secrets.html
+
+  -
+    question: >
+      When using the Symfony Mailer component, what is the purpose of a "transport"?
+    answers:
+      -
+        value: >
+          To define the email's subject and body.
+        correct: false
+      -
+        value: >
+          To specify how the email will be physically sent (e.g., SMTP, Sendmail, API).
+        correct: true
+      -
+        value: >
+          To store sent emails in a database.
+        correct: false
+      -
+        value: >
+          To validate email addresses.
+        correct: false
+    help: |
+      A transport in Symfony Mailer defines the mechanism used to send emails, such as SMTP, Sendmail, or various API-based services.
+      https://symfony.com/doc/current/mailer.html#transports
+
+  -
+    question: >
+      Which of the following is a valid use case for the Symfony Lock component?
+    answers:
+      -
+        value: >
+          Ensuring only one instance of a console command runs at a time.
+        correct: true
+      -
+        value: >
+          Protecting a database table from concurrent writes (this is typically handled by the database itself).
+        correct: false
+      -
+        value: >
+          Synchronizing access to a shared resource across multiple web servers without a shared filesystem.
+        correct: true
+      -
+        value: >
+          Preventing multiple users from logging in with the same credentials simultaneously.
+        correct: false
+    help: |
+      The Lock component is ideal for preventing race conditions in scenarios like single-instance console commands or distributed systems with shared resources, provided a shared lock store is used.
+      https://symfony.com/doc/current/components/lock.html#usage
+
+  -
+    question: >
+      What is the primary benefit of using "data collectors" in the Symfony Web Profiler?
+    answers:
+      -
+        value: >
+          They allow modifying the application's runtime behavior.
+        correct: false
+      -
+        value: >
+          They provide detailed insights into various aspects of a request without modifying the application code.
+        correct: true
+      -
+        value: >
+          They automatically fix errors detected during a request.
+        correct: false
+      -
+        value: >
+          They are used for collecting user feedback.
+        correct: false
+    help: |
+      Data collectors are a powerful feature of the Web Profiler, enabling developers to inspect the internal state of their application during a request.
+      https://symfony.com/doc/current/profiler/data_collectors.html
+
+  -
+    question: >
+      Which of the following best describes "Internationalization (i18n)" in the context of a Symfony application?
+    answers:
+      -
+        value: >
+          The process of adapting an application to a specific locale or region.
+        correct: false
+      -
+        value: >
+          The process of designing and developing an application to support multiple languages and regions without requiring changes to the source code.
+        correct: true
+      -
+        value: >
+          The process of translating all text within the application.
+        correct: false
+      -
+        value: >
+          The process of converting dates and numbers to a specific format.
+        correct: false
+    help: |
+      Internationalization (i18n) is the design and development of a product, application or document content such that it enables easy localization for target audiences that vary in culture, region, or language.
+      https://symfony.com/doc/current/translation.html#internationalization-and-localization
+
+  -
+    question: >
+      What is the purpose of the `Clock` component's `withTimeZone()` method?
+    answers:
+      -
+        value: >
+          To change the system's default timezone.
+        correct: false
+      -
+        value: >
+          To create a new clock instance that always returns times in a specific timezone, without affecting the original clock.
+        correct: true
+      -
+        value: >
+          To convert a `DateTime` object to a different timezone.
+        correct: false
+      -
+        value: >
+          To set the timezone for all subsequent clock operations globally.
+        correct: false
+    help: |
+      The `withTimeZone()` method returns a new `Clock` instance configured with the specified timezone, allowing for flexible time handling without side effects.
+      https://symfony.com/doc/current/components/clock.html#timezones
+
+  -
+    question: >
+      Which of the following is a common strategy for handling errors in a Symfony application in production?
+    answers:
+      -
+        value: >
+          Displaying detailed error messages and stack traces directly to the end-user.
+        correct: false
+      -
+        value: >
+          Logging errors to a file or a dedicated error tracking service (e.g., Sentry, Monolog).
+        correct: true
+      -
+        value: >
+          Silently ignoring all exceptions.
+        correct: false
+      -
+        value: >
+          Restarting the web server on every error.
+        correct: false
+    help: |
+      In production, detailed error messages should be hidden from users, and errors should be logged and monitored for debugging and analysis.
+      https://symfony.com/doc/current/logging.html
+
+  -
+    question: >
+      Which of the following is a best practice for optimizing cache usage in a Symfony application?
+    answers:
+      -
+        value: >
+          Caching dynamic content that changes frequently.
+        correct: false
+      -
+        value: >
+          Using a single cache pool for all types of data.
+        correct: false
+      -
+        value: >
+          Invalidating cache entries when the underlying data changes.
+        correct: true
+      -
+        value: >
+          Storing sensitive user data directly in the cache without encryption.
+        correct: false
+    help: |
+      Effective cache management involves caching static or infrequently changing data and ensuring cache invalidation when data updates.
+      https://symfony.com/doc/current/components/cache.html#cache-invalidation
+
+  -
+    question: |
+      You are debugging a Symfony application and notice that a service is not being injected correctly. Which Web Profiler panel would be most helpful to inspect the service container?
+    answers:
+      -
+        value: >
+          "Routing"
+        correct: false
+      -
+        value: >
+          "Logger"
+        correct: false
+      -
+        value: >
+          "Container"
+        correct: true
+      -
+        value: >
+          "Events"
+        correct: false
+    help: |
+      The "Container" panel in the Web Profiler allows you to inspect all services, parameters, and aliases defined in the dependency injection container, which is crucial for debugging service-related issues.
+      https://symfony.com/doc/current/profiler/panels.html#container-panel
+
+  -
+    question: >
+      What is the primary purpose of the `Mime` component in Symfony?
+    answers:
+      -
+        value: >
+          To handle database migrations.
+        correct: false
+      -
+        value: >
+          To create and manipulate MIME messages, especially for emails.
+        correct: true
+      -
+        value: >
+          To validate file types.
+        correct: false
+      -
+        value: >
+          To manage HTTP headers.
+        correct: false
+    help: |
+      The Mime component provides an object-oriented API for creating and manipulating MIME messages, commonly used with the Mailer component.
+      https://symfony.com/doc/current/components/mime.html
+
+  -
+    question: >
+      Which of the following is a key advantage of using the Symfony Serializer component over manual `json_encode`/`json_decode`?
+    answers:
+      -
+        value: >
+          It automatically handles database persistence.
+        correct: false
+      -
+        value: >
+          It provides advanced features like normalization, denormalization, and circular reference handling.
+        correct: true
+      -
+        value: >
+          It is significantly faster for all serialization tasks.
+        correct: false
+      -
+        value: >
+          It only supports JSON format.
+        correct: false
+    help: |
+      The Serializer component offers a flexible and extensible architecture for serialization and deserialization, including handling complex object graphs and different formats.
+      https://symfony.com/doc/current/components/serializer.html
+
+  -
+    question: >
+      What is a common deployment best practice for Symfony applications to ensure all dependencies are installed correctly?
+    answers:
+      -
+        value: >
+          Manually copying `vendor/` directory from development.
+        correct: false
+      -
+        value: >
+          Running `composer install --no-dev --optimize-autoloader` on the production server.
+        correct: true
+      -
+        value: >
+          Only deploying the `src/` directory.
+        correct: false
+      -
+        value: >
+          Using `git pull` without any further steps.
+        correct: false
+    help: |
+      Running `composer install --no-dev --optimize-autoloader` on the production server ensures that only production dependencies are installed and the autoloader is optimized for performance.
+      https://symfony.com/doc/current/deployment.html#install-dependencies
+
+  -
+    question: >
+      In Symfony's ExpressionLanguage, what is the `min()` function used for?
+    answers:
+      -
+        value: >
+          To get the minimum length of a string.
+        correct: false
+      -
+        value: >
+          To return the lowest value among the given parameters.
+        correct: true
+      -
+        value: >
+          To check if a number is below a certain threshold.
+        correct: false
+      -
+        value: >
+          To define a minimum value for a form field.
+        correct: false
+    help: |
+      The `min()` function in ExpressionLanguage returns the lowest value from its arguments, similar to PHP's `min()` function.
+      https://symfony.com/doc/current/reference/formats/expression_language.html#min-function
+
+  -
+    question: >
+      Which of the following is a primary benefit of using Symfony's `Clock` component for time-related operations?
+    answers:
+      -
+        value: >
+          It automatically synchronizes the server time with an NTP server.
+        correct: false
+      -
+        value: >
+          It makes code more testable by allowing the "current time" to be controlled.
+        correct: true
+      -
+        value: >
+          It provides high-precision timestamps for performance benchmarking.
+        correct: false
+      -
+        value: >
+          It replaces PHP's built-in date and time functions entirely.
+        correct: false
+    help: |
+      The Clock component provides a testable abstraction over time, which is invaluable for unit and functional testing of time-sensitive logic.
+      https://symfony.com/doc/current/components/clock.html
+
+  -
+    question: >
+      When dealing with multiple languages in a Symfony application, what is the purpose of a "locale"?
+    answers:
+      -
+        value: >
+          It defines the default currency for the application.
+        correct: false
+      -
+        value: >
+          It represents a specific language and region combination (e.g., `en_US`, `fr_FR`).
+        correct: true
+      -
+        value: >
+          It specifies the character encoding for the application.
+        correct: false
+      -
+        value: >
+          It determines the server's geographical location.
+        correct: false
+    help: |
+      A locale is a string identifier that represents a set of user preferences, including language, country, and other cultural conventions.
+      https://symfony.com/doc/current/translation.html#locales
+
+  -
+    question: >
+      Which of the following is a valid way to retrieve a service from the container in a Symfony application (outside of autowiring in a controller or service constructor)?
+    answers:
+      -
+        value: >
+          `$container->get('my_service_id')`
+        correct: true
+      -
+        value: >
+          `new MyService()`
+        correct: false
+      -
+        value: >
+          `$_SERVER['my_service_id']`
+        correct: false
+      -
+        value: >
+          `$this->get('my_service_id')` (if extending `AbstractController` or `ContainerAwareTrait`)
+        correct: true
+    help: |
+      Services can be retrieved from the container using `get()` method on the container object or via the `get()` shortcut in controllers/container-aware services.
+      https://symfony.com/doc/current/service_container.html#fetching-services-from-the-container
+
+  -
+    question: >
+      What is the purpose of the `APP_DEBUG` environment variable in a Symfony application?
+    answers:
+      -
+        value: >
+          To enable or disable the Symfony Debug component, affecting error reporting and performance.
+        correct: true
+      -
+        value: >
+          To specify the debugger port for XDebug.
+        correct: false
+      -
+        value: >
+          To enable verbose logging for all services.
+        correct: false
+      -
+        value: >
+          To force the application to run in the `dev` environment.
+        correct: false
+    help: |
+      `APP_DEBUG` controls whether the Debug component is enabled, which impacts error handling, caching, and performance. It's typically `true` in `dev` and `false` in `prod`.
+      https://symfony.com/doc/current/components/debug.html
+
+  -
+    question: >
+      Which of the following is a common strategy for reducing application size and improving performance during deployment?
+    answers:
+      -
+        value: >
+          Including all development dependencies in the production build.
+        correct: false
+      -
+        value: >
+          Removing unused bundles and packages.
+        correct: true
+      -
+        value: >
+          Disabling all caching mechanisms.
+        correct: false
+      -
+        value: >
+          Keeping all log files in the deployed application.
+        correct: false
+    help: |
+      Removing unnecessary development dependencies and unused bundles helps reduce the application's footprint and can improve loading times.
+      https://symfony.com/doc/current/deployment.html#optimizing-for-production
+
+  -
+    question: >
+      When should you use the `Process` component over PHP's built-in `exec()` or `shell_exec()` functions?
+    answers:
+      -
+        value: >
+          Never, `exec()` is always preferred for simplicity.
+        correct: false
+      -
+        value: >
+          When you need more control over the process (e.g., input, output, error handling, timeouts, environment variables).
+        correct: true
+      -
+        value: >
+          Only when executing commands on a remote server.
+        correct: false
+      -
+        value: >
+          When the command is very short and simple.
+        correct: false
+    help: |
+      The Process component provides a robust and object-oriented API for executing external processes, offering more control and better error handling than raw PHP functions.
+      https://symfony.com/doc/current/components/process.html
+
+  -
+    question: >
+      How can you typically enable or disable the Web Profiler in a Symfony application?
+    answers:
+      -
+        value: >
+          By modifying a setting in `composer.json`.
+        correct: false
+      -
+        value: >
+          By configuring the `framework.profiler.enabled` option in `config/packages/dev/profiler.yaml`.
+        correct: true
+      -
+        value: >
+          By commenting out the `ProfilerBundle` in `src/Kernel.php`.
+        correct: false
+      -
+        value: >
+          It's always enabled in development and disabled in production automatically.
+        correct: false
+    help: |
+      The Web Profiler is typically enabled in the `dev` environment via configuration in `config/packages/dev/profiler.yaml`.
+      https://symfony.com/doc/current/profiler.html#enabling-the-profiler
+
+  -
+    question: >
+      Which of the following is a common method for translating messages in Twig templates?
+    answers:
+      -
+        value: >
+          Using the `trans` filter or `trans` tag.
+        correct: true
+      -
+        value: >
+          Directly embedding PHP `_()` functions.
+        correct: false
+      -
+        value: >
+          Calling a custom Twig function named `translate_text()`.
+        correct: false
+      -
+        value: >
+          Storing all translations in JavaScript files.
+        correct: false
+    help: |
+      Twig provides the `trans` filter and `trans` tag for translating content within templates.
+      https://symfony.com/doc/current/translation.html#translating-content-in-twig-templates
+
+  -
+    question: >
+      What is the main purpose of the `Runtime` component in Symfony 6+?
+    answers:
+      -
+        value: >
+          To provide a flexible entry point for different PHP runtimes (e.g., web, console, serverless).
+        correct: true
+      -
+        value: >
+          To manage application dependencies.
+        correct: false
+      -
+        value: >
+          To handle database connections.
+        correct: false
+      -
+        value: >
+          To compile Twig templates at runtime.
+        correct: false
+    help: |
+      The Runtime component abstracts the application bootstrap process, allowing Symfony applications to run in various environments (e.g., PHP-FPM, Swoole, RoadRunner, serverless functions) with minimal changes.
+      https://symfony.com/doc/current/components/runtime.html
+
+  -
+    question: >
+      Which of the following is a valid way to get the current time using the Symfony `Clock` component?
+    answers:
+      -
+        value: >
+          `new \DateTimeImmutable()`
+        correct: false
+      -
+        value: >
+          `$clock->now()`
+        correct: true
+      -
+        value: >
+          `time()`
+        correct: false
+      -
+        value: >
+          `date('Y-m-d H:i:s')`
+        correct: false
+    help: |
+      The `now()` method of a `ClockInterface` implementation returns a `DateTimeImmutable` object representing the current time.
+      https://symfony.com/doc/current/components/clock.html#getting-the-current-time
+
+  -
+    question: >
+      What is the primary advantage of using a message queue (e.g., RabbitMQ, Redis) with Symfony Messenger?
+    answers:
+      -
+        value: >
+          It ensures messages are processed immediately and synchronously.
+        correct: false
+      -
+        value: >
+          It allows for reliable asynchronous processing, decoupling producers from consumers and handling spikes in load.
+        correct: true
+      -
+        value: >
+          It encrypts all message payloads for security.
+        correct: false
+      -
+        value: >
+          It provides a real-time chat interface for users.
+        correct: false
+    help: |
+      Message queues enable asynchronous processing, provide durability for messages, and help manage load by buffering tasks.
+      https://symfony.com/doc/current/components/messenger.html#transports
+
+  -
+    question: >
+      Which of the following is a common strategy for handling errors gracefully in a Symfony application, presenting a user-friendly page instead of a technical error?
+    answers:
+      -
+        value: >
+          Using custom error pages configured in `config/packages/framework.yaml`.
+        correct: true
+      -
+        value: >
+          Displaying the full stack trace to the user.
+        correct: false
+      -
+        value: >
+          Redirecting all errors to the homepage.
+        correct: false
+      -
+        value: >
+          Disabling error logging entirely.
+        correct: false
+    help: |
+      Symfony allows configuring custom error pages for different HTTP status codes (e.g., 404, 500) to provide a better user experience.
+      https://symfony.com/doc/current/controller/error_pages.html
+
+  -
+    question: >
+      Which of the following is a key consideration for cache invalidation in a Symfony application?
+    answers:
+      -
+        value: >
+          Invalidating the entire cache on every request.
+        correct: false
+      -
+        value: >
+          Implementing a strategy to clear or update cached data when the source data changes.
+        correct: true
+      -
+        value: >
+          Never invalidating cache, assuming data is always fresh.
+        correct: false
+      -
+        value: >
+          Only invalidating cache manually via console commands.
+        correct: false
+    help: |
+      Proper cache invalidation is crucial to ensure users see up-to-date information. Strategies include tagging, explicit invalidation, or time-based expiration.
+      https://symfony.com/doc/current/components/cache.html#cache-invalidation
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `remove()` method?
+    answers:
+      -
+        value: >
+          To move files or directories.
+        correct: false
+      -
+        value: >
+          To delete files or directories.
+        correct: true
+      -
+        value: >
+          To rename files.
+        correct: false
+      -
+        value: >
+          To create empty files.
+        correct: false
+    help: |
+      The `remove()` method deletes files or directories, including their contents.
+      https://symfony.com/doc/current/components/filesystem.html#remove
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony Serializer component in an API application?
+    answers:
+      -
+        value: >
+          Converting incoming JSON request bodies into PHP objects.
+        correct: true
+      -
+        value: >
+          Generating HTML responses.
+        correct: false
+      -
+        value: >
+          Managing database transactions.
+        correct: false
+      -
+        value: >
+          Handling user authentication.
+        correct: false
+    help: |
+      The Serializer component is frequently used in API contexts for denormalizing (deserializing) request data into PHP objects and normalizing (serializing) PHP objects into response formats.
+      https://symfony.com/doc/current/components/serializer.html#api-platform
+
+  -
+    question: >
+      Which of the following is a recommended practice for deployment to production in Symfony?
+    answers:
+      -
+        value: >
+          Running `composer update` on the production server.
+        correct: false
+      -
+        value: >
+          Disabling the cache completely to avoid issues.
+        correct: false
+      -
+        value: >
+          Warming up the cache after deployment.
+        correct: true
+      -
+        value: >
+          Keeping `APP_ENV=dev` for easier debugging.
+        correct: false
+    help: |
+      Warming up the cache (`php bin/console cache:warmup`) after deployment pre-generates the cache, improving the first request's performance.
+      https://symfony.com/doc/current/deployment.html#cache-warmup
+
+  -
+    question: >
+      What is the main advantage of using the `Lock` component in a distributed system (e.g., multiple servers)?
+    answers:
+      -
+        value: >
+          It ensures that all servers have the same system time.
+        correct: false
+      -
+        value: >
+          It allows for distributed locking, preventing concurrent access to shared resources across different machines.
+        correct: true
+      -
+        value: >
+          It provides a mechanism for inter-process communication.
+        correct: false
+      -
+        value: >
+          It encrypts data transmitted between servers.
+        correct: false
+    help: |
+      With a shared lock store (e.g., Redis, Memcached), the Lock component can provide distributed locks, crucial for coordinating tasks across multiple servers.
+      https://symfony.com/doc/current/components/lock.html#distributed-locks
+
+  -
+    question: >
+      Which of the following is a common way to inspect the data collected by the Web Profiler for a specific request?
+    answers:
+      -
+        value: >
+          Checking the server's raw access logs.
+        correct: false
+      -
+        value: >
+          Clicking on the Symfony logo in the Web Debug Toolbar.
+        correct: true
+      -
+        value: >
+          Using `phpinfo()` in the browser.
+        correct: false
+      -
+        value: >
+          Examining the contents of `var/cache/`.
+        correct: false
+    help: |
+      Clicking the Symfony logo or any panel in the Web Debug Toolbar opens the full Web Profiler page for the current request, showing detailed information.
+      https://symfony.com/doc/current/profiler.html#web-debug-toolbar
+
+  -
+    question: >
+      What is the purpose of the `Intl` component's `MessageFormatter` class?
+    answers:
+      -
+        value: >
+          To format numbers and currencies according to locale.
+        correct: false
+      -
+        value: >
+          To format messages with placeholders, pluralization, and gender-specific rules using ICU MessageFormat.
+        correct: true
+      -
+        value: >
+          To validate international phone numbers.
+        correct: false
+      -
+        value: >
+          To detect the user's browser language.
+        correct: false
+    help: |
+      The `MessageFormatter` class allows for complex message formatting based on ICU MessageFormat, handling pluralization, gender, and other locale-specific variations.
+      https://symfony.com/doc/current/components/intl.html#messageformatter
+
+  -
+    question: >
+      Which of the following is a key feature of the Symfony `Clock` component?
+    answers:
+      -
+        value: >
+          It provides a `sleep()` method that pauses execution for a specified duration.
+        correct: false
+      -
+        value: >
+          It allows "freezing" the current time for consistent testing of time-dependent logic.
+        correct: true
+      -
+        value: >
+          It automatically adjusts for daylight saving time changes.
+        correct: false
+      -
+        value: >
+          It provides a graphical interface for setting alarms.
+        correct: false
+    help: |
+      The `Clock` component's ability to be "frozen" or "mocked" is its most significant advantage for testing, ensuring that time-sensitive operations produce predictable results.
+      https://symfony.com/doc/current/components/clock.html#testing-time
+
+  -
+    question: >
+      Which of the following is a valid way to configure a custom error page for a 404 Not Found error in Symfony?
+    answers:
+      -
+        value: >
+          Creating a `404.html.twig` file in `templates/bundles/TwigBundle/Exception/`.
+        correct: true
+      -
+        value: >
+          Defining a route named `error_404`.
+        correct: false
+      -
+        value: >
+          Modifying the `.htaccess` file to redirect 404 errors.
+        correct: false
+      -
+        value: >
+          Implementing a custom event listener for `KernelEvents::EXCEPTION`.
+        correct: true
+    help: |
+      Symfony allows customizing error pages by creating Twig templates in specific paths (e.g., `templates/bundles/TwigBundle/Exception/error404.html.twig`) or by implementing an exception listener.
+      https://symfony.com/doc/current/controller/error_pages.html
+
+  -
+    question: >
+      What is the primary benefit of using the `Finder` component over PHP's built-in `glob()` or `scandir()` functions?
+    answers:
+      -
+        value: >
+          It is significantly faster for all file system operations.
+        correct: false
+      -
+        value: >
+          It provides a fluent, object-oriented interface for complex file system searches with filtering capabilities.
+        correct: true
+      -
+        value: >
+          It can search files on remote servers directly.
+        correct: false
+      -
+        value: >
+          It automatically fixes file permissions.
+        correct: false
+    help: |
+      The Finder component offers a powerful and flexible API for finding files, supporting various criteria like name patterns, size, content, and type, which is much more robust than basic PHP functions.
+      https://symfony.com/doc/current/components/finder.html
+
+  -
+    question: >
+      What is the main purpose of the `DotEnv` component's `load()` method?
+    answers:
+      -
+        value: >
+          To save environment variables to a `.env` file.
+        correct: false
+      -
+        value: >
+          To load environment variables from a `.env` file into the current process.
+        correct: true
+      -
+        value: >
+          To validate the syntax of a `.env` file.
+        correct: false
+      -
+        value: >
+          To encrypt the contents of a `.env` file.
+        correct: false
+    help: |
+      The `load()` method of the DotEnv component reads the `.env` file and sets the environment variables.
+      https://symfony.com/doc/current/components/dotenv.html#loading-environment-variables
+
+  -
+    question: >
+      Which of the following is a valid way to define an ExpressionLanguage expression in a Symfony configuration file (e.g., `services.yaml`)?
+    answers:
+      -
+        value: >
+          `value: 'service("my_service").callMethod()'`
+        correct: false
+      -
+        value: >
+          `value: '@=service("my_service").callMethod()'`
+        correct: true
+      -
+        value: >
+          `value: 'php: service("my_service")->callMethod()'`
+        correct: false
+      -
+        value: >
+          `value: '{{ service("my_service").callMethod() }}'`
+        correct: false
+    help: |
+      ExpressionLanguage expressions in YAML configuration files are prefixed with `@=` to distinguish them from regular strings.
+      https://symfony.com/doc/current/components/expression_language.html#usage-in-configuration
+
+  -
+    question: >
+      When debugging a Symfony application, what is the significance of the `var/log/dev.log` file?
+    answers:
+      -
+        value: >
+          It contains all database queries executed in the development environment.
+        correct: false
+      -
+        value: >
+          It stores all user session data for the development environment.
+        correct: false
+      -
+        value: >
+          It's the default log file for the development environment, containing application logs, errors, and debugging information.
+        correct: true
+      -
+        value: >
+          It's a temporary file that can be safely deleted at any time.
+        correct: false
+    help: |
+      The `dev.log` file is where Symfony's Monolog integration writes logs in the development environment, providing a detailed record of application activity and errors.
+      https://symfony.com/doc/current/logging.html#log-files
+
+  -
+    question: >
+      Which of the following is a common practice for improving performance in a production Symfony application related to caching?
+    answers:
+      -
+        value: >
+          Disabling all cache warmers.
+        correct: false
+      -
+        value: >
+          Using a local filesystem cache for all data, even across multiple servers.
+        correct: false
+      -
+        value: >
+          Employing a distributed cache system (e.g., Redis, Memcached) for shared data.
+        correct: true
+      -
+        value: >
+          Storing sensitive user data in the public cache directory.
+        correct: false
+    help: |
+      For multi-server deployments, a distributed cache system is essential to ensure cache consistency and performance.
+      https://symfony.com/doc/current/components/cache.html#distributed-cache
+
+  -
+    question: >
+      What is the primary role of the `Filesystem` component's `dumpFile()` method?
+    answers:
+      -
+        value: >
+          To read the content of a file.
+        correct: false
+      -
+        value: >
+          To write content to a file, creating it if it doesn't exist, and overwriting it if it does.
+        correct: true
+      -
+        value: >
+          To create an empty file.
+        correct: false
+      -
+        value: >
+          To append content to an existing file.
+        correct: false
+    help: |
+      The `dumpFile()` method writes the given content to a file, creating parent directories if necessary and overwriting existing files.
+      https://symfony.com/doc/current/components/filesystem.html#dumpfile
+
+  -
+    question: >
+      Which of the following is a valid way to send an email using the Symfony Mailer component?
+    answers:
+      -
+        value: >
+          `$mailer->send(new Email());`
+        correct: true
+      -
+        value: >
+          `$mailer->send('to@example.com', 'Subject', 'Body');`
+        correct: false
+      -
+        value: >
+          `$mailer->createMessage()->setSubject('...')->send();`
+        correct: false
+      -
+        value: >
+          `$mailer->dispatch(new MailMessage());`
+        correct: false
+    help: |
+      The `send()` method of the Mailer service takes a `Symfony\Component\Mime\Email` object as an argument.
+      https://symfony.com/doc/current/mailer.html#sending-emails
+
+  -
+    question: >
+      What is the primary purpose of the `Lock` component's `acquire()` method?
+    answers:
+      -
+        value: >
+          To release an existing lock.
+        correct: false
+      -
+        value: >
+          To attempt to obtain an exclusive lock.
+        correct: true
+      -
+        value: >
+          To check if a lock is currently held.
+        correct: false
+      -
+        value: >
+          To create a new lock instance.
+        correct: false
+    help: |
+      The `acquire()` method attempts to obtain a lock. If the lock is already held by another process, it will block or return `false` depending on the lock's configuration.
+      https://symfony.com/doc/current/components/lock.html#acquiring-a-lock
+
+  -
+    question: >
+      Which of the following is a common use case for the `Web Profiler`'s "Time" panel?
+    answers:
+      -
+        value: >
+          To measure the total execution time of a request and identify performance bottlenecks.
+        correct: true
+      -
+        value: >
+          To set the current system time.
+        correct: false
+      -
+        value: >
+          To synchronize time with external services.
+        correct: false
+      -
+        value: >
+          To schedule future tasks.
+        correct: false
+    help: |
+      The "Time" panel in the Web Profiler provides a detailed timeline of events during a request, helping to pinpoint where time is spent.
+      https://symfony.com/doc/current/profiler/panels.html#time-panel
+
+  -
+    question: >
+      What is "Localization (l10n)" in the context of a Symfony application?
+    answers:
+      -
+        value: >
+          The process of designing an application to support multiple languages.
+        correct: false
+      -
+        value: >
+          The process of adapting an internationalized application to a specific locale or region, including translations, date/time formats, and currency.
+        correct: true
+      -
+        value: >
+          The process of detecting the user's geographical location.
+        correct: false
+      -
+        value: >
+          The process of converting all application text to a single language.
+        correct: false
+    help: |
+      Localization (l10n) is the process of adapting an internationalized product or content to a specific locale or market.
+      https://symfony.com/doc/current/translation.html#internationalization-and-localization
+
+  -
+    question: >
+      Which of the following is a benefit of using the Symfony `Clock` component for date and time operations?
+    answers:
+      -
+        value: >
+          It automatically handles all timezone conversions without explicit configuration.
+        correct: false
+      -
+        value: >
+          It allows for deterministic testing of time-sensitive code by controlling the "current" time.
+        correct: true
+      -
+        value: >
+          It provides a direct interface to the operating system's real-time clock.
+        correct: false
+      -
+        value: >
+          It replaces the need for the PHP `DateTime` class.
+        correct: false
+    help: |
+      The `Clock` component promotes testability by allowing developers to control the perceived "current time," making tests involving dates and times reliable.
+      https://symfony.com/doc/current/components/clock.html
+
+  -
+    question: >
+      Which of the following is a common strategy for handling long-running tasks in a Symfony application without blocking the user interface?
+    answers:
+      -
+        value: >
+          Executing them directly in the controller and waiting for completion.
+        correct: false
+      -
+        value: >
+          Using the Symfony Messenger component to dispatch them to a message queue for asynchronous processing.
+        correct: true
+      -
+        value: >
+          Increasing the PHP execution time limit for web requests.
+        correct: false
+      -
+        value: >
+          Running them as separate cron jobs completely outside the Symfony application.
+        correct: false
+    help: |
+      The Messenger component is designed for handling long-running or resource-intensive tasks asynchronously, improving the responsiveness of web applications.
+      https://symfony.com/doc/current/components/messenger.html
+
+  -
+    question: >
+      What is the purpose of the `Process` component's `run()` method?
+    answers:
+      -
+        value: >
+          To start a process in the background without waiting for its completion.
+        correct: false
+      -
+        value: >
+          To execute a command and wait for its completion, returning the exit code.
+        correct: true
+      -
+        value: >
+          To retrieve the output of a previously run process.
+        correct: false
+      -
+        value: >
+          To check if a process is currently running.
+        correct: false
+    help: |
+      The `run()` method executes the command and blocks until the process terminates, returning the exit code.
+      https://symfony.com/doc/current/components/process.html#running-processes
+
+  -
+    question: >
+      Which of the following is a valid way to define a custom message in the Symfony Serializer component for a specific property?
+    answers:
+      -
+        value: >
+          Using the `#[Serializer\Groups(["group"])]` attribute.
+        correct: false
+      -
+        value: >
+          Implementing the `NormalizableInterface`.
+        correct: true
+      -
+        value: >
+          Defining a `__serialize()` method in the entity.
+        correct: false
+      -
+        value: >
+          Adding a `serializer_message` option in `config/serializer.yaml`.
+        correct: false
+    help: |
+      The Serializer component allows for custom normalization and denormalization logic by implementing `NormalizableInterface` or using custom normalizers.
+      https://symfony.com/doc/current/components/serializer.html#custom-normalizers
+
+  -
+    question: >
+      Which of the following is a common debugging technique for a Symfony application when an unexpected redirect occurs?
+    answers:
+      -
+        value: >
+          Checking the "Request" and "Response" panels in the Web Profiler.
+        correct: true
+      -
+        value: >
+          Inspecting the database for redirect entries.
+        correct: false
+      -
+        value: >
+          Disabling all routes in `config/routes.yaml`.
+        correct: false
+      -
+        value: >
+          Clearing the browser cache only.
+        correct: false
+    help: |
+      The "Request" and "Response" panels in the Web Profiler provide detailed information about HTTP headers, including redirect locations and status codes.
+      https://symfony.com/doc/current/profiler/panels.html#request-and-response-panels
+
+  -
+    question: >
+      What is the purpose of the `Lock` component's `release()` method?
+    answers:
+      -
+        value: >
+          To acquire a new lock.
+        correct: false
+      -
+        value: >
+          To explicitly release a previously acquired lock.
+        correct: true
+      -
+        value: >
+          To check if a lock is available.
+        correct: false
+      -
+        value: >
+          To renew the lease on a lock.
+        correct: false
+    help: |
+      The `release()` method frees a lock, making it available for other processes to acquire.
+      https://symfony.com/doc/current/components/lock.html#releasing-a-lock
+
+  -
+    question: >
+      Which of the following is a common practice for managing environment-specific configurations in Symfony?
+    answers:
+      -
+        value: >
+          Using separate `config/packages/*.yaml` files for each environment (e.g., `dev/`, `prod/`).
+        correct: true
+      -
+        value: >
+          Hardcoding environment checks directly in PHP code.
+        correct: false
+      -
+        value: >
+          Storing all configurations in a single `config.yaml` file.
+        correct: false
+      -
+        value: >
+          Relying solely on `.env` files for all configuration.
+        correct: false
+    help: |
+      Symfony's configuration system allows for environment-specific configuration files, typically organized in subdirectories like `config/packages/dev/` and `config/packages/prod/`.
+      https://symfony.com/doc/current/configuration.html#environment-specific-configuration
+
+  -
+    question: >
+      Which of the following is a valid use case for the Symfony `Finder` component?
+    answers:
+      -
+        value: >
+          Finding all PHP files in a directory that contain a specific string.
+        correct: true
+      -
+        value: >
+          Performing a full-text search across a database.
+        correct: false
+      -
+        value: >
+          Downloading files from a remote server.
+        correct: false
+      -
+        value: >
+          Generating unique file names.
+        correct: false
+    help: |
+      The `Finder` component can filter files by content, name, size, and other criteria, making it powerful for tasks like finding specific code snippets.
+      https://symfony.com/doc/current/components/finder.html#filtering-by-content
+
+  -
+    question: >
+      What is the purpose of the `Web Debug Toolbar`'s "Profiler Token" link?
+    answers:
+      -
+        value: >
+          To generate a new security token for the current user.
+        correct: false
+      -
+        value: >
+          To open the full Web Profiler page for the current request, identified by its token.
+        correct: true
+      -
+        value: >
+          To clear the current session.
+        correct: false
+      -
+        value: >
+          To download the raw profile data as a JSON file.
+        correct: false
+    help: |
+      Each request profiled by Symfony has a unique token. Clicking this link in the toolbar navigates to the full profiler page for that specific request.
+      https://symfony.com/doc/current/profiler.html#web-debug-toolbar
+
+  -
+    question: >
+      Which of the following is a key benefit of using the `Clock` component in a Symfony application?
+    answers:
+      -
+        value: >
+          It provides a built-in calendar and scheduling system.
+        correct: false
+      -
+        value: >
+          It simplifies testing of time-dependent logic by allowing time to be mocked or frozen.
+        correct: true
+      -
+        value: >
+          It automatically handles time synchronization with external services.
+        correct: false
+      -
+        value: >
+          It replaces the need for database timestamps.
+        correct: false
+    help: |
+      The Clock component is designed to make time-dependent code testable by providing a controllable source of "current time."
+      https://symfony.com/doc/current/components/clock.html
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Process` component?
+    answers:
+      -
+        value: >
+          Executing a long-running background task (e.g., image processing).
+        correct: true
+      -
+        value: >
+          Handling HTTP requests from clients.
+        correct: false
+      -
+        value: >
+          Managing database connections.
+        correct: false
+      -
+        value: >
+          Rendering Twig templates.
+        correct: false
+    help: |
+      The Process component is ideal for executing external commands or scripts, especially for tasks that might take a long time and should run in the background.
+      https://symfony.com/doc/current/components/process.html
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `copy()` method?
+    answers:
+      -
+        value: >
+          To move a file from one location to another.
+        correct: false
+      -
+        value: >
+          To duplicate a file to a new location.
+        correct: true
+      -
+        value: >
+          To create a symbolic link to a file.
+        correct: false
+      -
+        value: >
+          To read the contents of a file.
+        correct: false
+    help: |
+      The `copy()` method copies a file from a source path to a destination path.
+      https://symfony.com/doc/current/components/filesystem.html#copy
+
+  -
+    question: >
+      Which of the following is a best practice for logging errors in a production Symfony application?
+    answers:
+      -
+        value: >
+          Logging only critical errors to the console.
+        correct: false
+      -
+        value: >
+          Configuring Monolog to send errors to a centralized logging service or file.
+        correct: true
+      -
+        value: >
+          Disabling all logging to improve performance.
+        correct: false
+      -
+        value: >
+          Using `echo` statements for debugging.
+        correct: false
+    help: |
+      Monolog is Symfony's default logging solution, and it should be configured to capture errors and send them to appropriate destinations for monitoring and analysis in production.
+      https://symfony.com/doc/current/logging.html
+
+  -
+    question: >
+      Which of the following is a common strategy for handling translations in a Symfony application?
+    answers:
+      -
+        value: >
+          Storing all translations directly in PHP arrays.
+        correct: false
+      -
+        value: >
+          Using translation files in formats like XLIFF, YAML, or PHP.
+        correct: true
+      -
+        value: >
+          Hardcoding translated strings directly in Twig templates.
+        correct: false
+      -
+        value: >
+          Relying on Google Translate API for all translations.
+        correct: false
+    help: |
+      Symfony supports various translation file formats, allowing developers to organize and manage translations efficiently.
+      https://symfony.com/doc/current/translation.html#translation-resources
+
+  -
+    question: >
+      What is the primary purpose of the `Finder` component's `in()` method?
+    answers:
+      -
+        value: >
+          To specify the directory (or directories) where the search should begin.
+        correct: true
+      -
+        value:
+          To filter files based on their content.
+        correct: false
+      -
+        value: >
+          To include hidden files in the search results.
+        correct: false
+      -
+        value: >
+          To define the maximum depth for directory traversal.
+        correct: false
+    help: |
+      The `in()` method defines the directories that the `Finder` component will search.
+      https://symfony.com/doc/current/components/finder.html#basic-usage
+
+  -
+    question: >
+      Which of the following is a valid way to define a custom cache pool in Symfony?
+    answers:
+      -
+        value: >
+          By creating a new service and tagging it with `cache.pool`.
+        correct: true
+      -
+        value: >
+          By modifying the `var/cache/` directory permissions.
+        correct: false
+      -
+        value: >
+          By directly instantiating a cache adapter in a controller.
+        correct: false
+      -
+        value: >
+          By adding a new entry to `composer.json`.
+        correct: false
+    help: |
+      Custom cache pools can be defined as services in the dependency injection container and tagged with `cache.pool` to be recognized by the framework.
+      https://symfony.com/doc/current/components/cache.html#custom-cache-pools
+
+  -
+    question: >
+      What is the primary purpose of the `Serializer` component's `normalize()` method?
+    answers:
+      -
+        value: >
+          To convert a data format (e.g., JSON) into a PHP object.
+        correct: false
+      -
+        value: >
+          To convert a PHP object into an array or scalar value, preparing it for serialization into a specific format.
+        correct: true
+      -
+        value: >
+          To validate the structure of a serialized string.
+        correct: false
+      -
+        value: >
+          To encrypt serialized data.
+        correct: false
+    help: |
+      Normalization is the process of converting a complex data structure (like a PHP object) into a simpler, standardized format (like an array) that can then be encoded into various formats.
+      https://symfony.com/doc/current/components/serializer.html#normalization-and-denormalization
+
+  -
+    question: >
+      Which of the following is a common deployment best practice for Symfony applications to ensure database schema is up-to-date?
+    answers:
+      -
+        value: >
+          Manually executing SQL queries on the production database.
+        correct: false
+      -
+        value: >
+          Running Doctrine migrations (e.g., `php bin/console doctrine:migrations:migrate`).
+        correct: true
+      -
+        value: >
+          Deleting and recreating the database on every deployment.
+        correct: false
+      -
+        value: >
+          Ignoring database schema changes in production.
+        correct: false
+    help: |
+      Doctrine Migrations provide a robust way to manage database schema changes in a version-controlled and reproducible manner.
+      https://symfony.com/doc/current/doctrine/migrations.html
+
+  -
+    question: >
+      What is the primary purpose of the `Lock` component's `isAcquired()` method?
+    answers:
+      -
+        value: >
+          To attempt to acquire a lock.
+        correct: false
+      -
+        value: >
+          To check if the current process holds the lock.
+        correct: true
+      -
+        value: >
+          To release a lock.
+        correct: false
+      -
+        value: >
+          To determine if a lock is available for acquisition.
+        correct: false
+    help: |
+      The `isAcquired()` method returns `true` if the current `Lock` instance has successfully acquired the lock, and `false` otherwise.
+      https://symfony.com/doc/current/components/lock.html#checking-if-a-lock-is-acquired
+
+  -
+    question: >
+      Which of the following is a common use case for the `Web Debug Toolbar`?
+    answers:
+      -
+        value: >
+          Editing Twig templates directly in the browser.
+        correct: false
+      -
+        value: >
+          Quickly viewing logs, request parameters, and performance metrics for the current page.
+        correct: true
+      -
+        value: >
+          Deploying the application to production.
+        correct: false
+      -
+        value: >
+          Managing user roles and permissions.
+        correct: false
+    help: |
+      The Web Debug Toolbar provides a convenient, at-a-glance overview of various debugging information for the current request.
+      https://symfony.com/doc/current/profiler.html#web-debug-toolbar
+
+  -
+    question: >
+      What is the purpose of the `Intl` component's `NumberFormatter` class?
+    answers:
+      -
+        value: >
+          To format dates and times according to locale.
+        correct: false
+      -
+        value: >
+          To format numbers, currencies, and percentages according to locale-specific rules.
+        correct: true
+      -
+        value: >
+          To validate numerical input.
+        correct: false
+      -
+        value: >
+          To perform mathematical calculations.
+        correct: false
+    help: |
+      The `NumberFormatter` class provides methods for formatting and parsing numbers, currencies, and percentages based on a given locale.
+      https://symfony.com/doc/current/components/intl.html#numberformatter
+
+  -
+    question: >
+      Which of the following is a common strategy for handling errors in a Symfony console command?
+    answers:
+      -
+        value: >
+          Catching exceptions and displaying user-friendly messages to the console.
+        correct: true
+      -
+        value: >
+          Allowing all exceptions to bubble up and crash the command.
+        correct: false
+      -
+        value: >
+          Redirecting errors to a web browser.
+        correct: false
+      -
+        value: >
+          Silently ignoring all errors.
+        correct: false
+    help: |
+      In console commands, it's good practice to catch exceptions and provide informative output to the user, indicating what went wrong.
+      https://symfony.com/doc/current/console/exceptions.html
+
+  -
+    question: >
+      Which of the following is a key benefit of using the Symfony `Messenger` component for event dispatching?
+    answers:
+      -
+        value: >
+          It ensures all event listeners are executed synchronously.
+        correct: false
+      -
+        value: >
+          It allows events to be processed asynchronously, decoupling the event producer from its consumers.
+        correct: true
+      -
+        value: >
+          It automatically retries failed event dispatches indefinitely.
+        correct: false
+      -
+        value: >
+          It provides a real-time broadcast mechanism for events.
+        correct: false
+    help: |
+      Messenger can be used to dispatch events to message buses, enabling asynchronous processing of event listeners and improving application responsiveness.
+      https://symfony.com/doc/current/components/messenger.html#events
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `exists()` method?
+    answers:
+      -
+        value: >
+          To create a file if it doesn't exist.
+        correct: false
+      -
+        value: >
+          To check if a file or directory exists.
+        correct: true
+      -
+        value: >
+          To get the size of a file.
+        correct: false
+      -
+        value: >
+          To check if a file is readable.
+        correct: false
+    help: |
+      The `exists()` method returns `true` if the given path exists, and `false` otherwise.
+      https://symfony.com/doc/current/components/filesystem.html#exists
+
+  -
+    question: >
+      Which of the following describes the role of "Data Collectors" in the Symfony Web Profiler?
+    answers:
+      -
+        value: >
+          They are responsible for collecting user input from forms.
+        correct: false
+      -
+        value: >
+          They gather specific data about the application's state during a request for display in the Web Profiler.
+        correct: true
+      -
+        value: >
+          They are used for collecting analytics data for external services.
+        correct: false
+      -
+        value: >
+          They store session data for the current user.
+        correct: false
+    help: |
+      Data collectors are services that implement `DataCollectorInterface` and are responsible for gathering specific data points (e.g., database queries, mailer events, Twig data) for the Web Profiler.
+      https://symfony.com/doc/current/profiler/data_collectors.html
+
+  -
+    question: >
+      What is the purpose of the `Serializer` component's `denormalize()` method?
+    answers:
+      -
+        value: >
+          To convert a PHP object into an array or scalar value.
+        correct: false
+      -
+        value: >
+          To convert a normalized data format (e.g., an array) back into a PHP object.
+        correct: true
+      -
+        value: >
+          To validate the structure of a PHP object.
+        correct: false
+      -
+        value: >
+          To encrypt a PHP object.
+        correct: false
+    help: |
+      Denormalization is the process of converting a simpler, standardized format (like an array) back into a complex data structure (like a PHP object).
+      https://symfony.com/doc/current/components/serializer.html#normalization-and-denormalization
+
+  -
+    question: >
+      Which of the following is a common deployment best practice for Symfony applications to ensure optimal performance?
+    answers:
+      -
+        value: >
+          Disabling the OpCache.
+        correct: false
+      -
+        value: >
+          Enabling the OpCache and ensuring it's properly configured.
+        correct: true
+      -
+        value: >
+          Running PHP in development mode on production.
+        correct: false
+      -
+        value: >
+          Using `var_dump()` for all debugging in production.
+        correct: false
+    help: |
+      OpCache is a PHP extension that improves performance by storing precompiled script bytecode in shared memory, avoiding recompilation on each request. It should be enabled and configured in production.
+      https://symfony.com/doc/current/performance.html#php-opcache
+
+  -
+    question: >
+      What is the purpose of the `Lock` component's `isExpired()` method?
+    answers:
+      -
+        value: >
+          To check if a lock has been released.
+        correct: false
+      -
+        value: >
+          To determine if the acquired lock has expired.
+        correct: true
+      -
+        value: >
+          To set an expiration time for a lock.
+        correct: false
+      -
+        value: >
+          To renew an expired lock.
+        correct: false
+    help: |
+      The `isExpired()` method checks if the acquired lock's lifetime has passed.
+      https://symfony.com/doc/current/components/lock.html#lock-expiration
+
+  -
+    question: >
+      Which of the following is a common strategy for debugging performance issues in a Symfony application?
+    answers:
+      -
+        value: >
+          Adding `sleep()` calls to identify slow sections.
+        correct: false
+      -
+        value: >
+          Using the Web Profiler's "Time" panel and Blackfire.
+        correct: true
+      -
+        value: >
+          Disabling all services to isolate the problem.
+        correct: false
+      -
+        value: >
+          Randomly changing code until performance improves.
+        correct: false
+    help: |
+      The Web Profiler's "Time" panel provides a detailed timeline of execution, and Blackfire is a dedicated performance profiler for PHP applications.
+      https://symfony.com/doc/current/profiler.html#time-panel
+
+  -
+    question: >
+      What is the primary purpose of the `Intl` component's `Collator` class?
+    answers:
+      -
+        value: >
+          To format dates and times.
+        correct: false
+      -
+        value: >
+          To compare strings according to locale-specific rules, including sorting and searching.
+        correct: true
+      -
+        value: >
+          To convert character encodings.
+        correct: false
+      -
+        value: >
+          To detect the language of a given text.
+        correct: false
+    help: |
+      The `Collator` class provides methods for performing locale-sensitive string comparisons, which is essential for correct sorting and searching in different languages.
+      https://symfony.com/doc/current/components/intl.html#collator
+
+  -
+    question: >
+      Which of the following is a key feature of the Symfony `Runtime` component?
+    answers:
+      -
+        value: >
+          It provides a built-in web server for development.
+        correct: false
+      -
+        value: >
+          It allows Symfony applications to run in various PHP environments (e.g., traditional web servers, command-line, serverless functions) with a single entry point.
+        correct: true
+      -
+        value: >
+          It manages application updates and patches.
+        correct: false
+      -
+        value: >
+          It provides a graphical user interface for application management.
+        correct: false
+    help: |
+      The Runtime component abstracts the bootstrap process, making Symfony applications more adaptable to different execution environments.
+      https://symfony.com/doc/current/components/runtime.html
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Clock` component in a production application?
+    answers:
+      -
+        value: >
+          Generating random timestamps for security.
+        correct: false
+      -
+        value: >
+          Ensuring consistent time-based logic across distributed systems by providing a centralized time source.
+        correct: true
+      -
+        value: >
+          Replacing the system's internal clock.
+        correct: false
+      -
+        value: >
+          Measuring the precise execution time of individual code blocks.
+        correct: false
+    help: |
+      The Clock component can be configured to use a specific time provider (e.g., a shared NTP server or a mock clock in tests) to ensure consistent time across an application, especially in distributed environments.
+      https://symfony.com/doc/current/components/clock.html
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `touch()` method?
+    answers:
+      -
+        value: >
+          To change the permissions of a file.
+        correct: false
+      -
+        value: >
+          To create an empty file if it doesn't exist, or update its modification time if it does.
+        correct: true
+      -
+        value: >
+          To read the first few bytes of a file.
+        correct: false
+      -
+        value: >
+          To copy a file.
+        correct: false
+    help: |
+      The `touch()` method creates a file if it doesn't exist or updates its access and modification times if it does.
+      https://symfony.com/doc/current/components/filesystem.html#touch
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Serializer` component's `json_encode()` and `json_decode()` methods (when using the JsonEncoder)?
+    answers:
+      -
+        value: >
+          Encrypting and decrypting data.
+        correct: false
+      -
+        value: >
+          Converting PHP arrays to JSON strings and vice-versa.
+        correct: true
+      -
+        value: >
+          Performing database queries.
+        correct: false
+      -
+        value: >
+          Sending HTTP requests.
+        correct: false
+    help: |
+      The `JsonEncoder` within the Serializer component leverages PHP's built-in `json_encode()` and `json_decode()` functions for JSON serialization/deserialization.
+      https://symfony.com/doc/current/components/serializer.html#json-encoder
+
+  -
+    question: >
+      Which of the following is a key benefit of using the Symfony `Messenger` component for handling background tasks?
+    answers:
+      -
+        value: >
+          It ensures all tasks are executed in real-time.
+        correct: false
+      -
+        value: >
+          It provides a robust way to process tasks asynchronously, improving application responsiveness and scalability.
+        correct: true
+      -
+        value: >
+          It automatically generates reports for completed tasks.
+        correct: false
+      -
+        value: >
+          It replaces the need for cron jobs.
+        correct: false
+    help: |
+      Messenger's asynchronous nature allows web requests to return quickly while long-running tasks are processed in the background, leading to better user experience and scalability.
+      https://symfony.com/doc/current/components/messenger.html
+
+  -
+    question: >
+      What is the primary purpose of the `Lock` component's `refresh()` method?
+    answers:
+      -
+        value: >
+          To release the lock.
+        correct: false
+      -
+        value: >
+          To attempt to re-acquire an expired lock.
+        correct: false
+      -
+        value: >
+          To extend the lifetime of an already acquired lock.
+        correct: true
+      -
+        value: >
+          To check if the lock is still valid.
+        correct: false
+    help: |
+      The `refresh()` method extends the expiration time of an active lock, preventing it from expiring prematurely.
+      https://symfony.com/doc/current/components/lock.html#refreshing-a-lock
+
+  -
+    question: >
+      Which of the following is a common practice for debugging a Symfony application when encountering a "500 Internal Server Error" in production?
+    answers:
+      -
+        value: >
+          Checking the server's web server error logs (e.g., Apache error log, Nginx error log).
+        correct: true
+      -
+        value: >
+          Enabling `APP_DEBUG=true` directly on the production server.
+        correct: false
+      -
+        value: >
+          Asking users to provide screenshots of the error.
+        correct: false
+      -
+        value: >
+          Restarting the server without checking logs.
+        correct: false
+    help: |
+      Web server error logs are crucial for identifying the root cause of 500 errors in production, as they often contain the underlying PHP error messages.
+      https://symfony.com/doc/current/logging.html
+
+  -
+    question: >
+      Which of the following is a key feature of the Symfony `Intl` component?
+    answers:
+      -
+        value: >
+          It provides a built-in database for country codes.
+        correct: false
+      -
+        value: >
+          It offers locale-aware formatting for numbers, dates, and currencies.
+        correct: true
+      -
+        value: >
+          It automatically translates all application text.
+        correct: false
+      -
+        value: >
+          It integrates with external translation services.
+        correct: false
+    help: |
+      The `Intl` component leverages the ICU library to provide robust, locale-aware formatting capabilities.
+      https://symfony.com/doc/current/components/intl.html
+
+  -
+    question: >
+      What is the primary purpose of the `Runtime` component's `run()` method in a web application context?
+    answers:
+      -
+        value: >
+          To execute a console command.
+        correct: false
+      -
+        value: >
+          To handle an incoming HTTP request and return a `Response` object.
+        correct: true
+      -
+        value: >
+          To start a background process.
+        correct: false
+      -
+        value: >
+          To compile the application's services.
+        correct: false
+    help: |
+      In a web context, the `run()` method of the Runtime component is responsible for processing the HTTP request and generating the response.
+      https://symfony.com/doc/current/components/runtime.html#usage
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Clock` component when dealing with external APIs?
+    answers:
+      -
+        value: >
+          To ensure that API requests are sent with a specific timestamp for idempotency or auditing.
+        correct: true
+      -
+        value: >
+          To automatically retry failed API calls after a delay.
+        correct: false
+      -
+        value: >
+          To convert API response times to the user's local timezone.
+        correct: false
+      -
+        value: >
+          To limit the rate of API requests.
+        correct: false
+    help: |
+      The Clock component can be used to control the timestamp sent with API requests, which is useful for testing or for APIs that require specific time-based parameters.
+      https://symfony.com/doc/current/components/clock.html
+
+  -
+    question: >
+      Which of the following is a common strategy for improving the performance of a Symfony application in production related to the cache?
+    answers:
+      -
+        value: >
+          Disabling the HTTP cache.
+        correct: false
+      -
+        value: >
+          Using a fast, in-memory cache backend like Redis or Memcached.
+        correct: true
+      -
+        value: >
+          Storing all cache data in the database.
+        correct: false
+      -
+        value: >
+          Clearing the cache on every request.
+        correct: false
+    help: |
+      In-memory cache systems offer significantly faster read/write operations compared to file-based caches, improving overall application performance.
+      https://symfony.com/doc/current/components/cache.html#adapters
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `rename()` method?
+    answers:
+      -
+        value: >
+          To copy a file to a new name.
+        correct: false
+      -
+        value: >
+          To move or rename a file or directory.
+        correct: true
+      -
+        value: >
+          To change the content of a file.
+        correct: false
+      -
+        value: >
+          To create a new file with a different name.
+        correct: false
+    help: |
+      The `rename()` method moves or renames a file or directory.
+      https://symfony.com/doc/current/components/filesystem.html#rename
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Serializer` component in a web application?
+    answers:
+      -
+        value: >
+          Generating PDF reports from database entities.
+        correct: false
+      -
+        value: >
+          Serializing PHP objects into JSON for API responses.
+        correct: true
+      -
+        value: >
+          Validating user input from HTML forms.
+        correct: false
+      -
+        value: >
+          Managing user authentication sessions.
+        correct: false
+    help: |
+      The Serializer component is frequently used to convert PHP objects (e.g., Doctrine entities) into JSON or XML for API responses.
+      https://symfony.com/doc/current/components/serializer.html
+
+  -
+    question: >
+      Which of the following is a common deployment best practice for Symfony applications to ensure security?
+    answers:
+      -
+        value: >
+          Exposing the `var/` directory to the public web.
+        correct: false
+      -
+        value: >
+          Ensuring that `APP_ENV` is set to `prod` and `APP_DEBUG` is `false`.
+        correct: true
+      -
+        value: >
+          Storing sensitive credentials directly in `parameters.yaml`.
+        correct: false
+      -
+        value: >
+          Giving full write permissions to the web server user on all application directories.
+        correct: false
+    help: |
+      Setting `APP_ENV=prod` and `APP_DEBUG=false` disables debugging features and enables production-optimized settings, which are crucial for security.
+      https://symfony.com/doc/current/deployment.html#environment-variables
+
+  -
+    question: >
+      What is the primary purpose of the `Lock` component when used with a file-based store?
+    answers:
+      -
+        value: >
+          To encrypt files on the filesystem.
+        correct: false
+      -
+        value: >
+          To provide a simple mechanism for preventing concurrent execution of a process on a single server.
+        correct: true
+      -
+        value: >
+          To manage file permissions.
+        correct: false
+      -
+        value: >
+          To synchronize files across multiple servers.
+        correct: false
+    help: |
+      A file-based lock store is suitable for single-server environments to prevent race conditions for local resources.
+      https://symfony.com/doc/current/components/lock.html#stores
+
+  -
+    question: >
+      Which of the following is a common strategy for debugging issues related to the Symfony service container?
+    answers:
+      -
+        value: >
+          Manually inspecting the `vendor/symfony/dependency-injection/` directory.
+        correct: false
+      -
+        value: >
+          Using the `debug:container` console command.
+        correct: true
+      -
+        value: >
+          Deleting the `var/cache/` directory repeatedly.
+        correct: false
+      -
+        value: >
+          Modifying the `public/index.php` file.
+        correct: false
+    help: |
+      The `debug:container` command allows you to inspect all services, parameters, and aliases in the service container, which is invaluable for debugging dependency injection issues.
+      https://symfony.com/doc/current/console/commands.html#debug-container
+
+  -
+    question: >
+      What is the primary purpose of the `Intl` component's `Locale` class?
+    answers:
+      -
+        value: >
+          To define custom locales.
+        correct: false
+      -
+        value: >
+          To provide utility methods for working with locale identifiers, such as parsing and validating them.
+        correct: true
+      -
+        value: >
+          To automatically detect the user's browser locale.
+        correct: false
+      -
+        value: >
+          To store a list of all supported locales.
+        correct: false
+    help: |
+      The `Locale` class offers static methods for manipulating and querying locale identifiers.
+      https://symfony.com/doc/current/components/intl.html#locale-class
+
+  -
+    question: >
+      Which of the following is a key benefit of using the Symfony `Runtime` component?
+    answers:
+      -
+        value: >
+          It provides a built-in database abstraction layer.
+        correct: false
+      -
+        value: >
+          It simplifies the application bootstrap process, making it easier to adapt to different execution environments (e.g., web, console, serverless).
+        correct: true
+      -
+        value: >
+          It automatically generates API documentation.
+        correct: false
+      -
+        value: >
+          It manages user authentication and authorization.
+        correct: false
+    help: |
+      The Runtime component aims to make Symfony applications more portable and easier to integrate into various PHP execution contexts.
+      https://symfony.com/doc/current/components/runtime.html
+
+  -
+    question: >
+      Which of the following is a common strategy for handling errors in a Symfony application during development?
+    answers:
+      -
+        value: >
+          Displaying detailed error messages and stack traces in the browser.
+        correct: true
+      -
+        value: >
+          Silently suppressing all errors.
+        correct: false
+      -
+        value: >
+          Only logging critical errors to a file.
+        correct: false
+      -
+        value: >
+          Restarting the development server on every error.
+        correct: false
+    help: |
+      In development, detailed error messages and stack traces are crucial for quickly identifying and fixing issues.
+      https://symfony.com/doc/current/profiler.html
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `mkdir()` method?
+    answers:
+      -
+        value: >
+          To delete a directory.
+        correct: false
+      -
+        value: >
+          To create a new directory.
+        correct: true
+      -
+        value: >
+          To list the contents of a directory.
+        correct: false
+      -
+        value: >
+          To check if a directory is empty.
+        correct: false
+    help: |
+      The `mkdir()` method creates a directory, including any necessary parent directories.
+      https://symfony.com/doc/current/components/filesystem.html#mkdir
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Serializer` component's `csv` format?
+    answers:
+      -
+        value: >
+          Storing complex PHP objects in a database.
+        correct: false
+      -
+        value: >
+          Importing or exporting tabular data (e.g., from spreadsheets).
+        correct: true
+      -
+        value: >
+          Sending real-time messages between applications.
+        correct: false
+      -
+        value: >
+          Generating HTML tables.
+        correct: false
+    help: |
+      The CSV encoder/decoder in the Serializer component is useful for handling data in comma-separated values format, commonly used for data exchange.
+      https://symfony.com/doc/current/components/serializer.html#csv-encoder
+
+  -
+    question: >
+      Which of the following is a key benefit of using the Symfony `Messenger` component for handling commands?
+    answers:
+      -
+        value: >
+          It ensures commands are executed synchronously to provide immediate feedback.
+        correct: false
+      -
+        value: >
+          It allows commands to be processed asynchronously, improving application responsiveness and providing a mechanism for retries and error handling.
+        correct: true
+      -
+        value: >
+          It automatically generates new command classes.
+        correct: false
+      -
+        value: >
+          It provides a graphical interface for managing commands.
+        correct: false
+    help: |
+      Messenger enables asynchronous command processing, which is beneficial for long-running operations or when you want to decouple the command dispatch from its execution.
+      https://symfony.com/doc/current/components/messenger.html#commands
+
+  -
+    question: >
+      What is the primary purpose of the `Lock` component's `release()` method?
+    answers:
+      -
+        value: >
+          To acquire a new lock.
+        correct: false
+      -
+        value: >
+          To explicitly release a previously acquired lock, making it available for others.
+        correct: true
+      -
+        value: >
+          To check if a lock is currently held.
+        correct: false
+      -
+        value: >
+          To renew the lease on a lock.
+        correct: false
+    help: |
+      The `release()` method frees a lock, allowing other processes to acquire it.
+      https://symfony.com/doc/current/components/lock.html#releasing-a-lock
+
+  -
+    question: >
+      Which of the following is a common strategy for optimizing cache performance in a Symfony application?
+    answers:
+      -
+        value: >
+          Storing all data in the cache, regardless of its volatility.
+        correct: false
+      -
+        value: >
+          Using a cache invalidation strategy (e.g., tagging, explicit invalidation) to ensure data freshness.
+        correct: true
+      -
+        value: >
+          Disabling the cache in production to avoid stale data.
+        correct: false
+      -
+        value: >
+          Only caching data that is rarely accessed.
+        correct: false
+    help: |
+      Effective cache optimization involves careful consideration of what to cache, for how long, and how to invalidate it when the underlying data changes.
+      https://symfony.com/doc/current/components/cache.html#cache-invalidation
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Process` component when interacting with version control systems?
+    answers:
+      -
+        value: >
+          Directly manipulating Git repositories (e.g., cloning, pulling, committing).
+        correct: true
+      -
+        value: >
+          Providing a graphical interface for Git operations.
+        correct: false
+      -
+        value: >
+          Managing Git hooks.
+        correct: false
+      -
+        value: >
+          Encrypting Git credentials.
+        correct: false
+    help: |
+      The Process component can be used to execute Git commands (or other VCS commands) from within a Symfony application.
+      https://symfony.com/doc/current/components/process.html
+
+  -
+    question: >
+      What is the primary purpose of the `Web Profiler`'s "Events" panel?
+    answers:
+      -
+        value: >
+          To log user interactions on the page.
+        correct: false
+      -
+        value: >
+          To display all dispatched events during a request and their listeners.
+        correct: true
+      -
+        value: >
+          To manage JavaScript events.
+        correct: false
+      -
+        value: >
+          To schedule future events.
+        correct: false
+    help: |
+      The "Events" panel provides insights into the event dispatching process, showing which events were dispatched and which listeners responded to them.
+      https://symfony.com/doc/current/profiler/panels.html#events-panel
+
+  -
+    question: >
+      Which of the following is a common strategy for handling errors in a Symfony application, specifically for unhandled exceptions?
+    answers:
+      -
+        value: >
+          Letting PHP display its default error page.
+        correct: false
+      -
+        value: >
+          Configuring a custom exception listener to catch and handle exceptions gracefully.
+        correct: true
+      -
+        value: >
+          Disabling error reporting in `php.ini`.
+        correct: false
+      -
+        value: >
+          Wrapping every line of code in a `try-catch` block.
+        correct: false
+    help: |
+      Symfony's event dispatcher allows you to register exception listeners that can catch and handle unhandled exceptions, providing a centralized error handling mechanism.
+      https://symfony.com/doc/current/event_dispatcher/exception_listener.html
+
+  -
+    question: >
+      Which of the following is a key benefit of using the Symfony `Clock` component for testing?
+    answers:
+      -
+        value: >
+          It allows tests to run faster by skipping time-consuming operations.
+        correct: false
+      -
+        value: >
+          It enables deterministic testing of time-sensitive logic by providing a controllable "current time."
+        correct: true
+      -
+        value: >
+          It provides a visual representation of time flow in tests.
+        correct: false
+      -
+        value: >
+          It automatically generates test data based on time.
+        correct: false
+    help: |
+      The ability to mock or freeze time with the Clock component is crucial for writing reliable and repeatable tests for code that depends on the current date or time.
+      https://symfony.com/doc/current/components/clock.html#testing-time
+
+  -
+    question: >
+      What is the primary purpose of the `Filesystem` component's `remove()` method?
+    answers:
+      -
+        value: >
+          To move files or directories.
+        correct: false
+      -
+        value: >
+          To delete files or directories recursively.
+        correct: true
+      -
+        value: >
+          To rename files.
+        correct: false
+      -
+        value: >
+          To create empty files.
+        correct: false
+    help: |
+      The `remove()` method deletes files or directories, including their contents if it's a directory.
+      https://symfony.com/doc/current/components/filesystem.html#remove
+
+  -
+    question: >
+      Which of the following is a common use case for the Symfony `Serializer` component when working with forms?
+    answers:
+      -
+        value: >
+          Automatically generating form fields from an object.
+        correct: false
+      -
+        value: >
+          Converting submitted form data into a PHP object (denormalization).
+        correct: true
+      -
+        value: >
+          Displaying form validation errors.
+        correct: false
+      -
+        value: >
+          Handling file uploads from forms.
+        correct: false
+    help: |
+      The Serializer component can be used to denormalize raw request data (e.g., JSON from an API request) into a PHP object that can then be bound to a form.
+      https://symfony.com/doc/current/components/serializer.html#serializer-in-forms
