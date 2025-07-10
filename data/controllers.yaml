@@ -3,172 +3,428 @@ category: Controllers
 questions:
   -
     question: >
-      Which of the following is the recommended naming convention for a controller class in Symfony 7?
+      Which of the following is the recommended naming convention for a Symfony controller class?
     answers:
       - { value: '`ProductController`', correct: true }
-      - { value: '`Product_Controller`', correct: false }
-      - { value: '`productController`', correct: false }
       - { value: '`ProductCtrl`', correct: false }
+      - { value: '`Product`', correct: false }
+      - { value: '`ControllerProduct`', correct: false }
     help: |
-      Symfony recommends using a `Controller` suffix for controller classes, following PSR-4 autoloading standards.
+      Symfony recommends suffixing controller classes with `Controller` for clarity and consistency.
       https://symfony.com/doc/current/controller.html#controller-naming-conventions
+
+  -
+    question: |
+      Consider the following Symfony controller method. What is the standard naming convention for this action?
+
+      ```php
+      class ProductController
+      {
+          #[Route('/products')]
+          public function list(): Response
+          {
+              // ...
+          }
+      }
+      ```
+    answers:
+      - { value: 'The method name `list` is standard, as the `#[Route]` attribute defines the action.', correct: true }
+      - { value: 'The method should be named `listAction` for consistency.', correct: false }
+      - { value: 'The method should be named `index` if it''s the primary action for the route.', correct: false }
+      - { value: 'The method name doesn''t matter, only the `#[Route]` attribute.', correct: false }
+    help: |
+      With PHP attributes for routing, the `Action` suffix is no longer strictly required. Any descriptive method name is acceptable as long as it's mapped by a route.
+      https://symfony.com/doc/current/controller.html#controller-naming-conventions
+
+  -
+    question: >
+      What is an "invokable controller" in Symfony?
+    answers:
+      - { value: 'A controller class that implements the `__invoke()` magic method to handle requests directly.', correct: true }
+      - { value: 'A controller method that is automatically called without a route definition.', correct: false }
+      - { value: 'A controller that can be called from the command line.', correct: false }
+      - { value: 'A controller that only returns JSON responses.', correct: false }
+    help: |
+      An invokable controller is a class that defines a `__invoke()` method, allowing the class itself to be used as the controller callable in a route definition.
+      https://symfony.com/doc/current/controller/service.html#invokable-controllers
+
+  -
+    question: |
+      Which of the following `#[Route]` definitions correctly maps an invokable controller?
+    answers:
+      - { value: '`#[Route('/hello/{name}', name: 'hello')] class HelloController { public function __invoke(string $name = 'World'): Response {} }`', correct: true }
+      - { value: '`#[Route('/hello/{name}', name: 'hello', controller: 'App\\Controller\\HelloController::index')] class HelloController { public function __invoke(string $name = 'World'): Response {} }`', correct: false }
+      - { value: '`#[Route('/hello/{name}', name: 'hello')] class HelloController extends AbstractController { public function index(): Response {} }`', correct: false }
+      - { value: '`#[Route('/hello/{name}', name: 'hello', method: '__invoke')] class HelloController { public function __invoke(string $name = 'World'): Response {} }`', correct: false }
+    help: |
+      For invokable controllers, you define the route directly on the class, and Symfony automatically calls the `__invoke()` method.
+      https://symfony.com/doc/current/controller/service.html#invokable-controllers
 
   -
     question: >
       What is the primary benefit of extending `Symfony\Bundle\FrameworkBundle\Controller\AbstractController` for your controllers?
     answers:
       - { value: 'It automatically makes the controller a service.', correct: false }
-      - { value: 'It provides convenient helper methods for common tasks like rendering templates, generating URLs, and managing sessions.', correct: true }
-      - { value: 'It enforces specific routing configurations.', correct: false }
-      - { value: 'It enables automatic dependency injection for all services.', correct: false }
-      - { value: 'It allows direct access to the global `$_GET` and `$_POST` arrays.', correct: false }
+      - { value: 'It provides convenient helper methods for common controller tasks like rendering templates, redirects, and service access.', correct: true }
+      - { value: 'It forces strict type-hinting for all controller arguments.', correct: false }
+      - { value: 'It enables automatic caching for all controller responses.', correct: false }
     help: |
       `AbstractController` provides shortcuts to commonly used services and methods, simplifying controller code.
       https://symfony.com/doc/current/controller.html#the-base-abstractcontroller-class
 
   -
     question: |
-      Given the following controller action, how would you correctly retrieve the `page` query parameter from the URL, defaulting to `1` if not present?
+      You need to render a Twig template from a controller. Which `AbstractController` helper method should you use?
+    answers:
+      - { value: '`$this->render(''template.html.twig'', [''data'' => $value]);`', correct: true }
+      - { value: '`$this->renderView(''template.html.twig'', [''data'' => $value]);`', correct: false }
+      - { value: '`$this->display(''template.html.twig'', [''data'' => $value]);`', correct: false }
+      - { value: '`$this->twig->render(''template.html.twig'', [''data'' => $value]);`', correct: false }
+    help: |
+      The `render()` method is a shortcut provided by `AbstractController` to render a Twig template and return a `Response` object.
+      https://symfony.com/doc/current/controller.html#rendering-templates
+
+  -
+    question: >
+      Which of the following helper methods is available in `AbstractController` for generating a URL for a given route name?
+    answers:
+      - { value: '`$this->generateUrl(''app_homepage'');`', correct: true }
+      - { value: '`$this->getUrl(''app_homepage'');`', correct: false }
+      - { value: '`$this->route(''app_homepage'');`', correct: false }
+      - { value: '`$this->path(''app_homepage'');`', correct: false }
+    help: |
+      The `generateUrl()` method is a shortcut for the router service's `generate()` method, used to create URLs from route names.
+      https://symfony.com/doc/current/routing.html#generating-urls-in-controllers
+
+  -
+    question: >
+      When should you consider NOT extending `AbstractController` for your Symfony controllers?
+    answers:
+      - { value: 'When you need to build a very lightweight API controller that only returns JSON.', correct: true }
+      - { value: 'When you want to use autowiring for all your controller dependencies.', correct: false }
+      - { value: 'When you are creating a simple web page that renders a Twig template.', correct: false }
+      - { value: 'When you need to access the session or flash messages.', correct: false }
+    help: |
+      You don't *have* to extend `AbstractController`. If you only need specific services, you can inject them directly into your controller's constructor or action methods, leading to leaner controllers.
+      https://symfony.com/doc/current/controller/service.html#controllers-as-services
+
+  -
+    question: |
+      How can you access query parameters (e.g., `?page=2`) from the `Request` object in a Symfony controller?
 
       ```php
-      // src/Controller/BlogController.php
-      namespace App\Controller;
-
-      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
       use Symfony\Component\HttpFoundation\Request;
       use Symfony\Component\HttpFoundation\Response;
-      use Symfony\Component\Routing\Attribute\Route;
 
-      class BlogController extends AbstractController
+      class MyController
       {
-          #[Route('/blog', name: 'app_blog')]
           public function index(Request $request): Response
           {
-              // ???
-              return new Response('...');
+              // ... access 'page' parameter here
           }
       }
       ```
     answers:
-      - { value: '`$page = $request->query->get(''page'', 1);`', correct: true }
-      - { value: '`$page = $request->attributes->get(''page'', 1);`', correct: false }
-      - { value: '`$page = $request->request->get(''page'', 1);`', correct: false }
-      - { value: '`$page = $request->get(''page'', 1);`', correct: false }
+      - { value: '`$request->query->get(''page'');`', correct: true }
+      - { value: '`$request->request->get(''page'');`', correct: false }
+      - { value: '`$request->attributes->get(''page'');`', correct: false }
+      - { value: '`$request->get(''page'');`', correct: false }
     help: |
-      Query parameters are accessed via the `query` property of the `Request` object. The `get()` method allows specifying a default value.
-      https://symfony.com/doc/current/controller.html#accessing-the-request
+      Query parameters are accessed via the `query` property of the `Request` object, which is an instance of `ParameterBag`.
+      https://symfony.com/doc/current/controller/request_data.html#query-parameters
+
+  -
+    question: |
+      You are handling a POST request with form data. How do you access the submitted `name` field from the `Request` object?
+
+      ```php
+      use Symfony\Component\HttpFoundation\Request;
+      use Symfony\Component\HttpFoundation\Response;
+
+      class MyController
+      {
+          public function submitForm(Request $request): Response
+          {
+              // ... access 'name' field here
+          }
+      }
+      ```
+    answers:
+      - { value: '`$request->request->get(''name'');`', correct: true }
+      - { value: '`$request->query->get(''name'');`', correct: false }
+      - { value: '`$request->get(''name'');`', correct: false }
+      - { value: '`$request->attributes->get(''name'');`', correct: false }
+    help: |
+      POST request body parameters are accessed via the `request` property of the `Request` object.
+      https://symfony.com/doc/current/controller/request_data.html#request-body
 
   -
     question: >
-      Which Symfony component class is primarily responsible for representing an HTTP response that a controller must return?
+      Which of the following is the correct way to create a basic HTTP `Response` object with a 200 OK status in a Symfony controller?
     answers:
-      - { value: '`Symfony\Component\HttpFoundation\Request`', correct: false }
-      - { value: '`Symfony\Component\HttpFoundation\Response`', correct: true }
-      - { value: '`Symfony\Component\HttpKernel\Kernel`', correct: false }
-      - { value: '`Symfony\Component\Routing\Route`', correct: false }
+      - { value: '`new Response(''Hello World!'');`', correct: true }
+      - { value: '`new Response(''Hello World!'', 200);`', correct: true }
+      - { value: '`Response::create(''Hello World!'');`', correct: false }
+      - { value: '`new HttpResponse(''Hello World!'');`', correct: false }
     help: |
-      Every controller in Symfony must return an instance of `Symfony\Component\HttpFoundation\Response` or one of its subclasses.
-      https://symfony.com/doc/current/controller.html#the-response
+      The `Response` class constructor takes the content and optionally the status code and headers. The default status code is 200.
+      https://symfony.com/doc/current/controller.html#creating-a-response
 
   -
     question: |
-      You want to store a user's preference in the session. Which of the following is the correct way to access the session in a controller extending `AbstractController`?
+      You want to return a JSON response from your controller. Which class should you use?
     answers:
-      - { value: '`$this->get(''session'')`', correct: false }
-      - { value: '`$this->session`', correct: false }
-      - { value: '`$request->getSession()`', correct: true }
-      - { value: '`$this->container->get(''session'')`', correct: false }
+      - { value: '`Symfony\Component\HttpFoundation\JsonResponse`', correct: true }
+      - { value: '`Symfony\Component\HttpFoundation\Response` with `header(''Content-Type: application/json'')`', correct: false }
+      - { value: '`Symfony\Component\HttpFoundation\Json`', correct: false }
+      - { value: '`Symfony\Component\HttpFoundation\ApiResponse`', correct: false }
     help: |
-      The session can be accessed via the `getSession()` method of the `Request` object.
-      https://symfony.com/doc/current/controller/sessions.html#accessing-the-session
+      `JsonResponse` is a specialized `Response` subclass that automatically sets the `Content-Type` header to `application/json` and encodes the data to JSON.
+      https://symfony.com/doc/current/controller/json_response.html
+
+  -
+    question: >
+      What is the purpose of the `send()` method on a `Response` object in Symfony?
+    answers:
+      - { value: 'It sends the HTTP headers and content to the client.', correct: true }
+      - { value: 'It saves the response to the session.', correct: false }
+      - { value: 'It prepares the response for caching.', correct: false }
+      - { value: 'It converts the response to a string.', correct: false }
+    help: |
+      The `send()` method of the `Response` object is responsible for sending the HTTP headers and the response content back to the client. In a full Symfony application, this is typically handled by the `Kernel`.
+      https://symfony.com/doc/current/components/http_foundation.html#response-send
 
   -
     question: |
-      How do you add a "success" flash message named 'notice' with the content "Item saved!" in a Symfony controller?
+      How can you set a cookie from a Symfony controller?
     answers:
-      - { value: '`$this->addFlash(''notice'', ''Item saved!'');`', correct: true }
-      - { value: '`$this->get(''session'')
-          ->getFlashBag()
-          ->add(''notice'', ''Item saved!'');`', correct: false }
-      - { value: '`$this->flash->add(''notice'', ''Item saved!'');`', correct: false }
-      - { value: '`$this->getFlashBag()->add(''notice'', ''Item saved!'');`', correct: false }
+      - { value: 'By adding a `Cookie` object to the `Response` object''s headers.', correct: true }
+      - { value: 'Using `$request->cookies->set(''name'', ''value'');`', correct: false }
+      - { value: 'Calling `$this->setCookie(''name'', ''value'');` from `AbstractController`.', correct: false }
+      - { value: 'Cookies cannot be set directly from a controller; they must be set in a listener.', correct: false }
     help: |
-      The `addFlash()` method is a convenient shortcut provided by `AbstractController` to add flash messages.
-      https://symfony.com/doc/current/controller/sessions.html#flash-messages
+      Cookies are managed via the `Response` object's `headers` property using the `setCookie()` method, which accepts a `Cookie` object.
+      https://symfony.com/doc/current/components/http_foundation/cookies.html#setting-cookies
 
   -
     question: |
-      Which method should you use in `AbstractController` to redirect the user to a named route called `app_homepage`?
+      Which of the following is the correct way to retrieve a cookie named `my_cookie` from the `Request` object?
     answers:
-      - { value: '`$this->redirect($this->generateUrl(''app_homepage''));`', correct: false }
+      - { value: '`$request->cookies->get(''my_cookie'');`', correct: true }
+      - { value: '`$request->getCookie(''my_cookie'');`', correct: false }
+      - { value: '`$request->headers->get(''Cookie'')` and parse it.', correct: false }
+      - { value: '`$request->query->get(''my_cookie'');`', correct: false }
+    help: |
+      Cookies sent by the client are available via the `cookies` property of the `Request` object.
+      https://symfony.com/doc/current/components/http_foundation/cookies.html#reading-cookies
+
+  -
+    question: >
+      What is the primary purpose of the `Session` component in Symfony?
+    answers:
+      - { value: 'To store temporary, user-specific data across multiple requests.', correct: true }
+      - { value: 'To manage database connections for the user.', correct: false }
+      - { value: 'To handle user authentication and authorization.', correct: false }
+      - { value: 'To cache frequently accessed data on the server.', correct: false }
+    help: |
+      The `Session` component provides a way to store data that persists between user requests.
+      https://symfony.com/doc/current/components/http_foundation/sessions.html
+
+  -
+    question: |
+      How do you access the `Session` object in a Symfony controller that extends `AbstractController`?
+    answers:
+      - { value: '`$this->get(''session'');`', correct: false }
+      - { value: '`$request->getSession();`', correct: true }
+      - { value: '`$this->session;`', correct: false }
+      - { value: '`$this->container->get(''session'');`', correct: false }
+    help: |
+      The `Session` object is accessible via the `Request` object using `$request->getSession()`. If extending `AbstractController`, you can also inject `SessionInterface` directly.
+      https://symfony.com/doc/current/components/http_foundation/sessions.html#accessing-the-session
+
+  -
+    question: |
+      You want to store a user's preference for their theme in the session. Which of the following is the correct way to do this?
+    answers:
+      - { value: '`$session->set(''theme'', ''dark'');`', correct: true }
+      - { value: '`$session->add(''theme'', ''dark'');`', correct: false }
+      - { value: '`$session->put(''theme'', ''dark'');`', correct: false }
+      - { value: '`$session->store(''theme'', ''dark'');`', correct: false }
+    help: |
+      The `set()` method of the `Session` object is used to store data.
+      https://symfony.com/doc/current/components/http_foundation/sessions.html#storing-retrieving-data
+
+  -
+    question: >
+      What are "flash messages" in Symfony?
+    answers:
+      - { value: 'Temporary session messages that are displayed to the user on the next request and then automatically removed.', correct: true }
+      - { value: 'Messages that appear and disappear quickly on the page without a page reload.', correct: false }
+      - { value: 'Error messages that are logged to the console.', correct: false }
+      - { value: 'Notifications sent to the user''s email address.', correct: false }
+    help: |
+      Flash messages are a special type of session attribute that are only available for the "next" request. They are commonly used for success/error messages after a form submission and are automatically cleared after being read.
+      https://symfony.com/doc/current/controller/flash_messages.html
+
+  -
+    question: |
+      How do you add a flash message named `success` with the content `Item saved!` in a Symfony controller extending `AbstractController`?
+    answers:
+      - { value: '`$this->addFlash(''success'', ''Item saved!'');`', correct: true }
+      - { value: '`$this->get(''session'')->getFlashBag()->add(''success'', ''Item saved!'');`', correct: true }
+      - { value: '`$this->flash(''success'', ''Item saved!'');`', correct: false }
+      - { value: '`$session->setFlash(''success'', ''Item saved!'');`', correct: false }
+    help: |
+      The `addFlash()` method is a convenient shortcut in `AbstractController` for adding flash messages to the session's flash bag.
+      https://symfony.com/doc/current/controller/flash_messages.html#adding-flash-messages
+
+  -
+    question: |
+      You want to redirect the user to the homepage after a successful form submission. The homepage has a route named `app_homepage`. Which `AbstractController` method should you use?
+    answers:
       - { value: '`$this->redirectToRoute(''app_homepage'');`', correct: true }
-      - { value: '`$this->forward(''app_homepage'');`', correct: false }
-      - { value: '`new RedirectResponse($this->generateUrl(''app_homepage''));`', correct: false }
+      - { value: '`$this->redirect($this->generateUrl(''app_homepage''));`', correct: true }
+      - { value: '`$this->redirect(''/'');`', correct: false }
+      - { value: '`$this->forward(''App\\Controller\\DefaultController::index'');`', correct: false }
     help: |
-      The `redirectToRoute()` method is a helper that generates a URL for a given route and returns a `RedirectResponse`.
+      `redirectToRoute()` is the preferred method for redirecting to a named route. `redirect()` can be used with a generated URL.
       https://symfony.com/doc/current/controller.html#redirecting
 
   -
-    question: |
-      When would you typically use the `forward()` method in a Symfony controller?
+    question: >
+      What is the default HTTP status code used by `redirectToRoute()` and `redirect()` methods in Symfony?
     answers:
-      - { value: 'To redirect the user''s browser to a different URL.', correct: false }
-      - { value: 'To make an internal sub-request to another controller action and embed its response.', correct: true }
-      - { value: 'To send an email to a user after a successful action.', correct: false }
-      - { value: 'To include a Twig template directly without a controller.', correct: false }
+      - { value: '`302 Found`', correct: true }
+      - { value: '`301 Moved Permanently`', correct: false }
+      - { value: '`303 See Other`', correct: false }
+      - { value: '`200 OK`', correct: false }
     help: |
-      The `forward()` method is used for internal redirects (sub-requests) within the application, allowing one controller to call another.
+      The default status code for redirects is 302, indicating a temporary redirect.
+      https://symfony.com/doc/current/controller.html#redirecting
+
+  -
+    question: >
+      When would you use `redirect()` instead of `redirectToRoute()` in a Symfony controller?
+    answers:
+      - { value: 'When you need to redirect to an external URL or a URL that is not managed by Symfony''s routing system.', correct: true }
+      - { value: 'When you want to perform a permanent redirect (301).', correct: false }
+      - { value: 'When you are redirecting to a route with complex parameters.', correct: false }
+      - { value: 'When you want to pass flash messages along with the redirect.', correct: false }
+    help: |
+      `redirect()` is used for arbitrary URLs, while `redirectToRoute()` is specifically for named routes within your application.
+      https://symfony.com/doc/current/controller.html#redirecting
+
+  -
+    question: >
+      What is the purpose of the `forward()` method in a Symfony controller?
+    answers:
+      - { value: 'To make an internal sub-request to another controller action within the same application.', correct: true }
+      - { value: 'To redirect the user''s browser to a different URL.', correct: false }
+      - { value: 'To send an HTTP request to an external API.', correct: false }
+      - { value: 'To include a Twig template directly without executing a controller.', correct: false }
+    help: |
+      `forward()` creates a sub-request that is handled internally by the HttpKernel, allowing you to reuse controller logic without a browser redirect.
       https://symfony.com/doc/current/controller/forwarding.html
 
   -
     question: |
-      How can you generate a 404 Not Found page in a Symfony controller?
-    answers:
-      - { value: 'Return `new Response('''', 404);`', correct: false }
-      - { value: 'Throw `new \Exception(''Page not found'', 404);`', correct: false }
-      - { value: 'Throw `$this->createNotFoundException(''The page does not exist'');`', correct: true }
-      - { value: 'Call `$this->render404();`', correct: false }
-    help: |
-      The `createNotFoundException()` method, provided by `AbstractController`, is the standard way to trigger a 404 response.
-      https://symfony.com/doc/current/controller.html#generating-404-pages
-
-  -
-    question: |
-      Consider the following controller action:
+      Consider the following code snippet. What will be the final `Response` object returned by the `index` method?
 
       ```php
-      // src/Controller/ProductController.php
+      // src/Controller/MyController.php
       namespace App\Controller;
 
+      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
       use Symfony\Component\HttpFoundation\Response;
       use Symfony\Component\Routing\Attribute\Route;
 
-      class ProductController
+      class MyController extends AbstractController
       {
-          #[Route('/product/{id}')]
-          public function show(int $id): Response
+          #[Route('/test')]
+          public function index(): Response
           {
-              // ...
+              return $this->forward('App\\Controller\\OtherController::fancy', ['message' => 'Hello']);
+          }
+      }
+
+      // src/Controller/OtherController.php
+      namespace App\Controller;
+
+      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+      use Symfony\Component\HttpFoundation\Response;
+      use Symfony\Component\Routing\Attribute\Route;
+
+      class OtherController extends AbstractController
+      {
+          public function fancy(string $message): Response
+          {
+              return new Response('Fancy message: ' . $message);
           }
       }
       ```
-
-      How does Symfony automatically inject the `id` value into the `$id` argument?
     answers:
-      - { value: 'By checking the `$_GET` superglobal for a key named `id`.', correct: false }
-      - { value: 'The `ArgumentResolver` matches the route parameter name (`id`) with the argument name (`$id`) and its type hint.', correct: true }
-      - { value: 'It requires a specific service definition for the `id` parameter.', correct: false }
-      - { value: 'It's a feature of PHP 8.2, not Symfony.', correct: false }
+      - { value: 'A `Response` object with content `Fancy message: Hello`.', correct: true }
+      - { value: 'A `RedirectResponse` to `/fancy`.', correct: false }
+      - { value: 'An error will occur because `fancy` is not a route.', correct: false }
+      - { value: 'An empty `Response` object.', correct: false }
     help: |
-      Symfony's `ArgumentResolver` automatically resolves controller arguments by matching route parameters, query parameters, request body data, or services based on argument names and type hints.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html
+      The `forward()` method returns the `Response` object generated by the forwarded controller action.
+      https://symfony.com/doc/current/controller/forwarding.html
+
+  -
+    question: >
+      What is the key difference between an HTTP redirect and an internal forward in Symfony?
+    answers:
+      - { value: 'A redirect sends an HTTP status code (e.g., 302) to the client, telling the browser to make a new request, while a forward is an internal server-side sub-request without a browser redirect.', correct: true }
+      - { value: 'A redirect is faster than a forward because it avoids server-side processing.', correct: false }
+      - { value: 'A forward can pass more data to the target than a redirect.', correct: false }
+      - { value: 'A redirect can only be used for external URLs, while a forward is for internal URLs.', correct: false }
+    help: |
+      The crucial distinction is that a redirect involves the client, while a forward is entirely server-side.
+      https://symfony.com/doc/current/controller/forwarding.html#forwarding-vs-redirecting
 
   -
     question: |
-      You need to handle a file upload in your controller. Which attribute can automatically map an uploaded file from the request to an `UploadedFile` object in a controller argument?
+      How do you generate a 404 Not Found page in a Symfony controller?
+    answers:
+      - { value: '`throw $this->createNotFoundException(''The product does not exist'');`', correct: true }
+      - { value: '`return new Response(''Not Found'', 404);`', correct: true }
+      - { value: '`$this->render404(''The product does not exist'');`', correct: false }
+      - { value: '`throw new NotFoundHttpException(''The product does not exist'');`', correct: true }
+    help: |
+      You can either throw a `NotFoundHttpException` (conveniently via `createNotFoundException()` in `AbstractController`) or manually create a `Response` with a 404 status code.
+      https://symfony.com/doc/current/controller/exceptions.html#the-404-page
+
+  -
+    question: >
+      Which of the following exceptions would Symfony automatically convert into an appropriate HTTP error response (e.g., 403, 404, 500)?
+    answers:
+      - { value: '`Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException`', correct: true }
+      - { value: '`Symfony\Component\HttpKernel\Exception\NotFoundHttpException`', correct: true }
+      - { value: '`Symfony\Component\HttpKernel\Exception\HttpException`', correct: true }
+      - { value: '`\RuntimeException`', correct: false }
+      - { value: '`\InvalidArgumentException`', correct: false }
+    help: |
+      Symfony's `ExceptionListener` catches exceptions that extend `HttpExceptionInterface` (like `NotFoundHttpException`, `AccessDeniedHttpException`) and converts them into appropriate HTTP responses. Other exceptions typically result in a 500 Internal Server Error.
+      https://symfony.com/doc/current/controller/exceptions.html
+
+  -
+    question: |
+      You are building an API endpoint that accepts file uploads. Which attribute can you use to automatically map an uploaded file to a controller argument?
+    answers:
+      - { value: '`#[MapUploadedFile]`', correct: true }
+      - { value: '`#[FileParam]`', correct: false }
+      - { value: '`#[RequestFile]`', correct: false }
+      - { value: '`#[Upload]`', correct: false }
+    help: |
+      The `#[MapUploadedFile]` attribute is specifically designed for mapping uploaded files from the request to `UploadedFile` objects in controller arguments.
+      https://symfony.com/doc/current/controller.html#uploaded-file-argument
+
+  -
+    question: |
+      Given the following controller, what is the type of `$picture` when a file is uploaded via a form field named `picture`?
 
       ```php
-      // src/Controller/UserController.php
       namespace App\Controller;
 
       use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -179,1352 +435,1171 @@ questions:
 
       class UserController extends AbstractController
       {
-          #[Route('/user/picture', methods: ['POST'])]
+          #[Route('/user/picture', methods: ['PUT'])]
           public function changePicture(
-              // ??? UploadedFile $picture
+              #[MapUploadedFile] UploadedFile $picture,
           ): Response {
               // ...
           }
       }
       ```
     answers:
-      - { value: '`#[MapFile]`', correct: false }
-      - { value: '`#[FileArgument]`', correct: false }
-      - { value: '`#[MapUploadedFile]`', correct: true }
-      - { value: '`#[Upload]`', correct: false }
+      - { value: '`Symfony\Component\HttpFoundation\File\UploadedFile`', correct: true }
+      - { value: '`SplFileInfo`', correct: false }
+      - { value: '`string` (the file path)', correct: false }
+      - { value: '`array` (file details)', correct: false }
     help: |
-      The `#[MapUploadedFile]` attribute is used to automatically inject an `UploadedFile` object into a controller argument, simplifying file upload handling.
-      https://symfony.com/doc/current/controller/upload_file.html
+      The `#[MapUploadedFile]` attribute ensures that the argument is automatically resolved to an instance of `UploadedFile`.
+      https://symfony.com/doc/current/controller.html#uploaded-file-argument
 
   -
     question: |
-      How would you set a cookie named `my_cookie` with the value `some_value` and a lifetime of 1 hour in a Symfony controller?
+      Which Twig function allows you to embed the output of another Symfony controller directly into a template?
     answers:
-      - { value: '`$response->headers->setCookie(new Cookie(''my_cookie'', ''some_value'', time() + 3600));`', correct: true }
-      - { value: '`$request->cookies->set(''my_cookie'', ''some_value'', time() + 3600);`', correct: false }
-      - { value: '`$this->setCookie(''my_cookie'', ''some_value'', 3600);`', correct: false }
-      - { value: '`setcookie(''my_cookie'', ''some_value'', time() + 3600);`', correct: false }
+      - { value: '`render()` with `controller()`', correct: true }
+      - { value: '`include()`', correct: false }
+      - { value: '`embed()`', correct: false }
+      - { value: '`call_controller()`', correct: false }
     help: |
-      Cookies are set on the `Response` object's `headers` property using the `setCookie()` method, which takes a `Cookie` object.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      Which of the following is the correct way to retrieve the `User-Agent` header from the current request in a Symfony controller?
-    answers:
-      - { value: '`$request->headers->get(''User-Agent'');`', correct: true }
-      - { value: '`$request->getHeaders(''User-Agent'');`', correct: false }
-      - { value: '`$request->server->get(''HTTP_USER_AGENT'');`', correct: false }
-      - { value: '`$_SERVER[''HTTP_USER_AGENT''];`', correct: false }
-    help: |
-      Request headers are accessed via the `headers` property of the `Request` object using the `get()` method.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      What is an "invokable controller" in Symfony?
-    answers:
-      - { value: 'A controller that can be called directly from the command line.', correct: false }
-      - { value: 'A controller class that implements the `__invoke()` magic method to handle requests.', correct: true }
-      - { value: 'A controller that automatically renders a Twig template without an explicit `render()` call.', correct: false }
-      - { value: 'A controller that can only be accessed via AJAX requests.', correct: false }
-    help: |
-      An invokable controller is a class where the `__invoke()` method acts as the controller action, allowing the class itself to be treated as a callable.
-      https://symfony.com/doc/current/controller/service.html#invokable-controllers
-
-  -
-    question: |
-      Which of the following is the recommended way to register controllers as services in Symfony 7, especially when using PHP attributes for routing?
-    answers:
-      - { value: 'Manually define each controller as a service in `services.yaml` with `public: true`.', correct: false }
-      - { value: 'By default, controllers in `src/Controller/` are automatically registered as services if autowiring and autoconfigure are enabled.', correct: true }
-      - { value: 'Extend `Symfony\Component\DependencyInjection\ContainerAwareInterface` in your controller.', correct: false }
-      - { value: 'Add the `#[Service]` attribute to each controller class.', correct: false }
-    help: |
-      With autowiring and autoconfigure enabled (which is the default for `src/Controller/` in `config/services.yaml`), controllers are automatically registered as services, allowing for dependency injection.
-      https://symfony.com/doc/current/controller/service.html
-
-  -
-    question: |
-      Which of the following best describes the `kernel.controller` event in Symfony?
-    answers:
-      - { value: 'It is dispatched before the controller is resolved.', correct: false }
-      - { value: 'It is dispatched after the controller callable has been determined but before its execution.', correct: true }
-      - { value: 'It is dispatched after the controller has returned a `Response` object.', correct: false }
-      - { value: 'It is used to modify the HTTP request before it reaches the controller.', correct: false }
-    help: |
-      The `kernel.controller` event is dispatched by `HttpKernel::handle()` after the controller callable has been determined but before its execution. Listeners can initialize systems, retrieve controller attributes, or even change the controller itself.
-      https://symfony.com/doc/current/components/http_kernel.html#the-kernel-controller-event
-
-  -
-    question: |
-      You want to access a custom configuration parameter, `app.items_per_page`, defined in `config/services.yaml` from your controller. How would you do this if your controller extends `AbstractController`?
-    answers:
-      - { value: '`$this->container->getParameter(''app.items_per_page'');`', correct: false }
-      - { value: '`$this->getParameter(''app.items_per_page'');`', correct: true }
-      - { value: '`$this->get(''parameter_bag'')
-          ->get(''app.items_per_page'');`', correct: false }
-      - { value: '`$this->params->get(''app.items_per_page'');`', correct: false }
-    help: |
-      The `getParameter()` method is a convenient helper provided by `AbstractController` to access container parameters.
-      https://symfony.com/doc/current/controller.html#accessing-configuration-parameters
-
-  -
-    question: |
-      What is the purpose of the `#[AsController]` attribute in Symfony 7?
-    answers:
-      - { value: 'It marks a class as a service that can be autowired.', correct: false }
-      - { value: 'It explicitly registers a class as a controller, making it discoverable for routing and enabling service injection into its methods.', correct: true }
-      - { value: 'It defines the default route for all methods within the controller.', correct: false }
-      - { value: 'It's used for console commands, not HTTP controllers.', correct: false }
-    help: |
-      The `#[AsController]` attribute explicitly marks a class as a controller, ensuring it's registered as a service and enabling dependency injection into its action methods. While often implicit for classes in `src/Controller/`, it's good practice for clarity or when controllers are located elsewhere.
-      https://symfony.com/doc/current/controller/service.html#controllers-as-services
-
-  -
-    question: |
-      Which of the following is NOT a valid way to define a controller in Symfony 7?
-    answers:
-      - { value: 'A class method with a `#[Route]` attribute.', correct: false }
-      - { value: 'A class implementing the `__invoke()` method.', correct: false }
-      - { value: 'A standalone PHP function.', correct: true }
-      - { value: 'A service defined with the `controller.service_arguments` tag.', correct: false }
-    help: |
-      While older Symfony versions or custom frameworks might use standalone functions, modern Symfony 7 controllers are typically class methods (often with `#[Route]` attributes) or invokable classes.
-      https://symfony.com/doc/current/controller.html#defining-a-controller
-
-  -
-    question: |
-      You want to render a Twig template named `product/show.html.twig` and pass a `product` variable to it from your controller. Which method should you use?
-    answers:
-      - { value: '`$this->render(''product/show.html.twig'', [''product'' => $product]);`', correct: true }
-      - { value: '`$this->display(''product/show.html.twig'', [''product'' => $product]);`', correct: false }
-      - { value: '`$this->twig->render(''product/show.html.twig'', [''product'' => $product]);`', correct: false }
-      - { value: '`new Response($this->renderView(''product/show.html.twig'', [''product'' => $product]));`', correct: false }
-    help: |
-      The `render()` method, provided by `AbstractController`, is the standard way to render a Twig template and return a `Response` object.
-      https://symfony.com/doc/current/controller.html#rendering-templates
-
-  -
-    question: |
-      What is the purpose of `ArgumentValueResolverInterface` in Symfony?
-    answers:
-      - { value: 'To resolve the correct controller callable from a request.', correct: false }
-      - { value: 'To determine the values for controller method arguments based on the request and type hints.', correct: true }
-      - { value: 'To convert a controller''s return value into a `Response` object.', correct: false }
-      - { value: 'To manage the lifecycle of services injected into controllers.', correct: false }
-    help: |
-      `ArgumentValueResolverInterface` defines the contract for custom argument value resolvers, which are responsible for providing values for controller method arguments.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#creating-a-custom-argument-value-resolver
-
-  -
-    question: |
-      Which of the following is a valid way to embed the output of another controller (`App\Controller\BlogController::recentArticles`) into a Twig template, passing a `max` parameter?
-    answers:
-      - { value: '`{{ include(controller(''App\\\\Controller\\\\BlogController::recentArticles'', {max: 3})) }}`', correct: false }
-      - { value: '`{{ render(controller(''App\\\\Controller\\\\BlogController::recentArticles'', {max: 3})) }}`', correct: true }
-      - { value: '`{{ render(path(''app_blog_recent_articles'', {max: 3})) }}`', correct: true }
-      - { value: '`{{ embed(''App\\\\Controller\\\\BlogController::recentArticles'', {max: 3}) }}`', correct: false }
-    help: |
-      The `render()` Twig function can be used with `controller()` to embed the output of another controller. If the controller is associated with a route, `path()` or `url()` can also be used.
+      The `render()` Twig function, combined with `controller()`, is used to embed the output of a controller into a template, effectively making a sub-request.
       https://symfony.com/doc/current/templates.html#embedding-controllers
 
   -
     question: |
-      When a controller method has both a `Request` object argument and a route parameter argument (e.g., `public function index(Request $request, int $id)`), what is true about their order?
+      Consider the following Twig snippet. What is the purpose of `App\\Controller\\BlogController::recentArticles`?
+
+      ```twig
+      {# templates/base.html.twig #}
+      <div id="sidebar">
+          {{ render(controller(
+              'App\\Controller\\BlogController::recentArticles', {max: 3}
+          )) }}
+      </div>
+      ```
     answers:
-      - { value: 'The `Request` object must always come first.', correct: false }
-      - { value: 'The route parameter must always come first.', correct: false }
-      - { value: 'The order of these arguments does not matter; Symfony''s `ArgumentResolver` handles it.', correct: true }
-      - { value: 'Only one of them can be present in a single method signature.', correct: false }
+      - { value: 'It specifies the controller class and method to be executed for the sub-request.', correct: true }
+      - { value: 'It defines a Twig macro to render recent articles.', correct: false }
+      - { value: 'It''s a Twig filter that formats blog articles.', correct: false }
+      - { value: 'It refers to a service ID that will return HTML content.', correct: false }
     help: |
-      Symfony's `ArgumentResolver` is smart enough to match arguments by name and type, so the order of `Request` objects and route parameters in the method signature does not affect their resolution.
-      https://symfony.com/doc/current/create_framework/http_kernel_controller_resolver.html#controller-method-arguments
+      The `controller()` Twig function takes a string representing the controller callable (class::method or service ID) and an array of arguments.
+      https://symfony.com/doc/current/templates.html#embedding-controllers
+
+  -
+    question: >
+      What is the primary role of Symfony's Argument Value Resolvers?
+    answers:
+      - { value: 'To automatically determine and provide the correct values for controller method arguments based on the `Request` and other sources.', correct: true }
+      - { value: 'To validate the types of arguments passed to controller methods.', correct: false }
+      - { value: 'To convert controller return values into `Response` objects.', correct: false }
+      - { value: 'To handle routing and match URLs to controller actions.', correct: false }
+    help: |
+      Argument value resolvers are a core part of how Symfony automatically injects dependencies and data into controller method arguments.
+      https://symfony.com/doc/current/controller/argument_value_resolvers.html
 
   -
     question: |
-      What is the primary role of the `ControllerResolverInterface` in Symfony's HttpKernel component?
-    answers:
-      - { value: 'To convert the raw HTTP request into a `Request` object.', correct: false }
-      - { value: 'To determine and return the PHP callable (controller) responsible for handling a given `Request`.', correct: true }
-      - { value: 'To execute the controller and handle its return value.', correct: false }
-      - { value: 'To manage the routing process and match URLs to controllers.', correct: false }
-    help: |
-      The `ControllerResolverInterface` defines how Symfony finds the appropriate controller callable for a given request.
-      https://symfony.com/doc/current/components/http_kernel.html#controller-resolution
+      Given the following controller method, how does Symfony automatically provide the `Request $request` and `int $id` arguments?
 
-  -
-    question: |
-      Which of the following is a valid way to define a route for a controller action using PHP attributes in Symfony 7?
-    answers:
-      - { value: '`#[Route(path: ''/products'', name: ''app_products'')]`', correct: true }
-      - { value: '`@Route(''/products'', name=''app_products'')`', correct: false }
-      - { value: '`#[Path(''/products''), Name(''app_products'')]`', correct: false }
-      - { value: '`#[Route(''/products''), name: ''app_products'']`', correct: false }
-    help: |
-      The `#[Route]` attribute is used to define routes directly on controller methods or invokable classes.
-      https://symfony.com/doc/current/routing.html#defining-routes-as-attributes
+      ```php
+      use Symfony\Component\HttpFoundation\Request;
+      use Symfony\Component\HttpFoundation\Response;
+      use Symfony\Component\Routing\Attribute\Route;
 
-  -
-    question: |
-      You need to send an HTTP status code of `201 Created` along with a response. How would you achieve this in a Symfony controller?
+      class ProductController
+      {
+          #[Route('/product/{id}')]
+          public function show(Request $request, int $id): Response
+          {
+              // ...
+          }
+      }
+      ```
     answers:
-      - { value: '`return new Response(''Resource created'', 201);`', correct: true }
-      - { value: '`$response->setStatusCode(201); return $response;`', correct: true }
-      - { value: '`return $this->json([''message'' => ''Created''], 201);`', correct: true }
-      - { value: '`return new Response(''Resource created''); $response->setStatusCode(201);`', correct: false }
+      - { value: 'The `Request` object is resolved by the `RequestValueResolver`, and `$id` is resolved by the `ServiceValueResolver` from route attributes.', correct: true }
+      - { value: 'Both are resolved by the `RequestValueResolver`.', correct: false }
+      - { value: 'Both are resolved by autowiring from the service container.', correct: false }
+      - { value: 'The `Request` object is injected by the `HttpKernel`, and `$id` is manually extracted from `$request->attributes`.', correct: false }
     help: |
-      The HTTP status code can be set in the `Response` constructor or via the `setStatusCode()` method. For JSON responses, the status code can be passed as the second argument to `json()`.
-      https://symfony.com/doc/current/components/http_foundation.html#response-status-codes
-
-  -
-    question: |
-      Which of the following describes a key responsibility of a "front controller" in a Symfony application?
-    answers:
-      - { value: 'To directly handle all business logic and database interactions.', correct: false }
-      - { value: 'To serve static assets like CSS and JavaScript files.', correct: false }
-      - { value: 'To bootstrap the application, handle incoming requests, dispatch them to the appropriate controller, and send the response.', correct: true }
-      - { value: 'To manage user authentication and authorization for all requests.', correct: false }
-    help: |
-      The front controller (typically `public/index.php`) is the single entry point for all web requests, responsible for initiating the Symfony application lifecycle.
-      https://symfony.com/doc/current/create_framework/front_controller.html
-
-  -
-    question: |
-      You want to prevent a controller from being automatically registered as a service. How can you achieve this?
-    answers:
-      - { value: 'Move the controller class outside the `src/Controller/` directory.', correct: true }
-      - { value: 'Add `#[AsService(false)]` attribute to the controller class.', correct: false }
-      - { value: 'Set `autoconfigure: false` for the `App\\Controller\\` namespace in `config/services.yaml`.', correct: true }
-      - { value: 'Make the controller class `abstract`.', correct: false }
-    help: |
-      Controllers in `src/Controller/` are autoconfigured as services by default. To prevent this, you can move them or disable autoconfigure for that namespace.
-      https://symfony.com/doc/current/controller/service.html#controllers-as-services
-
-  -
-    question: |
-      Which of the following is NOT a built-in argument value resolver in Symfony?
-    answers:
-      - { value: '`RequestValueResolver` (for `Request` objects)', correct: false }
-      - { value: '`ServiceValueResolver` (for autowired services)', correct: false }
-      - { value: '`EntityValueResolver` (for Doctrine entities)', correct: false }
-      - { value: '`FormValueResolver` (for `Form` objects)', correct: true }
-    help: |
-      Symfony provides several built-in argument value resolvers, including `RequestValueResolver`, `ServiceValueResolver`, and `EntityValueResolver`. There is no built-in `FormValueResolver` that automatically injects `Form` objects.
+      Symfony has built-in argument resolvers. The `RequestValueResolver` handles the `Request` object, and route parameters are automatically mapped by name and type.
       https://symfony.com/doc/current/controller/argument_value_resolvers.html#built-in-argument-value-resolvers
 
   -
-    question: |
-      Consider a controller method: `public function show(string $slug)`. If the route is `/blog/{slug}`, how does Symfony populate the `$slug` argument?
+    question: >
+      You have a custom class `App\ValueObject\ProductId`. How would you enable Symfony to automatically inject an instance of `ProductId` into a controller argument from a route parameter named `productId`?
     answers:
-      - { value: 'It looks for a query parameter named `slug`.', correct: false }
-      - { value: 'It looks for a request attribute named `slug` (which is populated by the router).', correct: true }
-      - { value: 'It looks for a POST parameter named `slug`.', correct: false }
-      - { value: 'It requires manual retrieval using `$request->attributes->get(''slug'')`.', correct: false }
+      - { value: 'By creating a custom argument value resolver that supports `ProductId`.', correct: true }
+      - { value: 'By adding `#[Autowire]` above the `$productId` argument.', correct: false }
+      - { value: 'By extending `AbstractController` and implementing a `resolveProductId` method.', correct: false }
+      - { value: 'Symfony can only inject built-in types and services, not custom value objects directly from route parameters.', correct: false }
     help: |
-      Symfony's `ArgumentResolver` automatically matches route parameters to controller method arguments by name. The router populates the request attributes with matched route parameters.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html
-
-  -
-    question: |
-      You want to return a JSON response from your controller. Which method from `AbstractController` is the most convenient way to do this?
-    answers:
-      - { value: '`return new JsonResponse([''data'' => $data]);`', correct: false }
-      - { value: '`return $this->json([''data'' => $data]);`', correct: true }
-      - { value: '`return $this->serialize([''data'' => $data]);`', correct: false }
-      - { value: '`return $this->renderJson([''data'' => $data]);`', correct: false }
-    help: |
-      The `json()` method is a shortcut in `AbstractController` that creates and returns a `JsonResponse` object.
-      https://symfony.com/doc/current/controller.html#returning-json-response
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute in Symfony 7?
-    answers:
-      - { value: 'To map query parameters to a DTO.', correct: false }
-      - { value: 'To automatically deserialize the request body (e.g., JSON or XML) into a PHP object or DTO.', correct: true }
-      - { value: 'To map uploaded files to a specific object.', correct: false }
-      - { value: 'To map form data from a `POST` request to an array.', correct: false }
-    help: |
-      The `#[MapRequestPayload]` attribute simplifies handling request bodies by automatically deserializing them into a specified PHP object or DTO.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      Which of the following best describes how Symfony handles the return value of a controller action?
-    answers:
-      - { value: 'It must always return a string, which is then sent as the response body.', correct: false }
-      - { value: 'It must always return an array, which Symfony then converts to JSON.', correct: false }
-      - { value: 'It must always return an instance of `Symfony\Component\HttpFoundation\Response` or one of its subclasses.', correct: true }
-      - { value: 'It can return any PHP type, and Symfony will automatically cast it to a string.', correct: false }
-    help: |
-      A controller's primary responsibility is to return a `Response` object, which encapsulates the HTTP response (status code, headers, content).
-      https://symfony.com/doc/current/controller.html#the-response
-
-  -
-    question: |
-      You want to retrieve all flash messages of a specific type, e.g., 'success'. How would you do this in a controller?
-    answers:
-      - { value: '`$this->getFlashBag()->get(''success'');`', correct: false }
-      - { value: '`$this->session->getFlashBag()->get(''success'');`', correct: true }
-      - { value: '`$this->get(''session'')
-          ->getFlashBag()
-          ->all();`', correct: false }
-      - { value: '`$this->getFlashes(''success'');`', correct: false }
-    help: |
-      Flash messages are managed by the `FlashBag` which is accessible via the session.
-      https://symfony.com/doc/current/controller/sessions.html#retrieving-flash-messages
-
-  -
-    question: |
-      What is the purpose of the `#[MapQueryParameter]` attribute in Symfony 7?
-    answers:
-      - { value: 'To map a single query parameter to a controller argument, with optional validation.', correct: true }
-      - { value: 'To map all query parameters into a single array argument.', correct: false }
-      - { value: 'To map a query parameter to a service.', correct: false }
-      - { value: 'To map a query parameter to a route attribute.', correct: false }
-    help: |
-      The `#[MapQueryParameter]` attribute allows you to directly map a specific query parameter to a controller argument, providing type conversion and basic validation.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
-
-  -
-    question: |
-      Which method is used to retrieve a specific cookie value from the current request?
-    answers:
-      - { value: '`$request->cookies->get(''cookie_name'');`', correct: true }
-      - { value: '`$request->getCookie(''cookie_name'');`', correct: false }
-      - { value: '`$_COOKIE[''cookie_name''];`', correct: false }
-      - { value: '`$request->headers->get(''Cookie'');`', correct: false }
-    help: |
-      The `cookies` property of the `Request` object provides access to request cookies, and the `get()` method retrieves their values.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      When defining a controller method, what is the significance of type-hinting an argument with `Symfony\Component\HttpFoundation\Request`?
-    answers:
-      - { value: 'It makes the controller a service.', correct: false }
-      - { value: 'It allows Symfony''s `ArgumentResolver` to automatically inject the current `Request` object into that argument.', correct: true }
-      - { value: 'It makes the argument optional.', correct: false }
-      - { value: 'It forces the request method to be `GET`.', correct: false }
-    help: |
-      Type-hinting with `Request` is the standard way to get the current request object injected into your controller action.
-      https://symfony.com/doc/current/controller.html#accessing-the-request
-
-  -
-    question: |
-      What is the primary difference between `redirectToRoute()` and `redirect()` in `AbstractController`?
-    answers:
-      - { value: '`redirectToRoute()` performs an internal redirect, while `redirect()` performs an external redirect.', correct: false }
-      - { value: '`redirectToRoute()` redirects to a named Symfony route, while `redirect()` redirects to an arbitrary URL.', correct: true }
-      - { value: '`redirectToRoute()` sends a 301 redirect, while `redirect()` sends a 302 redirect.', correct: false }
-      - { value: '`redirectToRoute()` is for GET requests, `redirect()` is for POST requests.', correct: false }
-    help: |
-      `redirectToRoute()` is for Symfony-specific named routes, while `redirect()` is for any arbitrary URL.
-      https://symfony.com/doc/current/controller.html#redirecting
-
-  -
-    question: |
-      Which of the following is the correct way to retrieve data sent in a `POST` request body (e.g., from a form submission) in a Symfony controller?
-    answers:
-      - { value: '`$request->query->get(''field_name'');`', correct: false }
-      - { value: '`$request->request->get(''field_name'');`', correct: true }
-      - { value: '`$request->attributes->get(''field_name'');`', correct: false }
-      - { value: '`$_POST[''field_name''];`', correct: false }
-    help: |
-      Data from POST requests (form submissions) is accessed via the `request` property of the `Request` object.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      When should you consider creating a custom argument value resolver?
-    answers:
-      - { value: 'When you need to inject a service into your controller.', correct: false }
-      - { value: 'When you want to automatically convert a request value (e.g., a string ID) into a complex object (e.g., a DTO or an entity) for a controller argument.', correct: true }
-      - { value: 'When you need to handle file uploads.', correct: false }
-      - { value: 'When you want to change the default behavior of the `Request` object.', correct: false }
-    help: |
-      Custom argument value resolvers are useful for complex argument resolution logic, such as converting raw request data into domain-specific objects.
+      For custom value objects or complex argument resolution logic, you need to implement a custom argument value resolver by implementing `ValueResolverInterface`.
       https://symfony.com/doc/current/controller/argument_value_resolvers.html#creating-a-custom-argument-value-resolver
 
   -
-    question: |
-      What is the recommended directory for Symfony controller classes?
+    question: >
+      Which of the following attributes can be used to automatically map data from the request body (e.g., JSON payload) to a DTO (Data Transfer Object) in a controller argument?
     answers:
-      - { value: '`src/Controller/`', correct: true }
-      - { value: '`app/Controllers/`', correct: false }
-      - { value: '`var/controllers/`', correct: false }
-      - { value: '`bin/controllers/`', correct: false }
+      - { value: '`#[MapRequestPayload]`', correct: true }
+      - { value: '`#[MapQueryParameter]`', correct: false }
+      - { value: '`#[MapEntity]`', correct: false }
+      - { value: '`#[MapBody]`', correct: false }
     help: |
-      The `src/Controller/` directory is the standard and recommended location for controller classes in a Symfony application.
-      https://symfony.com/doc/current/controller.html#controller-naming-conventions
-
-  -
-    question: |
-      Which of the following is true about the `Response` object in Symfony?
-    answers:
-      - { value: 'It is immutable once created.', correct: false }
-      - { value: 'It encapsulates the HTTP status code, headers, and content.', correct: true }
-      - { value: 'It is automatically sent to the client by the controller.', correct: false }
-      - { value: 'It can only contain HTML content.', correct: false }
-    help: |
-      The `Response` object is mutable and contains all parts of the HTTP response. It is sent by the `Kernel`, not directly by the controller.
-      https://symfony.com/doc/current/components/http_foundation.html#response-object
-
-  -
-    question: |
-      You want to set a custom HTTP header, e.g., `X-My-Header: Value`, on your response. How would you do this?
-    answers:
-      - { value: '`$response->headers->set(''X-My-Header'', ''Value'');`', correct: true }
-      - { value: '`$response->setHeader(''X-My-Header'', ''Value'');`', correct: false }
-      - { value: '`$response->addHeader(''X-My-Header'', ''Value'');`', correct: false }
-      - { value: '`$response->headers[''X-My-Header''] = ''Value'';`', correct: false }
-    help: |
-      Response headers are managed via the `headers` property of the `Response` object using the `set()` method.
-      https://symfony.com/doc/current/components/http_foundation.html#response-headers
-
-  -
-    question: |
-      What is the purpose of the `#[MapQueryString]` attribute (available with `symfony/serializer` and `symfony/validator`)?
-    answers:
-      - { value: 'To map the entire query string into a DTO, with deserialization and validation.', correct: true }
-      - { value: 'To map a single query parameter to a string.', correct: false }
-      - { value: 'To map the request body to a DTO.', correct: false }
-      - { value: 'To map URL path parameters to a DTO.', correct: false }
-    help: |
-      `#[MapQueryString]` is a powerful attribute that allows mapping the entire query string into a DTO, leveraging the Serializer and Validator components.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapquerystring
-
-  -
-    question: |
-      Which of the following is true regarding the `Request` object in Symfony?
-    answers:
-      - { value: 'It is a global variable that can be accessed anywhere in the application.', correct: false }
-      - { value: 'It is an object-oriented representation of the HTTP request.', correct: true }
-      - { value: 'It is immutable and cannot be modified after creation.', correct: false }
-      - { value: 'It only contains data from GET requests.', correct: false }
-    help: |
-      The `Request` object is a mutable, object-oriented wrapper around the raw HTTP request, providing access to all request data (query, post, headers, files, etc.).
-      https://symfony.com/doc/current/components/http_foundation.html#request-object
-
-  -
-    question: |
-      You want to clear all flash messages of all types from the session. How can you achieve this?
-    answers:
-      - { value: '`$this->session->getFlashBag()->clear();`', correct: true }
-      - { value: '`$this->clearFlashes();`', correct: false }
-      - { value: '`$this->session->clear();`', correct: false }
-      - { value: '`$this->getFlashBag()->clearAll();`', correct: false }
-    help: |
-      The `clear()` method on the `FlashBag` removes all flash messages.
-      https://symfony.com/doc/current/controller/sessions.html#retrieving-flash-messages
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when used with a DTO class in a controller argument?
-    answers:
-      - { value: 'It automatically validates the DTO against its constraints.', correct: true }
-      - { value: 'It automatically deserializes the request body into an instance of the DTO.', correct: true }
-      - { value: 'It automatically hydrates the DTO with query parameters.', correct: false }
-      - { value: 'It automatically generates a form for the DTO.', correct: false }
-    help: |
-      `#[MapRequestPayload]` deserializes the request body into the DTO and automatically triggers validation if the Symfony Validator component is enabled.
+      `#[MapRequestPayload]` is designed to deserialize request body content (like JSON or XML) into a PHP object.
       https://symfony.com/doc/current/controller/request_payload.html
 
   -
-    question: |
-      Which of the following is a common use case for a "built-in internal controller" like `_profiler` or `_wdt`?
+    question: >
+      Which attribute allows you to automatically fetch an entity from the database based on a route parameter and inject it directly into your controller method?
     answers:
-      - { value: 'Handling user authentication and authorization.', correct: false }
-      - { value: 'Rendering the Symfony Web Debug Toolbar or the Profiler interface.', correct: true }
-      - { value: 'Processing form submissions and saving data to the database.', correct: false }
-      - { value: 'Serving static assets from the `public/` directory.', correct: false }
+      - { value: '`#[MapEntity]`', correct: true }
+      - { value: '`#[ParamConverter]`', correct: false }
+      - { value: '`#[Entity]`', correct: false }
+      - { value: '`#[FetchEntity]`', correct: false }
     help: |
-      Internal controllers like `_profiler` and `_wdt` are used by Symfony's internal mechanisms, such as the Web Debug Toolbar and the Profiler, to display debugging and performance information.
-      https://symfony.com/doc/current/reference/configuration/framework.html#profiler
+      The `#[MapEntity]` attribute (provided by DoctrineBridge) is used for automatic entity fetching based on route parameters.
+      https://symfony.com/doc/current/doctrine.html#automatically-fetching-objects-from-the-route
+
+  -
+    question: >
+      Which of the following is NOT a core responsibility of a Symfony controller?
+    answers:
+      - { value: 'Directly interacting with the database to perform complex queries and data manipulation.', correct: true }
+      - { value: 'Handling incoming HTTP requests.', correct: true }
+      - { value: 'Returning an `HTTP Response` object.', correct: true }
+      - { value: 'Orchestrating the application logic by calling services.', correct: true }
+      - { value: 'Rendering a view template.', correct: true }
+      - { value: 'Defining the application''s security policies.', correct: false }
+    help: |
+      Controllers should be thin and delegate business logic to services. While they interact with the database indirectly via services, direct complex queries are not their primary responsibility. Defining security policies is typically done in security configuration or voters, not directly in controllers.
+      https://symfony.com/doc/current/controller.html#what-is-a-controller
 
   -
     question: |
-      You want to get all flash messages, regardless of their type, as an associative array. How would you do this?
+      You need to retrieve the client's IP address from the `Request` object. Which method should you use?
     answers:
-      - { value: '`$this->session->getFlashBag()->all();`', correct: true }
-      - { value: '`$this->getAllFlashes();`', correct: false }
-      - { value: '`$this->get(''session'')
-          ->getFlashBag()
-          ->getMessages();`', correct: false }
-      - { value: '`$this->getFlashBag()->peekAll();`', correct: false }
+      - { value: '`$request->getClientIp();`', correct: true }
+      - { value: '`$request->server->get(''REMOTE_ADDR'');`', correct: true }
+      - { value: '`$request->getIp();`', correct: false }
+      - { value: '`$request->headers->get(''X-Forwarded-For'');`', correct: false }
     help: |
-      The `all()` method on the `FlashBag` retrieves and clears all flash messages.
-      https://symfony.com/doc/current/controller/sessions.html#retrieving-flash-messages
+      `getClientIp()` is the recommended way to get the client's IP, as it handles proxies correctly. You can also access it directly from the `SERVER` bag.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      What happens if a controller method argument is type-hinted with a class that is not a service and cannot be resolved by any argument value resolver?
+      Which HTTP status code should typically be returned for a successful creation of a resource (e.g., after a POST request)?
     answers:
-      - { value: 'Symfony will throw a `ServiceNotFoundException`.', correct: false }
-      - { value: 'Symfony will attempt to instantiate the class with no arguments.', correct: false }
-      - { value: 'Symfony will throw a `RuntimeException` indicating it cannot resolve the argument.', correct: true }
-      - { value: 'The argument will be `null`.', correct: false }
+      - { value: '`201 Created`', correct: true }
+      - { value: '`200 OK`', correct: false }
+      - { value: '`204 No Content`', correct: false }
+      - { value: '`302 Found`', correct: false }
     help: |
-      If an argument cannot be resolved by any registered argument value resolver, Symfony will throw a `RuntimeException` (or a more specific exception depending on the context), as it doesn't know how to provide a value for that argument.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html
+      The `201 Created` status code indicates that the request has been fulfilled and resulted in one or more new resources being created.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201
 
   -
     question: |
-      Which of the following is the correct way to check if a session has been started in a Symfony controller?
+      You want to send a file download to the user from your controller. Which type of `Response` should you use?
     answers:
-      - { value: '`$request->hasSession();`', correct: true }
-      - { value: '`$this->session->isStarted();`', correct: false }
-      - { value: '`$request->getSession()->isStarted();`', correct: true }
-      - { value: '`isset($_SESSION);`', correct: false }
+      - { value: '`Symfony\Component\HttpFoundation\BinaryFileResponse`', correct: true }
+      - { value: '`Symfony\Component\HttpFoundation\StreamedResponse`', correct: true }
+      - { value: '`Symfony\Component\HttpFoundation\FileResponse`', correct: false }
+      - { value: '`Symfony\Component\HttpFoundation\DownloadResponse`', correct: false }
     help: |
-      You can check if a session exists on the request using `hasSession()` or if the session object itself is started using `isStarted()`.
-      https://symfony.com/doc/current/controller/sessions.html
+      `BinaryFileResponse` is ideal for sending existing files. `StreamedResponse` is useful for generating large files on the fly or streaming content.
+      https://symfony.com/doc/current/components/http_foundation/responses.html#serving-files
 
   -
     question: |
-      When handling file uploads, what is the type of object that Symfony's `#[MapUploadedFile]` attribute injects into your controller argument?
+      Which `AbstractController` helper method allows you to check if a user has a specific role or permission?
     answers:
-      - { value: '`SplFileInfo`', correct: false }
-      - { value: '`Symfony\Component\HttpFoundation\File\File`', correct: false }
-      - { value: '`Symfony\Component\HttpFoundation\File\UploadedFile`', correct: true }
-      - { value: '`Psr\Http\Message\UploadedFileInterface`', correct: false }
+      - { value: '`$this->isGranted(''ROLE_ADMIN'');`', correct: true }
+      - { value: '`$this->hasRole(''ROLE_ADMIN'');`', correct: false }
+      - { value: '`$this->getUser()->hasRole(''ROLE_ADMIN'');`', correct: false }
+      - { value: '`$this->authorize(''ROLE_ADMIN'');`', correct: false }
     help: |
-      The `#[MapUploadedFile]` attribute specifically injects an instance of `Symfony\Component\HttpFoundation\File\UploadedFile`.
-      https://symfony.com/doc/current/controller/upload_file.html
+      The `isGranted()` method is a shortcut to the `AuthorizationCheckerInterface` service, used for checking user permissions.
+      https://symfony.com/doc/current/security.html#checking-if-a-user-has-a-role-or-permission
 
   -
     question: |
-      You want to make a controller method accessible only via `POST` requests. How would you configure its route using PHP attributes?
+      How can you retrieve a configuration parameter (e.g., `app.mailer.sender_email`) within a controller extending `AbstractController`?
     answers:
-      - { value: '`#[Route(''/submit'', methods: [''POST''])]`', correct: true }
-      - { value: '`#[Route(''/submit'', method: ''POST'')]`', correct: false }
-      - { value: '`#[Route(''/submit'', requirements: [''_method'' => ''POST''])]`', correct: false }
-      - { value: '`#[PostRoute(''/submit'')]`', correct: false }
+      - { value: '`$this->getParameter(''app.mailer.sender_email'');`', correct: true }
+      - { value: '`$this->container->getParameter(''app.mailer.sender_email'');`', correct: true }
+      - { value: '`$this->getParam(''app.mailer.sender_email'');`', correct: false }
+      - { value: '`$this->config[''app.mailer.sender_email''];`', correct: false }
     help: |
-      The `methods` option in the `#[Route]` attribute allows specifying allowed HTTP methods for a route.
-      https://symfony.com/doc/current/routing.html#http-method-requirements
+      The `getParameter()` method in `AbstractController` is a shortcut to access parameters from the service container.
+      https://symfony.com/doc/current/controller.html#accessing-configuration-parameters
 
   -
-    question: |
-      What is the main advantage of using `#[AsController]` on a controller class?
+    question: >
+      What is the purpose of the `#[AsController]` attribute introduced in Symfony?
     answers:
-      - { value: 'It allows the controller to be used as a console command.', correct: false }
-      - { value: 'It explicitly declares the class as a controller, making it a service and enabling autowiring for its action methods.', correct: true }
-      - { value: 'It automatically generates a Twig template for the controller.', correct: false }
-      - { value: 'It makes the controller accessible via a direct URL without defining a route.', correct: false }
+      - { value: 'It automatically registers the controller as a service, making it eligible for autowiring.', correct: true }
+      - { value: 'It marks the class as a controller, but requires manual service definition.', correct: false }
+      - { value: 'It defines the default route for the controller.', correct: false }
+      - { value: 'It's a legacy attribute no longer used in Symfony 7.', correct: false }
     help: |
-      `#[AsController]` ensures the controller is treated as a service, which is crucial for features like autowiring dependencies into its action methods.
+      The `#[AsController]` attribute simplifies controller registration as services, especially when not extending `AbstractController`.
       https://symfony.com/doc/current/controller/service.html#controllers-as-services
 
   -
     question: |
-      Which of the following is a valid way to retrieve a specific cookie named `user_id` from the `Request` object?
+      Which of the following is the correct way to inject a service (e.g., `LoggerInterface`) into a controller action method using autowiring?
     answers:
-      - { value: '`$request->cookies->get(''user_id'');`', correct: true }
-      - { value: '`$request->getCookie(''user_id'');`', correct: false }
-      - { value: '`$request->headers->get(''Cookie'')[''user_id''];`', correct: false }
-      - { value: '`$_COOKIE[''user_id''];`', correct: false }
+      - { value: '`public function index(LoggerInterface $logger): Response {}`', correct: true }
+      - { value: '`public function index(#[Autowire] LoggerInterface $logger): Response {}`', correct: false }
+      - { value: '`public function index($logger): Response { $logger = $this->get(''logger''); }`', correct: false }
+      - { value: '`public function index(LoggerInterface $logger = null): Response {}`', correct: false }
     help: |
-      The `cookies` property of the `Request` object provides access to the request cookies via a `ParameterBag` instance.
+      Symfony's autowiring automatically injects services into controller method arguments based on type hints, provided the controller is registered as a service.
+      https://symfony.com/doc/current/controller.html#autowiring-action-arguments
+
+  -
+    question: >
+      When handling a form submission, after processing the form data, what is the recommended practice to prevent resubmission upon page refresh?
+    answers:
+      - { value: 'Perform a Post-Redirect-Get (PRG) pattern by redirecting the user to another page.', correct: true }
+      - { value: 'Display a success message on the same page without redirecting.', correct: false }
+      - { value: 'Use JavaScript to disable the submit button after the first click.', correct: false }
+      - { value: 'Store a token in the session and check it on subsequent requests.', correct: false }
+    help: |
+      The Post-Redirect-Get (PRG) pattern is a widely used web development design pattern that helps to prevent duplicate form submissions.
+      https://symfony.com/doc/current/forms.html#handling-form-submissions
+
+  -
+    question: |
+      Consider a scenario where you need to access the current user object in a controller. Which of the following is the most common and recommended way in a controller extending `AbstractController`?
+    answers:
+      - { value: '`$this->getUser();`', correct: true }
+      - { value: '`$this->get(''security.token_storage'')->getToken()->getUser();`', correct: true }
+      - { value: '`$this->security->getUser();`', correct: false }
+      - { value: '`$request->getUser();`', correct: false }
+    help: |
+      `getUser()` is a convenient helper method in `AbstractController`. You can also access the user via the security token storage service.
+      https://symfony.com/doc/current/security.html#accessing-the-user-in-a-controller
+
+  -
+    question: >
+      Which of the following describes the purpose of the `kernel.controller` event in Symfony?
+    answers:
+      - { value: 'It is dispatched after the controller callable has been determined but before its execution, allowing listeners to modify the controller or its arguments.', correct: true }
+      - { value: 'It is dispatched before the controller is determined, allowing listeners to choose the controller.', correct: false }
+      - { value: 'It is dispatched after the controller has executed and returned a response.', correct: false }
+      - { value: 'It is dispatched when a controller throws an exception.', correct: false }
+    help: |
+      The `kernel.controller` event is a crucial point in the request lifecycle for manipulating the controller before it runs.
+      https://symfony.com/doc/current/components/http_kernel.html#the-kernel-controller-event
+
+  -
+    question: |
+      You want to ensure a controller action is only accessible via a GET request. How would you configure this using the `#[Route]` attribute?
+    answers:
+      - { value: '`#[Route('/my-path', methods: ['GET'])]`', correct: true }
+      - { value: '`#[Route('/my-path', method: 'GET')]`', correct: false }
+      - { value: '`#[Route('/my-path', requirements: ['_method' => 'GET'])]`', correct: false }
+      - { value: '`#[Route('/my-path', allow_methods: ['GET'])]`', correct: false }
+    help: |
+      The `methods` option in the `#[Route]` attribute specifies which HTTP methods the route should match.
+      https://symfony.com/doc/current/routing.html#http-method-requirements
+
+  -
+    question: >
+      What is the primary benefit of using Argument Value Resolvers over manually extracting data from the `Request` object?
+    answers:
+      - { value: 'Cleaner and more readable controller code by abstracting data extraction logic.', correct: true }
+      - { value: 'Improved performance due to optimized data retrieval.', correct: false }
+      - { value: 'Automatic validation of all incoming request data.', correct: false }
+      - { value: 'Enhanced security against common web vulnerabilities.', correct: false }
+    help: |
+      Argument value resolvers make controller actions more concise and focused on business logic by handling the boilerplate of extracting and transforming request data.
+      https://symfony.com/doc/current/controller/argument_value_resolvers.html
+
+  -
+    question: >
+      Which of the following is a valid way to define a controller in Symfony 7 using PHP attributes?
+    answers:
+      - { value: '```php
+        #[Route('/lucky/number/{max}', name: 'app_lucky_number')]
+        class LuckyController
+        {
+            public function number(int $max): Response
+            {
+                // ...
+            }
+        }
+        ```', correct: true }
+      - { value: '```php
+        class LuckyController
+        {
+            public function number(#[Route('/lucky/number/{max}')] int $max): Response
+            {
+                // ...
+            }
+        }
+        ```', correct: false }
+      - { value: '```php
+        #[Controller(path: '/lucky/number/{max}', name: 'app_lucky_number')]
+        class LuckyController
+        {
+            public function number(int $max): Response
+            {
+                // ...
+            }
+        }
+        ```', correct: false }
+      - { value: '```php
+        class LuckyController
+        {
+            public function numberAction(int $max): Response
+            {
+                // ...
+            }
+        }
+        ```', correct: false }
+    help: |
+      The `#[Route]` attribute is placed directly above the controller method (or class for invokable controllers) to define the route.
+      https://symfony.com/doc/current/controller.html#defining-a-controller
+
+  -
+    question: >
+      When a Symfony application handles a request, what is the expected return type of a controller action?
+    answers:
+      - { value: 'An instance of `Symfony\Component\HttpFoundation\Response` or one of its subclasses.', correct: true }
+      - { value: 'A string containing the HTML content.', correct: false }
+      - { value: 'An array of data to be serialized into JSON.', correct: false }
+      - { value: '`void` if the response is sent directly.', correct: false }
+    help: |
+      Every controller in Symfony must return a `Response` object, which represents the HTTP response sent back to the client.
+      https://symfony.com/doc/current/controller.html#creating-a-response
+
+  -
+    question: |
+      You want to retrieve a specific header, e.g., `User-Agent`, from the incoming request. How would you do this?
+    answers:
+      - { value: '`$request->headers->get(''User-Agent'');`', correct: true }
+      - { value: '`$request->getHeader(''User-Agent'');`', correct: false }
+      - { value: '`$request->server->get(''HTTP_USER_AGENT'');`', correct: true }
+      - { value: '`$request->attributes->get(''User-Agent'');`', correct: false }
+    help: |
+      HTTP headers are accessed via the `headers` property of the `Request` object. They can also be found in the `SERVER` bag with an `HTTP_` prefix.
       https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      You want to redirect to a route named `app_product_show` and pass an `id` parameter. Which code snippet is correct?
+      Which of the following is true regarding the order of arguments in a Symfony controller method?
     answers:
-      - { value: '`return $this->redirectToRoute(''app_product_show'', [''id'' => $productId]);`', correct: true }
-      - { value: '`return $this->redirect($this->generateUrl(''app_product_show'', [''id'' => $productId]));`', correct: false }
-      - { value: '`return $this->forward(''app_product_show'', [''id'' => $productId]);`', correct: false }
-      - { value: '`return new RedirectResponse(''app_product_show'', [''id'' => $productId]);`', correct: false }
+      - { value: 'The order of arguments does not matter, as Symfony''s ArgumentResolver matches them by name and type hint.', correct: true }
+      - { value: 'The `Request` object must always be the first argument.', correct: false }
+      - { value: 'Route parameters must always come before services.', correct: false }
+      - { value: 'All arguments must be explicitly defined in the `#[Route]` attribute.', correct: false }
     help: |
-      `redirectToRoute()` is the preferred helper for redirecting to named routes with parameters.
-      https://symfony.com/doc/current/controller.html#redirecting
+      The `ArgumentResolver` is flexible and can resolve arguments regardless of their order, as long as they are correctly type-hinted or match a route parameter name.
+      https://symfony.com/doc/current/create_framework/http_kernel_controller_resolver.html#controller-method-arguments
+
+  -
+    question: >
+      What is the primary purpose of the `public/index.php` file in a standard Symfony application?
+    answers:
+      - { value: 'It acts as the front controller, handling all incoming HTTP requests and bootstrapping the Symfony application.', correct: true }
+      - { value: 'It contains all the application''s routing definitions.', correct: false }
+      - { value: 'It is the main configuration file for the entire application.', correct: false }
+      - { value: 'It serves static assets like CSS and JavaScript.', correct: false }
+    help: |
+      `public/index.php` is the single entry point for all web requests, responsible for creating the `Kernel`, handling the `Request`, and sending the `Response`.
+      https://symfony.com/doc/current/configuration/micro_kernel_trait.html#the-front-controller
 
   -
     question: |
-      What is the default HTTP status code for a redirect performed by `redirectToRoute()` or `redirect()`?
+      You want to prevent a controller action from being accessed by unauthenticated users. Which `AbstractController` helper method can you use for this?
     answers:
-      - { value: '`200 OK`', correct: false }
-      - { value: '`301 Moved Permanently`', correct: false }
-      - { value: '`302 Found`', correct: true }
-      - { value: '`303 See Other`', correct: false }
+      - { value: '`$this->denyAccessUnlessGranted(''IS_AUTHENTICATED_FULLY'');`', correct: true }
+      - { value: '`$this->denyUnlessLoggedIn();`', correct: false }
+      - { value: '`$this->isGranted(''IS_AUTHENTICATED_FULLY'');` and then throw an exception.', correct: true }
+      - { value: '`$this->requireLogin();`', correct: false }
     help: |
-      The default status code for redirects in Symfony is `302 Found`, indicating a temporary redirect.
-      https://symfony.com/doc/current/controller.html#redirecting
+      `denyAccessUnlessGranted()` is a convenient shortcut to throw an `AccessDeniedException` if the user does not have the required attributes/roles. You can also use `isGranted()` and manually throw an exception.
+      https://symfony.com/doc/current/security.html#restricting-access-to-controllers
+
+  -
+    question: >
+      Which of the following is a correct way to define a default value for a route parameter in a controller method signature?
+    answers:
+      - { value: '`public function show(int $id = 1): Response {}`', correct: true }
+      - { value: '`public function show(int $id = null): Response {}`', correct: false }
+      - { value: '`public function show(int $id): Response { $id = $id ?? 1; }`', correct: false }
+      - { value: '`#[Route('/product/{id?1}')]`', correct: false }
+    help: |
+      PHP's default argument values work seamlessly with Symfony's argument resolvers for optional route parameters.
+      https://symfony.com/doc/current/routing.html#optional-parameters
 
   -
     question: |
-      Which of the following is the correct way to retrieve a specific flash message type (e.g., 'error') and remove it from the session?
+      What happens if a controller action returns `null` instead of a `Response` object?
     answers:
-      - { value: '`$this->session->getFlashBag()->get(''error'');`', correct: true }
-      - { value: '`$this->getFlashBag()->peek(''error'');`', correct: false }
-      - { value: '`$this->session->getFlashBag()->all()[''error''];`', correct: false }
-      - { value: '`$this->get(''session'')
-          ->getFlashBag()
-          ->fetch(''error'');`', correct: false }
+      - { value: 'Symfony will throw an `UnexpectedValueException` or similar error, as a `Response` object is always expected.', correct: true }
+      - { value: 'Symfony will automatically convert `null` into an empty `Response` with a 200 OK status.', correct: false }
+      - { value: 'The request will hang indefinitely.', correct: false }
+      - { value: 'It will result in a 500 Internal Server Error, but the application will continue running.', correct: false }
     help: |
-      The `get()` method on the `FlashBag` retrieves and removes messages of a specific type.
-      https://symfony.com/doc/current/controller/sessions.html#retrieving-flash-messages
+      A controller *must* return a `Response` object. Returning `null` will lead to an error.
+      https://symfony.com/doc/current/controller.html#creating-a-response
+
+  -
+    question: >
+      Which of the following is true about controllers and services in Symfony?
+    answers:
+      - { value: 'Controllers are services by default in modern Symfony applications.', correct: true }
+      - { value: 'Controllers can only access services by extending `AbstractController`.', correct: false }
+      - { value: 'Services can directly call controller methods.', correct: false }
+      - { value: 'Controllers should manually instantiate all their dependencies.', correct: false }
+    help: |
+      Thanks to autoconfiguration (and `#[AsController]` or `controller.service_arguments` tag), controllers are typically registered as services, allowing for autowiring.
+      https://symfony.com/doc/current/controller/service.html
 
   -
     question: |
-      You have a controller method that expects a `DateTimeImmutable` object from a route parameter named `date`. How can Symfony automatically convert the string date from the URL into this object?
+      You need to create a `StreamedResponse` to send a large file to the user without loading it entirely into memory. Which of the following is the correct approach?
     answers:
-      - { value: 'By using a custom `DateTimeImmutableValueResolver`.', correct: true }
-      - { value: 'Symfony automatically converts all string parameters to objects if type-hinted.', correct: false }
-      - { value: 'This requires manual conversion within the controller method.', correct: false }
-      - { value: 'By configuring a specific format in the routing definition.', correct: false }
+      - { value: 'Create a `StreamedResponse` and pass a callable that writes to the output buffer.', correct: true }
+      - { value: 'Create a `BinaryFileResponse` and set its content to a resource stream.', correct: false }
+      - { value: 'Use `Response::create()` with a stream as content.', correct: false }
+      - { value: 'The `StreamedResponse` is only for real-time data, not file downloads.', correct: false }
     help: |
-      Symfony has a built-in argument value resolver that can convert string representations of dates into `DateTime` or `DateTimeImmutable` objects when type-hinted.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#datetime-objects
+      `StreamedResponse` takes a callable that will be executed to stream the content to the client, making it suitable for large data sets.
+      https://symfony.com/doc/current/components/http_foundation/responses.html#streaming-a-response
 
   -
-    question: |
-      What is the primary purpose of the `terminate()` method on the `Kernel` in `public/index.php`?
+    question: >
+      What is the purpose of the `RequestStack` service in Symfony?
     answers:
-      - { value: 'To send the HTTP response to the client.', correct: false }
-      - { value: 'To perform cleanup tasks after the response has been sent, such as flushing the logger or sending emails.', correct: true }
-      - { value: 'To stop the execution of the PHP script immediately.', correct: false }
-      - { value: 'To handle exceptions that occurred during request processing.', correct: false }
+      - { value: 'It holds the current `Request` object and allows access to previous requests in a sub-request context.', correct: true }
+      - { value: 'It manages a stack of all `Response` objects generated during the application lifecycle.', correct: false }
+      - { value: 'It is used to store and retrieve session data.', correct: false }
+      - { value: 'It provides a way to queue and process multiple HTTP requests asynchronously.', correct: false }
     help: |
-      The `terminate()` method is called after the response has been sent to the client, allowing for post-response tasks without delaying the user.
-      https://symfony.com/doc/current/components/http_kernel.html#the-kernel-terminate-event
-
-  -
-    question: |
-      You want to retrieve a specific query parameter, `category`, but if it's not present, you want to use `null`. Which code snippet is correct?
-    answers:
-      - { value: '`$category = $request->query->get(''category'');`', correct: true }
-      - { value: '`$category = $request->query->get(''category'', null);`', correct: true }
-      - { value: '`$category = $request->get(''category'');`', correct: false }
-      - { value: '`$category = $request->query[''category'] ?? null;`', correct: false }
-    help: |
-      The `get()` method of `ParameterBag` (used by `query`, `request`, `attributes`) returns `null` by default if the key is not found, or you can explicitly provide `null` as the default value.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      Which of the following describes the `RequestStack` service in Symfony?
-    answers:
-      - { value: 'It stores all incoming HTTP requests in a database.', correct: false }
-      - { value: 'It provides access to the current master request and any sub-requests.', correct: true }
-      - { value: 'It is a deprecated service in Symfony 7.', correct: false }
-      - { value: 'It is used exclusively for handling AJAX requests.', correct: false }
-    help: |
-      The `RequestStack` service allows you to access the current request, especially useful when dealing with sub-requests (e.g., from `forward()`).
+      The `RequestStack` is crucial for accessing the current request, especially in scenarios involving sub-requests (like `forward()`).
       https://symfony.com/doc/current/components/http_kernel.html#request-stack
 
   -
     question: |
-      What is the purpose of the `#[MapEntity]` attribute (from `SensioFrameworkExtraBundle` or `symfony/doctrine-bridge` in newer versions) when used in a controller argument?
+      Which of the following is a valid way to retrieve the current route name within a controller extending `AbstractController`?
     answers:
-      - { value: 'To automatically convert a route parameter into a Doctrine entity by fetching it from the database.', correct: true }
-      - { value: 'To map request payload data to an entity.', correct: false }
-      - { value: 'To automatically create a new entity instance.', correct: false }
-      - { value: 'To validate an entity before persisting it.', correct: false }
+      - { value: '`$request->attributes->get('_route');`', correct: true }
+      - { value: '`$this->getRouteName();`', correct: false }
+      - { value: '`$this->container->get(''router'')->getContext()->getRouteName();`', correct: true }
+      - { value: '`$request->getRoute();`', correct: false }
     help: |
-      `#[MapEntity]` (or `ParamConverter` functionality) simplifies fetching Doctrine entities directly into controller arguments based on route parameters.
-      https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/annotations/converters.html (Note: While `SensioFrameworkExtraBundle` is often mentioned, the core functionality for `#[MapEntity]` is now in `symfony/doctrine-bridge` for Symfony 6+).
+      The route name is stored as an attribute on the `Request` object after routing. You can also get it from the router's context.
+      https://symfony.com/doc/current/routing.html#accessing-the-request-and-route-parameters
+
+  -
+    question: >
+      What is the role of the `ControllerResolver` in Symfony's HttpKernel?
+    answers:
+      - { value: 'It determines the PHP callable (controller) responsible for handling the current request.', correct: true }
+      - { value: 'It resolves the arguments for the controller method.', correct: false }
+      - { value: 'It matches the incoming URL to a defined route.', correct: false }
+      - { value: 'It renders the Twig template associated with the controller.', correct: false }
+    help: |
+      The `ControllerResolver` is responsible for taking the `Request` object and returning the actual PHP callable that will act as the controller.
+      https://symfony.com/doc/current/components/http_kernel.html#controller-resolution
 
   -
     question: |
-      You want to retrieve a flash message and ensure it is not removed from the session after retrieval. Which method would you use?
+      If you need to access raw request body content (e.g., for a custom API payload that isn't JSON or form data), how would you do it?
     answers:
-      - { value: '`$this->session->getFlashBag()->peek(''notice'');`', correct: true }
-      - { value: '`$this->session->getFlashBag()->get(''notice'');`', correct: false }
-      - { value: '`$this->peekFlash(''notice'');`', correct: false }
-      - { value: '`$this->session->getFlashBag()->keep(''notice'');`', correct: false }
+      - { value: '`$request->getContent();`', correct: true }
+      - { value: '`$request->request->all();`', correct: false }
+      - { value: '`file_get_contents(''php://input'');`', correct: false }
+      - { value: '`$request->getBody();`', correct: false }
     help: |
-      The `peek()` method retrieves a flash message without removing it from the session.
-      https://symfony.com/doc/current/controller/sessions.html#retrieving-flash-messages
+      The `getContent()` method of the `Request` object returns the raw request body.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+
+  -
+    question: >
+      Which of the following is a valid way to set a custom HTTP header on a `Response` object?
+    answers:
+      - { value: '`$response->headers->set(''X-Custom-Header'', ''Value'');`', correct: true }
+      - { value: '`$response->setHeader(''X-Custom-Header'', ''Value'');`', correct: false }
+      - { value: '`$response->addHeader(''X-Custom-Header'', ''Value'');`', correct: false }
+      - { value: '`$response->setHeaders([''X-Custom-Header'' => ''Value'']);`', correct: false }
+    help: |
+      Headers are managed via the `headers` property, which is an instance of `HeaderBag`.
+      https://symfony.com/doc/current/components/http_foundation.html#setting-headers
 
   -
     question: |
-      Which of the following is true about the `Response` object's `send()` method?
+      You want to disable the Symfony profiler for a specific controller action. How can you achieve this using an attribute?
     answers:
-      - { value: 'It is typically called directly within a controller action.', correct: false }
-      - { value: 'It sends the HTTP headers and content to the client.', correct: true }
-      - { value: 'It automatically terminates the PHP script after execution.', correct: false }
-      - { value: 'It is only used for `JsonResponse` objects.', correct: false }
+      - { value: '`#[Profiler(false)]`', correct: true }
+      - { value: '`#[NoProfiler]`', correct: false }
+      - { value: '`#[Debug(false)]`', correct: false }
+      - { value: '`#[IgnoreProfiler]`', correct: false }
     help: |
-      The `send()` method is usually called by the `Kernel` after the controller has returned the `Response` object, not directly by the controller itself.
-      https://symfony.com/doc/current/components/http_foundation.html#sending-the-response
+      The `#[Profiler]` attribute can be used to control profiler behavior for a specific controller or method.
+      https://symfony.com/doc/current/profiler.html#disabling-the-profiler-for-some-requests
+
+  -
+    question: >
+      What is the purpose of the `#[MapQueryParameter]` attribute?
+    answers:
+      - { value: 'To automatically map a query string parameter to a controller argument.', correct: true }
+      - { value: 'To map a route parameter to a controller argument.', correct: false }
+      - { value: 'To map a request body parameter to a controller argument.', correct: false }
+      - { value: 'To map a header value to a controller argument.', correct: false }
+    help: |
+      `#[MapQueryParameter]` is a specific argument resolver attribute for query string parameters.
+      https://symfony.com/doc/current/controller.html#query-parameters-argument
 
   -
     question: |
-      What is the primary purpose of the `#[MapDateTime]` attribute in Symfony 7?
+      Which of the following describes the `#[MapRequestPayload]` attribute's behavior when the request body is invalid JSON?
     answers:
-      - { value: 'To map a string from a route or query parameter to a `DateTime` or `DateTimeImmutable` object.', correct: true }
-      - { value: 'To format a `DateTime` object for display in a template.', correct: false }
-      - { value: 'To validate if a string is a valid date format.', correct: false }
-      - { value: 'To convert a timestamp to a `DateTime` object.', correct: false }
+      - { value: 'It will throw a `NotEncodableValueException` (or similar `HttpException`) which Symfony converts to a 400 Bad Request response.', correct: true }
+      - { value: 'It will return `null` for the argument, and the controller must handle it.', correct: false }
+      - { value: 'It will attempt to parse it as form data instead.', correct: false }
+      - { value: 'It will log an error but proceed with an empty DTO.', correct: false }
     help: |
-      The `#[MapDateTime]` attribute simplifies the conversion of date/time strings from request attributes or query parameters into `DateTime` or `DateTimeImmutable` objects.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapdatetime
+      `#[MapRequestPayload]` performs validation and throws an exception if the payload cannot be deserialized or is invalid, leading to an appropriate HTTP error response.
+      https://symfony.com/doc/current/controller/request_payload.html#validation-errors
+
+  -
+    question: >
+      What is the purpose of the `#[Cache]` attribute on a controller method?
+    answers:
+      - { value: 'To define HTTP caching headers (e.g., `Cache-Control`, `ETag`) for the response generated by that action.', correct: true }
+      - { value: 'To enable server-side caching of the controller''s output in the Symfony cache pool.', correct: false }
+      - { value: 'To mark the controller as eligible for opcode caching.', correct: false }
+      - { value: 'To configure the Twig cache for the template rendered by the controller.', correct: false }
+    help: |
+      The `#[Cache]` attribute is used to configure HTTP caching directly on controller actions.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
 
   -
     question: |
-      When is the `kernel.response` event dispatched in Symfony?
+      You want to send a `103 Early Hints` response from your controller. Which `AbstractController` method facilitates this?
     answers:
-      - { value: 'Before the controller is executed.', correct: false }
-      - { value: 'After the controller has returned a `Response` object, but before it is sent to the client.', correct: true }
-      - { value: 'After the response has been sent to the client.', correct: false }
-      - { value: 'When an exception occurs during request handling.', correct: false }
+      - { value: '`$this->sendEarlyHints();`', correct: true }
+      - { value: '`$this->earlyHints();`', correct: false }
+      - { value: '`$this->sendHeaders(103);`', correct: false }
+      - { value: '`$this->response(103);`', correct: false }
     help: |
-      The `kernel.response` event allows listeners to modify the `Response` object before it is sent to the client.
-      https://symfony.com/doc/current/components/http_kernel.html#the-kernel-response-event
+      The `sendEarlyHints()` method sends a 103 Early Hints response and returns the `Response` object to continue building the full response.
+      https://symfony.com/doc/current/controller.html#early-hints
+
+  -
+    question: >
+      Which of the following is true about how Symfony handles controller arguments that are not explicitly defined in the route but match a service ID?
+    answers:
+      - { value: 'If the controller is registered as a service and autowiring is enabled, Symfony will attempt to inject the service based on its type hint.', correct: true }
+      - { value: 'Symfony will throw an error because only route parameters can be automatically injected.', correct: false }
+      - { value: 'The argument will be `null` unless a default value is provided.', correct: false }
+      - { value: 'The controller must manually retrieve the service from the container.', correct: false }
+    help: |
+      Autowiring allows Symfony to automatically inject services into controller method arguments based on their type hints.
+      https://symfony.com/doc/current/service_container/autowiring.html
 
   -
     question: |
-      Which of the following is a valid way to retrieve the client's IP address from the `Request` object?
+      You are creating a controller for a REST API. Which of the following `Response` subclasses is most appropriate for returning a successful empty response (e.g., after a DELETE operation)?
     answers:
-      - { value: '`$request->getClientIp();`', correct: true }
-      - { value: '`$request->getIp();`', correct: false }
-      - { value: '`$_SERVER[''REMOTE_ADDR''];`', correct: false }
-      - { value: '`$request->server->get(''REMOTE_ADDR'');`', correct: true }
+      - { value: '`new Response(null, Response::HTTP_NO_CONTENT);`', correct: true }
+      - { value: '`new JsonResponse([], Response::HTTP_OK);`', correct: false }
+      - { value: '`new Response('', 200);`', correct: false }
+      - { value: '`new Response();`', correct: false }
     help: |
-      The `getClientIp()` method on the `Request` object is the recommended way to get the client IP, as it handles proxies correctly. You can also access it directly from the `server` parameter bag.
+      `204 No Content` is the standard HTTP status code for successful requests where no content is returned in the response body.
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204
+
+  -
+    question: >
+      What is the purpose of the `Request::isXmlHttpRequest()` method?
+    answers:
+      - { value: 'To check if the current request was made via AJAX (XMLHttpRequest).', correct: true }
+      - { value: 'To determine if the request body contains XML data.', correct: false }
+      - { value: 'To verify if the request originated from a trusted domain.', correct: false }
+      - { value: 'To check if the client supports XML responses.', correct: false }
+    help: |
+      This method checks the `X-Requested-With` header, which is commonly sent by JavaScript frameworks for AJAX requests.
+      https://symfony.com/doc/current/components/http_foundation.html#checking-the-request-format
+
+  -
+    question: |
+      Which of the following is the correct way to get all flash messages for a specific type (e.g., `success`) from the session in Twig?
+    answers:
+      - { value: '`app.flashes(''success'')`', correct: true }
+      - { value: '`app.session.flashbag.get(''success'')`', correct: true }
+      - { value: '`app.session.getFlash(''success'')`', correct: false }
+      - { value: '`flash(''success'')`', correct: false }
+    help: |
+      The `app.flashes` global variable provides easy access to flash messages in Twig. You can also access the flash bag directly from the session.
+      https://symfony.com/doc/current/controller/flash_messages.html#displaying-flash-messages
+
+  -
+    question: >
+      What happens if a route parameter in a controller method is type-hinted (e.g., `int $id`), but the URL provides a non-numeric value for that parameter?
+    answers:
+      - { value: 'Symfony''s argument resolver will throw a `TypeError` or `BadRequestHttpException`, leading to a 400 Bad Request response.', correct: true }
+      - { value: 'The parameter will be `null`, and the controller must handle the type mismatch.', correct: false }
+      - { value: 'Symfony will attempt to cast the value to an integer, potentially resulting in `0` or an unexpected value.', correct: false }
+      - { value: 'The route will simply not match, resulting in a 404 Not Found.', correct: false }
+    help: |
+      The argument resolvers enforce type hints. If a value cannot be converted to the specified type, an exception is thrown.
+      https://symfony.com/doc/current/controller/argument_value_resolvers.html#built-in-argument-value-resolvers
+
+  -
+    question: >
+      Which of the following is a valid way to retrieve the base URL of the current request in a controller?
+    answers:
+      - { value: '`$request->getBaseUrl();`', correct: true }
+      - { value: '`$request->getUriForPath('/');`', correct: false }
+      - { value: '`$request->getSchemeAndHttpHost();`', correct: true }
+      - { value: '`$request->getHost();`', correct: false }
+    help: |
+      `getBaseUrl()` returns the part of the URL before the path info (e.g., `/app_dev.php`). `getSchemeAndHttpHost()` returns the scheme and host (e.g., `https://example.com`).
       https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      What is the main purpose of the `#[MapForm]` attribute in Symfony 7?
+      You need to invalidate the current user's session. Which method on the `Session` object should you call?
     answers:
-      - { value: 'To automatically handle form submission and validation by mapping form data to a DTO or entity.', correct: true }
-      - { value: 'To create a new form instance in the controller.', correct: false }
-      - { value: 'To render a form in a Twig template.', correct: false }
-      - { value: 'To map query parameters to a form.', correct: false }
+      - { value: '`$session->invalidate();`', correct: true }
+      - { value: '`$session->clear();`', correct: false }
+      - { value: '`$session->destroy();`', correct: false }
+      - { value: '`$session->reset();`', correct: false }
     help: |
-      The `#[MapForm]` attribute simplifies form handling in controllers by automatically creating, handling, and validating forms based on request data and mapping them to a specified object.
-      https://symfony.com/doc/current/controller/map_form.html
+      The `invalidate()` method invalidates the current session and regenerates the session ID.
+      https://symfony.com/doc/current/components/http_foundation/sessions.html#invalidating-a-session
+
+  -
+    question: >
+      Which of the following is the correct way to get all parameters from the query string as an associative array?
+    answers:
+      - { value: '`$request->query->all();`', correct: true }
+      - { value: '`$request->query->toArray();`', correct: false }
+      - { value: '`$request->getQueryParams();`', correct: false }
+      - { value: '`$request->all();`', correct: false }
+    help: |
+      The `all()` method of the `ParameterBag` (which `query` is an instance of) returns all parameters as an associative array.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      You want to retrieve a value from the session and remove it immediately after retrieval. Which method should you use?
+      What is the purpose of the `#[MapQueryString]` attribute?
     answers:
-      - { value: '`$session->get(''key'');`', correct: false }
-      - { value: '`$session->remove(''key'');`', correct: false }
-      - { value: '`$session->getAndRemove(''key'');`', correct: true }
-      - { value: '`$session->pop(''key'');`', correct: false }
+      - { value: 'To automatically map all query string parameters to properties of a DTO (Data Transfer Object) in a controller argument.', correct: true }
+      - { value: 'To map a single query string parameter to a controller argument.', correct: false }
+      - { value: 'To validate the format of the query string.', correct: false }
+      - { value: 'To convert the query string into a JSON object.', correct: false }
     help: |
-      The `getAndRemove()` method retrieves a session attribute and then removes it from the session.
-      https://symfony.com/doc/current/components/http_foundation.html#session-attributes
+      `#[MapQueryString]` is used to map an entire query string into a dedicated DTO, simplifying access to multiple query parameters.
+      https://symfony.com/doc/current/controller/query_string_argument.html
+
+  -
+    question: >
+      When using `#[MapEntity]`, what happens if the entity with the given ID from the route parameter is not found in the database?
+    answers:
+      - { value: 'Symfony will automatically throw a `NotFoundHttpException`, resulting in a 404 Not Found response.', correct: true }
+      - { value: 'The argument will be `null`, and the controller must handle the missing entity.', correct: false }
+      - { value: 'A `RuntimeException` will be thrown, leading to a 500 Internal Server Error.', correct: false }
+      - { value: 'The controller will proceed, but the entity object will be empty.', correct: false }
+    help: |
+      `#[MapEntity]` conveniently handles the "not found" case by throwing a `NotFoundHttpException`.
+      https://symfony.com/doc/current/doctrine.html#handling-not-found-entities
 
   -
     question: |
-      Which of the following is typically responsible for creating the `Request` object from global PHP variables (`$_GET`, `$_POST`, `$_SERVER`, etc.)?
+      You need to get the current request method (e.g., 'GET', 'POST'). Which method on the `Request` object should you use?
     answers:
-      - { value: 'The `ControllerResolver`.', correct: false }
-      - { value: 'The `Kernel`.', correct: false }
-      - { value: 'The `Request::createFromGlobals()` static method, usually called in the front controller.', correct: true }
-      - { value: 'The `Router`.', correct: false }
+      - { value: '`$request->getMethod();`', correct: true }
+      - { value: '`$request->getHttpMethod();`', correct: false }
+      - { value: '`$request->method();`', correct: false }
+      - { value: '`$request->requestMethod();`', correct: false }
     help: |
-      The `Request::createFromGlobals()` static method is used in the front controller (`public/index.php`) to create the `Request` object from the raw PHP global variables.
-      https://symfony.com/doc/current/components/http_foundation.html#creating-a-request
+      The `getMethod()` method returns the HTTP method of the request.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+
+  -
+    question: >
+      Which of the following is a valid way to check if a specific flash message type (e.g., `error`) exists in the session?
+    answers:
+      - { value: '`$session->getFlashBag()->has(''error'');`', correct: true }
+      - { value: '`$this->hasFlash(''error'');`', correct: false }
+      - { value: '`$session->has(''error'');`', correct: false }
+      - { value: '`$session->getFlashBag()->get(''error'') !== [];`', correct: true }
+    help: |
+      The `has()` method on the `FlashBag` checks for the existence of messages for a given type. Retrieving and checking if the array is empty also works.
+      https://symfony.com/doc/current/controller/flash_messages.html#displaying-flash-messages
 
   -
     question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when used with a `#[MapQueryParameter]` attribute on the same controller argument?
+      What is the recommended way to handle form submissions in a Symfony controller?
     answers:
-      - { value: 'This combination is not allowed and will throw an error.', correct: false }
-      - { value: 'Only `#[MapRequestPayload]` will be effective; `#[MapQueryParameter]` will be ignored.', correct: false }
-      - { value: '`#[MapRequestPayload]` handles the request body, while `#[MapQueryParameter]` handles a specific query parameter for the same DTO.', correct: true }
-      - { value: 'It means the DTO can be populated from either the request payload or a query parameter.', correct: false }
+      - { value: 'Create a form, handle the request with `$form->handleRequest($request);`, and then check `$form->isSubmitted() && $form->isValid();`', correct: true }
+      - { value: 'Manually retrieve all form fields from `$request->request->all();` and validate them.', correct: false }
+      - { value: 'Use `#[MapRequestPayload]` for all form submissions.', correct: false }
+      - { value: 'Pass the `Request` object directly to the entity constructor.', correct: false }
     help: |
-      These attributes serve different purposes and can be used together on different arguments or even on the same DTO if the DTO itself is designed to receive data from both sources. `#[MapRequestPayload]` is for the request body, `#[MapQueryParameter]` is for a single query parameter.
-      https://symfony.com/doc/current/controller/request_payload.html
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
+      Symfony's Form component provides a robust way to handle form submissions, including request handling and validation.
+      https://symfony.com/doc/current/forms.html#handling-form-submissions
+
+  -
+    question: >
+      Which of the following is true about the `Response::HTTP_NOT_FOUND` constant?
+    answers:
+      - { value: 'It represents the HTTP status code `404`.', correct: true }
+      - { value: 'It is used to indicate a successful response.', correct: false }
+      - { value: 'It is a string value, not an integer.', correct: false }
+      - { value: 'It is only used for internal redirects.', correct: false }
+    help: |
+      `Response::HTTP_NOT_FOUND` is a convenient constant for the 404 status code.
+      https://symfony.com/doc/current/components/http_foundation.html#response-status-codes
 
   -
     question: |
-      You want to retrieve a session attribute named `user_id` but keep it in the session after retrieval. Which method should you use?
+      You want to set a custom header on a `Response` object that should be sent multiple times (e.g., `Set-Cookie` for multiple cookies). Which method should you use?
     answers:
-      - { value: '`$session->get(''user_id'');`', correct: true }
-      - { value: '`$session->peek(''user_id'');`', correct: false }
-      - { value: '`$session->getAndRemove(''user_id'');`', correct: false }
-      - { value: '`$session->has(''user_id'');`', correct: false }
+      - { value: '`$response->headers->set(''Set-Cookie'', [''cookie1'', ''cookie2''], false);`', correct: true }
+      - { value: '`$response->headers->add(''Set-Cookie'', ''cookie1''); $response->headers->add(''Set-Cookie'', ''cookie2'');`', correct: true }
+      - { value: '`$response->headers->append(''Set-Cookie'', ''cookie1'');`', correct: true }
+      - { value: '`$response->headers->setMultiple(''Set-Cookie'', [''cookie1'', ''cookie2'']);`', correct: false }
     help: |
-      The `get()` method retrieves a session attribute without removing it.
-      https://symfony.com/doc/current/components/http_foundation.html#session-attributes
+      The `set()` method with the third argument `false` (replace) or `add()`/`append()` methods can be used for multiple headers with the same name.
+      https://symfony.com/doc/current/components/http_foundation.html#setting-headers
+
+  -
+    question: >
+      What is the purpose of the `#[MapRequestPayload]` attribute's `validation_groups` option?
+    answers:
+      - { value: 'To specify which validation groups should be applied when deserializing the request payload into the DTO.', correct: true }
+      - { value: 'To define the HTTP methods for which the payload should be validated.', correct: false }
+      - { value: 'To group multiple payload attributes together for easier mapping.', correct: false }
+      - { value: 'To control which fields are included in the deserialized DTO.', correct: false }
+    help: |
+      The `validation_groups` option allows you to apply specific validation rules defined in your DTO based on the context.
+      https://symfony.com/doc/current/controller/request_payload.html#validation-groups
 
   -
     question: |
-      Which of the following is true about the `Session` object in Symfony?
+      Which of the following is the correct way to get the current URL path (e.g., `/blog/post/123`) from the `Request` object, excluding the host and query string?
     answers:
-      - { value: 'It is automatically started on every request.', correct: false }
-      - { value: 'It stores data in the `$_SESSION` superglobal.', correct: true }
-      - { value: 'It is primarily used for long-term data storage across multiple user visits.', correct: false }
-      - { value: 'It is stateless and does not persist data between requests.', correct: false }
+      - { value: '`$request->getPathInfo();`', correct: true }
+      - { value: '`$request->getUri();`', correct: false }
+      - { value: '`$request->getUriForPath();`', correct: false }
+      - { value: '`$request->getRequestUri();`', correct: false }
     help: |
-      The session is started implicitly when accessed (e.g., by calling `getSession()` on the request or using `addFlash()`). It uses `$_SESSION` internally.
-      https://symfony.com/doc/current/controller/sessions.html
+      `getPathInfo()` returns the path relative to the front controller, excluding the query string.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+
+  -
+    question: >
+      What is the purpose of the `#[MapEntity(expr: 'repository.find(id)')]` option in a controller argument?
+    answers:
+      - { value: 'It allows you to define a custom expression to fetch the entity, rather than just by ID or slug.', correct: true }
+      - { value: 'It specifies that the entity should be fetched from a custom repository method.', correct: false }
+      - { value: 'It defines a DQL query to retrieve the entity.', correct: false }
+      - { value: 'It enables caching for the fetched entity.', correct: false }
+    help: |
+      The `expr` option provides advanced control over how the entity is fetched, allowing complex queries or method calls.
+      https://symfony.com/doc/current/doctrine.html#advanced-usage-with-mape-entity
 
   -
     question: |
-      What is the purpose of the `#[MapUploadedFile]` attribute when the uploaded file is optional?
+      When would you use `Response::setPrivate()` and `Response::setSharedMaxAge()`?
     answers:
-      - { value: 'You must always provide a default `null` value for the argument.', correct: true }
-      - { value: 'The attribute automatically makes the argument optional.', correct: false }
-      - { value: 'You need to wrap the `UploadedFile` in an `Optional` type.', correct: false }
-      - { value: 'The controller method will not be called if the file is missing.', correct: false }
+      - { value: 'To configure HTTP caching for private (browser) and shared (proxy) caches, respectively.', correct: true }
+      - { value: 'To set permissions on the response object for internal Symfony components.', correct: false }
+      - { value: 'To encrypt the response content for private and shared networks.', correct: false }
+      - { value: 'To define the maximum age of a session cookie.', correct: false }
     help: |
-      If an uploaded file mapped by `#[MapUploadedFile]` is optional, the controller argument must be nullable (e.g., `UploadedFile $picture = null`).
-      https://symfony.com/doc/current/controller/upload_file.html#optional-uploaded-files
+      These methods are part of the `Response` object's caching capabilities, allowing fine-grained control over how responses are cached by clients and proxies.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
+
+  -
+    question: >
+      Which of the following is a valid way to get the current host (e.g., `example.com`) from the `Request` object?
+    answers:
+      - { value: '`$request->getHost();`', correct: true }
+      - { value: '`$request->getHttpHost();`', correct: true }
+      - { value: '`$request->server->get(''HTTP_HOST'');`', correct: true }
+      - { value: '`$request->getDomain();`', correct: false }
+    help: |
+      Multiple methods can retrieve the host information, including `getHost()`, `getHttpHost()`, and directly from the `SERVER` bag.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      When using `forward()` to an internal controller, what happens to the original request's query parameters and attributes?
+      What is the purpose of the `#[MapDateTime]` attribute?
     answers:
-      - { value: 'They are automatically passed to the forwarded controller.', correct: true }
-      - { value: 'They are completely lost and must be manually re-added.', correct: false }
-      - { value: 'Only query parameters are passed, not attributes.', correct: false }
-      - { value: 'Only attributes are passed, not query parameters.', correct: false }
+      - { value: 'To automatically convert a string from a route or query parameter into a `DateTimeInterface` object.', correct: true }
+      - { value: 'To format a `DateTime` object for display in a template.', correct: false }
+      - { value: 'To validate if a string represents a valid date and time.', correct: false }
+      - { value: 'To set the default timezone for the application.', correct: false }
     help: |
-      When you `forward()`, Symfony creates a new sub-request. The original request's query parameters and attributes are typically carried over to the sub-request. You can also pass additional arguments.
-      https://symfony.com/doc/current/controller/forwarding.html
+      `#[MapDateTime]` simplifies handling date/time strings in controller arguments by automatically converting them to `DateTimeInterface` instances.
+      https://symfony.com/doc/current/controller.html#datetime-argument
+
+  -
+    question: >
+      Which of the following describes the behavior of `Response::setStatusCode()`?
+    answers:
+      - { value: 'It sets the HTTP status code for the response (e.g., 200, 404, 500).', correct: true }
+      - { value: 'It sets the status message associated with the status code.', correct: false }
+      - { value: 'It only works for error status codes.', correct: false }
+      - { value: 'It sends the status line to the client immediately.', correct: false }
+    help: |
+      The `setStatusCode()` method explicitly sets the HTTP status code.
+      https://symfony.com/doc/current/components/http_foundation.html#response-status-codes
 
   -
     question: |
-      Which of the following is the correct way to check if a flash message of a specific type (e.g., 'warning') exists in the session?
-    answers:
-      - { value: '`$this->session->getFlashBag()->has(''warning'');`', correct: true }
-      - { value: '`$this->hasFlash(''warning'');`', correct: false }
-      - { value: '`$this->session->getFlashBag()->get(''warning'') !== null;`', correct: false }
-      - { value: '`isset($this->session->getFlashBag()[''warning'']);`', correct: false }
-    help: |
-      The `has()` method on the `FlashBag` checks for the existence of flash messages of a given type.
-      https://symfony.com/doc/current/controller/sessions.html#retrieving-flash-messages
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the request body contains invalid data (e.g., malformed JSON or invalid types for DTO properties)?
-    answers:
-      - { value: 'It will automatically correct the invalid data.', correct: false }
-      - { value: 'It will throw a `ValidationException` if the `symfony/validator` component is installed and validation rules are defined.', correct: true }
-      - { value: 'It will silently ignore the invalid data.', correct: false }
-      - { value: 'It will return a `500 Internal Server Error` without specific details.', correct: false }
-    help: |
-      When `symfony/validator` is installed and validation constraints are defined on the DTO, `#[MapRequestPayload]` will automatically validate the deserialized data and throw a `ValidationException` on failure.
-      https://symfony.com/doc/current/controller/request_payload.html#validation
-
-  -
-    question: |
-      You want to access the `User` object representing the currently logged-in user in your controller. Which of the following is the recommended way to do this if your controller extends `AbstractController`?
-    answers:
-      - { value: '`$this->getUser();`', correct: true }
-      - { value: '`$this->get(''security.token_storage'')
-          ->getToken()
-          ->getUser();`', correct: false }
-      - { value: '`$this->security->getUser();`', correct: false }
-      - { value: '`$this->container->get(''security.token_storage'')
-          ->getToken()
-          ->getUser();`', correct: false }
-    help: |
-      The `getUser()` method is a convenient helper provided by `AbstractController` to access the currently authenticated user.
-      https://symfony.com/doc/current/security.html#accessing-the-user
-
-  -
-    question: |
-      What is the primary difference between a `301 Moved Permanently` and a `302 Found` redirect?
-    answers:
-      - { value: '`301` is for temporary redirects, `302` is for permanent.', correct: false }
-      - { value: '`301` indicates the resource has permanently moved, while `302` indicates a temporary redirection.', correct: true }
-      - { value: '`301` is used for internal redirects, `302` for external.', correct: false }
-      - { value: '`301` is for GET requests, `302` is for POST requests.', correct: false }
-    help: |
-      `301` is a permanent redirect, signaling that the old URL should no longer be used. `302` is a temporary redirect, implying the resource might return to its original URL.
-      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301
-      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302
-
-  -
-    question: |
-      Which of the following is the correct way to retrieve all headers from the `Request` object?
+      You want to retrieve all headers from the incoming request as an associative array. Which method should you use?
     answers:
       - { value: '`$request->headers->all();`', correct: true }
       - { value: '`$request->getHeaders();`', correct: false }
       - { value: '`$request->headers->toArray();`', correct: false }
       - { value: '`$request->allHeaders();`', correct: false }
     help: |
-      The `all()` method on the `headers` property (which is a `HeaderBag`) returns all headers as an associative array.
+      The `all()` method of the `HeaderBag` returns all headers as an associative array.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+
+  -
+    question: >
+      What is the primary difference between `Request::getUri()` and `Request::getRequestUri()`?
+    answers:
+      - { value: '`getUri()` returns the full URI including scheme, host, path, and query string, while `getRequestUri()` returns the URI as it was requested by the client (including the front controller if applicable).', correct: true }
+      - { value: '`getUri()` is for internal use, `getRequestUri()` is for public display.', correct: false }
+      - { value: '`getUri()` includes the fragment, `getRequestUri()` does not.', correct: false }
+      - { value: 'They are synonyms and return the exact same value.', correct: false }
+    help: |
+      `getUri()` constructs a canonical URI, while `getRequestUri()` returns the raw URI from the request line.
       https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      What is the primary purpose of the `#[MapRequestPayload]` attribute when the request body is empty or missing?
+      Which of the following is true about the `Response::setPublic()` and `Response::setPrivate()` methods?
     answers:
-      - { value: 'It will create an empty instance of the DTO.', correct: false }
-      - { value: 'It will throw an exception if the DTO is not nullable.', correct: true }
-      - { value: 'It will return `null` for the DTO argument.', correct: false }
-      - { value: 'It will attempt to populate the DTO from query parameters instead.', correct: false }
+      - { value: '`setPublic()` marks the response as cacheable by shared caches (e.g., proxies), while `setPrivate()` marks it as cacheable only by the client''s browser.', correct: true }
+      - { value: '`setPublic()` makes the response accessible without authentication, `setPrivate()` requires authentication.', correct: false }
+      - { value: '`setPublic()` allows the response to be indexed by search engines, `setPrivate()` prevents it.', correct: false }
+      - { value: 'They control whether the response content is encrypted.', correct: false }
     help: |
-      If the request payload is missing or empty and the DTO argument is not nullable, `#[MapRequestPayload]` will throw an exception because it cannot create the required object.
-      https://symfony.com/doc/current/controller/request_payload.html
+      These methods control the `Cache-Control` header's `public` and `private` directives, influencing how and where the response can be cached.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
 
   -
     question: |
-      You want to access the current session ID. How can you do this?
+      You need to get the current request format (e.g., 'html', 'json') from the `Request` object. Which method should you use?
     answers:
-      - { value: '`$request->getSession()->getId();`', correct: true }
-      - { value: '`$this->session->getId();`', correct: false }
-      - { value: '`session_id();`', correct: false }
-      - { value: '`$request->getSessionId();`', correct: false }
+      - { value: '`$request->getRequestFormat();`', correct: true }
+      - { value: '`$request->getFormat();`', correct: false }
+      - { value: '`$request->attributes->get('_format');`', correct: true }
+      - { value: '`$request->getContentType();`', correct: false }
     help: |
-      The `getId()` method on the `Session` object retrieves the current session ID.
-      https://symfony.com/doc/current/controller/sessions.html#accessing-the-session
+      `getRequestFormat()` determines the format based on the `_format` route attribute or `Accept` header. The `_format` attribute is also directly accessible.
+      https://symfony.com/doc/current/components/http_foundation.html#checking-the-request-format
+
+  -
+    question: >
+      What is the purpose of the `#[MapUploadedFile]` attribute's `fileName` option?
+    answers:
+      - { value: 'To specify the name of the form field from which the uploaded file should be mapped, if it differs from the argument name.', correct: true }
+      - { value: 'To define the desired filename for the uploaded file after it''s moved.', correct: false }
+      - { value: 'To set a regular expression for validating the uploaded file''s name.', correct: false }
+      - { value: 'To indicate whether the file upload is required or optional.', correct: false }
+    help: |
+      The `fileName` option allows you to explicitly map a form field name to a controller argument name if they don't match.
+      https://symfony.com/doc/current/controller.html#uploaded-file-argument
 
   -
     question: |
-      Which of the following is a valid way to define a default value for a route parameter in a controller method signature?
+      Which of the following is true about using the `#[AsCommand]` attribute for console commands and its relation to controllers?
     answers:
-      - { value: '`public function show(int $id = 1): Response`', correct: true }
-      - { value: '`public function show(int $id = null): Response`', correct: true }
-      - { value: '`public function show(int $id): Response { $id ??= 1; }`', correct: false }
-      - { value: '`#[Route('/item/{id}', defaults: ['id' => 1])]`', correct: true }
+      - { value: '`#[AsCommand]` is used for console commands, not HTTP controllers, and defines command metadata.', correct: true }
+      - { value: '`#[AsCommand]` can be used on controller methods to expose them as console commands.', correct: false }
+      - { value: 'Controllers automatically become console commands if they extend `AbstractController`.', correct: false }
+      - { value: 'There is no `#[AsCommand]` attribute in Symfony.', correct: false }
     help: |
-      Default values for route parameters can be defined directly in the method signature or in the route definition using the `defaults` option.
-      https://symfony.com/doc/current/routing.html#default-values
+      `#[AsCommand]` is specific to console commands, providing a modern way to configure them. It's distinct from HTTP controllers.
+      https://symfony.com/doc/current/console.html#configuring-the-command
+
+  -
+    question: >
+      What is the purpose of the `Response::setExpires()` method?
+    answers:
+      - { value: 'To set the `Expires` HTTP header, indicating the date/time after which the response is considered stale.', correct: true }
+      - { value: 'To define the maximum age for the response in the cache.', correct: false }
+      - { value: 'To specify the expiration date of a session.', correct: false }
+      - { value: 'To set a cookie''s expiration date.', correct: false }
+    help: |
+      The `setExpires()` method is used for HTTP caching, specifically setting the `Expires` header.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
 
   -
     question: |
-      What is the main advantage of using `#[MapQueryParameter]` over manually retrieving query parameters with `$request->query->get()`?
+      You need to get the current locale from the `Request` object. Which method should you use?
     answers:
-      - { value: 'It automatically handles type conversion and basic validation.', correct: true }
-      - { value: 'It makes the query parameter optional by default.', correct: false }
-      - { value: 'It allows retrieving multiple query parameters at once.', correct: false }
-      - { value: 'It is faster for retrieving parameters.', correct: false }
-    help: |
-      `#[MapQueryParameter]` provides a more declarative and robust way to handle query parameters, including automatic type conversion and validation.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
-
-  -
-    question: |
-      You want to get the base URL of the current request (e.g., `http://example.com`). How can you achieve this using the `Request` object?
-    answers:
-      - { value: '`$request->getUriForPath('/');`', correct: false }
-      - { value: '`$request->getSchemeAndHttpHost();`', correct: true }
-      - { value: '`$request->getBaseUrl();`', correct: false }
-      - { value: '`$request->getHttpHost();`', correct: false }
-    help: |
-      The `getSchemeAndHttpHost()` method returns the scheme (http/https) and the host, forming the base URL.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the controller argument is type-hinted with an interface?
-    answers:
-      - { value: 'It will automatically find a concrete implementation of the interface to deserialize into.', correct: false }
-      - { value: 'It will throw an error, as `#[MapRequestPayload]` requires a concrete class.', correct: true }
-      - { value: 'It will attempt to deserialize into a generic `stdClass` object.', correct: false }
-      - { value: 'It will only work if the interface has a default implementation configured in the service container.', correct: false }
-    help: |
-      `#[MapRequestPayload]` needs a concrete class to deserialize the payload into. It cannot directly deserialize into an interface.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      Which of the following is the correct way to invalidate the current session in a Symfony controller?
-    answers:
-      - { value: '`$request->getSession()->invalidate();`', correct: true }
-      - { value: '`$this->session->destroy();`', correct: false }
-      - { value: '`session_destroy();`', correct: false }
-      - { value: '`$request->invalidateSession();`', correct: false }
-    help: |
-      The `invalidate()` method on the `Session` object invalidates the current session and regenerates the session ID.
-      https://symfony.com/doc/current/controller/sessions.html#invalidating-a-session
-
-  -
-    question: |
-      What is the primary role of the `ArgumentResolver` in Symfony's HttpKernel?
-    answers:
-      - { value: 'To resolve the controller callable from the request.', correct: false }
-      - { value: 'To determine the values for controller method arguments based on the request and registered value resolvers.', correct: true }
-      - { value: 'To convert the controller''s return value into a `Response` object.', correct: false }
-      - { value: 'To manage the routing process and match URLs to controllers.', correct: false }
-    help: |
-      The `ArgumentResolver` is responsible for populating the arguments of a controller method.
-      https://symfony.com/doc/current/components/http_kernel.html#controller-argument-resolution
-
-  -
-    question: |
-      You want to retrieve the current URL path (e.g., `/blog/my-post`). How can you achieve this using the `Request` object?
-    answers:
-      - { value: '`$request->getPathInfo();`', correct: true }
-      - { value: '`$request->getUri();`', correct: false }
-      - { value: '`$request->getRoute();`', correct: false }
-      - { value: '`$request->getUriForPath();`', correct: false }
-    help: |
-      The `getPathInfo()` method returns the path info of the request (the part of the URL after the script name).
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      Which of the following is true about the `#[MapUploadedFile]` attribute when multiple files are uploaded under the same field name (e.g., `files[]`)?
-    answers:
-      - { value: 'It will inject an array of `UploadedFile` objects.', correct: true }
-      - { value: 'It will only inject the first uploaded file.', correct: false }
-      - { value: 'It will throw an error, as it only supports single file uploads.', correct: false }
-      - { value: 'It requires a custom argument value resolver to handle arrays of files.', correct: false }
-    help: |
-      `#[MapUploadedFile]` can handle multiple files for the same field name by injecting an array of `UploadedFile` objects if the argument is type-hinted as an array.
-      https://symfony.com/doc/current/controller/upload_file.html#multiple-uploaded-files
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when used with the `validation_groups` option?
-    answers:
-      - { value: 'To specify which validation groups should be applied when deserializing the payload.', correct: true }
-      - { value: 'To define new validation groups for the DTO.', correct: false }
-      - { value: 'To disable validation for specific fields in the payload.', correct: false }
-      - { value: 'To map the payload to different DTOs based on validation groups.', correct: false }
-    help: |
-      The `validation_groups` option allows you to specify which validation groups the deserialized DTO should be validated against.
-      https://symfony.com/doc/current/controller/request_payload.html#validation-groups
-
-  -
-    question: |
-      You want to retrieve a specific route parameter named `slug` from the `Request` object's attributes. Which code snippet is correct?
-    answers:
-      - { value: '`$request->attributes->get(''slug'');`', correct: true }
-      - { value: '`$request->query->get(''slug'');`', correct: false }
-      - { value: '`$request->get(''slug'');`', correct: false }
-      - { value: '`$request->route->get(''slug'');`', correct: false }
-    help: |
-      Route parameters are stored in the `attributes` property of the `Request` object.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      Which of the following is a valid way to set a cookie that expires at the end of the browser session?
-    answers:
-      - { value: '`$response->headers->setCookie(new Cookie(''name'', ''value'', 0));`', correct: true }
-      - { value: '`$response->headers->setCookie(new Cookie(''name'', ''value'', null));`', correct: true }
-      - { value: '`$response->headers->setCookie(new Cookie(''name'', ''value''));`', correct: true }
-      - { value: '`$response->headers->setCookie(new Cookie(''name'', ''value'', time() + 0));`', correct: false }
-    help: |
-      Setting the expiration time to `0` or `null` (which is the default for `Cookie` if not provided) makes the cookie a session cookie, expiring when the browser closes.
-      https://symfony.com/doc/current/components/http_foundation.html#cookies
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the DTO contains nested objects?
-    answers:
-      - { value: 'It automatically deserializes nested JSON objects into corresponding nested DTOs.', correct: true }
-      - { value: 'It only supports flat DTO structures.', correct: false }
-      - { value: 'Nested objects must be manually deserialized after the main DTO.', correct: false }
-      - { value: 'It requires a custom normalizer for each nested object.', correct: false }
-    help: |
-      `#[MapRequestPayload]` leverages the Symfony Serializer component, which can handle complex nested object structures during deserialization.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      You want to retrieve the name of the route that matched the current request. How can you do this?
-    answers:
-      - { value: '`$request->attributes->get(''_route'');`', correct: true }
-      - { value: '`$request->getRouteName();`', correct: false }
-      - { value: '`$request->get(''route'');`', correct: false }
-      - { value: '`$this->getRoute();`', correct: false }
-    help: |
-      The router stores the matched route name in the `_route` attribute of the `Request` object.
-      https://symfony.com/doc/current/routing.html#accessing-route-parameters-and-attributes
-
-  -
-    question: |
-      What is the primary difference between `Request::createFromGlobals()` and `Request::create()`?
-    answers:
-      - { value: '`createFromGlobals()` creates a request from PHP globals, while `create()` creates a request from arbitrary data.', correct: true }
-      - { value: '`createFromGlobals()` is for GET requests, `create()` is for POST requests.', correct: false }
-      - { value: '`createFromGlobals()` is for production, `create()` is for testing.', correct: false }
-      - { value: '`createFromGlobals()` is deprecated in Symfony 7.', correct: false }
-    help: |
-      `createFromGlobals()` is used to build a `Request` object from the actual HTTP request. `create()` is for programmatic creation of requests, often used in tests.
-      https://symfony.com/doc/current/components/http_foundation.html#creating-a-request
-
-  -
-    question: |
-      Which of the following is true about the `AbstractController`'s `render()` method?
-    answers:
-      - { value: 'It directly outputs the template content to the browser.', correct: false }
-      - { value: 'It returns a `Response` object containing the rendered template content.', correct: true }
-      - { value: 'It requires the `TwigBundle` to be explicitly enabled.', correct: false }
-      - { value: 'It can only render HTML templates.', correct: false }
-    help: |
-      The `render()` method renders a Twig template and wraps the output in a `Response` object. It requires Twig to be installed and configured.
-      https://symfony.com/doc/current/controller.html#rendering-templates
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the request body is not JSON or XML (e.g., plain text)?
-    answers:
-      - { value: 'It will attempt to deserialize it as a string.', correct: false }
-      - { value: 'It will throw an error, as it only supports structured data formats.', correct: true }
-      - { value: 'It will automatically detect the content type and deserialize accordingly.', correct: false }
-      - { value: 'It will fallback to populating the DTO from query parameters.', correct: false }
-    help: |
-      `#[MapRequestPayload]` relies on the Serializer component's encoders, which typically support formats like JSON and XML. For plain text or other unstructured data, it will likely fail unless a custom encoder is configured.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      You want to retrieve the current request method (e.g., `GET`, `POST`). How can you do this using the `Request` object?
-    answers:
-      - { value: '`$request->getMethod();`', correct: true }
-      - { value: '`$request->getHttpMethod();`', correct: false }
-      - { value: '`$_SERVER[''REQUEST_METHOD''];`', correct: false }
-      - { value: '`$request->method();`', correct: false }
-    help: |
-      The `getMethod()` method returns the HTTP method of the request.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      Which of the following is true about the `Session` object's `start()` method?
-    answers:
-      - { value: 'It must be called manually in every controller action that uses the session.', correct: false }
-      - { value: 'It is automatically called by Symfony when session data is accessed or modified.', correct: true }
-      - { value: 'It is used to explicitly save session data to storage.', correct: false }
-      - { value: 'It is a deprecated method in Symfony 7.', correct: false }
-    help: |
-      Symfony's session management automatically starts the session when it's needed, so explicit calls to `start()` are rarely necessary.
-      https://symfony.com/doc/current/controller/sessions.html#accessing-the-session
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the DTO has a constructor with arguments that are not part of the request payload?
-    answers:
-      - { value: 'These arguments must be manually provided by a custom argument value resolver.', correct: false }
-      - { value: 'The constructor arguments will be automatically autowired by Symfony''s dependency injection container.', correct: true }
-      - { value: 'The DTO cannot have a constructor with arguments when used with `#[MapRequestPayload]`.', correct: false }
-      - { value: 'The arguments will be populated from query parameters by default.', correct: false }
-    help: |
-      `#[MapRequestPayload]` integrates with Symfony's autowiring. If the DTO's constructor arguments are services, they will be automatically injected.
-      https://symfony.com/doc/current/controller/request_payload.html#dto-constructor-arguments
-
-  -
-    question: |
-      You want to get the full URL of the current request, including query parameters. How can you achieve this using the `Request` object?
-    answers:
-      - { value: '`$request->getUri();`', correct: true }
-      - { value: '`$request->getUriForPath();`', correct: false }
-      - { value: '`$request->getSchemeAndHttpHost() . $request->getRequestUri();`', correct: true }
-      - { value: '`$request->getAbsoluteUrl();`', correct: false }
-    help: |
-      The `getUri()` method returns the full URI. You can also construct it manually using `getSchemeAndHttpHost()` and `getRequestUri()`.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      What is the primary purpose of the `#[MapQueryParameter]` attribute when the query parameter is optional?
-    answers:
-      - { value: 'The controller argument must be nullable (e.g., `string $param = null`).', correct: true }
-      - { value: 'The attribute automatically makes the argument optional.', correct: false }
-      - { value: 'The controller method will not be called if the parameter is missing.', correct: false }
-      - { value: 'It requires a custom argument value resolver to handle optional parameters.', correct: false }
-    help: |
-      If a query parameter mapped by `#[MapQueryParameter]` is optional, the controller argument must be nullable or have a default value.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
-
-  -
-    question: |
-      Which of the following is the correct way to retrieve a specific header value (e.g., `Content-Type`) from the `Request` object, with a default value if not present?
-    answers:
-      - { value: '`$request->headers->get(''Content-Type'', ''text/html'');`', correct: true }
-      - { value: '`$request->getHeaders(''Content-Type'', ''text/html'');`', correct: false }
-      - { value: '`$request->headers[''Content-Type''] ?? ''text/html'';`', correct: false }
-      - { value: '`$request->header(''Content-Type'', ''text/html'');`', correct: false }
-    help: |
-      The `get()` method of `HeaderBag` allows specifying a default value if the header is not found.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the DTO contains properties that are themselves complex objects (e.g., an `Address` DTO within a `User` DTO)?
-    answers:
-      - { value: 'It automatically deserializes nested JSON objects into corresponding nested DTOs.', correct: true }
-      - { value: 'Nested objects must be manually instantiated and populated.', correct: false }
-      - { value: 'It only supports flat DTO structures without nested objects.', correct: false }
-      - { value: 'Each nested object requires its own `#[MapRequestPayload]` attribute.', correct: false }
-    help: |
-      `#[MapRequestPayload]` leverages the Serializer component's capabilities to handle complex nested object structures during deserialization.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      You want to retrieve the client's preferred languages from the `Request` object. How can you do this?
-    answers:
-      - { value: '`$request->getLanguages();`', correct: true }
-      - { value: '`$request->headers->getAcceptLanguage();`', correct: false }
+      - { value: '`$request->getLocale();`', correct: true }
+      - { value: '`$request->attributes->get('_locale');`', correct: true }
       - { value: '`$request->getPreferredLanguage();`', correct: false }
-      - { value: '`$request->getLocale();`', correct: false }
+      - { value: '`$request->getLanguage();`', correct: false }
     help: |
-      The `getLanguages()` method returns an ordered list of languages preferred by the client.
+      The `getLocale()` method returns the current locale, which is also stored as the `_locale` attribute.
+      https://symfony.com/doc/current/translation.html#locale-and-the-request
+
+  -
+    question: |
+      Which of the following is true about the `Response::setVary()` method?
+    answers:
+      - { value: 'It sets the `Vary` HTTP header, indicating that the response content varies depending on the specified request headers.', correct: true }
+      - { value: 'It is used to vary the response content based on user roles.', correct: false }
+      - { value: 'It makes the response content dynamic and non-cacheable.', correct: false }
+      - { value: 'It is used to specify different versions of the response for A/B testing.', correct: false }
+    help: |
+      The `Vary` header is crucial for correct caching of responses that depend on specific request headers (e.g., `Accept-Encoding`, `User-Agent`).
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
+
+  -
+    question: |
+      What is the purpose of the `#[MapQueryParameter(name: 'page', filter: FILTER_VALIDATE_INT)]` attribute?
+    answers:
+      - { value: 'To map a query parameter named `page` to the argument and filter it as an integer.', correct: true }
+      - { value: 'To validate that the `page` parameter is an integer, but not map it.', correct: false }
+      - { value: 'To automatically paginate query results based on the `page` parameter.', correct: false }
+      - { value: 'To define a default value for the `page` parameter.', correct: false }
+    help: |
+      The `filter` option allows applying PHP's `filter_var` filters directly during argument resolution.
+      https://symfony.com/doc/current/controller.html#query-parameters-argument
+
+  -
+    question: >
+      Which of the following is the correct way to get a specific attribute from the `Request` object's attributes bag (e.g., `_controller` set by the router)?
+    answers:
+      - { value: '`$request->attributes->get('_controller');`', correct: true }
+      - { value: '`$request->get('_controller');`', correct: false }
+      - { value: '`$request->params->get('_controller');`', correct: false }
+      - { value: '`$request->route->get('_controller');`', correct: false }
+    help: |
+      The `attributes` property of the `Request` object holds parameters generated by the routing system or other listeners.
       https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      What is the purpose of the `#[MapQueryParameter]` attribute when the controller argument is type-hinted with an array (e.g., `array $tags`)?
+      What is the primary reason for using a dedicated `FormType` class (e.g., `TaskType`) instead of building forms directly in the controller?
     answers:
-      - { value: 'It will automatically collect multiple query parameters with the same name into an array.', correct: true }
-      - { value: 'It will only map the first occurrence of the query parameter.', correct: false }
-      - { value: 'It requires the query parameter to be sent as a JSON array string.', correct: false }
-      - { value: 'This usage is not supported by `#[MapQueryParameter]`.', correct: false }
+      - { value: 'To promote reusability of form definitions across different controllers or parts of the application.', correct: true }
+      - { value: 'To improve form submission performance.', correct: false }
+      - { value: 'To automatically handle form validation without manual configuration.', correct: false }
+      - { value: 'To prevent cross-site request forgery (CSRF) attacks.', correct: false }
     help: |
-      `#[MapQueryParameter]` can automatically collect multiple values for a parameter into an array if the argument is type-hinted as an array.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
+      Dedicated `FormType` classes encapsulate form structure, validation, and options, making forms reusable and keeping controllers clean.
+      https://symfony.com/doc/current/forms.html#creating-form-classes
 
   -
     question: |
-      Which of the following is the correct way to check if a session attribute named `is_logged_in` exists?
+      Which of the following is true about the `Response::setLastModified()` method?
     answers:
-      - { value: '`$request->getSession()->has(''is_logged_in'');`', correct: true }
-      - { value: '`$this->session->exists(''is_logged_in'');`', correct: false }
-      - { value: '`isset($_SESSION[''is_logged_in'']);`', correct: false }
-      - { value: '`$request->hasAttribute(''is_logged_in'');`', correct: false }
+      - { value: 'It sets the `Last-Modified` HTTP header, indicating the last time the resource was modified.', correct: true }
+      - { value: 'It updates the modification timestamp of the underlying file being served.', correct: false }
+      - { value: 'It is used to track the last time a user accessed the resource.', correct: false }
+      - { value: 'It is only relevant for responses with a `200 OK` status code.', correct: false }
     help: |
-      The `has()` method on the `Session` object checks for the existence of a session attribute.
-      https://symfony.com/doc/current/components/http_foundation.html#session-attributes
+      The `Last-Modified` header is a key part of HTTP caching, allowing browsers and proxies to use conditional requests.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
+
+  -
+    question: >
+      What is the purpose of the `#[MapQueryParameter(name: 'sort', default: 'name')]` attribute?
+    answers:
+      - { value: 'To map a query parameter named `sort` to the argument, providing a default value of `name` if the parameter is not present.', correct: true }
+      - { value: 'To automatically sort query results by the `name` field if no `sort` parameter is provided.', correct: false }
+      - { value: 'To validate that the `sort` parameter is one of the allowed values, with `name` as the default.', correct: false }
+      - { value: 'To define a required query parameter named `sort`.', correct: false }
+    help: |
+      The `default` option provides a fallback value if the query parameter is missing.
+      https://symfony.com/doc/current/controller.html#query-parameters-argument
 
   -
     question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the request body contains a nested array of objects?
-    answers:
-      - { value: 'It automatically deserializes the array of JSON objects into an array of DTOs.', correct: true }
-      - { value: 'It will only deserialize the first object in the array.', correct: false }
-      - { value: 'This structure is not supported by `#[MapRequestPayload]`.', correct: false }
-      - { value: 'It requires a custom normalizer for the array.', correct: false }
-    help: |
-      `#[MapRequestPayload]` can handle arrays of complex objects by deserializing them into an array of the specified DTO type.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      You want to retrieve the current host name (e.g., `example.com`) from the `Request` object. How can you do this?
-    answers:
-      - { value: '`$request->getHost();`', correct: true }
-      - { value: '`$request->getHttpHost();`', correct: true }
-      - { value: '`$_SERVER[''HTTP_HOST''];`', correct: false }
-      - { value: '`$request->getUriHost();`', correct: false }
-    help: |
-      Both `getHost()` and `getHttpHost()` can be used to retrieve the host name. `getHttpHost()` also includes the port if it's non-standard.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
-
-  -
-    question: |
-      What is the primary purpose of the `#[MapQueryParameter]` attribute when the controller argument is type-hinted with a DTO?
-    answers:
-      - { value: 'To automatically populate the DTO''s properties from query parameters with matching names.', correct: true }
-      - { value: 'To map the entire query string into a single DTO property.', correct: false }
-      - { value: 'To validate the DTO against query parameter constraints.', correct: false }
-      - { value: 'To convert the DTO into a query string.', correct: false }
-    help: |
-      `#[MapQueryParameter]` can automatically populate a DTO's properties from query parameters, simplifying argument resolution for multiple parameters.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
-
-  -
-    question: |
-      Which of the following is the correct way to remove a specific session attribute named `cart_id`?
-    answers:
-      - { value: '`$request->getSession()->remove(''cart_id'');`', correct: true }
-      - { value: '`$this->session->delete(''cart_id'');`', correct: false }
-      - { value: '`unset($_SESSION[''cart_id'']);`', correct: false }
-      - { value: '`$request->removeAttribute(''cart_id'');`', correct: false }
-    help: |
-      The `remove()` method on the `Session` object removes a specific session attribute.
-      https://symfony.com/doc/current/components/http_foundation.html#session-attributes
-
-  -
-    question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the request body contains data for a DTO, but some DTO properties are missing from the payload?
-    answers:
-      - { value: 'Missing properties will be set to `null` or their default value if defined in the DTO.', correct: true }
-      - { value: 'It will throw an error if any required properties are missing.', correct: false }
-      - { value: 'It will attempt to populate missing properties from query parameters.', correct: false }
-      - { value: 'The DTO will only be partially populated, and missing properties will remain uninitialized.', correct: false }
-    help: |
-      The deserialization process will set missing properties to `null` or their default values as defined in the DTO. Validation rules would then determine if `null` is acceptable for required fields.
-      https://symfony.com/doc/current/controller/request_payload.html
-
-  -
-    question: |
-      You want to retrieve the current request scheme (e.g., `http` or `https`). How can you do this using the `Request` object?
+      Which of the following is the correct way to get the current scheme (e.g., `http` or `https`) from the `Request` object?
     answers:
       - { value: '`$request->getScheme();`', correct: true }
       - { value: '`$request->getProtocol();`', correct: false }
-      - { value: '`$_SERVER[''HTTPS''] ? ''https'' : ''http'';`', correct: false }
+      - { value: '`$request->server->get(''HTTPS'') ? ''https'' : ''http'';`', correct: true }
       - { value: '`$request->isSecure() ? ''https'' : ''http'';`', correct: true }
     help: |
-      The `getScheme()` method returns the scheme. `isSecure()` can also be used to determine if it's `https`.
+      `getScheme()` is the direct method. You can also infer it from `isSecure()` or the `HTTPS` server parameter.
       https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      What is the primary purpose of the `#[MapQueryParameter]` attribute when the query parameter is a complex type (e.g., an enum or a custom object)?
+      What is the purpose of the `#[MapEntity(id: 'uuid')]` option when using `#[MapEntity]`?
     answers:
-      - { value: 'It requires a custom argument value resolver to handle the conversion.', correct: true }
-      - { value: 'It automatically converts the string to the complex type if a `__toString()` method exists.', correct: false }
-      - { value: 'It will throw an error, as it only supports scalar types.', correct: false }
-      - { value: 'It will attempt to deserialize the string as JSON into the complex type.', correct: false }
+      - { value: 'It specifies that the entity should be fetched using a property named `uuid` instead of the default `id` property from the route parameter.', correct: true }
+      - { value: 'It indicates that the entity''s primary key is a UUID.', correct: false }
+      - { value: 'It tells Symfony to generate a UUID for the entity if one is not provided.', correct: false }
+      - { value: 'It defines a custom argument resolver for UUIDs.', correct: false }
     help: |
-      For complex types that are not automatically handled (like enums or custom DTOs), a custom argument value resolver is needed to perform the conversion from the query parameter string.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#creating-a-custom-argument-value-resolver
+      The `id` option allows you to map a route parameter to a specific property of the entity other than its primary key.
+      https://symfony.com/doc/current/doctrine.html#advanced-usage-with-mape-entity
 
   -
     question: |
-      Which of the following is the correct way to add a new session attribute named `user_role` with the value `admin`?
+      Which of the following is true about how Symfony handles a controller method with a variadic argument (e.g., `...$items`)?
     answers:
-      - { value: '`$request->getSession()->set(''user_role'', ''admin'');`', correct: true }
-      - { value: '`$this->session->add(''user_role'', ''admin'');`', correct: false }
-      - { value: '`$_SESSION[''user_role''] = ''admin'';`', correct: false }
-      - { value: '`$request->setAttribute(''user_role'', ''admin'');`', correct: false }
+      - { value: 'If the corresponding request attribute is an array, its values will be passed to the variadic argument.', correct: true }
+      - { value: 'Variadic arguments are not supported in Symfony controller methods.', correct: false }
+      - { value: 'The variadic argument will always be an empty array unless explicitly populated by a custom resolver.', correct: false }
+      - { value: 'Symfony will only pass the first item from a request attribute to the variadic argument.', correct: false }
     help: |
-      The `set()` method on the `Session` object is used to add or update session attributes.
-      https://symfony.com/doc/current/components/http_foundation.html#session-attributes
+      Symfony's argument resolvers can handle variadic arguments, mapping array-based request attributes to them.
+      https://symfony.com/doc/current/create_framework/http_kernel_controller_resolver.html#controller-method-arguments
+
+  -
+    question: >
+      What is the purpose of the `Response::setEtag()` method?
+    answers:
+      - { value: 'To set the `ETag` HTTP header, providing a unique identifier for the response content for conditional requests.', correct: true }
+      - { value: 'To encrypt the response content.', correct: false }
+      - { value: 'To generate a unique ID for the response log entry.', correct: false }
+      - { value: 'To specify the encoding of the response content.', correct: false }
+    help: |
+      The `ETag` header is a strong validator for HTTP caching, allowing clients to make conditional requests to check if content has changed.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
 
   -
     question: |
-      What is the purpose of the `#[MapRequestPayload]` attribute when the DTO contains a property type-hinted with `array`?
+      Which of the following is the correct way to get the current URI scheme and HTTP host (e.g., `https://www.example.com`) from the `Request` object?
     answers:
-      - { value: 'It will deserialize a JSON array from the payload into the array property.', correct: true }
-      - { value: 'It will only deserialize a single value into the array.', correct: false }
-      - { value: 'It requires a custom normalizer for array properties.', correct: false }
-      - { value: 'This usage is not supported by `#[MapRequestPayload]`.', correct: false }
+      - { value: '`$request->getSchemeAndHttpHost();`', correct: true }
+      - { value: '`$request->getUriBase();`', correct: false }
+      - { value: '`$request->getAbsoluteUri();`', correct: false }
+      - { value: '`$request->getHttpHostWithScheme();`', correct: false }
     help: |
-      `#[MapRequestPayload]` can deserialize JSON arrays into PHP array properties within the DTO.
+      `getSchemeAndHttpHost()` constructs the base URL including the scheme and host.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+
+  -
+    question: >
+      What is the primary benefit of using `#[MapRequestPayload]` over manually decoding JSON and populating a DTO?
+    answers:
+      - { value: 'Automatic deserialization, validation, and error handling of the request payload, reducing boilerplate code in controllers.', correct: true }
+      - { value: 'It automatically caches the request payload for faster access.', correct: false }
+      - { value: 'It ensures that the request payload is always encrypted.', correct: false }
+      - { value: 'It prevents SQL injection vulnerabilities from the request payload.', correct: false }
+    help: |
+      `#[MapRequestPayload]` streamlines the process of handling complex request bodies by integrating deserialization and validation.
       https://symfony.com/doc/current/controller/request_payload.html
 
   -
     question: |
-      You want to retrieve the current request's URI scheme and host (e.g., `https://www.example.com`). How can you do this?
+      You want to get the client's preferred languages from the `Request` object, ordered by preference. Which method should you use?
     answers:
-      - { value: '`$request->getSchemeAndHttpHost();`', correct: true }
-      - { value: '`$request->getUriHost();`', correct: false }
-      - { value: '`$request->getBaseUrl();`', correct: false }
-      - { value: '`$request->getHttpHost();`', correct: false }
+      - { value: '`$request->getLanguages();`', correct: true }
+      - { value: '`$request->getPreferredLanguages();`', correct: true }
+      - { value: '`$request->getAcceptableLanguages();`', correct: false }
+      - { value: '`$request->getLocale();`', correct: false }
     help: |
-      The `getSchemeAndHttpHost()` method provides the scheme and host of the current request.
+      `getLanguages()` returns the languages from the `Accept-Language` header, ordered by preference. `getPreferredLanguages()` is an alias.
+      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+
+  -
+    question: >
+      Which of the following is true about the `Response::setCache()` method?
+    answers:
+      - { value: 'It is a fluent interface method that allows setting multiple HTTP caching headers at once (e.g., `public`, `max_age`, `expires`).', correct: true }
+      - { value: 'It only sets the `Cache-Control` header.', correct: false }
+      - { value: 'It stores the response in a server-side cache.', correct: false }
+      - { value: 'It is deprecated in Symfony 7.', correct: false }
+    help: |
+      `setCache()` provides a convenient way to configure various HTTP caching directives on the `Response` object.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
+
+  -
+    question: |
+      What is the purpose of the `#[MapQueryParameter(name: 'tags', type: 'array')]` attribute?
+    answers:
+      - { value: 'To map a query parameter named `tags` to the argument and ensure it is treated as an array.', correct: true }
+      - { value: 'To automatically convert a comma-separated string of tags into an array.', correct: false }
+      - { value: 'To define a required array of tags in the query string.', correct: false }
+      - { value: 'To filter the `tags` parameter to only allow array values.', correct: false }
+    help: |
+      The `type` option can be used to explicitly cast the query parameter value to a specific PHP type, including `array`.
+      https://symfony.com/doc/current/controller.html#query-parameters-argument
+
+  -
+    question: >
+      Which of the following is the correct way to get the current path and query string (e.g., `/blog?page=2`) from the `Request` object?
+    answers:
+      - { value: '`$request->getRequestUri();`', correct: true }
+      - { value: '`$request->getPathInfo() . ''?'' . $request->getQueryString();`', correct: true }
+      - { value: '`$request->getUri();`', correct: false }
+      - { value: '`$request->getRelativePath();`', correct: false }
+    help: |
+      `getRequestUri()` returns the full URI as requested by the client, including the query string. You can also manually concatenate `getPathInfo()` and `getQueryString()`.
       https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
 
   -
     question: |
-      What is the primary purpose of the `#[MapQueryParameter]` attribute when the query parameter is repeated (e.g., `tags[]=php&tags[]=symfony`)?
+      What is the purpose of the `#[MapRequestPayload(validationGroups: ['Default', 'api_create'])]` option?
     answers:
-      - { value: 'It will automatically collect all values into an array if the argument is type-hinted as `array`.', correct: true }
-      - { value: 'It will only map the first value of the repeated parameter.', correct: false }
-      - { value: 'It requires a custom argument value resolver to handle repeated parameters.', correct: false }
-      - { value: 'This usage is not supported by `#[MapQueryParameter]`.', correct: false }
+      - { value: 'To apply specific validation groups (`Default` and `api_create`) when validating the deserialized request payload.', correct: true }
+      - { value: 'To define which fields of the payload are required for validation.', correct: false }
+      - { value: 'To specify different validation rules for API creation versus updates.', correct: false }
+      - { value: 'To group multiple request payloads together for validation.', correct: false }
     help: |
-      `#[MapQueryParameter]` can automatically handle repeated query parameters by injecting them as an array if the controller argument is type-hinted as such.
-      https://symfony.com/doc/current/controller/argument_value_resolvers.html#mapqueryparameter
+      The `validationGroups` option allows fine-grained control over which validation rules are applied to the DTO.
+      https://symfony.com/doc/current/controller/request_payload.html#validation-groups
+
+  -
+    question: >
+      Which of the following is true about the `Response::isCacheable()` method?
+    answers:
+      - { value: 'It returns `true` if the response has been configured with HTTP caching headers that allow it to be cached.', correct: true }
+      - { value: 'It checks if the response content is small enough to be cached.', correct: false }
+      - { value: 'It indicates if the response is currently stored in a server-side cache.', correct: false }
+      - { value: 'It determines if the response can be compressed for better performance.', correct: false }
+    help: |
+      `isCacheable()` is a helper method to check if the response's HTTP caching headers indicate that it can be stored in a cache.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
 
   -
     question: |
-      Which of the following is the correct way to check if a cookie named `remember_me` exists in the current request?
+      What is the purpose of the `#[MapQueryParameter(name: 'page', nullable: true)]` attribute?
     answers:
-      - { value: '`$request->cookies->has(''remember_me'');`', correct: true }
-      - { value: '`$request->hasCookie(''remember_me'');`', correct: false }
-      - { value: '`isset($_COOKIE[''remember_me'']);`', correct: false }
-      - { value: '`$request->cookies[''remember_me''] !== null;`', correct: false }
+      - { value: 'To map a query parameter named `page` to the argument, allowing the argument to be `null` if the parameter is not present.', correct: true }
+      - { value: 'To make the `page` parameter optional in the route definition.', correct: false }
+      - { value: 'To ensure that the `page` parameter is always an integer or `null`.', correct: false }
+      - { value: 'To indicate that the `page` parameter can be an empty string.', correct: false }
     help: |
-      The `has()` method on the `cookies` property (a `ParameterBag`) checks for the existence of a cookie.
-      https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data
+      The `nullable` option ensures that the argument can be `null` if the corresponding query parameter is missing.
+      https://symfony.com/doc/current/controller.html#query-parameters-argument
+
+  -
+    question: >
+      Which of the following is true about the `Response::isFresh()` and `Response::isNotModified()` methods?
+    answers:
+      - { value: '`isFresh()` checks if the response is still fresh in the cache, while `isNotModified()` checks if the client''s cached version is still valid based on conditional headers.', correct: true }
+      - { value: '`isFresh()` is for server-side caching, `isNotModified()` is for client-side caching.', correct: false }
+      - { value: 'They both perform the same check for cache validity.', correct: false }
+      - { value: 'They are used to determine if the response content has been altered.', correct: false }
+    help: |
+      These methods are used in conjunction with HTTP caching to determine if a full response needs to be sent or if a `304 Not Modified` response can be returned.
+      https://symfony.com/doc/current/http_cache.html#http-cache-with-attributes
+
+  -
+    question: >
+      What is the purpose of the `#[MapQueryParameter(name: 'search', description: 'Search query string')]` option?
+    answers:
+      - { value: 'To provide a description for the query parameter, which can be used by tools like API documentation generators.', correct: true }
+      - { value: 'To define a tooltip for the search input field in a form.', correct: false }
+      - { value: 'To specify the default search algorithm to use.', correct: false }
+      - { value: 'To make the search parameter mandatory.', correct: false }
+    help: |
+      The `description` option is metadata that can be useful for documentation and other tooling.
+      https://symfony.com/doc/current/controller.html#query-parameters-argument
