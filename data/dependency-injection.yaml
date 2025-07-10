@@ -1,3 +1,4852 @@
-I'm sorry, but I was unable to retrieve the necessary documentation for Symfony's "Dependency Injection" topic due to a service error. This prevents me from generating the high-quality, accurate, and up-to-date questions required for your Symfony 7 certification preparation.
+category: Dependency Injection
 
-Please try again later.
+questions:
+  -
+    question: >
+      What is the primary purpose of the Symfony Dependency Injection Container?
+    answers:
+      -
+        value: >
+          To manage the lifecycle of objects (services) and their dependencies.
+        correct: true
+      -
+        value: >
+          To store application-wide configuration parameters.
+        correct: false
+      -
+        value: >
+          To handle HTTP requests and responses.
+        correct: false
+      -
+        value: >
+          To provide a global registry for all PHP classes.
+        correct: false
+    help: |
+      The Dependency Injection Container is responsible for instantiating services and injecting their dependencies, managing the object graph of your application.
+      https://symfony.com/doc/current/service_container.html
+
+  -
+    question: |
+      Consider the following service definition in `config/services.yaml`:
+
+      ```yaml
+      services:
+          App\Service\MyService:
+              arguments: ['@App\Service\DependencyA', '@App\Service\DependencyB']
+      ```
+
+      Which type of injection is being used for `App\Service\MyService`?
+    answers:
+      -
+        value: >
+          Setter Injection
+        correct: false
+      -
+        value: >
+          Constructor Injection
+        correct: true
+      -
+        value: >
+          Property Injection
+        correct: false
+      -
+        value: >
+          Method Call Injection
+        correct: false
+    help: |
+      When dependencies are passed to a service via its `arguments` key in YAML (or `args` in PHP config), it signifies constructor injection.
+      https://symfony.com/doc/current/service_container/injection_types.html#constructor-injection
+
+  -
+    question: >
+      Which of the following built-in Symfony services is responsible for routing incoming requests to the correct controller?
+    answers:
+      -
+        value: >
+          `event_dispatcher`
+        correct: false
+      -
+        value: >
+          `router`
+        correct: true
+      -
+        value: >
+          `http_client`
+        correct: false
+      -
+        value: >
+          `request_stack`
+        correct: false
+    help: |
+      The `router` service (often accessed via `#[Route]` attribute or `UrlGeneratorInterface`) is responsible for matching incoming URLs to defined routes and generating URLs.
+      https://symfony.com/doc/current/routing.html
+
+  -
+    question: |
+      How would you define a container parameter named `app.mailer.transport` with the value `smtp` in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          parameters:
+              app.mailer.transport: smtp
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          config:
+              app.mailer.transport: smtp
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              _defaults:
+                  parameters:
+                      app.mailer.transport: smtp
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          app.mailer.transport: smtp
+          ```
+        correct: false
+    help: |
+      Container parameters are defined under the top-level `parameters` key in YAML configuration files.
+      https://symfony.com/doc/current/service_container/parameters.html
+
+  -
+    question: >
+      Which PHP attribute is used to explicitly mark a setter method as required for autowiring in Symfony?
+    answers:
+      -
+        value: >
+          `#[Inject]`
+        correct: false
+      -
+        value: >
+          `#[Autowire]`
+        correct: false
+      -
+        value: >
+          `#[Required]`
+        correct: true
+      -
+        value: >
+          `#[Setter]`
+        correct: false
+    help: |
+      The `#[Required]` attribute ensures that a setter method must be called by the Dependency Injection Container during autowiring.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-setter-injection
+
+  -
+    question: >
+      What is the primary benefit of using autowiring in Symfony's Dependency Injection Container?
+    answers:
+      -
+        value: >
+          It eliminates the need for any service configuration.
+        correct: false
+      -
+        value: >
+          It automatically injects dependencies based on type-hints, reducing verbose configuration.
+        correct: true
+      -
+        value: >
+          It makes all services public by default.
+        correct: false
+      -
+        value: >
+          It allows services to be created lazily without any configuration.
+        correct: false
+    help: |
+      Autowiring simplifies dependency injection by automatically resolving and injecting dependencies based on type-hints, significantly reducing the amount of explicit configuration needed.
+      https://symfony.com/doc/current/service_container/autowiring.html
+
+  -
+    question: |
+      Given the following service definition, how would you inject the `mailer` service into the `setMailer` method of `App\Mail\NewsletterManager` using YAML?
+
+      ```php
+      namespace App\Mail;
+      use Symfony\Component\Mailer\MailerInterface;
+
+      class NewsletterManager
+      {
+          private MailerInterface $mailer;
+
+          public function setMailer(MailerInterface $mailer): void
+          {
+              $this->mailer = $mailer;
+          }
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Mail\NewsletterManager:
+                  arguments: ['@mailer']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Mail\NewsletterManager:
+                  calls:
+                      - setMailer: ['@mailer']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Mail\NewsletterManager:
+                  properties:
+                      mailer: '@mailer'
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Mail\NewsletterManager:
+                  setter: setMailer('@mailer')
+          ```
+        correct: false
+    help: |
+      Setter injection is configured using the `calls` key in YAML, specifying the method name and its arguments.
+      https://symfony.com/doc/current/service_container/injection_types.html#setter-injection
+
+  -
+    question: >
+      When would you typically use a Service Locator in Symfony?
+    answers:
+      -
+        value: >
+          To directly access any service from anywhere in the application.
+        correct: false
+      -
+        value: >
+          To solve circular dependency issues or for lazy loading of optional dependencies.
+        correct: true
+      -
+        value: >
+          To register all services automatically without explicit configuration.
+        correct: false
+      -
+        value: >
+          To replace the entire Dependency Injection Container.
+        correct: false
+    help: |
+      Service Locators are useful for breaking circular dependencies or for lazily loading services that are not always needed, avoiding unnecessary instantiation.
+      https://symfony.com/doc/current/service_container/service_subscribers_locators.html
+
+  -
+    question: |
+      You have two services, `App\Service\SmsSender` and `App\Service\EmailSender`, both implementing `App\Contract\MessageSenderInterface`. How can you inject `App\Service\SmsSender` specifically into a service using PHP attributes?
+    answers:
+      -
+        value: |
+          ```php
+          use App\Contract\MessageSenderInterface;
+          use Symfony\Component\DependencyInjection\Attribute\Target;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Target('App\Service\SmsSender')]
+                  private MessageSenderInterface $sender
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use App\Contract\MessageSenderInterface;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(service: 'App\Service\SmsSender')]
+                  private MessageSenderInterface $sender
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use App\Contract\MessageSenderInterface;
+
+          class MyService
+          {
+              public function __construct(
+                  private MessageSenderInterface $smsSender
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use App\Contract\MessageSenderInterface;
+          use Symfony\Component\DependencyInjection\Attribute\Inject;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Inject('sms_sender')]
+                  private MessageSenderInterface $sender
+              ) {}
+          }
+          ```
+        correct: false
+    help: |
+      The `#[Target]` attribute allows you to specify the exact service ID to inject when multiple services implement the same interface. The `#[Autowire(service: '...')` attribute also serves this purpose.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-specific-services
+
+  -
+    question: >
+      What is the purpose of a "compiler pass" in the Symfony Dependency Injection component?
+    answers:
+      -
+        value: >
+          To compile PHP code into bytecode for faster execution.
+        correct: false
+      -
+        value: >
+          To modify service definitions before the container is compiled and optimized.
+        correct: true
+      -
+        value: >
+          To generate cache files for routes and templates.
+        correct: false
+      -
+        value: >
+          To validate the syntax of service configuration files.
+        correct: false
+    help: |
+      Compiler passes allow you to hook into the container's compilation process to inspect, modify, or add service definitions programmatically. This is commonly used for features like collecting tagged services.
+      https://symfony.com/doc/current/service_container/compiler.html
+
+  -
+    question: |
+      You want to inject all services tagged with `app.event_listener` into a constructor argument as an `iterable`. Which PHP attribute should you use?
+    answers:
+      -
+        value: >
+          `#[Autowire(tag: 'app.event_listener')]`
+        correct: false
+      -
+        value: >
+          `#[Target(tag: 'app.event_listener')]`
+        correct: false
+      -
+        value: >
+          `#[AutowireIterator('app.event_listener')]`
+        correct: true
+      -
+        value: >
+          `#[ServiceCollection('app.event_listener')]`
+        correct: false
+    help: |
+      The `#[AutowireIterator]` attribute is specifically designed to inject a collection (as an `iterable`) of all services tagged with a given name.
+      https://symfony.com/doc/current/service_container/tags.html#autowiring-tagged-services
+
+  -
+    question: >
+      Which of the following is a valid way to retrieve a service named `my_service` from the container in a non-autowired context (e.g., in a compiler pass or a legacy application)?
+    answers:
+      -
+        value: >
+          `$container->get('my_service')`
+        correct: true
+      -
+        value: >
+          `$container->load('my_service')`
+        correct: false
+      -
+        value: >
+          `$container->find('my_service')`
+        correct: false
+      -
+        value: >
+          `$container['my_service']`
+        correct: false
+    help: |
+      The `get()` method of the container is used to retrieve a service instance by its ID.
+      https://symfony.com/doc/current/components/dependency_injection/introduction.html#getting-services
+
+  -
+    question: |
+      What is the correct YAML syntax to mark a service as `public`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  public: true
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  visibility: public
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  access: public
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  shared: true
+          ```
+        correct: false
+    help: |
+      Services are private by default. To make a service public, set the `public` option to `true`.
+      https://symfony.com/doc/current/service_container/alias_private.html#making-services-public-private
+
+  -
+    question: >
+      What is the purpose of the `#[AsCommand]` attribute in Symfony 7?
+    answers:
+      -
+        value: >
+          To register a console command as a service and configure its metadata.
+        correct: true
+      -
+        value: >
+          To define the arguments and options for a console command.
+        correct: false
+      -
+        value: >
+          To mark a class as an executable script.
+        correct: false
+      -
+        value: >
+          To automatically run a command at application startup.
+        correct: false
+    help: |
+      The `#[AsCommand]` attribute is used to register a console command as a service and define its name, description, and other properties directly on the command class.
+      https://symfony.com/doc/current/console/commands_as_services.html
+
+  -
+    question: |
+      You want to inject an environment variable `DATABASE_URL` into a service's constructor. How would you do this using the `#[Autowire]` attribute?
+    answers:
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(env: 'DATABASE_URL')]
+                  string $databaseUrl
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(param: 'env(DATABASE_URL)')]
+                  string $databaseUrl
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire('%env(DATABASE_URL)%')]
+                  string $databaseUrl
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(value: '%env(DATABASE_URL)%')]
+                  string $databaseUrl
+              ) {}
+          }
+          ```
+        correct: false
+    help: |
+      The `#[Autowire(env: 'VAR_NAME')]` syntax is used to inject environment variables directly.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-environment-variables
+
+  -
+    question: >
+      What is the primary difference between constructor injection and setter injection?
+    answers:
+      -
+        value: >
+          Constructor injection is for optional dependencies, while setter injection is for required dependencies.
+        correct: false
+      -
+        value: >
+          Constructor injection ensures dependencies are available at object creation, while setter injection allows dependencies to be set after creation.
+        correct: true
+      -
+        value: >
+          Setter injection is more performant than constructor injection.
+        correct: false
+      -
+        value: >
+          Constructor injection is only for private properties, setter injection for public.
+        correct: false
+    help: |
+      Constructor injection ensures that all required dependencies are provided when an object is instantiated, making the object always in a valid state. Setter injection allows dependencies to be set after object creation, often used for optional dependencies.
+      https://symfony.com/doc/current/service_container/injection_types.html
+
+  -
+    question: |
+      You have a service `App\Service\OldService` and you want to replace its behavior with `App\Service\NewService` without changing existing code that uses `OldService`. Which Dependency Injection feature should you use?
+    answers:
+      -
+        value: >
+          Service aliasing
+        correct: false
+      -
+        value: >
+          Service tagging
+        correct: false
+      -
+        value: >
+          Service decoration
+        correct: true
+      -
+        value: >
+          Service factories
+        correct: false
+    help: |
+      Service decoration allows you to replace an existing service with a new one, while still being able to access the original service from within the decorator.
+      https://symfony.com/doc/current/service_container/service_decoration.html
+
+  -
+    question: |
+      How would you configure a service `App\Service\MyFactory` to be used as a factory for creating instances of `App\Model\MyObject` in `config/services.yaml`?
+
+      ```php
+      namespace App\Service;
+
+      class MyFactory
+      {
+          public function createMyObject(): MyObject
+          {
+              return new MyObject();
+          }
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Model\MyObject:
+                  factory: ['@App\Service\MyFactory', 'createMyObject']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Model\MyObject:
+                  class: App\Service\MyFactory::createMyObject()
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Model\MyObject:
+                  call: ['App\Service\MyFactory', 'createMyObject']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Model\MyObject:
+                  factory_method: createMyObject
+                  factory_service: App\Service\MyFactory
+          ```
+        correct: false
+    help: |
+      The `factory` key in YAML is used to specify a service and a method on that service that will be called to create the instance.
+      https://symfony.com/doc/current/service_container/factories.html
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::compile()` method?
+    answers:
+      -
+        value: >
+          To clear the service container cache.
+        correct: false
+      -
+        value: >
+          To optimize the service container by resolving references and applying compiler passes.
+        correct: true
+      -
+        value: >
+          To load all service definitions from configuration files.
+        correct: false
+      -
+        value: >
+          To dump the compiled container to a PHP file.
+        correct: true
+    help: |
+      The `compile()` method processes all service definitions, resolves dependencies, applies compiler passes, and optimizes the container for performance. It also prepares the container for dumping to a cache file.
+      https://symfony.com/doc/current/components/dependency_injection/compilation.html
+
+  -
+    question: |
+      You have a class `App\Service\MyService` with a public property `$logger`. How can you inject the `logger` service into this property using YAML?
+
+      ```php
+      namespace App\Service;
+      use Psr\Log\LoggerInterface;
+
+      class MyService
+      {
+          public LoggerInterface $logger;
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['@logger']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  calls:
+                      - setLogger: ['@logger']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  properties:
+                      logger: '@logger'
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  inject:
+                      logger: '@logger'
+          ```
+        correct: false
+    help: |
+      Property injection is configured using the `properties` key in YAML, mapping property names to service IDs.
+      https://symfony.com/doc/current/service_container/injection_types.html#property-injection
+
+  -
+    question: >
+      Which of the following is NOT a valid way to define a service in Symfony 7?
+    answers:
+      -
+        value: >
+          XML configuration
+        correct: false
+      -
+        value: >
+          YAML configuration
+        correct: false
+      -
+        value: >
+          PHP configuration (using `ContainerConfigurator`)
+        correct: false
+      -
+        value: >
+          INI configuration
+        correct: true
+    help: |
+      Symfony supports YAML, XML, and PHP for defining service configurations. INI is not a supported format for services.
+      https://symfony.com/doc/current/service_container.html#service-configuration-formats
+
+  -
+    question: >
+      What is the purpose of the `#[AutowireServiceClosure]` attribute?
+    answers:
+      -
+        value: >
+          To automatically create an anonymous function (closure) that returns a service.
+        correct: true
+      -
+        value: >
+          To define a service as a PHP closure.
+        correct: false
+      -
+        value: >
+          To inject a service only when it's first accessed.
+        correct: true
+      -
+        value: >
+          To mark a service as a factory.
+        correct: false
+    help: |
+      `#[AutowireServiceClosure]` is used to inject a service as a closure, which is useful for lazy loading or when you need to pass a callable that provides a service.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-service-closures
+
+  -
+    question: >
+      When configuring a service in YAML, what does the `@` symbol before a value signify?
+    answers:
+      -
+        value: >
+          It's a reference to a container parameter.
+        correct: false
+      -
+        value: >
+          It's a reference to another service in the container.
+        correct: true
+      -
+        value: >
+          It's a reference to an environment variable.
+        correct: false
+      -
+        value: >
+          It's a special keyword for autowiring.
+        correct: false
+    help: |
+      The `@` symbol is used to reference other services within the Dependency Injection Container.
+      https://symfony.com/doc/current/service_container/references.html
+
+  -
+    question: |
+      Consider the following service definition:
+
+      ```yaml
+      services:
+          App\Service\MyService:
+              tags: ['app.processor', { priority: 10 }]
+      ```
+
+      What is the significance of the `priority` option in the tag?
+    answers:
+      -
+        value: >
+          It defines the order in which services with this tag are processed by compiler passes.
+        correct: true
+      -
+        value: >
+          It indicates the importance of the service for debugging.
+        correct: false
+      -
+        value: >
+          It determines if the service should be public or private.
+        correct: false
+      -
+        value: >
+          It's a custom attribute with no built-in meaning.
+        correct: false
+    help: |
+      The `priority` attribute on a tag is a common convention used by compiler passes to order services when collecting them (e.g., for event listeners or data collectors). Higher numbers mean higher priority.
+      https://symfony.com/doc/current/service_container/tags.html#adding-a-priority-to-tagged-services
+
+  -
+    question: >
+      Which built-in Symfony service provides access to the current request, request stack, and session?
+    answers:
+      -
+        value: >
+          `http_client`
+        correct: false
+      -
+        value: >
+          `request_stack`
+        correct: true
+      -
+        value: >
+          `session`
+        correct: false
+      -
+        value: >
+          `router`
+        correct: false
+    help: |
+      The `request_stack` service manages a stack of `Request` objects, allowing access to the current master request and sub-requests.
+      https://symfony.com/doc/current/components/http_foundation/requests.html#accessing-the-request
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that has an immutable setter `withLogger`. How would you configure this in `config/services.yaml` to ensure the container uses the cloned instance?
+
+      ```php
+      namespace App\Service;
+      use Psr\Log\LoggerInterface;
+
+      class MyService
+      {
+          public function withLogger(LoggerInterface $logger): self
+          {
+              $new = clone $this;
+              $new->logger = $logger;
+              return $new;
+          }
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  calls:
+                      - withLogger: ['@logger']
+                        returns_clone: true
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  calls:
+                      - withLogger: !returns_clone ['@logger']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  properties:
+                      logger: '@logger'
+                  immutable: true
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  factory: ['@App\Service\MyService', 'withLogger', ['@logger']]
+          ```
+        correct: false
+    help: |
+      For immutable setters (or "withers"), you must explicitly tell the container to use the returned cloned instance. In YAML, this is done with `!returns_clone`.
+      https://symfony.com/doc/current/service_container/injection_types.html#immutable-setter-injection
+
+  -
+    question: >
+      What is "semantic configuration" in Symfony, related to Dependency Injection?
+    answers:
+      -
+        value: >
+          A way to define configuration using natural language.
+        correct: false
+      -
+        value: >
+          A mechanism for bundles to define and validate their configuration schema.
+        correct: true
+      -
+        value: >
+          The process of automatically inferring service dependencies.
+        correct: false
+      -
+        value: >
+          A method to encrypt sensitive configuration parameters.
+        correct: false
+    help: |
+      Semantic configuration allows bundles to define a structured configuration tree (using `ConfigurationInterface`) that is validated and merged by Symfony, providing a clear and robust way to configure bundles.
+      https://symfony.com/doc/current/bundles/configuration.html
+
+  -
+    question: |
+      Which of the following is the correct PHP attribute to explicitly inject a container parameter named `kernel.project_dir` into a constructor argument?
+    answers:
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          public function __construct(
+              #[Autowire(param: 'kernel.project_dir')]
+              string $projectDir
+          ) {}
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          public function __construct(
+              #[Autowire('%kernel.project_dir%')]
+              string $projectDir
+          ) {}
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Target;
+
+          public function __construct(
+              #[Target('kernel.project_dir')]
+              string $projectDir
+          ) {}
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Inject;
+
+          public function __construct(
+              #[Inject(parameter: 'kernel.project_dir')]
+              string $projectDir
+          ) {}
+          ```
+        correct: false
+    help: |
+      The `#[Autowire(param: 'parameter_name')]` syntax is used to inject container parameters.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-parameter-values
+
+  -
+    question: >
+      What happens if Symfony's autowiring encounters multiple services that implement the same interface when trying to inject a dependency?
+    answers:
+      -
+        value: >
+          It automatically picks the first service defined in the configuration.
+        correct: false
+      -
+        value: >
+          It throws an autowiring exception due to ambiguity.
+        correct: true
+      -
+        value: >
+          It injects an array of all implementing services.
+        correct: false
+      -
+        value: >
+          It attempts to guess the correct service based on variable name.
+        correct: false
+    help: |
+      When multiple services implement the same interface, autowiring becomes ambiguous and Symfony will throw an exception, requiring explicit configuration (e.g., using `#[Target]` or `#[Autowire]`).
+      https://symfony.com/doc/current/service_container/autowiring.html#dealing-with-multiple-implementations-of-an-interface
+
+  -
+    question: >
+      Which of the following is a core responsibility of the `ContainerBuilder` class?
+    answers:
+      -
+        value: >
+          To manage HTTP sessions.
+        correct: false
+      -
+        value: >
+          To compile and optimize the service container.
+        correct: true
+      -
+        value: >
+          To handle database connections.
+        correct: false
+      -
+        value: >
+          To render Twig templates.
+        correct: false
+    help: |
+      The `ContainerBuilder` is the central class for defining, loading, and compiling service definitions into a runnable container.
+      https://symfony.com/doc/current/components/dependency_injection/compilation.html
+
+  -
+    question: |
+      You want to register a service `App\Service\MyService` using PHP configuration. What is the correct way to define it?
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+          $container = new ContainerBuilder();
+          $container->register(MyService::class);
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+
+          return [
+              MyService::class => null,
+          ];
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $container->service(MyService::class);
+          };
+          ```
+        correct: false
+    help: |
+      In PHP configuration files, services are defined using the `ContainerConfigurator`'s `services()` method and then `set()`.
+      https://symfony.com/doc/current/service_container/configuration.html#php-config
+
+  -
+    question: >
+      What is the primary purpose of tagging services in Symfony?
+    answers:
+      -
+        value: >
+          To make services publicly accessible.
+        correct: false
+      -
+        value: >
+          To group services together for later retrieval by compiler passes or `#[AutowireIterator]`.
+        correct: true
+      -
+        value: >
+          To define the scope of a service (e.g., request, container).
+        correct: false
+      -
+        value: >
+          To mark services for lazy loading.
+        correct: false
+    help: |
+      Tags are metadata assigned to services, allowing other parts of the application (especially compiler passes) to find and process collections of related services.
+      https://symfony.com/doc/current/service_container/tags.html
+
+  -
+    question: |
+      You have a service `App\Service\LoggerAwareService` that needs a `Psr\Log\LoggerInterface` injected. If you want to ensure that a specific logger channel, `monolog.logger.my_channel`, is injected, how would you achieve this using PHP attributes?
+    answers:
+      -
+        value: |
+          ```php
+          use Psr\Log\LoggerInterface;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class LoggerAwareService
+          {
+              public function __construct(
+                  #[Autowire(service: 'monolog.logger.my_channel')]
+                  private LoggerInterface $logger
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Psr\Log\LoggerInterface;
+          use Symfony\Component\DependencyInjection\Attribute\Target;
+
+          class LoggerAwareService
+          {
+              public function __construct(
+                  #[Target('monolog.logger.my_channel')]
+                  private LoggerInterface $logger
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Psr\Log\LoggerInterface;
+
+          class LoggerAwareService
+          {
+              public function __construct(
+                  private LoggerInterface $my_channel_logger
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Psr\Log\LoggerInterface;
+          use Symfony\Contracts\Service\Attribute\Required;
+
+          class LoggerAwareService
+          {
+              #[Required(service: 'monolog.logger.my_channel')]
+              private LoggerInterface $logger;
+          }
+          ```
+        correct: false
+    help: |
+      Both `#[Autowire(service: '...')` and `#[Target('...')` attributes can be used to specify a particular service ID to be injected, overriding autowiring's default behavior.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-specific-services
+
+  -
+    question: >
+      What is the default scope of a service in the Symfony Dependency Injection Container?
+    answers:
+      -
+        value: >
+          Prototype (a new instance every time it's requested)
+        correct: false
+      -
+        value: >
+          Request (a new instance per HTTP request)
+        correct: false
+      -
+        value: >
+          Singleton (shared, one instance per container)
+        correct: true
+      -
+        value: >
+          Global (one instance across all applications)
+        correct: false
+    help: |
+      By default, Symfony services are "shared" (singleton scope), meaning the container returns the same instance every time the service is requested.
+      https://symfony.com/doc/current/service_container/scopes.html
+
+  -
+    question: |
+      How can you make a service `App\Service\MyService` lazy-loaded in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  lazy: true
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  public: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  shared: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  defer: true
+          ```
+        correct: false
+    help: |
+      Setting `lazy: true` for a service tells the container to create a proxy for the service, delaying its actual instantiation until it's first used.
+      https://symfony.com/doc/current/service_container/lazy_services.html
+
+  -
+    question: >
+      Which built-in Symfony service is responsible for dispatching events throughout the application?
+    answers:
+      -
+        value: >
+          `http_kernel`
+        correct: false
+      -
+        value: >
+          `event_dispatcher`
+        correct: true
+      -
+        value: >
+          `logger`
+        correct: false
+      -
+        value: >
+          `security.token_storage`
+        correct: false
+    help: |
+      The `event_dispatcher` service (an instance of `Symfony\Component\EventDispatcher\EventDispatcherInterface`) is central to Symfony's event system.
+      https://symfony.com/doc/current/components/event_dispatcher.html
+
+  -
+    question: |
+      You want to inject the value of a Symfony Expression Language expression into a service. Which `#[Autowire]` parameter would you use?
+    answers:
+      -
+        value: >
+          `#[Autowire(value: 'expression(...)')]`
+        correct: false
+      -
+        value: >
+          `#[Autowire(expression: 'service("my_other_service").someMethod()')]`
+        correct: true
+      -
+        value: >
+          `#[Autowire(expr: '...')`
+        correct: false
+      -
+        value: >
+          `#[Autowire(eval: '...')`
+        correct: false
+    help: |
+      The `expression` parameter of the `#[Autowire]` attribute allows injecting the result of a Symfony Expression Language expression.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-expression-language
+
+  -
+    question: >
+      What is the primary benefit of using constructor injection over public property injection?
+    answers:
+      -
+        value: >
+          It allows for optional dependencies.
+        correct: false
+      -
+        value: >
+          It ensures the object is always in a valid state after construction.
+        correct: true
+      -
+        value: >
+          It makes the service easier to debug.
+        correct: false
+      -
+        value: >
+          It reduces the number of lines in service configuration.
+        correct: false
+    help: |
+      Constructor injection forces all required dependencies to be provided at the time of object creation, guaranteeing that the object is fully initialized and valid.
+      https://symfony.com/doc/current/service_container/injection_types.html#constructor-injection
+
+  -
+    question: |
+      How can you define an alias for an existing service `app.original_service` to be accessible as `app.alias_service` in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              app.alias_service: '@app.original_service'
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              app.alias_service:
+                  alias: app.original_service
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              app.original_service:
+                  alias_as: app.alias_service
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              app.alias_service:
+                  parent: app.original_service
+          ```
+        correct: false
+    help: |
+      Aliases can be defined by simply referencing the original service ID with `@` or by using the `alias` key.
+      https://symfony.com/doc/current/service_container/alias_private.html#aliasing
+
+  -
+    question: >
+      Which of the following is true about private services in Symfony?
+    answers:
+      -
+        value: >
+          They cannot be injected into other services.
+        correct: false
+      -
+        value: >
+          They cannot be retrieved directly from the container using `$container->get()`.
+        correct: true
+      -
+        value: >
+          They are automatically lazy-loaded.
+        correct: false
+      -
+        value: >
+          They are only available in the `dev` environment.
+        correct: false
+    help: |
+      Private services cannot be accessed directly via `$container->get()`. They can only be injected as dependencies into other services.
+      https://symfony.com/doc/current/service_container/alias_private.html#making-services-public-private
+
+  -
+    question: >
+      What is the primary benefit of using `ServiceSubscriberInterface` for a service locator?
+    answers:
+      -
+        value: >
+          It makes all subscribed services public.
+        correct: false
+      -
+        value: >
+          It allows for lazy loading of services and avoids circular dependencies.
+        correct: true
+      -
+        value: >
+          It automatically registers all services in the container.
+        correct: false
+      -
+        value: >
+          It provides a global service registry.
+        correct: false
+    help: |
+      `ServiceSubscriberInterface` allows a service to declare its dependencies in a way that enables Symfony to create a service locator for those specific dependencies, promoting lazy loading and breaking circular dependencies.
+      https://symfony.com/doc/current/service_container/service_subscribers_locators.html#service-subscribers
+
+  -
+    question: |
+      You have a custom bundle and want to add a compiler pass to modify service definitions. In which method of your bundle's extension class (`Extension.php`) should you add the compiler pass?
+    answers:
+      -
+        value: >
+          `build()`
+        correct: false
+      -
+        value: >
+          `load()`
+        correct: false
+      -
+        value: >
+          `configure()`
+        correct: false
+      -
+        value: >
+          You add compiler passes in the `build()` method of your bundle class (e.g., `AppBundle.php`), not the extension.
+        correct: true
+    help: |
+      Compiler passes are added in the `build()` method of your bundle class, which receives a `ContainerBuilder` instance.
+      https://symfony.com/doc/current/service_container/compiler.html#registering-a-compiler-pass
+
+  -
+    question: >
+      Which of the following built-in services provides access to the current user's security token and user object?
+    answers:
+      -
+        value: >
+          `security.authorization_checker`
+        correct: false
+      -
+        value: >
+          `security.token_storage`
+        correct: true
+      -
+        value: >
+          `security.authenticator_manager`
+        correct: false
+      -
+        value: >
+          `security.firewall`
+        correct: false
+    help: |
+      The `security.token_storage` service is responsible for storing and retrieving the security token for the current request, which contains the user object.
+      https://symfony.com/doc/current/security.html#accessing-the-user-in-a-controller
+
+  -
+    question: |
+      You are defining a service in `config/services.yaml` and want to inject a parameter value. What is the correct syntax for referencing a parameter named `app.upload_dir`?
+    answers:
+      -
+        value: >
+          `value: %app.upload_dir%`
+        correct: false
+      -
+        value: >
+          `'%app.upload_dir%'`
+        correct: true
+      -
+        value: >
+          `$app.upload_dir`
+        correct: false
+      -
+        value: >
+          `@app.upload_dir`
+        correct: false
+    help: |
+      Container parameters are referenced using the `%parameter_name%` syntax in YAML.
+      https://symfony.com/doc/current/service_container/parameters.html#referencing-parameters
+
+  -
+    question: >
+      What is the purpose of the `_defaults` section in `config/services.yaml`?
+    answers:
+      -
+        value: >
+          To define default arguments for all services.
+        correct: false
+      -
+        value: >
+          To apply default configuration (e.g., autowire, public, tags) to all services defined in that file or directory.
+        correct: true
+      -
+        value: >
+          To set default environment variables for the application.
+        correct: false
+      -
+        value: >
+          To define default parameters for the entire container.
+        correct: false
+    help: |
+      The `_defaults` section allows you to set default configurations like `autowire`, `public`, `autoconfigure`, and tags for a group of services, reducing repetition.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-and-service-aliases
+
+  -
+    question: |
+      You have a service `App\Service\MyService` which depends on `App\Service\DependencyA`. If `DependencyA` is defined as `private: true`, can `MyService` still be autowired with `DependencyA`?
+    answers:
+      -
+        value: >
+          No, private services cannot be autowired.
+        correct: false
+      -
+        value: >
+          Yes, private services can be autowired into other services.
+        correct: true
+      -
+        value: >
+          Only if `MyService` is also private.
+        correct: false
+      -
+        value: >
+          Only if `DependencyA` is explicitly aliased.
+        correct: false
+    help: |
+      Private services can be injected into other services (including via autowiring). They just cannot be retrieved directly from the container using `get()`.
+      https://symfony.com/doc/current/service_container/alias_private.html#making-services-public-private
+
+  -
+    question: >
+      Which built-in Symfony service is typically used for sending emails?
+    answers:
+      -
+        value: >
+          `mailer`
+        correct: true
+      -
+        value: >
+          `http_client`
+        correct: false
+      -
+        value: >
+          `messenger.bus.default`
+        correct: false
+      -
+        value: >
+          `swiftmailer.mailer` (deprecated in Symfony 5+)
+        correct: false
+    help: |
+      The `mailer` service (an instance of `Symfony\Component\Mailer\MailerInterface`) is the standard way to send emails in modern Symfony applications.
+      https://symfony.com/doc/current/mailer.html
+
+  -
+    question: |
+      You want to create a service `App\Service\MyService` whose constructor takes a `Psr\Log\LoggerInterface` and a string parameter `log_level`. How would you define this service using PHP attributes for autowiring and parameter injection?
+
+      ```php
+      namespace App\Service;
+      use Psr\Log\LoggerInterface;
+      use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+      class MyService
+      {
+          public function __construct(
+              private LoggerInterface $logger,
+              /* ??? */
+              private string $logLevel
+          ) {}
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```php
+              #[Autowire(param: 'app.log_level')]
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+              #[Autowire('%app.log_level%')]
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+              #[Autowire(value: '%app.log_level%')]
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+              #[Target('app.log_level')]
+          ```
+        correct: false
+    help: |
+      The `#[Autowire(param: '...')` attribute is used to inject container parameters by name.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-parameter-values
+
+  -
+    question: >
+      What is the primary reason for compiling the Dependency Injection Container in a production environment?
+    answers:
+      -
+        value: >
+          To enable debugging features.
+        correct: false
+      -
+        value: >
+          To improve application performance by caching service definitions.
+        correct: true
+      -
+        value: >
+          To prevent unauthorized access to services.
+        correct: false
+      -
+        value: >
+          To allow dynamic service creation at runtime.
+        correct: false
+    help: |
+      Compiling the container generates an optimized PHP class that directly instantiates services, avoiding the overhead of parsing configuration files on every request, thus significantly improving performance.
+      https://symfony.com/doc/current/components/dependency_injection/compilation.html
+
+  -
+    question: |
+      You want to decorate `App\Service\OriginalService` with `App\Service\DecoratorService`. The decorator's constructor needs the original service. How would you configure this in `config/services.yaml`?
+
+      ```php
+      namespace App\Service;
+
+      class DecoratorService
+      {
+          public function __construct(
+              private OriginalService $decoratedService
+          ) {}
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\OriginalService:
+                  decorates: App\Service\OriginalService
+                  arguments: ['@.inner']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\DecoratorService:
+                  decorates: App\Service\OriginalService
+                  arguments: ['@.inner']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\DecoratorService:
+                  decorate: App\Service\OriginalService
+                  arguments: ['@App\Service\OriginalService']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\OriginalService:
+                  decorator: App\Service\DecoratorService
+          ```
+        correct: false
+    help: |
+      The `decorates` keyword specifies the service to be decorated. The special `@.inner` reference is used to inject the original (decorated) service into the decorator's constructor.
+      https://symfony.com/doc/current/service_container/service_decoration.html
+
+  -
+    question: >
+      What is the purpose of the `#[AsAlias]` attribute?
+    answers:
+      -
+        value: >
+          To define a service as an alias for another service.
+        correct: true
+      -
+        value: >
+          To mark a service as an abstract definition.
+        correct: false
+      -
+        value: >
+          To create a service locator for a group of services.
+        correct: false
+      -
+        value: >
+          To automatically tag a service.
+        correct: false
+    help: |
+      The `#[AsAlias]` attribute allows you to define an alias for a service directly on its class.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-and-service-aliases
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs to access the `kernel.debug` parameter. How would you inject this parameter using YAML?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['%kernel.debug%']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['@kernel.debug']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['env(KERNEL_DEBUG)']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['parameter(kernel.debug)']
+          ```
+        correct: false
+    help: |
+      Parameters are injected into service arguments using the `%parameter_name%` syntax.
+      https://symfony.com/doc/current/service_container/parameters.html#referencing-parameters
+
+  -
+    question: >
+      Which of the following is a common use case for a compiler pass?
+    answers:
+      -
+        value: >
+          To dynamically add routes to the application.
+        correct: false
+      -
+        value: >
+          To collect all services that implement a specific interface or have a certain tag.
+        correct: true
+      -
+        value: >
+          To define new console commands.
+        correct: false
+      -
+        value: >
+          To modify database schema.
+        correct: false
+    help: |
+      Compiler passes are frequently used to find and process services based on their tags or implemented interfaces, allowing for extensible features (e.g., event listeners, data collectors).
+      https://symfony.com/doc/current/service_container/compiler.html
+
+  -
+    question: |
+      You want to inject a specific named service, `app.special_transformer`, into a constructor argument that type-hints `App\Util\TransformerInterface`. How would you use the `#[Target]` attribute for this?
+
+      ```php
+      namespace App\Service;
+      use App\Util\TransformerInterface;
+      use Symfony\Component\DependencyInjection\Attribute\Target;
+
+      class MyClient
+      {
+          public function __construct(
+              /* ??? */
+              private TransformerInterface $transformer
+          ) {}
+      }
+      ```
+    answers:
+      -
+        value: |
+          ```php
+              #[Target('app.special_transformer')]
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+              #[Target(service: 'app.special_transformer')]
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+              #[Target(id: 'app.special_transformer')]
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+              #[Target(name: 'app.special_transformer')]
+          ```
+        correct: false
+    help: |
+      The `#[Target]` attribute takes the service ID as its first argument.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-specific-services
+
+  -
+    question: >
+      What is the primary benefit of using `ContainerConfigurator` for PHP service definitions compared to direct `ContainerBuilder` manipulation?
+    answers:
+      -
+        value: >
+          `ContainerConfigurator` is faster to execute.
+        correct: false
+      -
+        value: >
+          `ContainerConfigurator` provides a more fluent and readable API for defining services.
+        correct: true
+      -
+        value: >
+          `ContainerConfigurator` allows for more complex logic in service definitions.
+        correct: false
+      -
+        value: >
+          `ContainerConfigurator` is the only way to define services in PHP.
+        correct: false
+    help: |
+      `ContainerConfigurator` (introduced in Symfony 4.1) offers a more modern, fluent, and less verbose way to define services in PHP configuration files compared to directly using `ContainerBuilder` methods.
+      https://symfony.com/doc/current/service_container/configuration.html#php-config
+
+  -
+    question: >
+      Which of the following is a valid way to define a service named `app.my_service` with class `App\Service\MyService` using YAML?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              app.my_service:
+                  class: App\Service\MyService
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService: ~
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              my_service: App\Service\MyService
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  id: app.my_service
+          ```
+        correct: false
+    help: |
+      Services can be defined by explicitly setting the `id` and `class`, or by using the FQCN as the service ID (which implies the class).
+      https://symfony.com/doc/current/service_container/configuration.html#defining-services
+
+  -
+    question: >
+      What is the purpose of the `#[Autowire]` attribute's `expression` parameter?
+    answers:
+      -
+        value: >
+          To inject a string literal.
+        correct: false
+      -
+        value: >
+          To inject the result of a Symfony Expression Language evaluation.
+        correct: true
+      -
+        value: >
+          To define a regular expression for service matching.
+        correct: false
+      -
+        value: >
+          To inject an environment variable.
+        correct: false
+    help: |
+      The `expression` parameter allows you to inject values that are dynamically computed using Symfony's Expression Language.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-expression-language
+
+  -
+    question: >
+      When should you use `#[Required]` on a public property instead of constructor injection?
+    answers:
+      -
+        value: >
+          When the dependency is optional.
+        correct: false
+      -
+        value: >
+          When dealing with legacy code or third-party libraries that expose public properties for configuration.
+        correct: true
+      -
+        value: >
+          Always, as it's the most modern approach.
+        correct: false
+      -
+        value: >
+          When the service is a console command.
+        correct: false
+    help: |
+      While constructor injection is generally preferred, `#[Required]` on public properties can be useful for integrating with codebases that rely on public properties or when a setter is not feasible.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-public-property-injection
+
+  -
+    question: >
+      Which built-in Symfony service is used for logging messages?
+    answers:
+      -
+        value: >
+          `logger`
+        correct: true
+      -
+        value: >
+          `debug.logger`
+        correct: false
+      -
+        value: >
+          `monolog`
+        correct: false
+      -
+        value: >
+          `event_logger`
+        correct: false
+    help: |
+      The `logger` service (an instance of `Psr\Log\LoggerInterface`) is the standard way to log messages in Symfony.
+      https://symfony.com/doc/current/logging.html
+
+  -
+    question: |
+      How can you load service definitions from a separate PHP file named `my_services.php` into your main `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          imports:
+              - { resource: my_services.php }
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          include:
+              - my_services.php
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              import: my_services.php
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          load:
+              - my_services.php
+          ```
+        correct: false
+    help: |
+      The `imports` key is used to include other configuration files (YAML, XML, or PHP) into the current one.
+      https://symfony.com/doc/current/service_container/import_resource.html
+
+  -
+    question: >
+      What is a "synthetic service" in Symfony's Dependency Injection Container?
+    answers:
+      -
+        value: >
+          A service that is created by a factory.
+        correct: false
+      -
+        value: >
+          A service that is defined in configuration but its instance is provided at runtime.
+        correct: true
+      -
+        value: >
+          A service that is automatically generated by autowiring.
+        correct: false
+      -
+        value: >
+          A service that is only used for testing purposes.
+        correct: false
+    help: |
+      Synthetic services are services for which the container does not create the instance itself. Instead, the instance is provided to the container at runtime using `Container::set()`.
+      https://symfony.com/doc/current/service_container/synthetic_services.html
+
+  -
+    question: |
+      You want to inject a collection of services that implement `App\Handler\HandlerInterface` into a constructor. Which type-hint should you use for the argument?
+    answers:
+      -
+        value: >
+          `array`
+        correct: false
+      -
+        value: >
+          `IteratorAggregate`
+        correct: false
+      -
+        value: >
+          `iterable`
+        correct: true
+      -
+        value: >
+          `Collection`
+        correct: false
+    help: |
+      When injecting collections of services (e.g., via `#[AutowireIterator]`), the argument should be type-hinted as `iterable`.
+      https://symfony.com/doc/current/service_container/tags.html#autowiring-tagged-services
+
+  -
+    question: >
+      What is the main advantage of using a service locator over injecting all dependencies directly into a constructor?
+    answers:
+      -
+        value: >
+          It always instantiates all services upfront.
+        correct: false
+      -
+        value: >
+          It reduces the number of constructor arguments and allows for lazy loading of specific dependencies.
+        correct: true
+      -
+        value: >
+          It makes the service independent of the Symfony container.
+        correct: false
+      -
+        value: >
+          It enforces strict dependency order.
+        correct: false
+    help: |
+      Service locators can help reduce constructor bloat and enable lazy loading of dependencies that are not always needed, improving performance and breaking circular dependencies.
+      https://symfony.com/doc/current/service_container/service_subscribers_locators.html
+
+  -
+    question: |
+      How would you disable autowiring for a specific service `App\Service\MyService` in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  autowire: false
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  autoconfigure: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  manual_wiring: true
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  disabled: true
+          ```
+        correct: false
+    help: |
+      The `autowire: false` option explicitly disables autowiring for a given service.
+      https://symfony.com/doc/current/service_container/autowiring.html#disabling-autowiring-for-a-specific-service
+
+  -
+    question: >
+      Which built-in Symfony service is responsible for handling HTTP client requests (e.g., making API calls)?
+    answers:
+      -
+        value: >
+          `http_kernel`
+        correct: false
+      -
+        value: >
+          `http_client`
+        correct: true
+      -
+        value: >
+          `request_stack`
+        correct: false
+      -
+        value: >
+          `router`
+        correct: false
+    help: |
+      The `http_client` service (an instance of `Symfony\Contracts\HttpClient\HttpClientInterface`) provides a convenient way to make HTTP requests.
+      https://symfony.com/doc/current/http_client.html
+
+  -
+    question: |
+      You have a custom configuration parameter `app.max_items` defined. How would you access its value within a service's method using the service container directly (not autowiring)?
+    answers:
+      -
+        value: >
+          `$this->container->getParameter('app.max_items')`
+        correct: true
+      -
+        value: >
+          `$this->getParameter('app.max_items')`
+        correct: false
+      -
+        value: >
+          `$this->container->get('app.max_items')`
+        correct: false
+      -
+        value: >
+          `$this->get('app.max_items')`
+        correct: false
+    help: |
+      The `getParameter()` method of the container is used to retrieve the value of a defined parameter.
+      https://symfony.com/doc/current/service_container/parameters.html#getting-parameters
+
+  -
+    question: >
+      What is the purpose of the `autoconfigure: true` option for services in Symfony?
+    answers:
+      -
+        value: >
+          It automatically adds all possible tags to a service.
+        correct: false
+      -
+        value: >
+          It enables autowiring for the service.
+        correct: false
+      -
+        value: >
+          It automatically applies common tags and configurations based on implemented interfaces or inherited classes.
+        correct: true
+      -
+        value: >
+          It makes the service public by default.
+        correct: false
+    help: |
+      `autoconfigure: true` tells Symfony to automatically apply relevant tags and configurations (e.g., registering as an event listener if `EventSubscriberInterface` is implemented) based on the service's class.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs a dependency to be injected into a public property named `config`. How would you achieve this using PHP attributes?
+    answers:
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              #[Autowire('%app.config%')]
+              public array $config;
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Contracts\Service\Attribute\Required;
+
+          class MyService
+          {
+              #[Required]
+              public array $config;
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Inject;
+
+          class MyService
+          {
+              #[Inject(property: 'config')]
+              public array $config;
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          namespace App\Service;
+
+          class MyService
+          {
+              public array $config;
+              public function __construct(array $config) { $this->config = $config; }
+          }
+          ```
+        correct: false
+    help: |
+      Both `#[Autowire]` and `#[Required]` can be used for public property injection. `#[Autowire]` allows specifying the source (parameter, service, expression), while `#[Required]` simply marks it as a required dependency for autowiring.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-public-property-injection
+
+  -
+    question: >
+      What is the primary role of the `kernel` service in Symfony?
+    answers:
+      -
+        value: >
+          To manage database connections.
+        correct: false
+      -
+        value: >
+          To handle the entire request lifecycle, from receiving a request to sending a response.
+        correct: true
+      -
+        value: >
+          To provide access to environment variables.
+        correct: false
+      -
+        value: >
+          To manage user authentication.
+        correct: false
+    help: |
+      The `kernel` service (an instance of `Symfony\Component\HttpKernel\HttpKernelInterface`) is the core of the Symfony application, orchestrating the request-response cycle.
+      https://symfony.com/doc/current/components/http_kernel.html
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs to be configured with a specific parameter `my_bundle.option` whose value is `true`. How would you define this in `config/services.yaml` using a parameter reference?
+    answers:
+      -
+        value: |
+          ```yaml
+          parameters:
+              my_bundle.option: true
+          services:
+              App\Service\MyService:
+                  arguments: ['%my_bundle.option%']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: [true]
+                  parameters:
+                      my_bundle.option: true
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['@my_bundle.option']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['parameter(my_bundle.option)']
+          ```
+        correct: false
+    help: |
+      Parameters are defined in the `parameters` section and referenced in service arguments using `%parameter_name%`.
+      https://symfony.com/doc/current/service_container/parameters.html
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::registerForAutoconfiguration()` method?
+    answers:
+      -
+        value: >
+          To register a service for autowiring.
+        correct: false
+      -
+        value: >
+          To define autoconfiguration rules for classes or interfaces.
+        correct: true
+      -
+        value: >
+          To register a compiler pass.
+        correct: false
+      -
+        value: >
+          To register a service locator.
+        correct: false
+    help: |
+      `registerForAutoconfiguration()` allows you to define rules (e.g., adding tags) that apply to any service that implements a specific interface or extends a certain class.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs to be instantiated only when it's actually used. How would you configure this lazy loading using PHP configuration?
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->lazy();
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->public(false);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->shared(false);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->defer();
+          };
+          ```
+        correct: false
+    help: |
+      The `lazy()` method on a service definition in PHP configuration enables lazy loading.
+      https://symfony.com/doc/current/service_container/lazy_services.html#lazy-services
+
+  -
+    question: >
+      What is the main benefit of using Dependency Injection in a Symfony application?
+    answers:
+      -
+        value: >
+          It makes the application run faster.
+        correct: false
+      -
+        value: >
+          It promotes loose coupling, testability, and reusability of code.
+        correct: true
+      -
+        value: >
+          It eliminates the need for any configuration files.
+        correct: false
+      -
+        value: >
+          It automatically handles database migrations.
+        correct: false
+    help: |
+      Dependency Injection helps decouple components by managing their dependencies externally, leading to more modular, testable, and reusable code.
+      https://symfony.com/doc/current/service_container.html#what-is-a-dependency-injection-container
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and explicitly tag it with `app.my_tag` in `config/services.yaml`.
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  tags: ['app.my_tag']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  tag: app.my_tag
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  attributes:
+                      tag: app.my_tag
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  tag_name: app.my_tag
+          ```
+        correct: false
+    help: |
+      Tags are defined under the `tags` key as an array of tag names or maps with additional attributes.
+      https://symfony.com/doc/current/service_container/tags.html#adding-tags-to-services
+
+  -
+    question: >
+      Which of the following is a built-in Symfony service that provides access to the current environment (e.g., `dev`, `prod`) and debug mode?
+    answers:
+      -
+        value: >
+          `kernel`
+        correct: true
+      -
+        value: >
+          `env`
+        correct: false
+      -
+        value: >
+          `app.environment`
+        correct: false
+      -
+        value: >
+          `container.environment`
+        correct: false
+    help: |
+      The `kernel` service provides methods like `getEnvironment()` and `isDebug()` to access application environment and debug status.
+      https://symfony.com/doc/current/reference/dic_tags.html#kernel-environment
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs to be registered as an abstract service, meaning it cannot be instantiated directly but can be used as a parent for other services. How would you configure this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  abstract: true
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  instantiate: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  shared: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  template: true
+          ```
+        correct: false
+    help: |
+      Setting `abstract: true` marks a service definition as abstract, preventing its direct instantiation and allowing it to be used as a template for other services via the `parent` option.
+      https://symfony.com/doc/current/service_container/parent_services.html#abstract-services
+
+  -
+    question: |
+      What is the correct way to define a service `App\Service\MyService` with an argument that is a string literal, `Hello World`, in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['Hello World']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: [value: 'Hello World']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: [string: 'Hello World']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['"Hello World"']
+          ```
+        correct: false
+    help: |
+      String literals are directly provided as arguments in YAML.
+      https://symfony.com/doc/current/service_container/arguments.html#literal-arguments
+
+  -
+    question: >
+      Which of the following built-in services provides access to the application's configuration parameters?
+    answers:
+      -
+        value: >
+          `container`
+        correct: true
+      -
+        value: >
+          `parameters`
+        correct: false
+      -
+        value: >
+          `config`
+        correct: false
+      -
+        value: >
+          `kernel`
+        correct: false
+    help: |
+      The `container` service itself provides access to parameters via its `getParameter()` method.
+      https://symfony.com/doc/current/service_container/parameters.html#getting-parameters
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and add a tag `app.processor` with a custom attribute `type: 'xml'` using PHP configuration.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->tag('app.processor', ['type' => 'xml']);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->addTag('app.processor', ['type' => 'xml']);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->attributes(['app.processor' => ['type' => 'xml']]);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->tags([['name' => 'app.processor', 'type' => 'xml']]);
+          };
+          ```
+        correct: false
+    help: |
+      In PHP configuration, the `tag()` method is used to add tags, with an optional second argument for tag attributes.
+      https://symfony.com/doc/current/service_container/tags.html#adding-tags-to-services
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::registerAttributeForAutoconfiguration()` method?
+    answers:
+      -
+        value: >
+          To register a PHP attribute for autowiring.
+        correct: false
+      -
+        value: >
+          To define autoconfiguration rules based on the presence of a specific PHP attribute on a class or method.
+        correct: true
+      -
+        value: >
+          To register a custom attribute for validation.
+        correct: false
+      -
+        value: >
+          To automatically generate attributes for services.
+        correct: false
+    help: |
+      This method allows you to create custom autoconfiguration rules that are triggered when a specific PHP attribute is used on a service class or its methods/properties.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services-with-php-attributes
+
+  -
+    question: |
+      You need to inject the `router` service into `App\Service\MyService` using PHP configuration.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+          use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args([service('router')]);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args(['@router']);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->call('setRouter', [service('router')]);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->property('router', service('router'));
+          };
+          ```
+        correct: false
+    help: |
+      In PHP configuration, the `service()` helper function is used to reference other services as arguments.
+      https://symfony.com/doc/current/service_container/configuration.html#referencing-services
+
+  -
+    question: >
+      What is the purpose of the `#[AutowireLocator]` attribute?
+    answers:
+      -
+        value: >
+          To inject a service locator that provides specific services.
+        correct: true
+      -
+        value: >
+          To automatically locate all services in the application.
+        correct: false
+      -
+        value: >
+          To define a service as a global singleton.
+        correct: false
+      -
+        value: >
+          To inject a specific service by its ID.
+        correct: false
+    help: |
+      `#[AutowireLocator]` allows you to inject a service locator that provides access to a predefined set of services, typically used to avoid injecting the entire container or for lazy loading.
+      https://symfony.com/doc/current/service_container/service_subscribers_locators.html#autowiring-service-locators
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs to be injected with a specific environment variable `APP_ENV` as a boolean. How would you achieve this using `#[Autowire]`?
+    answers:
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(env: 'bool:APP_ENV')]
+                  private bool $isProd
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(env: 'APP_ENV')]
+                  private bool $isProd
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(param: 'env(bool:APP_ENV)')]
+                  private bool $isProd
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(expression: 'env("APP_ENV") == "prod"')]
+                  private bool $isProd
+              ) {}
+          }
+          ```
+        correct: false
+    help: |
+      The `env` parameter of `#[Autowire]` supports processors like `bool:` to cast environment variables to specific types.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-environment-variables
+
+  -
+    question: >
+      What is the main advantage of using PHP attributes for service configuration over YAML or XML?
+    answers:
+      -
+        value: >
+          They are more performant.
+        correct: false
+      -
+        value: >
+          They keep service configuration closer to the code it configures.
+        correct: true
+      -
+        value: >
+          They support more complex configuration options.
+        correct: false
+      -
+        value: >
+          They are automatically generated by Symfony.
+        correct: false
+    help: |
+      PHP attributes allow you to define service configuration directly within the PHP class, co-locating the configuration with the code, which can improve readability and maintainability.
+      https://symfony.com/doc/current/service_container/attributes.html
+
+  -
+    question: |
+      You have a service `App\Service\MyService` and you want to ensure it is always a new instance whenever it is requested from the container. How would you configure this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  shared: false
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  lazy: true
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  public: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  prototype: true
+          ```
+        correct: false
+    help: |
+      Setting `shared: false` makes the service a "prototype" service, meaning a new instance is created every time it's retrieved from the container.
+      https://symfony.com/doc/current/service_container/scopes.html#prototype-services
+
+  -
+    question: >
+      Which of the following is a built-in Symfony service that provides access to the current controller and its arguments?
+    answers:
+      -
+        value: >
+          `argument_resolver`
+        correct: true
+      -
+        value: >
+          `controller_resolver`
+        correct: true
+      -
+        value: >
+          `http_kernel`
+        correct: false
+      -
+        value: >
+          `router`
+        correct: false
+    help: |
+      The `controller_resolver` determines which controller to execute, and the `argument_resolver` resolves the arguments passed to the controller method.
+      https://symfony.com/doc/current/components/http_kernel/introduction.html#the-httpkernel-class
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` that uses a static factory method `create` on `App\Factory\MyStaticFactory` to create its instances. How would you configure this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  factory: [App\Factory\MyStaticFactory, 'create']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  class: App\Factory\MyStaticFactory::create()
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  call: [App\Factory\MyStaticFactory, 'create']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  static_factory: App\Factory\MyStaticFactory::create
+          ```
+        correct: false
+    help: |
+      The `factory` key can also be used with static factory methods by providing the FQCN of the factory class and the method name.
+      https://symfony.com/doc/current/service_container/factories.html#static-factories
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::prependExtensionConfig()` method in a bundle extension?
+    answers:
+      -
+        value: >
+          To load configuration from a specific extension.
+        correct: false
+      -
+        value: >
+          To add configuration that will be merged *before* user-defined configuration.
+        correct: true
+      -
+        value: >
+          To validate the configuration of an extension.
+        correct: false
+      -
+        value: >
+          To remove configuration from an extension.
+        correct: false
+    help: |
+      `prependExtensionConfig()` allows a bundle to add configuration that will be processed before any user-defined configuration for a specific extension, enabling bundles to provide sensible defaults or enforce certain settings.
+      https://symfony.com/doc/current/bundles/prepend_extension.html
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that depends on `App\Service\OptionalDependency`. If `OptionalDependency` is not always available or needed, how can you make its injection optional using `#[Autowire]`?
+    answers:
+      -
+        value: |
+          ```php
+          use App\Service\OptionalDependency;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(service: 'App\Service\OptionalDependency', lazy: true)]
+                  ?OptionalDependency $dependency = null
+              ) {}
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use App\Service\OptionalDependency;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          class MyService
+          {
+              public function __construct(
+                  #[Autowire(service: 'App\Service\OptionalDependency', onInvalid: 'null')]
+                  ?OptionalDependency $dependency
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use App\Service\OptionalDependency;
+
+          class MyService
+          {
+              public function __construct(
+                  private ?OptionalDependency $dependency = null
+              ) {}
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use App\Service\OptionalDependency;
+          use Symfony\Contracts\Service\Attribute\Required;
+
+          class MyService
+          {
+              #[Required(optional: true)]
+              private ?OptionalDependency $dependency;
+          }
+          ```
+        correct: false
+    help: |
+      Type-hinting with `?` and providing a default `null` value makes a dependency optional for autowiring. Additionally, `#[Autowire(onInvalid: 'null')]` explicitly tells the container to inject `null` if the service cannot be found.
+      https://symfony.com/doc/current/service_container/optional_dependencies.html
+
+  -
+    question: >
+      What is the primary purpose of the `ContainerBuilder::addCompilerPass()` method?
+    answers:
+      -
+        value: >
+          To add a new service definition.
+        correct: false
+      -
+        value: >
+          To register a compiler pass that will modify the container during compilation.
+        correct: true
+      -
+        value: >
+          To add a new parameter to the container.
+        correct: false
+      -
+        value: >
+          To define a new service tag.
+        correct: false
+    help: |
+      The `addCompilerPass()` method is used to register custom compiler passes that can inspect and modify the service definitions before the container is compiled.
+      https://symfony.com/doc/current/service_container/compiler.html#registering-a-compiler-pass
+
+  -
+    question: |
+      You want to inject the `kernel.project_dir` parameter into a service using PHP configuration.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+          use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args([param('kernel.project_dir')]);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args(['%kernel.project_dir%']);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args(['@kernel.project_dir']);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args([$container->parameter('kernel.project_dir')]);
+          };
+          ```
+        correct: false
+    help: |
+      In PHP configuration, the `param()` helper function is used to reference container parameters.
+      https://symfony.com/doc/current/service_container/configuration.html#referencing-parameters
+
+  -
+    question: >
+      Which of the following is true about autowiring and aliases?
+    answers:
+      -
+        value: >
+          Autowiring ignores aliases.
+        correct: false
+      -
+        value: >
+          Autowiring can resolve aliases when injecting services.
+        correct: true
+      -
+        value: >
+          Aliases are only for public services.
+        correct: false
+      -
+        value: >
+          Aliases prevent autowiring.
+        correct: false
+    help: |
+      Autowiring is smart enough to resolve aliases. If you type-hint an interface and an alias points to the concrete implementation, autowiring will use that alias.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-and-service-aliases
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` using PHP attributes, and tag it with `app.listener`.
+    answers:
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+
+          #[Autoconfigure(tags: ['app.listener'])]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\AsService;
+
+          #[AsService(tags: ['app.listener'])]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Tag;
+
+          #[Tag('app.listener')]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          #[Autowire(tags: ['app.listener'])]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+    help: |
+      The `#[Autoconfigure]` attribute can be used to apply autoconfiguration rules, including adding tags, directly on a class.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services-with-php-attributes
+
+  -
+    question: >
+      What is the main difference between `#[Autowire(service: '...')` and `#[Target('...')`?
+    answers:
+      -
+        value: >
+          `#[Autowire]` is for parameters, `#[Target]` is for services.
+        correct: false
+      -
+        value: >
+          `#[Autowire]` allows injecting parameters, expressions, and environment variables in addition to services, while `#[Target]` is specifically for naming a service when ambiguity exists.
+        correct: true
+      -
+        value: >
+          `#[Target]` is deprecated in favor of `#[Autowire]`.
+        correct: false
+      -
+        value: >
+          `#[Autowire]` is for constructor arguments, `#[Target]` is for properties.
+        correct: false
+    help: |
+      `#[Autowire]` is more versatile, allowing injection of various types of values. `#[Target]` is specifically for resolving service ambiguity by naming the desired service. Both can be used for services.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-specific-services
+
+  -
+    question: >
+      Which of the following is NOT a common built-in service provided by Symfony?
+    answers:
+      -
+        value: >
+          `doctrine.orm.entity_manager`
+        correct: true
+      -
+        value: >
+          `router`
+        correct: false
+      -
+        value: >
+          `logger`
+        correct: false
+      -
+        value: >
+          `event_dispatcher`
+        correct: false
+    help: |
+      `doctrine.orm.entity_manager` is provided by the DoctrineBundle, which is a third-party integration, not a core Symfony component service itself.
+      https://symfony.com/doc/current/reference/dic_tags.html
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` that is created by a factory method `create` on a *class* `App\Factory\MyClassFactory` (not a service). How would you configure this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  factory: [App\Factory\MyClassFactory, 'create']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  class: App\Factory\MyClassFactory::create
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  call: [App\Factory\MyClassFactory, 'create']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  static_factory: App\Factory\MyClassFactory::create()
+          ```
+        correct: false
+    help: |
+      The `factory` key can point to a static method on a class, which will be called to create the service instance.
+      https://symfony.com/doc/current/service_container/factories.html#static-factories
+
+  -
+    question: >
+      What is the primary benefit of using a `ServiceLocator` over direct container access (`$container->get()`)?
+    answers:
+      -
+        value: >
+          It allows for compile-time validation of requested services.
+        correct: true
+      -
+        value: >
+          It makes all services public.
+        correct: false
+      -
+        value: >
+          It completely removes the need for the Dependency Injection Container.
+        correct: false
+      -
+        value: >
+          It provides a global registry for all application objects.
+        correct: false
+    help: |
+      Service locators, especially when used with `ServiceSubscriberInterface`, allow the container to know exactly which services might be requested, enabling compile-time checks and optimizations that are not possible with direct `get()` calls.
+      https://symfony.com/doc/current/service_container/service_subscribers_locators.html#service-locators
+
+  -
+    question: |
+      You want to inject an array of specific services (`service_a`, `service_b`) into a constructor argument as an `iterable`. How would you achieve this using `#[AutowireIterator]`?
+    answers:
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+
+          public function __construct(
+              #[AutowireIterator(['service_a', 'service_b'])]
+              iterable $services
+          ) {}
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          public function __construct(
+              #[Autowire(services: ['service_a', 'service_b'])]
+              iterable $services
+          ) {}
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\Target;
+
+          public function __construct(
+              #[Target(['service_a', 'service_b'])]
+              iterable $services
+          ) {}
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\DependencyInjection\Attribute\AutowireCollection;
+
+          public function __construct(
+              #[AutowireCollection(['service_a', 'service_b'])]
+              iterable $services
+          ) {}
+          ```
+        correct: false
+    help: |
+      `#[AutowireIterator]` can take an array of service IDs to explicitly define which services to inject into the iterable.
+      https://symfony.com/doc/current/service_container/tags.html#autowiring-tagged-services
+
+  -
+    question: >
+      What is the purpose of the `#[Autowire]` attribute's `param` parameter?
+    answers:
+      -
+        value: >
+          To inject a service by its ID.
+        correct: false
+      -
+        value: >
+          To inject a container parameter by its name.
+        correct: true
+      -
+        value: >
+          To inject an environment variable.
+        correct: false
+      -
+        value: >
+          To define a default value for an argument.
+        correct: false
+    help: |
+      The `param` parameter is specifically used to inject the value of a container parameter.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-parameter-values
+
+  -
+    question: |
+      You want to inject a service `App\Service\MyService` into a controller method. Which of the following is the most idiomatic Symfony 7 way to do this, assuming autowiring is enabled?
+    answers:
+      -
+        value: |
+          ```php
+          use App\Service\MyService;
+          use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+          use Symfony\Component\HttpFoundation\Response;
+
+          class MyController extends AbstractController
+          {
+              public function index(MyService $myService): Response
+              {
+                  // ...
+              }
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+          use Symfony\Component\HttpFoundation\Response;
+
+          class MyController extends AbstractController
+          {
+              public function index(): Response
+              {
+                  $myService = $this->container->get('App\Service\MyService');
+                  // ...
+              }
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+          use Symfony\Component\HttpFoundation\Response;
+
+          class MyController extends AbstractController
+          {
+              public function index(): Response
+              {
+                  $myService = $this->get('App\Service\MyService');
+                  // ...
+              }
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use App\Service\MyService;
+          use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+          use Symfony\Component\HttpFoundation\Response;
+
+          class MyController extends AbstractController
+          {
+              public function __construct(private MyService $myService) {}
+              public function index(): Response
+              {
+                  // ...
+              }
+          }
+          ```
+        correct: true
+    help: |
+      Both method argument injection and constructor injection with type-hinting are idiomatic ways to use autowiring in Symfony controllers.
+      https://symfony.com/doc/current/controller.html#controller-arguments-accessing-services
+
+  -
+    question: >
+      What is the purpose of the `#[Autoconfigure]` attribute?
+    answers:
+      -
+        value: >
+          To automatically configure a service's arguments.
+        correct: false
+      -
+        value: >
+          To apply autoconfiguration rules (like tags) to a service directly in its class definition.
+        correct: true
+      -
+        value: >
+          To enable autowiring for a class.
+        correct: false
+      -
+        value: >
+          To define a service as an alias.
+        correct: false
+    help: |
+      The `#[Autoconfigure]` attribute allows you to define autoconfiguration rules for a service directly on its class, such as adding tags or setting other definition properties.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services-with-php-attributes
+
+  -
+    question: |
+      You have a service `App\Service\MyService` that needs to be configured with a parameter `app.api_key`. How would you define this parameter in `config/services.php`?
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $container->parameters()
+                  ->set('app.api_key', 'your_api_key_here');
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $container->parameter('app.api_key', 'your_api_key_here');
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $container->set('app.api_key', 'your_api_key_here');
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $container->parameters = ['app.api_key' => 'your_api_key_here'];
+          };
+          ```
+        correct: false
+    help: |
+      In PHP configuration, parameters are defined using the `parameters()` method of the `ContainerConfigurator` and then `set()`.
+      https://symfony.com/doc/current/service_container/parameters.html#php-config
+
+  -
+    question: >
+      What is the main reason to avoid directly accessing the container using `$container->get()` in your application code?
+    answers:
+      -
+        value: >
+          It can lead to circular dependencies.
+        correct: false
+      -
+        value: >
+          It introduces tight coupling to the container and makes code harder to test.
+        correct: true
+      -
+        value: >
+          It is less performant than autowiring.
+        correct: false
+      -
+        value: >
+          It is a deprecated practice in Symfony 7.
+        correct: false
+    help: |
+      Direct container access is considered an anti-pattern as it couples your code to the container, making it less flexible, harder to test, and obscuring dependencies. Dependency injection is preferred.
+      https://symfony.com/doc/current/service_container/getting_services.html#getting-services-from-the-container
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` that has a constructor argument that is a service reference to `App\Service\AnotherService` and a string parameter `app.param`. How would you configure this in `config/services.php`?
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use App\Service\AnotherService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+          use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+          use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args([service(AnotherService::class), param('app.param')]);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->args(['@App\Service\AnotherService', '%app.param%']);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->constructor([service('App\Service\AnotherService'), param('app.param')]);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->arguments(service('App\Service\AnotherService'), param('app.param'));
+          };
+          ```
+        correct: false
+    help: |
+      The `args()` method takes an array of arguments, using `service()` for service references and `param()` for parameter references.
+      https://symfony.com/doc/current/service_container/configuration.html#referencing-services
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::getDefinition()` method in a compiler pass?
+    answers:
+      -
+        value: >
+          To retrieve a service instance.
+        correct: false
+      -
+        value: >
+          To retrieve the definition of a service, allowing it to be modified.
+        correct: true
+      -
+        value: >
+          To check if a service exists.
+        correct: false
+      -
+        value: >
+          To create a new service definition.
+        correct: false
+    help: |
+      `getDefinition()` returns a `Definition` object, which represents the configuration of a service, allowing compiler passes to inspect and modify it.
+      https://symfony.com/doc/current/service_container/compiler.html#getting-service-definitions
+
+  -
+    question: >
+      Which of the following is the correct way to load service definitions from an XML file named `services.xml` into a `ContainerBuilder`?
+    answers:
+      -
+        value: |
+          ```php
+          use Symfony\Component\Config\FileLocator;
+          use Symfony\Component\DependencyInjection\ContainerBuilder;
+          use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+
+          $container = new ContainerBuilder();
+          $loader = new XmlFileLoader($container, new FileLocator(__DIR__));
+          $loader->load('services.xml');
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          use Symfony\Component\Config\FileLocator;
+          use Symfony\Component\DependencyInjection\ContainerBuilder;
+          use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+
+          $container = new ContainerBuilder();
+          $container->load('services.xml', new XmlFileLoader(new FileLocator(__DIR__)));
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\Config\FileLocator;
+          use Symfony\Component\DependencyInjection\ContainerBuilder;
+          use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+
+          $container = new ContainerBuilder();
+          $loader = new XmlFileLoader(new FileLocator(__DIR__));
+          $container->addLoader($loader);
+          $container->load('services.xml');
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          use Symfony\Component\Config\FileLocator;
+          use Symfony\Component\DependencyInjection\ContainerBuilder;
+          use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+
+          $container = new ContainerBuilder();
+          $loader = new XmlFileLoader($container, __DIR__);
+          $loader->load('services.xml');
+          ```
+        correct: false
+    help: |
+      The `XmlFileLoader` is instantiated with the `ContainerBuilder` and a `FileLocator`, and then its `load()` method is called with the filename.
+      https://symfony.com/doc/current/components/dependency_injection/introduction.html#loading-service-definitions
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::has()` method?
+    answers:
+      -
+        value: >
+          To check if a service has been instantiated.
+        correct: false
+      -
+        value: >
+          To check if a service definition exists in the container.
+        correct: true
+      -
+        value: >
+          To check if a parameter exists in the container.
+        correct: true
+      -
+        value: >
+          To check if a service is public.
+        correct: false
+    help: |
+      The `has()` method checks for the existence of a service or parameter definition in the container.
+      https://symfony.com/doc/current/components/dependency_injection/introduction.html#getting-services
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` using PHP configuration and add a tag `app.my_tag` without any attributes.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->tag('app.my_tag');
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->addTag('app.my_tag');
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->tags(['app.my_tag']);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->attribute('tag', 'app.my_tag');
+          };
+          ```
+        correct: false
+    help: |
+      The `tag()` method with a single string argument is used to add a tag without additional attributes.
+      https://symfony.com/doc/current/service_container/tags.html#adding-tags-to-services
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::findTaggedServiceIds()` method in a compiler pass?
+    answers:
+      -
+        value: >
+          To find all services that are public.
+        correct: false
+      -
+        value: >
+          To retrieve the IDs of all services that have a specific tag.
+        correct: true
+      -
+        value: >
+          To find services that are not autowired.
+        correct: false
+      -
+        value: >
+          To find services that are lazy-loaded.
+        correct: false
+    help: |
+      This method is commonly used in compiler passes to gather all services that have been marked with a particular tag, enabling them to be processed as a group.
+      https://symfony.com/doc/current/service_container/compiler.html#finding-tagged-services
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and explicitly set its class to `App\Implementation\MyServiceImpl` in `config/services.yaml`.
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  class: App\Implementation\MyServiceImpl
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  implementation: App\Implementation\MyServiceImpl
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  type: App\Implementation\MyServiceImpl
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService: App\Implementation\MyServiceImpl
+          ```
+        correct: false
+    help: |
+      The `class` key is used to explicitly define the class of the service.
+      https://symfony.com/doc/current/service_container/configuration.html#defining-services
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::set()` method?
+    answers:
+      -
+        value: >
+          To define a new service in the container.
+        correct: false
+      -
+        value: >
+          To register a service definition.
+        correct: false
+      -
+        value: >
+          To inject an existing object instance into the container as a service.
+        correct: true
+      -
+        value: >
+          To set a parameter value.
+        correct: false
+    help: |
+      The `set()` method is used to add an already instantiated object to the container under a specific ID, making it available as a service. This is commonly used for synthetic services.
+      https://symfony.com/doc/current/service_container/synthetic_services.html
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and mark it as `public: false` in `config/services.php`.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->public(false);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->private();
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->visibility('private');
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->attribute('public', false);
+          };
+          ```
+        correct: false
+    help: |
+      The `public()` method with `false` or the `private()` method can be used to mark a service as private in PHP configuration.
+      https://symfony.com/doc/current/service_container/alias_private.html#making-services-public-private
+
+  -
+    question: >
+      What is the primary purpose of the `#[Autowire]` attribute's `service` parameter?
+    answers:
+      -
+        value: >
+          To inject a parameter by its name.
+        correct: false
+      -
+        value: >
+          To explicitly inject a service by its ID, overriding autowiring.
+        correct: true
+      -
+        value: >
+          To inject an environment variable.
+        correct: false
+      -
+        value: >
+          To define a new service.
+        correct: false
+    help: |
+      The `service` parameter is used to specify the exact service ID to be injected, providing fine-grained control over dependency resolution.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-specific-services
+
+  -
+    question: >
+      Which of the following is the correct way to define a service `App\Service\MyService` that extends an abstract parent service `App\Service\AbstractParent` in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\AbstractParent:
+                  abstract: true
+              App\Service\MyService:
+                  parent: App\Service\AbstractParent
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  extends: App\Service\AbstractParent
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  class: App\Service\MyService
+                  inherits: App\Service\AbstractParent
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  template: App\Service\AbstractParent
+          ```
+        correct: false
+    help: |
+      The `parent` option is used to inherit configuration from an abstract service definition.
+      https://symfony.com/doc/current/service_container/parent_services.html
+
+  -
+    question: >
+      What is the benefit of using `#[Required]` on a setter method compared to constructor injection for optional dependencies?
+    answers:
+      -
+        value: >
+          It makes the dependency mandatory.
+        correct: false
+      -
+        value: >
+          It allows the service to be instantiated without the dependency if it's not available, and the dependency can be set later.
+        correct: true
+      -
+        value: >
+          It reduces the number of arguments in the constructor.
+        correct: true
+      -
+        value: >
+          It prevents circular dependencies.
+        correct: false
+    help: |
+      `#[Required]` on a setter allows for optional dependencies that are still autowired if available, without cluttering the constructor with many optional arguments.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-setter-injection
+
+  -
+    question: |
+      You want to inject a specific named service `my_logger.channel_a` into a service's constructor argument that type-hints `Psr\Log\LoggerInterface`. How would you achieve this using YAML?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['@my_logger.channel_a']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: [{ service: 'my_logger.channel_a' }]
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['@Psr\Log\LoggerInterface:my_logger.channel_a']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  arguments: ['@=service("my_logger.channel_a")']
+          ```
+        correct: false
+    help: |
+      Directly referencing the service ID with `@` in YAML arguments is the standard way to inject a specific service.
+      https://symfony.com/doc/current/service_container/references.html
+
+  -
+    question: >
+      What is the primary role of the `ContainerBuilder` in the Dependency Injection component?
+    answers:
+      -
+        value: >
+          To provide a runtime instance of the service container.
+        correct: false
+      -
+        value: >
+          To build and compile the service container from definitions.
+        correct: true
+      -
+        value: >
+          To manage the cache for services.
+        correct: false
+      -
+        value: >
+          To resolve environment variables.
+        correct: false
+    help: |
+      The `ContainerBuilder` is the mutable object used during the compilation phase to gather and process all service definitions before creating the immutable, optimized container.
+      https://symfony.com/doc/current/components/dependency_injection/compilation.html
+
+  -
+    question: |
+      You have a service `App\Service\MyService` and you want to add a tag `app.data_collector` with a `priority` of `200` using PHP attributes.
+    answers:
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+
+          #[Autoconfigure(tags: [['name' => 'app.data_collector', 'priority' => 200]])]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Tag;
+
+          #[Tag('app.data_collector', priority: 200)]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+
+          #[Autoconfigure(tag: 'app.data_collector', priority: 200)]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          #[Autowire(tag: 'app.data_collector', priority: 200)]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+    help: |
+      The `tags` argument of `#[Autoconfigure]` takes an array of arrays, where each inner array defines a tag with its `name` and optional attributes like `priority`.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services-with-php-attributes
+
+  -
+    question: >
+      What is the purpose of the `#[Autowire]` attribute's `env` parameter?
+    answers:
+      -
+        value: >
+          To inject a service based on the current environment.
+        correct: false
+      -
+        value: >
+          To inject an environment variable.
+        correct: true
+      -
+        value: >
+          To define an environment-specific service.
+        correct: false
+      -
+        value: >
+          To set the application environment.
+        correct: false
+    help: |
+      The `env` parameter allows direct injection of environment variable values into service arguments or properties.
+      https://symfony.com/doc/current/service_container/autowiring.html#injecting-environment-variables
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and configure it to call a method `initialize()` after its instantiation. How would you do this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  calls:
+                      - initialize
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  method: initialize
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  init: initialize
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  post_construct: initialize
+          ```
+        correct: false
+    help: |
+      The `calls` key is used to define methods that should be called on the service instance after it has been instantiated and its constructor arguments have been injected.
+      https://symfony.com/doc/current/service_container/calls.html
+
+  -
+    question: >
+      Which built-in Symfony service provides access to the application's file system and path information?
+    answers:
+      -
+        value: >
+          `filesystem`
+        correct: true
+      -
+        value: >
+          `kernel`
+        correct: false
+      -
+        value: >
+          `file_locator`
+        correct: false
+      -
+        value: >
+          `path_resolver`
+        correct: false
+    help: |
+      The `filesystem` service (an instance of `Symfony\Component\Filesystem\Filesystem`) provides utility methods for common filesystem operations.
+      https://symfony.com/doc/current/components/filesystem.html
+
+  -
+    question: |
+      You have a service `App\Service\MyService` and you want to prevent it from being autowired, requiring explicit configuration for its dependencies. How would you configure this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  autowire: false
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  autoconfigure: false
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  manual_wiring: true
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  disabled: true
+          ```
+        correct: false
+    help: |
+      Setting `autowire: false` for a service disables autowiring for that specific service, meaning all its dependencies must be explicitly configured.
+      https://symfony.com/doc/current/service_container/autowiring.html#disabling-autowiring-for-a-specific-service
+
+  -
+    question: >
+      What is the purpose of the `#[Autowire]` attribute's `lazy` parameter (when used with a service reference)?
+    answers:
+      -
+        value: >
+          To make the service always public.
+        correct: false
+      -
+        value: >
+          To ensure the service is only instantiated when it's first used.
+        correct: true
+      -
+        value: >
+          To prevent the service from being autowired.
+        correct: false
+      -
+        value: >
+          To mark the service as optional.
+        correct: false
+    help: |
+      The `lazy` parameter (e.g., `#[Autowire(service: 'my_service', lazy: true)]`) tells the container to inject a proxy for the service, delaying its actual instantiation until it's accessed.
+      https://symfony.com/doc/current/service_container/lazy_services.html#autowiring-lazy-services
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and explicitly set its `id` to `my_custom_service_id` in `config/services.yaml`.
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              my_custom_service_id:
+                  class: App\Service\MyService
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  id: my_custom_service_id
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              my_custom_service_id: App\Service\MyService
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  name: my_custom_service_id
+          ```
+        correct: false
+    help: |
+      The key under `services:` defines the service ID. The `class` key is then used to specify the actual class.
+      https://symfony.com/doc/current/service_container/configuration.html#defining-services
+
+  -
+    question: >
+      What is the primary benefit of using service parameters in Symfony?
+    answers:
+      -
+        value: >
+          To make services public.
+        correct: false
+      -
+        value: >
+          To centralize configuration values and reuse them across multiple services.
+        correct: true
+      -
+        value: >
+          To define new services dynamically.
+        correct: false
+      -
+        value: >
+          To inject services lazily.
+        correct: false
+    help: |
+      Parameters allow you to define scalar values or arrays that can be injected into services, promoting reusability and making configuration easier to manage and change.
+      https://symfony.com/doc/current/service_container/parameters.html
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and tag it with `app.processor` and `app.reporter` in `config/services.yaml`.
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  tags: ['app.processor', 'app.reporter']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  tag:
+                      - app.processor
+                      - app.reporter
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  tags:
+                      app.processor: ~
+                      app.reporter: ~
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  attributes:
+                      tags: ['app.processor', 'app.reporter']
+          ```
+        correct: false
+    help: |
+      Multiple tags are defined as an array under the `tags` key.
+      https://symfony.com/doc/current/service_container/tags.html#adding-tags-to-services
+
+  -
+    question: >
+      What is the primary difference between `autowire` and `autoconfigure` in service definitions?
+    answers:
+      -
+        value: >
+          `autowire` enables automatic dependency injection, while `autoconfigure` automatically applies tags and other configurations based on conventions.
+        correct: true
+      -
+        value: >
+          `autowire` is for parameters, `autoconfigure` is for services.
+        correct: false
+      -
+        value: >
+          `autoconfigure` is deprecated in favor of `autowire`.
+        correct: false
+      -
+        value: >
+          `autowire` is for public services, `autoconfigure` is for private services.
+        correct: false
+    help: |
+      `autowire` handles the injection of dependencies based on type-hints. `autoconfigure` automatically applies common configurations (like adding tags for event subscribers) based on the class's interfaces or parent classes.
+      https://symfony.com/doc/current/service_container/autowiring.html#autowiring-and-service-aliases
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and make it public in `config/services.php`.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->public();
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->public(true);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->visibility('public');
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->attribute('public', true);
+          };
+          ```
+        correct: false
+    help: |
+      The `public()` method on a service definition in PHP configuration can be called without arguments or with `true` to make the service public.
+      https://symfony.com/doc/current/service_container/alias_private.html#making-services-public-private
+
+  -
+    question: >
+      What is the primary role of the `ContainerConfigurator` in Symfony's PHP service definitions?
+    answers:
+      -
+        value: >
+          To compile the service container.
+        correct: false
+      -
+        value: >
+          To provide a fluent API for defining services and parameters in PHP configuration files.
+        correct: true
+      -
+        value: >
+          To load services from YAML files.
+        correct: false
+      -
+        value: >
+          To manage environment variables.
+        correct: false
+    help: |
+      `ContainerConfigurator` is the entry point for defining services and parameters using PHP configuration, offering a more modern and readable syntax.
+      https://symfony.com/doc/current/service_container/configuration.html#php-config
+
+  -
+    question: >
+      Which of the following is a built-in Symfony service that provides access to the application's cache pools?
+    answers:
+      -
+        value: >
+          `cache.app`
+        correct: true
+      -
+        value: >
+          `cache.system`
+        correct: true
+      -
+        value: >
+          `cache_manager`
+        correct: false
+      -
+        value: >
+          `cache.default`
+        correct: false
+    help: |
+      Symfony provides several built-in cache pools, commonly `cache.app` for application-specific data and `cache.system` for internal Symfony data.
+      https://symfony.com/doc/current/cache.html#cache-pools
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and add a tag `app.event_subscriber` with no attributes using PHP attributes.
+    answers:
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+
+          #[Autoconfigure(tags: ['app.event_subscriber'])]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+          class MyService implements EventSubscriberInterface
+          {
+              // ...
+          }
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Tag;
+
+          #[Tag('app.event_subscriber')]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          namespace App\Service;
+          use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+          #[Autowire(tag: 'app.event_subscriber')]
+          class MyService
+          {
+              // ...
+          }
+          ```
+        correct: false
+    help: |
+      Implementing `EventSubscriberInterface` automatically adds the `kernel.event_subscriber` tag if autoconfigure is enabled. Alternatively, `#[Autoconfigure(tags: ['...'])]` can be used.
+      https://symfony.com/doc/current/service_container/tags.html#autoconfiguring-services
+      https://symfony.com/doc/current/components/event_dispatcher.html#event-subscribers
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::addResource()` method?
+    answers:
+      -
+        value: >
+          To add a new service definition.
+        correct: false
+      -
+        value: >
+          To register a resource (e.g., a configuration file) that the container depends on for cache invalidation.
+        correct: true
+      -
+        value: >
+          To add a new parameter to the container.
+        correct: false
+      -
+        value: >
+          To define a new service tag.
+        correct: false
+    help: |
+      `addResource()` is used to inform the container about external resources (like configuration files or directories) that affect its compilation. If these resources change, the container cache will be invalidated.
+      https://symfony.com/doc/current/components/dependency_injection/compilation.html#adding-resources
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` that is created by a factory *service* named `app.my_factory` and its method `createObject`. How would you configure this in `config/services.yaml`?
+    answers:
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  factory: ['@app.my_factory', 'createObject']
+          ```
+        correct: true
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  class: '@app.my_factory::createObject()'
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  call: ['@app.my_factory', 'createObject']
+          ```
+        correct: false
+      -
+        value: |
+          ```yaml
+          services:
+              App\Service\MyService:
+                  factory_service: app.my_factory
+                  factory_method: createObject
+          ```
+        correct: false
+    help: |
+      When the factory is itself a service, you reference it with `@` followed by the service ID, and then the method name.
+      https://symfony.com/doc/current/service_container/factories.html#service-factories
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::addExtension()` method?
+    answers:
+      -
+        value: >
+          To add a new service definition.
+        correct: false
+      -
+        value: >
+          To register a bundle's Dependency Injection extension.
+        correct: true
+      -
+        value: >
+          To add a new parameter to the container.
+        correct: false
+      -
+        value: >
+          To define a new service tag.
+        correct: false
+    help: |
+      The `addExtension()` method is used to register a bundle's extension, which is responsible for loading and processing the bundle's configuration into the container.
+      https://symfony.com/doc/current/bundles/extension.html
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and mark it as `autoconfigure: false` in `config/services.php`.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->autoconfigure(false);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->autoConfigure(false);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->attribute('autoconfigure', false);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->disableAutoconfigure();
+          };
+          ```
+        correct: false
+    help: |
+      The `autoconfigure()` method with `false` is used to disable autoconfiguration for a service.
+      https://symfony.com/doc/current/service_container/tags.html#disabling-autoconfiguration-for-a-specific-service
+
+  -
+    question: >
+      What is the main difference between a service and a parameter in the Symfony Dependency Injection Container?
+    answers:
+      -
+        value: >
+          Services are objects, while parameters are scalar values or arrays.
+        correct: true
+      -
+        value: >
+          Services are always public, while parameters are always private.
+        correct: false
+      -
+        value: >
+          Services are configured in YAML, while parameters are configured in PHP.
+        correct: false
+      -
+        value: >
+          Services are compile-time, while parameters are runtime.
+        correct: false
+    help: |
+      Services are the objects that perform tasks in your application, managed by the container. Parameters are configuration values (strings, numbers, booleans, arrays) that can be injected into services.
+      https://symfony.com/doc/current/service_container.html
+      https://symfony.com/doc/current/service_container/parameters.html
+
+  -
+    question: |
+      You want to define a service `App\Service\MyService` and explicitly set its `autowire` option to `true` in `config/services.php`.
+    answers:
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->autowire(true);
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->autoWire();
+          };
+          ```
+        correct: true
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->attribute('autowire', true);
+          };
+          ```
+        correct: false
+      -
+        value: |
+          ```php
+          // config/services.php
+          use App\Service\MyService;
+          use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+          return function(ContainerConfigurator $container): void {
+              $services = $container->services();
+              $services->set(MyService::class)
+                  ->enableAutowire();
+          };
+          ```
+        correct: false
+    help: |
+      The `autowire()` method on a service definition in PHP configuration can be called without arguments or with `true` to enable autowiring.
+      https://symfony.com/doc/current/service_container/autowiring.html#enabling-autowiring-for-a-specific-service
+
+  -
+    question: >
+      What is the purpose of the `ContainerBuilder::addDefinitions()` method?
+    answers:
+      -
+        value: >
+          To add a single service definition.
+        correct: false
+      -
+        value: >
+          To add multiple service definitions at once.
+        correct: true
+      -
+        value: >
+          To add parameter definitions.
+        correct: false
+      -
+        value: >
+          To add compiler passes.
+        correct: false
+    help: |
+      `addDefinitions()` allows you to register an array of service definitions (Definition objects) with the container builder.
+      https://symfony.com/doc/current/components/dependency_injection/introduction.html#defining-services
