@@ -3,1518 +3,1496 @@ category: Data Validation
 questions:
   -
     question: >
-      Which of the following is the correct way to validate a scalar value (e.g., an email string) using the Symfony Validator component?
+      Which component is primarily responsible for handling data validation in Symfony applications?
     answers:
-      - { value: "Inject `ValidatorInterface` and call `$validator->validate($email, new Assert\\Email());`", correct: true }
-      - { value: "Use `Validation::createValidator()->validateEmail($email);`", correct: false }
-      - { value: "Pass the email string directly to a form type for validation.", correct: false }
-      - { value: "Scalar values cannot be validated directly by the Symfony Validator.", correct: false }
+      - { value: 'The Validator component.', correct: true }
+      - { value: 'The Form component.', correct: false }
+      - { value: 'The Security component.', correct: false }
+      - { value: 'The Doctrine ORM component.', correct: false }
     help: |
-      To validate a scalar value, you inject the `ValidatorInterface` and pass the value along with the desired constraint(s) to the `validate()` method.
-      https://symfony.com/doc/current/validation/raw_values.html#validating-raw-values
+      The Validator component provides the tools for validating data against a set of rules (constraints). While the Form component uses the Validator, the core validation logic resides in the Validator component itself.
+      https://symfony.com/doc/current/validation.html
 
   -
     question: |
-      Consider the following Symfony form type configuration:
+      To enable validation in a Symfony application, which bundle typically needs to be configured or enabled?
 
-      ```php
-      use App\\Entity\\Client;
-      use Symfony\\Component\\Form\\FormInterface;
-      use Symfony\\Component\\OptionsResolver\\OptionsResolver;
-
-      public function configureOptions(OptionsResolver $resolver): void
-      {
-          $resolver->setDefaults([
-              'validation_groups' => function (FormInterface $form): array {
-                  $data = $form->getData();
-
-                  if (Client::TYPE_PERSON == $data->getType()) {
-                      return ['person'];
-                  }
-
-                  return ['company'];
-              },
-          ]);
-      }
+      ```yaml
+      # config/packages/framework.yaml
+      framework:
+          # ...
+          validation: { enable_annotations: true } # Or enable_attributes: true in newer Symfony versions
+          # ...
       ```
-
-      What will be the validation behavior if `Client::TYPE_PERSON` is matched, but the `Client` entity also has constraints defined in the `Default` group?
     answers:
-      - { value: "Only constraints in the 'person' group will be validated.", correct: true }
-      - { value: "Constraints in both 'person' and 'Default' groups will be validated.", correct: false }
-      - { value: "No validation will occur, as 'Default' is not explicitly included.", correct: false }
-      - { value: "An error will be thrown because the 'Default' group is omitted.", correct: false }
+      - { value: 'FrameworkBundle', correct: true }
+      - { value: 'ValidatorBundle', correct: false }
+      - { value: 'AnnotationsBundle', correct: false }
+      - { value: 'FormBundle', correct: false }
     help: |
-      When `validation_groups` is set to a Closure or a static callback, only the groups explicitly returned by the callback will be validated. To include the `Default` group, it must be explicitly added to the returned array.
-      https://symfony.com/doc/current/form/data_based_validation.html#data-based-validation
+      The validation configuration is part of the FrameworkBundle. Enabling validation, including attribute support, is done under the `framework.validation` key.
+      https://symfony.com/doc/current/reference/configuration/framework.html#validation
 
   -
     question: >
-      Which of the following methods can be used to define validation metadata for a Symfony entity?
+      What is the recommended way to define validation constraints for a PHP object in Symfony 7?
     answers:
-      - { value: "PHP Attributes", correct: true }
-      - { value: "YAML configuration files", correct: true }
-      - { value: "XML configuration files", correct: true }
-      - { value: "A static `loadValidatorMetadata()` method within the entity class", correct: true }
-      - { value: "Annotations (deprecated in Symfony 6+)", correct: false }
+      - { value: 'Using PHP attributes directly on properties or methods.', correct: true }
+      - { value: 'Using YAML configuration files.', correct: true }
+      - { value: 'Using XML configuration files.', correct: true }
+      - { value: 'Using annotations (deprecated in favor of attributes).', correct: false }
+      - { value: 'Implementing the `ValidatableInterface`.', correct: false }
     help: |
-      Symfony supports defining validation metadata using PHP attributes, YAML, XML, and a static `loadValidatorMetadata()` method. Annotations are deprecated in Symfony 6+.
-      https://symfony.com/doc/current/validation.html#configuration-formats
+      Symfony 7 primarily recommends PHP attributes for defining constraints. However, YAML and XML configurations are still fully supported and valid alternatives. Annotations are technically still supported for backward compatibility but attributes are the modern approach.
+      https://symfony.com/doc/current/validation.html#constraints-configuration
 
   -
     question: |
-      Given the following entity:
+      Consider the following PHP class. Which attribute would you use to ensure the `email` property is a valid email address?
 
       ```php
-      namespace App\\Entity;
+      namespace App\Entity;
 
-      use Symfony\\Component\\Validator\\Constraints as Assert;
+      use Symfony\Component\Validator\Constraints as Assert;
 
       class User
       {
-          #[Assert\\Email(groups: ['registration'])]
-          private string $email;
+          #[Assert\NotBlank]
+          private ?string $name = null;
 
-          #[Assert\\NotBlank(groups: ['registration'])]
-          #[Assert\\Length(min: 7, groups: ['registration'])]
-          private string $password;
-
-          #[Assert\\Length(min: 2)]
-          private string $city;
+          // ???
+          private ?string $email = null;
       }
       ```
-
-      How would you validate only the `email` and `password` properties, which belong to the `registration` group, using the `ValidatorInterface`?
     answers:
-      - { value: "`$validator->validate($user, null, ['registration']);`", correct: true }
-      - { value: "`$validator->validate($user, ['email', 'password']);`", correct: false }
-      - { value: "`$validator->validate($user, new Assert\\Group('registration'));`", correct: false }
-      - { value: "`$validator->validate($user, null, 'registration');`", correct: true }
+      - { value: '`#[Assert\Email]`', correct: true }
+      - { value: '`#[Assert\ValidEmail]`', correct: false }
+      - { value: '`#[Assert\Type(''email'')]`', correct: false }
+      - { value: '`#[Assert\Format(pattern: ''/^\S+@\S+\.\S+$/'')]`', correct: false }
     help: |
-      The `validate()` method of `ValidatorInterface` accepts an optional third argument for validation groups. You can pass a string or an array of strings representing the group names.
-      https://symfony.com/doc/current/validation/groups.html#validation-groups
-
-  -
-    question: >
-      What is the purpose of the `#[Assert\\Valid]` attribute in Symfony's validation component?
-    answers:
-      - { value: "To mark a property as valid if it passes all its own constraints.", correct: false }
-      - { value: "To ensure that a nested object's properties are also validated.", correct: true }
-      - { value: "To apply a default set of validation rules to an entire class.", correct: false }
-      - { value: "To skip validation for a specific property.", correct: false }
-    help: |
-      The `#[Assert\\Valid]` attribute is used on properties that hold other objects. When applied, it tells the validator to recursively validate the nested object's properties as well.
-      https://symfony.com/doc/current/reference/constraints/Valid.html
-
-  -
-    question: >
-      When defining a custom validation constraint, which class must its associated validator extend?
-    answers:
-      - { value: "`Symfony\\Component\\Validator\\ConstraintValidator`", correct: true }
-      - { value: "`Symfony\\Component\\Validator\\ValidatorInterface`", correct: false }
-      - { value: "`Symfony\\Component\\Validator\\Constraint`", correct: false }
-      - { value: "`Symfony\\Component\\Validator\\Validation`", correct: false }
-    help: |
-      A custom constraint's validator class must extend `Symfony\\Component\\Validator\\ConstraintValidator` and implement the `validate()` method.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
-
-  -
-    question: |
-      You are implementing a custom validation constraint. Inside the `validate()` method of your validator, how do you register a validation violation?
-    answers:
-      - { value: "`$this->context->addViolation($constraint->message);`", correct: false }
-      - { value: "`$this->context->buildViolation($constraint->message)->addViolation();`", correct: true }
-      - { value: "`$this->addViolation($constraint->message);`", correct: false }
-      - { value: "`$this->validator->addViolation($constraint->message);`", correct: false }
-    help: |
-      To register a violation, you use the `context` property of the validator. You call `buildViolation()` to create a violation builder, optionally set parameters, and then call `addViolation()`.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
-
-  -
-    question: >
-      What is the purpose of a `GroupSequence` in Symfony validation?
-    answers:
-      - { value: "To define a specific order in which validation groups are applied.", correct: true }
-      - { value: "To group multiple constraints under a single name.", correct: false }
-      - { value: "To apply validation only if certain conditions are met.", correct: false }
-      - { value: "To skip validation for an entire object.", correct: false }
-    help: |
-      A `GroupSequence` allows you to define a sequence of validation groups. If any constraint in an earlier group fails, subsequent groups in the sequence are not validated.
-      https://symfony.com/doc/current/validation/sequence_provider.html
-
-  -
-    question: >
-      Which of the following built-in Symfony validation constraints is used to ensure a value falls within a specified numeric or date range?
-    answers:
-      - { value: "`#[Assert\\Range]`", correct: true }
-      - { value: "`#[Assert\\Length]`", correct: false }
-      - { value: "`#[Assert\\GreaterThan]`", correct: false }
-      - { value: "`#[Assert\\LessThanOrEqual]`", correct: false }
-    help: |
-      The `#[Assert\\Range]` constraint is used to check if a value is within a specified minimum and maximum.
-      https://symfony.com/doc/current/reference/constraints/Range.html
-
-  -
-    question: >
-      When validating an object with a `GroupSequence`, what happens if a constraint in an earlier group fails?
-    answers:
-      - { value: "Validation stops immediately, and subsequent groups are not checked.", correct: true }
-      - { value: "All groups are still validated, but errors are reported for all.", correct: false }
-      - { value: "The failing constraint is skipped, and validation continues with the next group.", correct: false }
-      - { value: "An exception is thrown, halting the application.", correct: false }
-    help: |
-      The core concept of a `GroupSequence` is to provide a "fail-fast" mechanism. If a constraint in an earlier group fails, the validation process for that object stops, and no further groups in the sequence are evaluated.
-      https://symfony.com/doc/current/validation/sequence_provider.html
-
-  -
-    question: >
-      How can you apply validation constraints directly to individual fields within a Symfony form when it's NOT mapped to a data class?
-    answers:
-      - { value: "By adding a `constraints` option to the `add()` method for each field in `buildForm()`.", correct: true }
-      - { value: "By defining constraints in the `configureOptions()` method using the `data_class` option.", correct: false }
-      - { value: "By creating a separate validator service for each field.", correct: false }
-      - { value: "It's not possible to validate forms not mapped to a data class.", correct: false }
-    help: |
-      When a form is not mapped to a data class, you can apply constraints directly to individual fields using the `constraints` option within the `add()` method in `buildForm()`.
-      https://symfony.com/doc/current/form/without_class.html#adding-field-level-validation
-
-  -
-    question: >
-      Which of the following is the correct way to disable validation groups for a Symfony form?
-    answers:
-      - { value: "Set the `validation_groups` option to `false` in `configureOptions()`.", correct: true }
-      - { value: "Set the `validation_groups` option to an empty array `[]`.", correct: false }
-      - { value: "Call `$form->disableValidation();` in the controller.", correct: false }
-      - { value: "Remove all `#[Assert]` attributes from the entity.", correct: false }
-    help: |
-      To disable validation groups for a form, you set the `validation_groups` option to `false` in its `configureOptions()` method. Note that some basic integrity checks (e.g., file size) might still apply.
-      https://symfony.com/doc/current/form/disabling_validation.html
-
-  -
-    question: |
-      You need to validate an array of data, ensuring that specific keys exist and have certain properties (e.g., `name` is not blank, `email` is a valid email). Which built-in Symfony constraint should you use?
-    answers:
-      - { value: "`#[Assert\\Collection]`", correct: true }
-      - { value: "`#[Assert\\All]`", correct: false }
-      - { value: "`#[Assert\\Array]`", correct: false }
-      - { value: "`#[Assert\\Each]`", correct: false }
-    help: |
-      The `#[Assert\\Collection]` constraint is designed for validating array structures, allowing you to define constraints for specific keys within the array.
-      https://symfony.com/doc/current/reference/constraints/Collection.html
-
-  -
-    question: >
-      What is the primary purpose of the `payload` option in a Symfony validation constraint?
-    answers:
-      - { value: "To attach arbitrary custom data to a validation violation.", correct: true }
-      - { value: "To define the error message for the constraint.", correct: false }
-      - { value: "To specify the validation groups for the constraint.", correct: false }
-      - { value: "To set the severity level of the validation error (e.g., warning, error).", correct: false }
-    help: |
-      The `payload` option allows you to attach any arbitrary custom data to a constraint. This data can then be retrieved from the `ConstraintViolation` object, which is useful for advanced error handling or UI customization.
-      https://symfony.com/doc/current/validation/severity.html#retrieving-the-payload
-
-  -
-    question: >
-      Which of the following is a valid way to define validation constraints for a property named `firstName` in a Symfony entity using YAML?
-    answers:
-      - { value: '''App\\Entity\\Author:
-    properties:
-        firstName:
-            - NotBlank: ~
-            - Length:
-                min: 3''' , correct: true }
-      - { value: '''App\\Entity\\Author:
-    firstName:
-        NotBlank:
-        Length: { min: 3 }''' , correct: false }
-      - { value: '''properties:
-    App\\Entity\\Author.firstName:
-        - NotBlank:
-        - Length: { min: 3 }''' , correct: false }
-      - { value: '''validation:
-    Author:
-        firstName:
-            NotBlank: true
-            Length: { min: 3 }''' , correct: false }
-    help: |
-      YAML validation configuration for entities follows a specific structure: the fully qualified class name, followed by `properties`, and then the property name with a list of constraints.
-      https://symfony.com/doc/current/validation.html#yaml
-
-  -
-    question: >
-      When using the `#[Assert\\When]` constraint, what type of expression is typically used to define the condition under which nested constraints are applied?
-    answers:
-      - { value: "A Symfony Expression Language expression.", correct: true }
-      - { value: "A PHP callable or Closure.", correct: false }
-      - { value: "A simple boolean value.", correct: false }
-      - { value: "A regular expression string.", correct: false }
-    help: |
-      The `#[Assert\\When]` constraint uses the Symfony Expression Language to define the `expression` that determines whether its nested constraints should be evaluated.
-      https://symfony.com/doc/current/reference/constraints/When.html
-
-  -
-    question: >
-      What is the default validation group applied when you call `$validator->validate($object);` without specifying any groups?
-    answers:
-      - { value: "The `Default` group.", correct: true }
-      - { value: "All defined groups.", correct: false }
-      - { value: "No groups are applied by default.", correct: false }
-      - { value: "The first group defined in the entity's metadata.", correct: false }
-    help: |
-      By default, if no validation groups are explicitly passed to the `validate()` method, only constraints belonging to the `Default` group are checked.
-      https://symfony.com/doc/current/validation/groups.html#validation-groups
-
-  -
-    question: >
-      Which of the following built-in constraints can be used to ensure that a collection (e.g., an array of strings) contains only unique elements?
-    answers:
-      - { value: "`#[Assert\\Unique]`", correct: true }
-      - { value: "`#[Assert\\Distinct]`", correct: false }
-      - { value: "`#[Assert\\NoRepeats]`", correct: false }
-      - { value: "`#[Assert\\Singular]`", correct: false }
-    help: |
-      The `#[Assert\\Unique]` constraint is used to ensure that all elements in a collection are unique.
-      https://symfony.com/doc/current/reference/constraints/Unique.html
-
-  -
-    question: >
-      What happens if you set the `stopOnFirstError` option to `true` for the `#[Assert\\Unique]` constraint?
-    answers:
-      - { value: "Validation will stop at the first duplicate element found in the collection.", correct: true }
-      - { value: "The entire validation process for the object will halt.", correct: false }
-      - { value: "Only the first error message will be displayed, but all duplicates are still found.", correct: false }
-      - { value: "The constraint will be ignored if any other validation error occurs.", correct: false }
-    help: |
-      The `stopOnFirstError` option, when set to `true`, causes the `#[Assert\\Unique]` constraint to stop processing the collection and return a violation as soon as the first non-unique element is detected.
-      https://symfony.com/doc/current/reference/constraints/Unique.html#stoponfirsterror
-
-  -
-    question: |
-      You have a `User` entity with a `password` property. You want to ensure it's not blank and has a minimum length of 7 characters, specifically for a 'registration' process. Which PHP attribute configuration is correct?
-    answers:
-      - { value: '''#[Assert\\NotBlank(groups: ['registration'])]
-#[Assert\\Length(min: 7, groups: ['registration'])]
-private string $password;''' , correct: true }
-      - { value: '''#[Assert\\NotBlank, Assert\\Length(min: 7)]
-private string $password;''' , correct: false }
-      - { value: '''#[Assert\\All([new Assert\\NotBlank(), new Assert\\Length(min: 7)], groups: ['registration'])]
-private string $password;''' , correct: false }
-      - { value: '''#[Assert\\Group('registration')]
-#[Assert\\NotBlank]
-#[Assert\\Length(min: 7)]
-private string $password;''' , correct: false }
-    help: |
-      To assign constraints to a specific validation group using PHP attributes, you pass an array of group names to the `groups` option of each constraint.
-      https://symfony.com/doc/current/validation/groups.html#validation-groups
-
-  -
-    question: >
-      Which interface must a service implement to be registered with the `validator.initializer` tag in Symfony?
-    answers:
-      - { value: "`Symfony\\Component\\Validator\\ObjectInitializerInterface`", correct: true }
-      - { value: "`Symfony\\Component\\Validator\\ValidatorInterface`", correct: false }
-      - { value: "`Symfony\\Component\\Validator\\ConstraintValidatorInterface`", correct: false }
-      - { value: "`Symfony\\Component\\Validator\\Mapping\\ClassMetadataFactoryInterface`", correct: false }
-    help: |
-      Services tagged with `validator.initializer` must implement `Symfony\\Component\\Validator\\ObjectInitializerInterface`. This allows them to perform actions on objects right before validation occurs.
-      https://symfony.com/doc/current/reference/dic_tags.html#validator-initializer
-
-  -
-    question: >
-      What is the primary benefit of using a static `loadValidatorMetadata()` method within an entity class for defining validation constraints?
-    answers:
-      - { value: "It allows for programmatic definition of constraints, which can be conditional or dynamic.", correct: true }
-      - { value: "It is the only way to define validation groups.", correct: false }
-      - { value: "It completely replaces the need for PHP attributes or YAML/XML configuration.", correct: false }
-      - { value: "It automatically integrates with Doctrine ORM for database-level validation.", correct: false }
-    help: |
-      The `loadValidatorMetadata()` static method provides a programmatic way to define constraints, offering flexibility for conditional logic or more complex constraint setups that might be harder to express in declarative formats like attributes or YAML/XML.
-      https://symfony.com/doc/current/components/validator/resources.html#the-static-method
-
-  -
-    question: >
-      When validating an object with `ValidatorInterface::validate()`, what is the return type of this method?
-    answers:
-      - { value: "`Symfony\\Component\\Validator\\ConstraintViolationListInterface`", correct: true }
-      - { value: "`array`", correct: false }
-      - { value: "`bool`", correct: false }
-      - { value: "`Symfony\\Component\\Validator\\ConstraintViolation`", correct: false }
-    help: |
-      The `validate()` method returns a `ConstraintViolationListInterface` object, which is a collection of `ConstraintViolation` objects if any errors are found.
-      https://symfony.com/doc/current/validation/groups.html#validation-groups (See API documentation for validate method)
-
-  -
-    question: >
-      Which of the following is a valid use case for a custom callback validator in Symfony?
-    answers:
-      - { value: "Validating a password against a username (e.g., password cannot be the same as username).", correct: true }
-      - { value: "Checking if an email address is in a valid format.", correct: false }
-      - { value: "Ensuring a string has a minimum length.", correct: false }
-      - { value: "Validating that a number is within a specific range.", correct: false }
-    help: |
-      Custom callback validators are ideal for complex validation logic that cannot be covered by built-in constraints, such as cross-field validation (e.g., comparing password and username).
-      https://symfony.com/doc/current/validation/custom_constraint.html#callback-constraint
-
-  -
-    question: >
-      What is the purpose of `ConstraintViolationBuilderInterface::setParameter()` when building a validation violation?
-    answers:
-      - { value: "To replace placeholders in the violation message with dynamic values.", correct: true }
-      - { value: "To define the validation group for the violation.", correct: false }
-      - { value: "To set the severity level of the violation.", correct: false }
-      - { value: "To specify the property path where the violation occurred.", correct: false }
-    help: |
-      `setParameter()` is used to replace placeholders (e.g., `{{ value }}`) in the constraint's error message with actual dynamic values relevant to the violation.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
-
-  -
-    question: >
-      When using the `#[Assert\\Range]` constraint for a `DateTimeInterface` property, what is the expected format for the `min` and `max` options?
-    answers:
-      - { value: "Any string parsable by the `DateTime` constructor.", correct: true }
-      - { value: "A Unix timestamp.", correct: false }
-      - { value: "A `DateTimeImmutable` object.", correct: false }
-      - { value: "A specific 'YYYY-MM-DD' string format.", correct: false }
-    help: |
-      For `DateTimeInterface` properties, the `min` and `max` options of the `#[Assert\\Range]` constraint accept any string that can be successfully parsed by PHP's `DateTime` constructor.
-      https://symfony.com/doc/current/reference/constraints/Range.html#min-and-max-options
-
-  -
-    question: >
-      Which of the following is a correct way to get the `payload` from a `ConstraintViolation` object?
-    answers:
-      - { value: "`$constraintViolation->getConstraint()->payload;`", correct: true }
-      - { value: "`$constraintViolation->getPayload();`", correct: false }
-      - { value: "`$constraintViolation->payload;`", correct: false }
-      - { value: "`$constraintViolation->getConstraint()->getPayload();`", correct: false }
-    help: |
-      The `payload` is an option of the `Constraint` itself, so you first retrieve the constraint from the violation and then access its `payload` property.
-      https://symfony.com/doc/current/validation/severity.html#retrieving-the-payload
-
-  -
-    question: >
-      What is the purpose of the `errorPath` option in the `#[Assert\\Unique]` constraint?
-    answers:
-      - { value: "To bind the validation error message to a specific field within the first item of the collection.", correct: true }
-      - { value: "To define the path to the unique identifier property.", correct: false }
-      - { value: "To specify the property that should be checked for uniqueness.", correct: false }
-      - { value: "To log the error to a specific file path.", correct: false }
-    help: |
-      The `errorPath` option allows you to direct the validation error message of the `#[Assert\\Unique]` constraint to a specific field within the collection's first item, using PropertyAccess syntax.
-      https://symfony.com/doc/current/reference/constraints/Unique.html#errorpath
-
-  -
-    question: >
-      When handling a Symfony form submission, what is the correct order of methods to call after creating the form object to process the request and check for validity?
-    answers:
-      - { value: "`$form->handleRequest($request);` then `if ($form->isSubmitted() && $form->isValid()) { ... }`", correct: true }
-      - { value: "`$form->isValid();` then `$form->handleRequest($request);`", correct: false }
-      - { value: "`$form->submit($request);` then `if ($form->isValid()) { ... }`", correct: false }
-      - { value: "`$form->isSubmitted();` then `$form->isValid();` then `$form->handleRequest($request);`", correct: false }
-    help: |
-      The correct sequence is to first call `handleRequest()` to populate the form with submitted data, and then check `isSubmitted()` and `isValid()` to determine if the form was submitted and if its data passed validation.
-      https://symfony.com/doc/current/forms.html#handling-form-submissions
-
-  -
-    question: >
-      Which of the following is a valid way to define a `GroupSequence` for a `User` entity using PHP attributes?
-    answers:
-      - { value: '''#[Assert\\GroupSequence(['User', 'Strict'])]
-class User
-{
-    // ...
-}''' , correct: true }
-      - { value: '''#[Assert\\Sequence(['User', 'Strict'])]
-class User
-{
-    // ...
-}''' , correct: false }
-      - { value: '''#[Assert\\ValidationGroupSequence(['User', 'Strict'])]
-class User
-{
-    // ...
-}''' , correct: false }
-      - { value: '''#[Assert\\Groups(['User', 'Strict'], sequence: true)]
-class User
-{
-    // ...
-}''' , correct: false }
-    help: |
-      The `#[Assert\\GroupSequence]` attribute is used at the class level to define a sequential validation order for groups.
-      https://symfony.com/doc/current/validation/sequence_provider.html#group-sequence-provider
-
-  -
-    question: >
-      What is the primary purpose of the `normalizer` option in the `#[Assert\\Unique]` constraint?
-    answers:
-      - { value: "To apply a PHP callable to each element of the collection before checking for uniqueness.", correct: true }
-      - { value: "To convert the collection into a canonical format for comparison.", correct: false }
-      - { value: "To normalize the error messages generated by the constraint.", correct: false }
-      - { value: "To strip HTML tags from string elements before validation.", correct: false }
-    help: |
-      The `normalizer` option allows you to specify a PHP callable that will be applied to each element of the collection before the uniqueness check is performed. This is useful for tasks like trimming whitespace or converting to lowercase to ensure accurate comparisons.
-      https://symfony.com/doc/current/reference/constraints/Unique.html#normalizer
-
-  -
-    question: >
-      When should you use `Symfony\\Component\\Validator\\Validation::createCallable()`?
-    answers:
-      - { value: "When you need a closure that throws a `ValidationFailedException` if constraints are not matched.", correct: true }
-      - { value: "To create a new instance of the validator service.", correct: false }
-      - { value: "To dynamically add constraints to an object at runtime.", correct: false }
-      - { value: "To generate a list of all available validation constraints.", correct: false }
-    help: |
-      `Validation::createCallable()` returns a closure that can be used in contexts like `OptionsResolver` or console command answers, which will throw a `ValidationFailedException` if the provided value does not satisfy the specified constraints.
-      https://symfony.com/doc/current/validation.html#validation-callable-methods
-
-  -
-    question: |
-      You have a form where an 'other_text' field should only be required if a 'how_did_you_hear' field has the value 'other'. Which constraint allows you to implement this conditional validation?
-    answers:
-      - { value: "`#[Assert\\When]`", correct: true }
-      - { value: "`#[Assert\\Callback]`", correct: false }
-      - { value: "`#[Assert\\Expression]`", correct: false }
-      - { value: "`#[Assert\\Conditional]`", correct: false }
-    help: |
-      The `#[Assert\\When]` constraint is specifically designed for conditional validation, allowing you to apply nested constraints only when a given Expression Language condition evaluates to true.
-      https://symfony.com/doc/current/form/without_class.html#conditional-validation
-
-  -
-    question: >
-      What is the purpose of the `data_class` option in a Symfony form type's `configureOptions` method?
-    answers:
-      - { value: "To specify the class that the form will map its data to.", correct: true }
-      - { value: "To define the validation groups for the form.", correct: false }
-      - { value: "To set the default values for the form fields.", correct: false }
-      - { value: "To indicate that the form should not be validated.", correct: false }
-    help: |
-      The `data_class` option tells the form which class its submitted data should be mapped to, enabling automatic data hydration and validation against that class's constraints.
-      https://symfony.com/doc/current/forms.html#defining-the-form-class
-
-  -
-    question: >
-      Which of the following is NOT a valid way to define validation constraints in Symfony?
-    answers:
-      - { value: "Using a `.json` file for constraint definitions.", correct: true }
-      - { value: "Using PHP attributes directly on entity properties.", correct: false }
-      - { value: "Using YAML files in `config/validator/validation.yaml`.", correct: false }
-      - { value: "Using a static `loadValidatorMetadata()` method in the entity class.", correct: false }
-    help: |
-      Symfony's Validator component supports PHP attributes, YAML, XML, and static `loadValidatorMetadata()` methods for defining constraints. JSON is not a supported format for constraint definitions.
-      https://symfony.com/doc/current/validation.html#configuration-formats
-
-  -
-    question: >
-      What is the primary difference between `Symfony\\Component\\Validator\\Validation::createCallable()` and `Symfony\\Component\\Validator\\Validation::createIsValidCallable()`?
-    answers:
-      - { value: "The former throws an exception on failure, the latter returns `false`.", correct: true }
-      - { value: "The former is for objects, the latter is for scalar values.", correct: false }
-      - { value: "The former is for single constraints, the latter is for multiple constraints.", correct: false }
-      - { value: "There is no functional difference; they are aliases.", correct: false }
-    help: |
-      `createCallable()` returns a closure that throws a `ValidationFailedException` if validation fails, while `createIsValidCallable()` returns a closure that simply returns `false` on failure.
-      https://symfony.com/doc/current/validation.html#validation-callable-methods
-
-  -
-    question: >
-      When implementing a custom constraint validator, what should you do if the `$value` passed to the `validate()` method is `null` or an empty string?
-    answers:
-      - { value: "Return immediately without adding a violation, as constraints typically ignore null/empty values.", correct: true }
-      - { value: "Throw an `UnexpectedValueException`.", correct: false }
-      - { value: "Add a `NotBlank` violation automatically.", correct: false }
-      - { value: "Convert the value to a default before validation.", correct: false }
-    help: |
-      Custom constraints are generally expected to ignore `null` and empty string values. This allows other constraints like `NotBlank` to handle the "empty" check. If your constraint should specifically validate against emptiness, you would add that logic.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
-
-  -
-    question: >
-      How does Symfony's validation component typically handle validation constraints inferred from Doctrine ORM metadata (e.g., `nullable=false`)?
-    answers:
-      - { value: "It automatically converts them into equivalent Symfony validation constraints (e.g., `NotNull`).", correct: true }
-      - { value: "It ignores them, requiring explicit Symfony constraints.", correct: false }
-      - { value: "It only applies them if a specific Doctrine validation group is activated.", correct: false }
-      - { value: "It throws an error if there's a mismatch between Doctrine and Symfony constraints.", correct: false }
-    help: |
-      Symfony's Validator component can leverage Doctrine ORM mapping information (like `nullable=false` or `length` definitions) to automatically infer and apply corresponding validation constraints without explicit definition.
-      https://symfony.com/doc/current/doctrine.html#validating-objects
-
-  -
-    question: >
-      When using the `#[Assert\\Collection]` constraint, which nested constraint is used to apply a set of constraints to ALL elements within an array property?
-    answers:
-      - { value: "`#[Assert\\All]`", correct: true }
-      - { value: "`#[Assert\\Each]`", correct: false }
-      - { value: "`#[Assert\\Map]`", correct: false }
-      - { value: "`#[Assert\\List]`", correct: false }
-    help: |
-      The `#[Assert\\All]` constraint is used within a `Collection` constraint to apply a set of constraints to every element of an array or traversable property.
-      https://symfony.com/doc/current/reference/constraints/Collection.html#all
-
-  -
-    question: >
-      What is the purpose of the `invalidDateTimeMessage` option in the `#[Assert\\Range]` constraint?
-    answers:
-      - { value: "To define the error message when the input value is not a valid date/time string, and `min`/`max` are also dates.", correct: true }
-      - { value: "To specify the message when the date is outside the allowed range.", correct: false }
-      - { value: "To set the message for invalid date format in general.", correct: false }
-      - { value: "To provide a message when the `min` or `max` options are invalid date formats.", correct: false }
-    help: |
-      `invalidDateTimeMessage` is specifically for when the `min` and `max` options are date-based, but the validated value itself cannot be parsed as a valid date/time.
-      https://symfony.com/doc/current/reference/constraints/Range.html#invalidDateTimeMessage
-
-  -
-    question: >
-      Which of the following built-in validation constraints is suitable for ensuring that a string value matches or does not match a given regular expression?
-    answers:
-      - { value: "`#[Assert\\Regex]`", correct: true }
-      - { value: "`#[Assert\\Pattern]`", correct: false }
-      - { value: "`#[Assert\\Match]`", correct: false }
-      - { value: "`#[Assert\\Expression]`", correct: false }
-    help: |
-      The `#[Assert\\Regex]` constraint is used to validate a string against a regular expression pattern.
-      https://symfony.com/doc/current/reference/constraints/Regex.html
-
-  -
-    question: >
-      When using the `#[Assert\\Regex]` constraint, how can you make the validation pass only if the given string DOES NOT match the pattern?
-    answers:
-      - { value: "Set the `match` option to `false`.", correct: true }
-      - { value: "Set the `inverse` option to `true`.", correct: false }
-      - { value: "Use a negative lookahead assertion in the regex pattern.", correct: false }
-      - { value: "Set the `notMatch` option to `true`.", correct: false }
-    help: |
-      The `match` option of the `#[Assert\\Regex]` constraint, when set to `false`, inverts the validation logic, so it passes only if the string does NOT match the pattern.
-      https://symfony.com/doc/current/reference/constraints/Regex.html#match
-
-  -
-    question: >
-      What is the primary purpose of `Symfony\\Component\\Validator\\ConstraintViolationListInterface`?
-    answers:
-      - { value: "To represent a collection of validation errors.", correct: true }
-      - { value: "To define the structure of a single validation error.", correct: false }
-      - { value: "To provide methods for validating objects.", correct: false }
-      - { value: "To list all available validation constraints.", correct: false }
-    help: |
-      `ConstraintViolationListInterface` is the interface for the object returned by the `ValidatorInterface::validate()` method, which contains zero or more `ConstraintViolation` objects representing validation errors.
-      https://symfony.com/doc/current/validation.html#validating-objects
-
-  -
-    question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `name` in a Symfony entity using XML?
-    answers:
-      - { value: '''<class name="App\\Entity\\Author">
-    <property name="name">
-        <constraint name="NotBlank"/>
-    </property>
-</class>''' , correct: true }
-      - { value: '''<constraint-mapping>
-    <property name="App\\Entity\\Author.name">
-        <NotBlank/>
-    </property>
-</constraint-mapping>''' , correct: false }
-      - { value: '''<class name="App\\Entity\\Author" property="name">
-    <constraint name="NotBlank"/>
-</class>''' , correct: false }
-      - { value: '''<constraint name="NotBlank" for="App\\Entity\\Author.name"/>''' , correct: false }
-    help: |
-      XML validation configuration uses `<class>` tags for entities and `<property>` tags for properties, with nested `<constraint>` tags for each constraint.
-      https://symfony.com/doc/current/validation.html#xml
-
-  -
-    question: >
-      When using the `#[Assert\\Length]` constraint, what happens if the validated value is `null`?
-    answers:
-      - { value: "The value is considered valid, and the constraint is not triggered.", correct: true }
-      - { value: "A `NotBlank` violation is automatically added.", correct: false }
-      - { value: "An exception is thrown because `null` cannot have a length.", correct: false }
-      - { value: "The `min` option is ignored, but `max` is still checked.", correct: false }
-    help: |
-      The `#[Assert\\Length]` constraint, like many others, considers `null` values as valid and does not trigger a violation. If you need to ensure a value is not null, you should use `#[Assert\\NotBlank]` or `#[Assert\\NotNull]`.
-      https://symfony.com/doc/current/reference/constraints/Length.html#min
-
-  -
-    question: >
-      You are building a custom validation constraint and its validator. Inside the `validate()` method, how should you handle an unexpected type for the `$value` argument (e.g., expecting a string but receiving an integer)?
-    answers:
-      - { value: "Throw an `UnexpectedValueException`.", correct: true }
-      - { value: "Add a violation using `buildViolation()`.", correct: false }
-      - { value: "Return `false` to indicate an invalid type.", correct: false }
-      - { value: "Log a warning and attempt to cast the value.", correct: false }
-    help: |
-      If your custom validator receives a value of an unexpected type, it should throw an `UnexpectedValueException` to indicate that it cannot properly handle the given type.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
-
-  -
-    question: >
-      Which built-in Symfony constraint is used to validate that a property contains a valid email address?
-    answers:
-      - { value: "`#[Assert\\Email]`", correct: true }
-      - { value: "`#[Assert\\IsEmail]`", correct: false }
-      - { value: "`#[Assert\\Mail]`", correct: false }
-      - { value: "`#[Assert\\EmailAddress]`", correct: false }
-    help: |
-      The `#[Assert\\Email]` constraint is specifically designed to validate email addresses.
+      The `Email` constraint is used to validate that a string is a valid email address.
       https://symfony.com/doc/current/reference/constraints/Email.html
 
   -
     question: >
-      What is the purpose of the `verify_key` option in the Memcached cache adapter configuration in Symfony?
+      Which built-in constraint would you use to ensure a string property is not empty and not just whitespace?
     answers:
-      - { value: "To enable or disable the testing and verification of all keys used in Memcached operations for validity.", correct: true }
-      - { value: "To verify the integrity of the Memcached server connection.", correct: false }
-      - { value: "To ensure that cached data is not corrupted.", correct: false }
-      - { value: "To validate that the Memcached server is reachable.", correct: false }
+      - { value: '`NotBlank`', correct: true }
+      - { value: '`NotNull`', correct: false }
+      - { value: '`NotEmpty`', correct: false }
+      - { value: '`Length(min: 1)`', correct: false }
     help: |
-      The `verify_key` option in the Memcached adapter configuration controls whether all keys used in Memcached operations are tested and verified for validity and adherence to the protocol.
-      https://symfony.com/doc/current/components/cache/adapters/memcached_adapter.html#memcached-adapter
+      The `NotBlank` constraint asserts that the validated value is not blank. It considers `null`, empty strings, and strings consisting only of whitespace characters as blank.
+      https://symfony.com/doc/current/reference/constraints/NotBlank.html
+
+  -
+    question: |
+      You have a `Product` object with a `price` property. Which constraint would you use to ensure the price is between 0.01 and 1000.00 (inclusive)?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      class Product
+      {
+          // ???
+          private float $price;
+      }
+      ```
+    answers:
+      - { value: '`#[Assert\Range(min: 0.01, max: 1000.00)]`', correct: true }
+      - { value: '`#[Assert\GreaterThanOrEqual(value: 0.01), Assert\LessThanOrEqual(value: 1000.00)]`', correct: true }
+      - { value: '`#[Assert\Between(0.01, 1000.00)]`', correct: false }
+      - { value: '`#[Assert\Min(0.01), Assert\Max(1000.00)]`', correct: false }
+    help: |
+      The `Range` constraint checks if a value is between a specified minimum and maximum. Alternatively, `GreaterThanOrEqual` and `LessThanOrEqual` can be combined.
+      https://symfony.com/doc/current/reference/constraints/Range.html
+      https://symfony.com/doc/current/reference/constraints/GreaterThanOrEqual.html
+      https://symfony.com/doc/current/reference/constraints/LessThanOrEqual.html
 
   -
     question: >
-      When is the `onPreSubmit` event dispatched during Symfony form processing?
+      What is the purpose of validation groups in Symfony?
     answers:
-      - { value: "Before any data is bound to the form, allowing manipulation of the raw submitted data.", correct: true }
-      - { value: "After data is bound but before validation.", correct: false }
-      - { value: "After validation, but before the form is marked as valid.", correct: false }
-      - { value: "After the form is submitted and valid, just before saving data.", correct: false }
+      - { value: 'To apply different sets of constraints depending on the context or operation.', correct: true }
+      - { value: 'To group related validation errors together.', correct: false }
+      - { value: 'To define the order in which constraints are executed.', correct: false }
+      - { value: 'To validate multiple objects simultaneously.', correct: false }
     help: |
-      The `FormEvents::PRE_SUBMIT` event is dispatched at the very beginning of the form submission process, before any data is bound to the form. This is the ideal place to modify the raw submitted data based on other submitted values.
-      https://symfony.com/doc/current/form/events.html#form-events-pre-submit
+      Validation groups allow you to validate an object against a subset of its constraints. This is useful when the same object needs different validation rules depending on the scenario (e.g., "registration" vs. "profile update").
+      https://symfony.com/doc/current/validation/groups.html
+
+  -
+    question: |
+      How would you specify that a `name` property should only be validated when the `registration` group is active?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      class User
+      {
+          // ???
+          private ?string $name = null;
+      }
+      ```
+    answers:
+      - { value: '`#[Assert\NotBlank(groups: [''registration''])]`', correct: true }
+      - { value: '`#[Assert\NotBlank(group: ''registration'')]`', correct: false }
+      - { value: '`#[Assert\NotBlank(on: ''registration'')]`', correct: false }
+      - { value: '`#[Assert\NotBlank(context: ''registration'')]`', correct: false }
+    help: |
+      The `groups` option is used with constraints to specify which validation groups they belong to.
+      https://symfony.com/doc/current/validation/groups.html#basic-example
 
   -
     question: >
-      What is the primary use case for `Symfony\\Component\\Uid\\Ulid::isValid()`?
+      By default, which validation group is always active when you validate an object without explicitly specifying groups?
     answers:
-      - { value: "To check if a given string value is a valid ULID.", correct: true }
-      - { value: "To generate a new ULID.", correct: false }
-      - { value: "To convert a ULID to a UUID.", correct: false }
-      - { value: "To compare two ULIDs for equality.", correct: false }
+      - { value: '`Default`', correct: true }
+      - { value: '`Standard`', correct: false }
+      - { value: '`All`', correct: false }
+      - { value: '`Global`', correct: false }
     help: |
-      `Ulid::isValid()` is a static method used to determine if a provided string or `Ulid` object represents a syntactically valid ULID.
-      https://symfony.com/doc/current/components/uid.html#ulid
+      When no groups are specified, the `Default` group is used. Any constraint without an explicit `groups` option belongs to the `Default` group.
+      https://symfony.com/doc/current/validation/groups.html#default-group
+
+  -
+    question: |
+      You have a `User` entity with different validation rules for `registration` and `profile_update`. How can you define a group sequence to ensure `registration` rules are checked before `profile_update` rules?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Mapping\Attribute\GroupSequence;
+
+      #[GroupSequence(['registration', 'profile_update'])]
+      class User
+      {
+          // ...
+      }
+      ```
+      What is the effect of this `GroupSequence`?
+    answers:
+      - { value: 'Validation will stop if any constraint in the `registration` group fails, and `profile_update` rules will not be checked.', correct: true }
+      - { value: 'All `registration` and `profile_update` rules will be checked simultaneously.', correct: false }
+      - { value: 'Validation will proceed to `profile_update` rules even if `registration` rules fail.', correct: false }
+      - { value: 'It defines a new combined group named `registration_profile_update`.', correct: false }
+    help: |
+      A group sequence ensures that validation groups are executed in a specific order. If a violation is found in an earlier group, subsequent groups in the sequence are not validated.
+      https://symfony.com/doc/current/validation/group_sequence.html
 
   -
     question: >
-      Which of the following is the correct way to validate a `Product` entity using the `ValidatorInterface` in a Symfony controller?
+      When would you typically use a custom callback validator?
     answers:
-      - { value: "`$errors = $validator->validate($product);`", correct: true }
-      - { value: "`$product->validate();`", correct: false }
-      - { value: "`$validator->validateEntity($product);`", correct: false }
-      - { value: "`$errors = $this->get('validator')->validate($product);`", correct: false }
+      - { value: 'When the validation logic is too complex for built-in constraints.', correct: true }
+      - { value: 'When you need to perform validation that depends on multiple properties of an object.', correct: true }
+      - { value: 'When you need to interact with a database or external service for validation.', correct: true }
+      - { value: 'When you want to override the behavior of a built-in constraint.', correct: false }
     help: |
-      You inject the `ValidatorInterface` service into your controller and then call its `validate()` method, passing the entity object as the argument.
-      https://symfony.com/doc/current/validation.html#validating-objects
+      Callback validators are ideal for complex validation logic, cross-property validation, or when external dependencies (like a database) are required for validation.
+      https://symfony.com/doc/current/validation/custom_constraint.html#callback-constraint
+
+  -
+    question: |
+      How do you define a callback method for validation using PHP attributes?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+      use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+      class User
+      {
+          private ?string $password = null;
+          private ?string $confirmPassword = null;
+
+          // ???
+          public function validatePasswordMatch(ExecutionContextInterface $context, mixed $payload): void
+          {
+              if ($this->password !== $this->confirmPassword) {
+                  $context->buildViolation('Passwords do not match.')
+                      ->atPath('confirmPassword')
+                      ->addViolation();
+              }
+          }
+      }
+      ```
+    answers:
+      - { value: '`#[Assert\Callback(callback: [self::class, ''validatePasswordMatch''])]`', correct: true }
+      - { value: '`#[Assert\Callback(''validatePasswordMatch'')]`', correct: true }
+      - { value: '`#[Assert\Custom(method: ''validatePasswordMatch'')]`', correct: false }
+      - { value: '`#[Assert\Expression(expression: ''this.password === this.confirmPassword'')]`', correct: false }
+    help: |
+      The `Callback` constraint allows you to specify a method on the validated object (or a static method) that will perform the validation. You can pass the method name as a string or an array `[self::class, 'methodName']`.
+      https://symfony.com/doc/current/reference/constraints/Callback.html
 
   -
     question: >
-      When denormalizing data with the Symfony Serializer, what option can be used to ensure that an exception is thrown if the denormalized data is missing any properties defined in the target class?
+      What is the purpose of the `ExecutionContextInterface` object passed to a custom callback validator method?
     answers:
-      - { value: "`AbstractNormalizer::REQUIRE_ALL_PROPERTIES`", correct: true }
-      - { value: "`AbstractNormalizer::STRICT_MODE`", correct: false }
-      - { value: "`AbstractNormalizer::THROW_ON_MISSING_PROPERTY`", correct: false }
-      - { value: "`AbstractNormalizer::DENY_PARTIAL_DATA`", correct: false }
+      - { value: 'To add validation violations and access the validator.', correct: true }
+      - { value: 'To retrieve the validated object''s properties.', correct: false }
+      - { value: 'To define new validation constraints dynamically.', correct: false }
+      - { value: 'To configure the validation groups for the current validation process.', correct: false }
     help: |
-      The `AbstractNormalizer::REQUIRE_ALL_PROPERTIES` context option ensures that all properties defined in the target class must be present in the denormalized data, throwing a `MissingConstructorArgumentException` if any are missing.
-      https://symfony.com/doc/current/serializer.html#missing-properties
+      The `ExecutionContextInterface` provides methods to add violations (`buildViolation`), access the root object, and other validation-related utilities.
+      https://symfony.com/doc/current/validation/custom_constraint.html#callback-constraint
+
+  -
+    question: |
+      When building a custom violation using `buildViolation()`, which method is used to specify the property path where the violation occurred?
+
+      ```php
+      // Inside a custom validator or callback
+      $context->buildViolation('Invalid value.')
+          // ???
+          ->addViolation();
+      ```
+    answers:
+      - { value: '`atPath(''propertyName'')`', correct: true }
+      - { value: '`setPropertyPath(''propertyName'')`', correct: false }
+      - { value: '`onProperty(''propertyName'')`', correct: false }
+      - { value: '`forPath(''propertyName'')`', correct: false }
+    help: |
+      The `atPath()` method is used to set the property path for the violation. This is crucial for displaying errors correctly in forms.
+      https://symfony.com/doc/current/validation/custom_constraint.html#adding-violations-with-the-violations-builder
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Intl\\Languages::exists()`?
+      Which built-in constraint is used to validate that an associated object or collection of objects is also valid?
     answers:
-      - { value: "To check if a given language code (alpha-2 or alpha-3) exists.", correct: true }
-      - { value: "To get the full name of a language from its code.", correct: false }
-      - { value: "To retrieve a list of all supported language codes.", correct: false }
-      - { value: "To validate if a string contains valid UTF-8 characters.", correct: false }
+      - { value: '`Valid`', correct: true }
+      - { value: '`Nested`', correct: false }
+      - { value: '`Object`', correct: false }
+      - { value: '`Collection`', correct: false }
     help: |
-      `Languages::exists()` is a utility method to quickly check if a provided language code (e.g., 'en', 'fr', 'eng') is a valid and recognized language.
-      https://symfony.com/doc/current/components/intl.html#languages
+      The `Valid` constraint is used to recursively validate the referenced object or each object in a collection.
+      https://symfony.com/doc/current/reference/constraints/Valid.html
 
   -
-    question: >
-      Which of the following is the correct way to define a `NotBlank` constraint for a property named `task` in a Symfony entity using PHP attributes?
-    answers:
-      - { value: '''#[Assert\\NotBlank]
-public string $task;''' , correct: true }
-      - { value: '''#[NotBlank]
-public string $task;''' , correct: false }
-      - { value: '''@NotBlank
-public string $task;''' , correct: false }
-      - { value: '''#[Constraint(NotBlank::class)]
-public string $task;''' , correct: false }
-    help: |
-      PHP attributes for validation constraints are typically prefixed with `Assert\\` and placed directly above the property.
-      https://symfony.com/doc/current/validation.html#php-attributes
+    question: |
+      Given the following `Address` class, how would you ensure that when a `User` object is validated, its `address` property is also validated?
 
-  -
-    question: >
-      What is the primary advantage of using PHP attributes for defining validation constraints compared to YAML or XML files?
-    answers:
-      - { value: "Constraints are defined directly within the entity class, keeping related code together.", correct: true }
-      - { value: "It provides more powerful conditional validation logic.", correct: false }
-      - { value: "It offers better performance during validation.", correct: false }
-      - { value: "It allows for easier translation of error messages.", correct: false }
-    help: |
-      PHP attributes offer the benefit of co-locating validation rules directly with the properties they apply to, improving readability and maintainability by keeping related code in one place.
-      https://symfony.com/doc/current/validation.html#php-attributes
+      ```php
+      // App\Entity\User.php
+      namespace App\Entity;
 
-  -
-    question: >
-      When defining a `GroupSequence` in YAML, what is the correct key to specify the sequence of groups?
-    answers:
-      - { value: "`group_sequence`", correct: true }
-      - { value: "`groups_order`", correct: false }
-      - { value: "`validation_sequence`", correct: false }
-      - { value: "`sequence_groups`", correct: false }
-    help: |
-      In YAML configuration, the `group_sequence` key is used at the class level to define the ordered list of validation groups for a `GroupSequence`.
-      https://symfony.com/doc/current/validation/sequence_provider.html#group-sequence-provider
+      use Symfony\Component\Validator\Constraints as Assert;
 
-  -
-    question: >
-      Which of the following is a valid way to define a `Length` constraint with a minimum of 5 and maximum of 20 for a property named `name` using a static `loadValidatorMetadata()` method?
-    answers:
-      - { value: '''$metadata->addPropertyConstraint('name', new Assert\\Length(min: 5, max: 20));''' , correct: true }
-      - { value: '''$metadata->addConstraint('name', 'Length', ['min' => 5, 'max' => 20]);''' , correct: false }
-      - { value: '''$metadata->setConstraint('name', new Assert\\Length(['min' => 5, 'max' => 20]));''' , correct: false }
-      - { value: '''$metadata->addPropertyConstraint('name', 'Length', ['min' => 5, 'max' => 20]);''' , correct: false }
-    help: |
-      Within `loadValidatorMetadata()`, you use `addPropertyConstraint()` and pass an instance of the constraint with its options.
-      https://symfony.com/doc/current/components/validator/resources.html#the-static-method
+      class User
+      {
+          // ...
+          // ???
+          private ?Address $address = null;
+      }
 
-  -
-    question: >
-      What is the purpose of the `invalidMessage` option in the `#[Assert\\Range]` constraint when `min` and `max` are numeric?
-    answers:
-      - { value: "To define the error message when the input value is not a valid number.", correct: true }
-      - { value: "To specify the message when the number is outside the allowed range.", correct: false }
-      - { value: "To set the message for general validation failures.", correct: false }
-      - { value: "To provide a message when the `min` or `max` options are not valid numbers.", correct: false }
-    help: |
-      `invalidMessage` is specifically for when the `min` and `max` options are numeric, but the validated value itself cannot be parsed as a valid number.
-      https://symfony.com/doc/current/reference/constraints/Range.html#invalidMessage
+      // App\Entity\Address.php
+      namespace App\Entity;
 
-  -
-    question: >
-      You have an `Author` entity with a nested `Address` object. To ensure that the `Address` object's properties (e.g., `street`, `zipCode`) are also validated when validating the `Author`, what constraint must be applied to the `address` property in `Author`?
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      class Address
+      {
+          #[Assert\NotBlank]
+          private ?string $street = null;
+      }
+      ```
     answers:
-      - { value: "`#[Assert\\Valid]`", correct: true }
-      - { value: "`#[Assert\\Nested]`", correct: false }
-      - { value: "`#[Assert\\Object]`", correct: false }
-      - { value: "`#[Assert\\Cascade]`", correct: false }
+      - { value: '`#[Assert\Valid]`', correct: true }
+      - { value: '`#[Assert\Type(type: Address::class)]`', correct: false }
+      - { value: '`#[Assert\Object]`', correct: false }
+      - { value: '`#[Assert\Nested]`', correct: false }
     help: |
-      The `#[Assert\\Valid]` constraint is used to trigger validation on nested objects.
+      The `Valid` constraint is applied to properties that hold other objects (or collections of objects) that also need to be validated.
       https://symfony.com/doc/current/reference/constraints/Valid.html
 
   -
     question: >
-      When dynamically choosing validation groups for a Symfony form using a Closure, how can you ensure that the `Default` validation group is also applied along with your dynamically selected groups?
+      What is the correct way to retrieve the validator service from the service container in a controller?
     answers:
-      - { value: "Explicitly include `'Default'` in the array returned by the Closure.", correct: true }
-      - { value: "The `Default` group is always applied automatically.", correct: false }
-      - { value: "Set a separate `default_validation_group` option.", correct: false }
-      - { value: "Call `$form->addValidationGroup('Default');` inside the Closure.", correct: false }
+      - { value: 'Type-hinting `Symfony\\Component\\Validator\\Validator\\ValidatorInterface` in the constructor or action method.', correct: true }
+      - { value: 'Using `$this->get(''validator'')` (if the controller extends `AbstractController`).', correct: false }
+      - { value: 'Calling `Container::get(''validator'')`.', correct: false }
+      - { value: 'Instantiating `new Validator()`.', correct: false }
     help: |
-      If you dynamically select validation groups, you must explicitly include `'Default'` in the returned array if you want its constraints to be applied.
-      https://symfony.com/doc/current/form/data_based_validation.html#including-the-default-group
+      The recommended way to get services in Symfony is via dependency injection (type-hinting). While `get('validator')` might work in some legacy contexts, it's not the preferred method.
+      https://symfony.com/doc/current/service_container/getting_services.html
 
   -
-    question: >
-      Which of the following is a correct way to define a `GroupSequence` for a `User` entity using YAML?
-    answers:
-      - { value: '''App\\Entity\\User:
-    group_sequence:
-        - User
-        - Strict''' , correct: true }
-      - { value: '''App\\Entity\\User:
-    validation_groups:
-        sequence: [User, Strict]''' , correct: false }
-      - { value: '''App\\Entity\\User:
-    groups:
-        - User
-        - Strict''' , correct: false }
-      - { value: '''App\\Entity\\User:
-    sequence_provider:
-        groups: [User, Strict]''' , correct: false }
-    help: |
-      In YAML, the `group_sequence` key directly under the class name defines the ordered list of groups for a `GroupSequence`.
-      https://symfony.com/doc/current/validation/sequence_provider.html#group-sequence-provider
+    question: |
+      How do you manually validate an object using the validator service?
 
-  -
-    question: >
-      What is the purpose of `Symfony\\Component\\Uid\\Uuid::isValid()` when used with format constants (e.g., `Uuid::FORMAT_RFC_4122`)?
-    answers:
-      - { value: "To validate if a UUID string conforms to specific UUID formats (e.g., RFC 4122, Base32).", correct: true }
-      - { value: "To convert a UUID from one format to another.", correct: false }
-      - { value: "To generate a UUID in a specific format.", correct: false }
-      - { value: "To check if a UUID is globally unique.", correct: false }
-    help: |
-      `Uuid::isValid()` can take a second argument, which is a bitmask of `Uuid::FORMAT_` constants, allowing you to validate a UUID string against one or more specific formats.
-      https://symfony.com/doc/current/components/uid.html#uuid
+      ```php
+      namespace App\Controller;
 
-  -
-    question: >
-      When defining validation constraints for a form that is NOT mapped to a data class, where can you define the constraints for the entire form (as a collection)?
-    answers:
-      - { value: "In the `configureOptions()` method, using the `constraints` option with an `Assert\\Collection`.", correct: true }
-      - { value: "In the `buildForm()` method, by adding a `constraints` option to the form builder.", correct: false }
-      - { value: "In a separate validation YAML file for the form type.", correct: false }
-      - { value: "It is not possible to define form-level constraints for unmapped forms.", correct: false }
-    help: |
-      For forms not mapped to a data class, form-level constraints (e.g., for cross-field validation) can be defined in the `configureOptions()` method using the `constraints` option, typically with an `Assert\\Collection` constraint.
-      https://symfony.com/doc/current/form/without_class.html#adding-form-level-validation
+      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+      use Symfony\Component\HttpFoundation\Response;
+      use Symfony\Component\Routing\Attribute\Route;
+      use Symfony\Component\Validator\Validator\ValidatorInterface;
+      use App\Entity\User;
 
-  -
-    question: >
-      What is the primary purpose of `Symfony\\Component\\Validator\\Validator\\ValidatorInterface`?
+      class UserController extends AbstractController
+      {
+          #[Route('/user/new', name: 'app_user_new')]
+          public function new(ValidatorInterface $validator): Response
+          {
+              $user = new User();
+              $user->setName(''); // Invalid name
+
+              // ???
+              $errors = null; // Store violations here
+
+              // ...
+              return $this->render('user/new.html.twig', ['errors' => $errors]);
+          }
+      }
+      ```
     answers:
-      - { value: "To validate objects and values against defined constraints.", correct: true }
-      - { value: "To define custom validation constraints.", correct: false }
-      - { value: "To manage validation groups and sequences.", correct: false }
-      - { value: "To provide a factory for creating validator instances.", correct: false }
+      - { value: '`$errors = $validator->validate($user);`', correct: true }
+      - { value: '`$errors = $validator->validateObject($user);`', correct: false }
+      - { value: '`$errors = $validator->validate($user, null, [''Default'']);`', correct: true }
+      - { value: '`$errors = $validator->validate($user, groups: [''Default'']);`', correct: false }
     help: |
-      `ValidatorInterface` is the central service for performing validation in Symfony. Its `validate()` method is used to check objects or values against their configured constraints.
+      The `validate()` method of the `ValidatorInterface` is used to validate an object. You can optionally pass an array of validation groups as the third argument.
       https://symfony.com/doc/current/validation.html#validating-objects
 
   -
     question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `firstName` in a Symfony entity using PHP?
+      After validating an object, what type of object is returned by the `ValidatorInterface::validate()` method if there are violations?
     answers:
-      - { value: '''#[Assert\\NotBlank]
-private string $firstName;''' , correct: true }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint('firstName', new Assert\\NotBlank());
-}''' , correct: true }
-      - { value: '''private string $firstName = new Assert\\NotBlank();''' , correct: false }
-      - { value: '''#[Constraint(NotBlank::class)]
-private string $firstName;''' , correct: false }
+      - { value: 'A `ConstraintViolationList` object.', correct: true }
+      - { value: 'An array of strings.', correct: false }
+      - { value: 'A `ValidationErrors` object.', correct: false }
+      - { value: 'A boolean `true` or `false`.', correct: false }
     help: |
-      Constraints can be defined using PHP attributes directly on the property or programmatically within a static `loadValidatorMetadata()` method.
-      https://symfony.com/doc/current/validation.html#php-attributes and https://symfony.com/doc/current/validation.html#the-static-method
+      The `validate()` method returns a `ConstraintViolationList` instance, which is a collection of `ConstraintViolation` objects.
+      https://symfony.com/doc/current/validation.html#validating-objects
+
+  -
+    question: |
+      How can you check if there are any validation violations in the `ConstraintViolationList` object?
+
+      ```php
+      use Symfony\Component\Validator\ConstraintViolationListInterface;
+
+      function processValidation(ConstraintViolationListInterface $violations): void
+      {
+          if (/* ??? */) {
+              echo "Validation failed!";
+          } else {
+              echo "Validation successful!";
+          }
+      }
+      ```
+    answers:
+      - { value: '`$violations->count() > 0`', correct: true }
+      - { value: '`!$violations->isEmpty()`', correct: true }
+      - { value: '`$violations->hasErrors()`', correct: false }
+      - { value: '`count($violations) > 0`', correct: true }
+    help: |
+      The `ConstraintViolationList` implements `Countable` and `IteratorAggregate`, so you can use `count()` or `isEmpty()`.
+      https://symfony.com/doc/current/validation.html#validating-objects
 
   -
     question: >
-      What is the main advantage of using validation groups?
+      Which constraint would you use to ensure a string property matches a specific regular expression pattern?
     answers:
-      - { value: "To apply different sets of validation rules based on the context (e.g., registration vs. profile update).", correct: true }
-      - { value: "To group similar constraints together for better organization.", correct: false }
-      - { value: "To improve validation performance by only loading necessary constraints.", correct: false }
-      - { value: "To define a fallback validation mechanism.", correct: false }
+      - { value: '`Regex`', correct: true }
+      - { value: '`Pattern`', correct: false }
+      - { value: '`Match`', correct: false }
+      - { value: '`Expression`', correct: false }
     help: |
-      Validation groups allow you to selectively apply constraints based on the specific scenario or "group" of validation needed, which is crucial for different forms or stages of an object's lifecycle.
+      The `Regex` constraint validates that a string matches a given regular expression.
+      https://symfony.com/doc/current/reference/constraints/Regex.html
+
+  -
+    question: |
+      You want to ensure a `username` property has a minimum length of 3 and a maximum length of 20 characters. How would you apply this constraint?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      class User
+      {
+          // ???
+          private ?string $username = null;
+      }
+      ```
+    answers:
+      - { value: '`#[Assert\Length(min: 3, max: 20)]`', correct: true }
+      - { value: '`#[Assert\MinLength(3), Assert\MaxLength(20)]`', correct: false }
+      - { value: '`#[Assert\Size(min: 3, max: 20)]`', correct: false }
+      - { value: '`#[Assert\Range(min: 3, max: 20)]`', correct: false }
+    help: |
+      The `Length` constraint is used to check the length of a string.
+      https://symfony.com/doc/current/reference/constraints/Length.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is one of a predefined set of options?
+    answers:
+      - { value: '`Choice`', correct: true }
+      - { value: '`InArray`', correct: false }
+      - { value: '`Options`', correct: false }
+      - { value: '`Enum`', correct: false }
+    help: |
+      The `Choice` constraint validates that a value is one of a given list of choices.
+      https://symfony.com/doc/current/reference/constraints/Choice.html
+
+  -
+    question: |
+      How can you apply a constraint to an entire class (e.g., for cross-property validation) using PHP attributes?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      // ???
+      class Order
+      {
+          private ?\DateTimeInterface $startDate = null;
+          private ?\DateTimeInterface $endDate = null;
+      }
+      ```
+    answers:
+      - { value: '`#[Assert\Callback(callback: [self::class, ''validateDates''])]`', correct: true }
+      - { value: '`#[Assert\Expression(expression: ''this.startDate < this.endDate'')]`', correct: true }
+      - { value: '`#[Assert\ClassConstraint]`', correct: false }
+      - { value: '`#[Assert\ObjectConstraint]`', correct: false }
+    help: |
+      Class-level constraints are applied directly to the class. `Callback` and `Expression` are common choices for validating relationships between properties.
+      https://symfony.com/doc/current/validation/custom_constraint.html#callback-constraint
+      https://symfony.com/doc/current/reference/constraints/Expression.html
+
+  -
+    question: >
+      What is the primary benefit of using `GroupSequence` over simply listing multiple groups in the `validate()` method?
+    answers:
+      - { value: 'It allows validation to stop immediately if a violation is found in an earlier group.', correct: true }
+      - { value: 'It makes the validation process faster by optimizing constraint checks.', correct: false }
+      - { value: 'It enables parallel validation of different groups.', correct: false }
+      - { value: 'It automatically reorders groups based on dependency.', correct: false }
+    help: |
+      The main advantage of `GroupSequence` is its "fail-fast" behavior. If a group in the sequence fails, subsequent groups are not validated, which can save processing time and provide clearer error messages.
+      https://symfony.com/doc/current/validation/group_sequence.html
+
+  -
+    question: |
+      You are creating a custom validator class for a new constraint. Which interface must this custom validator class implement?
+    answers:
+      - { value: '`Symfony\\Component\\Validator\\ConstraintValidatorInterface`', correct: true }
+      - { value: '`Symfony\\Component\\Validator\\ValidatorInterface`', correct: false }
+      - { value: '`Symfony\\Component\\Validator\\ConstraintInterface`', correct: false }
+      - { value: '`Symfony\\Component\\Validator\\ValidationAwareInterface`', correct: false }
+    help: |
+      Custom validator classes must implement `ConstraintValidatorInterface` and typically extend `ConstraintValidator`.
+      https://symfony.com/doc/current/validation/custom_constraint.html#creating-the-validator
+
+  -
+    question: |
+      Inside a custom constraint validator's `validate()` method, how do you access the validated value?
+
+      ```php
+      // Inside MyCustomValidator.php
+      use Symfony\Component\Validator\Constraint;
+      use Symfony\Component\Validator\ConstraintValidator;
+
+      class MyCustomValidator extends ConstraintValidator
+      {
+          public function validate(mixed $value, Constraint $constraint): void
+          {
+              // ???
+          }
+      }
+      ```
+    answers:
+      - { value: 'The `$value` argument directly.', correct: true }
+      - { value: '`$this->context->getValue()`', correct: false }
+      - { value: '`$constraint->getValue()`', correct: false }
+      - { value: '`$this->value`', correct: false }
+    help: |
+      The value being validated is passed as the first argument (`$value`) to the `validate()` method of the custom validator.
+      https://symfony.com/doc/current/validation/custom_constraint.html#creating-the-validator
+
+  -
+    question: |
+      When creating a custom constraint, which class should your constraint attribute extend?
+
+      ```php
+      namespace App\Validator\Constraints;
+
+      use Symfony\Component\Validator\Constraint;
+
+      #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+      class MyCustomConstraint extends /* ??? */
+      {
+          public string $message = 'This value is not valid.';
+      }
+      ```
+    answers:
+      - { value: '`Constraint`', correct: true }
+      - { value: '`AbstractConstraint`', correct: false }
+      - { value: '`ValidationAttribute`', correct: false }
+      - { value: '`BaseConstraint`', correct: false }
+    help: |
+      All custom constraint attributes must extend `Symfony\Component\Validator\Constraint`.
+      https://symfony.com/doc/current/validation/custom_constraint.html#creating-the-constraint-class
+
+  -
+    question: >
+      What is the purpose of the `payload` argument in a constraint violation?
+    answers:
+      - { value: 'To attach custom, non-string data to a violation for later processing.', correct: true }
+      - { value: 'To specify the HTTP status code for the validation error.', correct: false }
+      - { value: 'To provide a unique identifier for the violation.', correct: false }
+      - { value: 'To define the severity level of the violation (e.g., warning, error).', correct: false }
+    help: |
+      The `payload` option allows you to attach arbitrary data to a violation. This can be useful for frontend frameworks or custom error handling logic.
+      https://symfony.com/doc/current/validation/payload.html
+
+  -
+    question: |
+      You want to validate that a `password` property is strong, containing at least one uppercase letter, one lowercase letter, one digit, and one special character. Which built-in constraint is best suited for this?
+    answers:
+      - { value: '`Regex`', correct: true }
+      - { value: '`Expression`', correct: false }
+      - { value: '`Callback`', correct: false }
+      - { value: '`PasswordStrength` (does not exist as a built-in constraint)', correct: false }
+    help: |
+      While `Callback` or `Expression` could work, `Regex` is the most direct and efficient built-in constraint for complex pattern matching like password strength requirements.
+      https://symfony.com/doc/current/reference/constraints/Regex.html
+
+  -
+    question: >
+      Which constraint would you use to ensure a numeric value is greater than a specific number?
+    answers:
+      - { value: '`GreaterThan`', correct: true }
+      - { value: '`Min`', correct: false }
+      - { value: '`Positive`', correct: false }
+      - { value: '`AtLeast`', correct: false }
+    help: |
+      The `GreaterThan` constraint asserts that a value is strictly greater than a given value.
+      https://symfony.com/doc/current/reference/constraints/GreaterThan.html
+
+  -
+    question: >
+      Which constraint would you use to ensure a numeric value is greater than or equal to a specific number?
+    answers:
+      - { value: '`GreaterThanOrEqual`', correct: true }
+      - { value: '`Min`', correct: false }
+      - { value: '`AtLeast`', correct: false }
+      - { value: '`PositiveOrZero`', correct: false }
+    help: |
+      The `GreaterThanOrEqual` constraint asserts that a value is greater than or equal to a given value.
+      https://symfony.com/doc/current/reference/constraints/GreaterThanOrEqual.html
+
+  -
+    question: >
+      Which constraint would you use to ensure a numeric value is less than a specific number?
+    answers:
+      - { value: '`LessThan`', correct: true }
+      - { value: '`Max`', correct: false }
+      - { value: '`Negative`', correct: false }
+      - { value: '`AtMost`', correct: false }
+    help: |
+      The `LessThan` constraint asserts that a value is strictly less than a given value.
+      https://symfony.com/doc/current/reference/constraints/LessThan.html
+
+  -
+    question: >
+      Which constraint would you use to ensure a numeric value is less than or equal to a specific number?
+    answers:
+      - { value: '`LessThanOrEqual`', correct: true }
+      - { value: '`Max`', correct: false }
+      - { value: '`AtMost`', correct: false }
+      - { value: '`NegativeOrZero`', correct: false }
+    help: |
+      The `LessThanOrEqual` constraint asserts that a value is less than or equal to a given value.
+      https://symfony.com/doc/current/reference/constraints/LessThanOrEqual.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is a valid URL?
+    answers:
+      - { value: '`Url`', correct: true }
+      - { value: '`Link`', correct: false }
+      - { value: '`WebAddress`', correct: false }
+      - { value: '`Uri`', correct: false }
+    help: |
+      The `Url` constraint validates that a string is a valid URL.
+      https://symfony.com/doc/current/reference/constraints/Url.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is a valid IP address?
+    answers:
+      - { value: '`Ip`', correct: true }
+      - { value: '`IpAddress`', correct: false }
+      - { value: '`NetworkAddress`', correct: false }
+      - { value: '`Host`', correct: false }
+    help: |
+      The `Ip` constraint validates that a string is a valid IP address (IPv4 or IPv6).
+      https://symfony.com/doc/current/reference/constraints/Ip.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is a valid UUID?
+    answers:
+      - { value: '`Uuid`', correct: true }
+      - { value: '`Guid`', correct: false }
+      - { value: '`UniqueId`', correct: false }
+      - { value: '`Identifier`', correct: false }
+    help: |
+      The `Uuid` constraint validates that a string is a valid UUID (Universally Unique Identifier).
+      https://symfony.com/doc/current/reference/constraints/Uuid.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is a valid JSON string?
+    answers:
+      - { value: '`Json`', correct: true }
+      - { value: '`IsJson`', correct: false }
+      - { value: '`JsonString`', correct: false }
+      - { value: '`DataFormat`', correct: false }
+    help: |
+      The `Json` constraint validates that a string is a valid JSON string.
+      https://symfony.com/doc/current/reference/constraints/Json.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is a valid file upload?
+    answers:
+      - { value: '`File`', correct: true }
+      - { value: '`UploadedFile`', correct: false }
+      - { value: '`Attachment`', correct: false }
+      - { value: '`Resource`', correct: false }
+    help: |
+      The `File` constraint validates uploaded files. It can check size, MIME type, and other file-related properties.
+      https://symfony.com/doc/current/reference/constraints/File.html
+
+  -
+    question: >
+      Which constraint is used to ensure a property's value is a valid image file?
+    answers:
+      - { value: '`Image`', correct: true }
+      - { value: '`Picture`', correct: false }
+      - { value: '`Photo`', correct: false }
+      - { value: '`Graphic`', correct: false }
+    help: |
+      The `Image` constraint extends the `File` constraint and adds image-specific validation rules like width, height, and aspect ratio.
+      https://symfony.com/doc/current/reference/constraints/Image.html
+
+  -
+    question: |
+      How can you retrieve a specific violation from a `ConstraintViolationList` by its index?
+
+      ```php
+      use Symfony\Component\Validator\ConstraintViolationListInterface;
+
+      function getFirstViolation(ConstraintViolationListInterface $violations): ?string
+      {
+          if ($violations->count() > 0) {
+              return $violations->get(0)->getMessage();
+          }
+          return null;
+      }
+      ```
+      Which method is used to get a violation at a specific index?
+    answers:
+      - { value: '`get(index)`', correct: true }
+      - { value: '`offsetGet(index)`', correct: false }
+      - { value: '`item(index)`', correct: false }
+      - { value: '`at(index)`', correct: false }
+    help: |
+      The `ConstraintViolationList` implements `ArrayAccess`, allowing you to access violations by index using `get()`.
+      https://symfony.com/doc/current/validation.html#validating-objects (implicitly, as it behaves like an array)
+
+  -
+    question: >
+      What is the purpose of the `Expression` constraint?
+    answers:
+      - { value: 'To validate a value based on a Symfony ExpressionLanguage expression.', correct: true }
+      - { value: 'To execute a PHP callback function for validation.', correct: false }
+      - { value: 'To check if a string matches a regular expression.', correct: false }
+      - { value: 'To define complex validation rules using a custom DSL.', correct: false }
+    help: |
+      The `Expression` constraint allows you to define complex validation rules using the Symfony ExpressionLanguage component.
+      https://symfony.com/doc/current/reference/constraints/Expression.html
+
+  -
+    question: |
+      You want to ensure that a `User` object's `age` property is at least 18, and its `isAdult` property is `true`. How can you achieve this with a single `Expression` constraint?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      #[Assert\Expression(
+          expression: '/* ??? */',
+          message: 'User must be an adult.'
+      )]
+      class User
+      {
+          private int $age;
+          private bool $isAdult;
+      }
+      ```
+    answers:
+      - { value: '`this.age >= 18 and this.isAdult == true`', correct: true }
+      - { value: '`value.age >= 18 && value.isAdult === true`', correct: false }
+      - { value: '`object.age >= 18 and object.isAdult is true`', correct: false }
+      - { value: '`this.age >= 18 and this.isAdult`', correct: true }
+    help: |
+      Inside an `Expression` constraint applied to a class, `this` refers to the validated object. Boolean values can be checked directly.
+      https://symfony.com/doc/current/reference/constraints/Expression.html#expression-language
+
+  -
+    question: >
+      Which constraint is used to ensure a collection (e.g., an array or `Countable` object) has a specific number of elements?
+    answers:
+      - { value: '`Count`', correct: true }
+      - { value: '`CollectionSize`', correct: false }
+      - { value: '`Size`', correct: false }
+      - { value: '`Length` (for collections)', correct: false }
+    help: |
+      The `Count` constraint validates that a collection has a minimum, maximum, or exact number of elements.
+      https://symfony.com/doc/current/reference/constraints/Count.html
+
+  -
+    question: |
+      How can you apply different validation groups when validating an object submitted through a Symfony Form?
+    answers:
+      - { value: 'By setting the `validation_groups` option in the form builder or form options.', correct: true }
+      - { value: 'By calling `$form->handleRequest($request, [''group'' => ''my_group'']);`', correct: false }
+      - { value: 'By defining groups directly in the form type class.', correct: false }
+      - { value: 'By using `#[FormGroup(''my_group'')]` attribute on the form type.', correct: false }
+    help: |
+      The `validation_groups` option in the form type or when creating the form allows you to specify which validation groups should be applied.
+      https://symfony.com/doc/current/reference/forms/types/form.html#validation-groups
+
+  -
+    question: >
+      What is the purpose of the `#[Unique]` constraint in Symfony's Validator component?
+    answers:
+      - { value: 'There is no built-in `#[Unique]` constraint in the core Symfony Validator component for database uniqueness.', correct: true }
+      - { value: 'To ensure a property''s value is unique across all instances of an object.', correct: false }
+      - { value: 'To check for uniqueness against a database column.', correct: false }
+      - { value: 'To prevent duplicate entries in a collection.', correct: false }
+    help: |
+      The core Symfony Validator component does not provide a `Unique` constraint for database uniqueness checks. This functionality is typically provided by ORM/ODM integrations (e.g., Doctrine's `UniqueEntity` constraint).
+      https://symfony.com/doc/current/validation.html (This is a conceptual question to clarify the scope of Symfony's core validator)
+
+  -
+    question: |
+      When using the `buildViolation()` method in a custom validator, what is the final method call to register the violation?
+
+      ```php
+      $this->context->buildViolation('My custom message.')
+          ->atPath('myProperty')
+          // ???
+      ;
+      ```
+    answers:
+      - { value: '`addViolation()`', correct: true }
+      - { value: '`validate()`', correct: false }
+      - { value: '`report()`', correct: false }
+      - { value: '`create()`', correct: false }
+    help: |
+      After building the violation details, `addViolation()` is called to register the violation with the validation context.
+      https://symfony.com/doc/current/validation/custom_constraint.html#adding-violations-with-the-violations-builder
+
+  -
+    question: >
+      What is the primary difference between `NotBlank` and `NotNull` constraints?
+    answers:
+      - { value: '`NotBlank` checks for non-empty strings and non-whitespace strings, while `NotNull` only checks for `null`.', correct: true }
+      - { value: '`NotBlank` applies to all types, `NotNull` only to strings.', correct: false }
+      - { value: '`NotNull` is for database columns, `NotBlank` for form fields.', correct: false }
+      - { value: '`NotBlank` allows `null`, `NotNull` does not.', correct: false }
+    help: |
+      `NotNull` only asserts that the value is not `null`. `NotBlank` is more strict for strings, also checking for empty strings and strings consisting only of whitespace.
+      https://symfony.com/doc/current/reference/constraints/NotBlank.html
+      https://symfony.com/doc/current/reference/constraints/NotNull.html
+
+  -
+    question: |
+      How can you translate validation messages in Symfony?
+    answers:
+      - { value: 'By providing translation keys in the constraint''s `message` option and defining translations in `.xlf` or `.yaml` files.', correct: true }
+      - { value: 'By using the `Translatable` attribute on constraint messages.', correct: false }
+      - { value: 'Validation messages are automatically translated by Symfony.', correct: false }
+      - { value: 'By injecting the `translator` service into the validator.', correct: false }
+    help: |
+      Validation messages are part of Symfony's translation mechanism. You provide a translation key (or the default message) and define translations in your application's translation files.
+      https://symfony.com/doc/current/validation/translations.html
+
+  -
+    question: >
+      What is the purpose of the `groups` option when defining a constraint?
+    answers:
+      - { value: 'To assign the constraint to one or more validation groups.', correct: true }
+      - { value: 'To specify the order of execution for the constraint.', correct: false }
+      - { value: 'To define a custom error message for a specific group.', correct: false }
+      - { value: 'To enable or disable the constraint based on environment.', correct: false }
+    help: |
+      The `groups` option allows you to specify which validation groups a constraint belongs to. When validating, only constraints belonging to the active groups will be checked.
       https://symfony.com/doc/current/validation/groups.html
 
   -
-    question: >
-      When should you consider creating a custom validation constraint and validator in Symfony?
+    question: |
+      You have a `User` entity and want to ensure that the `password` and `confirmPassword` fields match, but only when a `registration` group is active. How would you configure this using a class-level `Callback` constraint?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+      use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+      #[Assert\Callback(callback: [self::class, 'validatePasswordMatch'], groups: ['registration'])]
+      class User
+      {
+          private ?string $password = null;
+          private ?string $confirmPassword = null;
+
+          public function validatePasswordMatch(ExecutionContextInterface $context, mixed $payload): void
+          {
+              if ($this->password !== $this->confirmPassword) {
+                  $context->buildViolation('Passwords do not match.')
+                      ->atPath('confirmPassword')
+                      ->addViolation();
+              }
+          }
+      }
+      ```
+      Which part of this configuration ensures the `registration` group dependency?
     answers:
-      - { value: "When no built-in constraint can fulfill the required validation logic.", correct: true }
-      - { value: "For every validation rule in your application.", correct: false }
-      - { value: "Only for cross-field validation scenarios.", correct: false }
-      - { value: "To improve the performance of simple validation rules.", correct: false }
+      - { value: '`groups: [''registration'']` in the `#[Assert\Callback]` attribute.', correct: true }
+      - { value: 'The `validatePasswordMatch` method name implies the group.', correct: false }
+      - { value: 'The `ExecutionContextInterface` automatically handles group context.', correct: false }
+      - { value: 'It requires a separate `GroupSequence` definition.', correct: false }
     help: |
-      Custom constraints are for complex or highly specific validation rules that cannot be achieved with existing built-in constraints or combinations thereof.
-      https://symfony.com/doc/current/validation/custom_constraint.html
+      The `groups` option on the `Callback` constraint explicitly assigns it to the `registration` group, meaning it will only be executed when that group is part of the validation process.
+      https://symfony.com/doc/current/reference/constraints/Callback.html#groups
 
   -
     question: >
-      What is the purpose of the `min` option in the `#[Assert\\Length]` constraint?
+      What happens if you try to validate an object with a non-existent validation group?
     answers:
-      - { value: "To set the minimum required length for the validated value.", correct: true }
-      - { value: "To define the minimum numeric value allowed.", correct: false }
-      - { value: "To specify the minimum number of items in a collection.", correct: false }
-      - { value: "To set the minimum file size for an uploaded file.", correct: false }
+      - { value: 'The validation process will proceed, but no constraints assigned to that non-existent group will be checked.', correct: true }
+      - { value: 'A `GroupNotFoundException` will be thrown.', correct: false }
+      - { value: 'Symfony will default to the `Default` group instead.', correct: false }
+      - { value: 'All constraints on the object will be checked regardless of groups.', correct: false }
     help: |
-      The `min` option of the `#[Assert\\Length]` constraint specifies the smallest acceptable length for a string or array.
-      https://symfony.com/doc/current/reference/constraints/Length.html#min
+      Symfony's validator will not throw an error for non-existent groups. It will simply ignore any constraints that are assigned to that group, as there are none.
+      https://symfony.com/doc/current/validation/groups.html (Implicitly, by how groups work)
+
+  -
+    question: |
+      You have a custom constraint `#[App\Validator\Constraints\ContainsAlphanumeric]`. How can you ensure its validator class `App\Validator\Constraints\ContainsAlphanumericValidator` is automatically registered with Symfony's validator?
+    answers:
+      - { value: 'By ensuring the validator class is located in a conventional directory (e.g., `src/Validator/Constraints`) and autowired.', correct: true }
+      - { value: 'By explicitly defining the validator as a service in `services.yaml` and tagging it.', correct: false }
+      - { value: 'By extending `AbstractConstraintValidator` instead of `ConstraintValidator`.', correct: false }
+      - { value: 'By implementing `ValidatorAwareInterface` in the constraint.', correct: false }
+    help: |
+      Symfony's autoconfigure and autowire features typically handle the registration of custom constraint validators if they follow the standard naming conventions and are located in a discoverable directory.
+      https://symfony.com/doc/current/validation/custom_constraint.html#creating-the-validator (Implicitly, through service autoconfigure)
 
   -
     question: >
-      How can you retrieve the current (invalid) value from a `ConstraintViolation` object for display in an error message?
+      What is the purpose of the `message` option in most built-in constraints?
     answers:
-      - { value: "`$violation->getInvalidValue();`", correct: true }
-      - { value: "`$violation->getValue();`", correct: false }
-      - { value: "`$violation->getConstraint()->value;`", correct: false }
-      - { value: "`$violation->getMessageParameters()['{{ value }}'];`", correct: false }
+      - { value: 'To define the error message displayed when the constraint is violated.', correct: true }
+      - { value: 'To specify a translation key for the error message.', correct: true }
+      - { value: 'To provide a unique identifier for the constraint.', correct: false }
+      - { value: 'To set the severity level of the violation.', correct: false }
     help: |
-      The `getInvalidValue()` method on a `ConstraintViolation` object returns the value that caused the violation.
-      https://symfony.com/doc/current/validation.html#displaying-violations
+      The `message` option allows you to customize the error message that is returned when the constraint fails. This message can also be a translation key.
+      https://symfony.com/doc/current/validation.html#error-messages
+
+  -
+    question: |
+      You want to validate that a `startDate` property is before an `endDate` property. Which constraint is most suitable for this cross-property validation without writing a full custom validator class?
+    answers:
+      - { value: '`Expression`', correct: true }
+      - { value: '`Callback`', correct: true }
+      - { value: '`Range`', correct: false }
+      - { value: '`LessThan` (on `startDate` alone)', correct: false }
+    help: |
+      Both `Expression` and `Callback` constraints are well-suited for cross-property validation. `Expression` is good for simple comparisons, while `Callback` allows for more complex logic.
+      https://symfony.com/doc/current/reference/constraints/Expression.html
+      https://symfony.com/doc/current/reference/constraints/Callback.html
 
   -
     question: >
-      What is the primary role of the `ConstraintViolationBuilderInterface` in Symfony's validation component?
+      When using a `GroupSequence` on an object, what happens if a constraint in an earlier group fails?
     answers:
-      - { value: "To construct and configure a new validation violation.", correct: true }
-      - { value: "To define the properties of a custom constraint.", correct: false }
-      - { value: "To manage the list of all validation errors.", correct: false }
-      - { value: "To resolve validation groups for an object.", correct: false }
+      - { value: 'Validation stops immediately for subsequent groups in the sequence.', correct: true }
+      - { value: 'All groups are still validated, but errors from earlier groups are prioritized.', correct: false }
+      - { value: 'The object is considered valid, and a warning is issued.', correct: false }
+      - { value: 'Symfony automatically retries the validation with a different group.', correct: false }
     help: |
-      The `ConstraintViolationBuilderInterface` provides a fluent API for creating and configuring `ConstraintViolation` objects within a custom validator.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
+      This is the "fail-fast" behavior of group sequences. If a violation is found in a group, the validation process for that object stops, and subsequent groups in the sequence are not checked.
+      https://symfony.com/doc/current/validation/group_sequence.html
+
+  -
+    question: |
+      Consider a scenario where you have a `User` entity and want to validate its `email` property with the `Email` constraint, but only if the `newsletter` property is `true`. How can you achieve this conditionally?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      class User
+      {
+          private bool $newsletter = false;
+
+          // ???
+          private ?string $email = null;
+      }
+      ```
+    answers:
+      - { value: '`#[Assert\Email(groups: [''newsletter_opt_in''])]` and validate with a group sequence or conditional group.', correct: true }
+      - { value: '`#[Assert\Expression(expression: ''this.newsletter ? this.email is email : true'')]`', correct: true }
+      - { value: '`#[Assert\When(expression: ''this.newsletter'', constraints: [new Assert\Email()])]`', correct: false }
+      - { value: 'This requires a custom validator class.', correct: false }
+    help: |
+      Conditional validation can be achieved using validation groups (and potentially group sequences) or directly with the `Expression` constraint on the property or class level.
+      https://symfony.com/doc/current/validation/groups.html#conditional-validation
+      https://symfony.com/doc/current/reference/constraints/Expression.html
 
   -
     question: >
-      Which of the following is a built-in Symfony constraint used to ensure a string is not empty or contains only whitespace?
+      What is the purpose of the `payload` option in a constraint violation?
     answers:
-      - { value: "`#[Assert\\NotBlank]`", correct: true }
-      - { value: "`#[Assert\\NotEmpty]`", correct: false }
-      - { value: "`#[Assert\\NotNull]`", correct: false }
-      - { value: "`#[Assert\\Required]`", correct: false }
+      - { value: 'To attach custom, non-string data to a violation.', correct: true }
+      - { value: 'To specify the HTTP status code for the error.', correct: false }
+      - { value: 'To define the severity of the violation (e.g., warning, error).', correct: false }
+      - { value: 'To provide a unique identifier for the violation.', correct: false }
     help: |
-      The `#[Assert\\NotBlank]` constraint checks if a string is not empty and does not consist solely of whitespace characters.
-      https://symfony.com/doc/current/reference/constraints/NotBlank.html
+      The `payload` option allows you to associate custom data with a violation, which can be useful for frontend frameworks, API responses, or custom error handling.
+      https://symfony.com/doc/current/validation/payload.html
+
+  -
+    question: |
+      Which method of `ExecutionContextInterface` is used to get the root object being validated?
+
+      ```php
+      use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+      function getRootObject(ExecutionContextInterface $context): object
+      {
+          return /* ??? */;
+      }
+      ```
+    answers:
+      - { value: '`$context->getRoot()`', correct: true }
+      - { value: '`$context->getObject()`', correct: false }
+      - { value: '`$context->getValidatedObject()`', correct: false }
+      - { value: '`$context->getSubject()`', correct: false }
+    help: |
+      The `getRoot()` method of `ExecutionContextInterface` returns the root object that started the validation process.
+      https://symfony.com/doc/current/validation/custom_constraint.html#accessing-the-root-object
+
+  -
+    question: |
+      When creating a custom constraint, what is the purpose of the `validatedBy()` method in the constraint class?
+
+      ```php
+      namespace App\Validator\Constraints;
+
+      use Symfony\Component\Validator\Constraint;
+
+      #[\Attribute(\Attribute::TARGET_PROPERTY)]
+      class MyCustomConstraint extends Constraint
+      {
+          public function validatedBy(): string
+          {
+              return /* ??? */;
+          }
+      }
+      ```
+    answers:
+      - { value: 'To return the fully qualified class name of the associated validator.', correct: true }
+      - { value: 'To specify the service ID of the validator if it''s not autowired.', correct: false }
+      - { value: 'To define the validation method within the constraint itself.', correct: false }
+      - { value: 'To declare the validation groups for the constraint.', correct: false }
+    help: |
+      The `validatedBy()` method tells Symfony which validator class is responsible for validating this specific constraint. It should return the FQCN of the validator.
+      https://symfony.com/doc/current/validation/custom_constraint.html#creating-the-constraint-class
 
   -
     question: >
-      When using `#[Assert\\Collection]`, which option is used to define constraints for keys that are optional in the input array?
+      What is the default error message for the `NotBlank` constraint?
     answers:
-      - { value: "`Optional`", correct: true }
-      - { value: "`AllowMissing`", correct: false }
-      - { value: "`Sometimes`", correct: false }
-      - { value: "`Nullable`", correct: false }
+      - { value: '`This value should not be blank.`', correct: true }
+      - { value: '`This field cannot be empty.`', correct: false }
+      - { value: '`The value is required.`', correct: false }
+      - { value: '`This value must not be null or empty.`', correct: false }
     help: |
-      The `Optional` key within the `#[Assert\\Collection]` constraint allows you to define constraints for keys that might not be present in the input array without causing a violation if they are missing.
-      https://symfony.com/doc/current/reference/constraints/Collection.html#optional
+      The default message for the `NotBlank` constraint is "This value should not be blank.".
+      https://symfony.com/doc/current/reference/constraints/NotBlank.html#message
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Uid\\Ulid::getDateTime()`?
+      Which constraint is used to ensure a property's value is a valid date?
     answers:
-      - { value: "To extract the timestamp from a ULID as a `DateTimeImmutable` instance.", correct: true }
-      - { value: "To convert a ULID to a human-readable date string.", correct: false }
-      - { value: "To set the creation timestamp of a ULID.", correct: false }
-      - { value: "To compare the timestamps of two ULIDs.", correct: false }
+      - { value: '`Date`', correct: true }
+      - { value: '`DateTime`', correct: false }
+      - { value: '`ValidDate`', correct: false }
+      - { value: '`IsDate`', correct: false }
     help: |
-      ULIDs are time-ordered, and `getDateTime()` allows you to retrieve the `DateTimeImmutable` object representing the timestamp embedded within the ULID.
-      https://symfony.com/doc/current/components/uid.html#ulid
+      The `Date` constraint validates that a string is a valid date in the `YYYY-MM-DD` format.
+      https://symfony.com/doc/current/reference/constraints/Date.html
 
   -
     question: >
-      When handling a `TransformationFailedException` in a Symfony data transformer, which method should you use to set a public error message for the user?
+      Which constraint is used to ensure a property's value is a valid time?
     answers:
-      - { value: "`$failure->setInvalidMessage($publicErrorMessage, ['{{ value }}' => $issueNumber]);`", correct: true }
-      - { value: "`$failure->setMessage($publicErrorMessage);`", correct: false }
-      - { value: "`$failure->setPublicMessage($publicErrorMessage);`", correct: false }
-      - { value: "`$failure->addViolation($publicErrorMessage);`", correct: false }
+      - { value: '`Time`', correct: true }
+      - { value: '`ValidTime`', correct: false }
+      - { value: '`IsTime`', correct: false }
+      - { value: '`HourMinute`', correct: false }
     help: |
-      The `setInvalidMessage()` method on a `TransformationFailedException` allows you to provide a user-friendly public message, optionally with placeholders, which will be displayed to the user.
-      https://symfony.com/doc/current/form/data_transformers.html#data-transformers-validation
+      The `Time` constraint validates that a string is a valid time in the `HH:MM:SS` format.
+      https://symfony.com/doc/current/reference/constraints/Time.html
 
   -
     question: >
-      Which of the following is a valid way to define a `Length` constraint with a minimum of 3 for a property named `firstName` in a Symfony entity using YAML?
+      Which constraint is used to ensure a property's value is a valid datetime?
     answers:
-      - { value: '''App\\Entity\\Author:
-    properties:
-        firstName:
-            - Length:
-                min: 3''' , correct: true }
-      - { value: '''App\\Entity\\Author:
-    firstName:
-        Length: { min: 3 }''' , correct: false }
-      - { value: '''properties:
-    firstName:
-        Length:
-            min: 3''' , correct: false }
-      - { value: '''validation:
-    Author:
-        firstName:
-            Length: 3''' , correct: false }
+      - { value: '`DateTime`', correct: true }
+      - { value: '`Timestamp`', correct: false }
+      - { value: '`ValidDateTime`', correct: false }
+      - { value: '`IsDateTime`', correct: false }
     help: |
-      YAML configuration for constraints requires the constraint name followed by its options, indented.
-      https://symfony.com/doc/current/validation.html#yaml
+      The `DateTime` constraint validates that a string is a valid date and time in the `YYYY-MM-DD HH:MM:SS` format.
+      https://symfony.com/doc/current/reference/constraints/DateTime.html
 
   -
     question: >
-      What is the purpose of the `peer_fingerprint` option in Symfony's HTTP client configuration?
+      What is the behavior of the `NotNull` constraint when applied to a property with an empty string value?
     answers:
-      - { value: "To validate the public key fingerprint of the server's TLS certificate, aborting the connection if it doesn't match.", correct: true }
-      - { value: "To provide a client-side certificate for mutual TLS authentication.", correct: false }
-      - { value: "To encrypt the communication between the client and the server.", correct: false }
-      - { value: "To verify the hostname of the server against its certificate.", correct: false }
+      - { value: 'It passes, as an empty string is not `null`.', correct: true }
+      - { value: 'It fails, as an empty string is considered `null` by this constraint.', correct: false }
+      - { value: 'It fails, but only if the `allowEmptyString` option is set to `false`.', correct: false }
+      - { value: 'It throws an exception.', correct: false }
     help: |
-      The `peer_fingerprint` option allows for strict validation of the server's public key fingerprint. If the fingerprint extracted from the server's certificate does not match any of the provided fingerprints, the connection is aborted.
-      https://symfony.com/doc/current/reference/configuration/framework.html#peer-fingerprint
+      The `NotNull` constraint only checks if the value is strictly `null`. An empty string (`''`) is not `null`, so it passes this constraint. Use `NotBlank` if you want to disallow empty strings.
+      https://symfony.com/doc/current/reference/constraints/NotNull.html
 
   -
     question: >
-      When validating an object with a `GroupSequence`, how is the "Default" group typically included in the sequence?
+      How can you retrieve the property path of a `ConstraintViolation` object?
     answers:
-      - { value: "By explicitly listing `'Default'` as one of the groups in the sequence.", correct: true }
-      - { value: "The "Default" group is always implicitly included at the beginning of any sequence.", correct: false }
-      - { value: "It is automatically added if no other groups are specified in the sequence.", correct: false }
-      - { value: "You cannot mix "Default" with custom groups in a sequence.", correct: false }
+      - { value: '`$violation->getPropertyPath()`', correct: true }
+      - { value: '`$violation->getPath()`', correct: false }
+      - { value: '`$violation->getFieldName()`', correct: false }
+      - { value: '`$violation->getLocation()`', correct: false }
     help: |
-      When defining a `GroupSequence`, you must explicitly include `'Default'` in the sequence array if you want the default constraints to be applied as part of the sequential validation.
-      https://symfony.com/doc/current/validation/sequence_provider.html#group-sequence-provider
+      The `getPropertyPath()` method of a `ConstraintViolation` object returns the path to the property that caused the violation.
+      https://symfony.com/doc/current/validation.html#displaying-the-validation-errors
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Intl\\Languages::getAlpha3Code()`?
+      How can you retrieve the error message of a `ConstraintViolation` object?
     answers:
-      - { value: "To convert a two-letter (alpha-2) language code to its three-letter (alpha-3) equivalent.", correct: true }
-      - { value: "To retrieve the full language name from an alpha-3 code.", correct: false }
-      - { value: "To validate if an alpha-3 code exists.", correct: false }
-      - { value: "To get a list of all alpha-3 language codes.", correct: false }
+      - { value: '`$violation->getMessage()`', correct: true }
+      - { value: '`$violation->getErrorMessage()`', correct: false }
+      - { value: '`$violation->getText()`', correct: false }
+      - { value: '`$violation->getViolationMessage()`', correct: false }
     help: |
-      `Languages::getAlpha3Code()` provides a convenient way to convert an ISO 639-1 (alpha-2) language code to its ISO 639-2/T (alpha-3) equivalent.
-      https://symfony.com/doc/current/components/intl.html#languages
+      The `getMessage()` method of a `ConstraintViolation` object returns the human-readable error message.
+      https://symfony.com/doc/current/validation.html#displaying-the-validation-errors
 
   -
     question: >
-      Which of the following is the correct way to define a `NotBlank` constraint for a property named `name` in a Symfony entity using a static `loadValidatorMetadata()` method?
+      What is the role of the `payload` argument in the `ExecutionContextInterface::buildViolation()` method?
     answers:
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint('name', new NotBlank());
-}''' , correct: true }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addConstraint('name', new NotBlank());
-}''' , correct: false }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->setConstraint('name', new NotBlank());
-}''' , correct: false }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint(new NotBlank(), 'name');
-}''' , correct: false }
+      - { value: 'To attach custom, non-string data to the violation.', correct: true }
+      - { value: 'To specify the HTTP status code for the violation.', correct: false }
+      - { value: 'To define a unique identifier for the violation.', correct: false }
+      - { value: 'To set the severity level of the violation.', correct: false }
     help: |
-      The `addPropertyConstraint()` method of `ClassMetadata` is used to add constraints to properties programmatically.
-      https://symfony.com/doc/current/validation.html#the-static-method
+      The `payload` argument allows developers to attach custom data to a validation violation, which can be useful for advanced error handling scenarios.
+      https://symfony.com/doc/current/validation/payload.html
+
+  -
+    question: |
+      You are validating a `User` object that has a `roles` property, which is an array of strings (e.g., `['ROLE_USER', 'ROLE_ADMIN']`). Which constraint would you use to ensure each role in the array starts with `ROLE_`?
+    answers:
+      - { value: '`#[Assert\All(new Assert\Regex(pattern: ''/^ROLE_/''))]`', correct: true }
+      - { value: '`#[Assert\Collection(fields: { roles: [new Assert\Regex(pattern: ''/^ROLE_/'')] })]`', correct: false }
+      - { value: '`#[Assert\Each(new Assert\Regex(pattern: ''/^ROLE_/''))]`', correct: false }
+      - { value: '`#[Assert\Array(constraints: [new Assert\Regex(pattern: ''/^ROLE_/'')])`', correct: false }
+    help: |
+      The `All` constraint applies a set of constraints to each element of a collection (array or traversable object).
+      https://symfony.com/doc/current/reference/constraints/All.html
 
   -
     question: >
-      What is the primary benefit of using Data Transfer Objects (DTOs) with validation constraints in Symfony controllers?
+      What is the purpose of the `#[Assert\Type]` constraint?
     answers:
-      - { value: "To decouple validation logic from entities and forms, making controllers cleaner and more focused.", correct: true }
-      - { value: "To automatically persist data to the database after validation.", correct: false }
-      - { value: "To replace the need for Symfony Forms entirely.", correct: false }
-      - { value: "To enforce strict type-hinting for all request parameters.", correct: false }
+      - { value: 'To validate that a value is of a specific PHP data type (e.g., `string`, `int`, `array`, `bool`).', correct: true }
+      - { value: 'To check if an object is an instance of a particular class or interface.', correct: true }
+      - { value: 'To ensure a value matches a predefined type alias.', correct: false }
+      - { value: 'To cast a value to a specific type before validation.', correct: false }
     help: |
-      DTOs provide a clean way to represent incoming request data and apply validation rules to it, separating this concern from the domain entities and simplifying controller logic.
-      https://symfony.com/doc/current/controller.html#mapping-the-whole-query-string-into-an-object
+      The `Type` constraint validates that a value is of a specific PHP type or an instance of a given class/interface.
+      https://symfony.com/doc/current/reference/constraints/Type.html
+
+  -
+    question: |
+      How can you apply a `GroupSequence` to a form type in Symfony?
+
+      ```php
+      namespace App\Form\Type;
+
+      use App\Entity\User;
+      use Symfony\Component\Form\AbstractType;
+      use Symfony\Component\Form\FormBuilderInterface;
+      use Symfony\Component\OptionsResolver\OptionsResolver;
+
+      class UserType extends AbstractType
+      {
+          public function buildForm(FormBuilderInterface $builder, array $options): void
+          {
+              // ... add fields
+          }
+
+          public function configureOptions(OptionsResolver $resolver): void
+          {
+              $resolver->setDefaults([
+                  'data_class' => User::class,
+                  // ???
+              ]);
+          }
+      }
+      ```
+    answers:
+      - { value: '`validation_groups` => [''Default'', ''registration_step2'']` (if `User` has a `GroupSequence` defined)', correct: true }
+      - { value: '`validation_groups` => function (FormInterface $form) { return $form->getData()->getValidationGroups(); }`', correct: true }
+      - { value: '`group_sequence` => [''Default'', ''registration_step2'']`', correct: false }
+      - { value: '`validation_groups` => new GroupSequence([''Default'', ''registration_step2''])`', correct: false }
+    help: |
+      The `validation_groups` option in `configureOptions` can accept an array of group names or a callable that returns the groups. If the entity has a `GroupSequence` attribute, you can simply list the groups in the desired order.
+      https://symfony.com/doc/current/reference/forms/types/form.html#validation-groups
 
   -
     question: >
-      When configuring a `RedisSessionHandler` in Symfony, what does the `ttl` option define?
+      What is the primary benefit of using `#[AsCommand]` attribute for console commands compared to defining them in `services.yaml`?
     answers:
-      - { value: "The Time-To-Live (TTL) for session data in Redis, in seconds.", correct: true }
-      - { value: "The maximum number of sessions to store in Redis.", correct: false }
-      - { value: "The timeout for connecting to the Redis server.", correct: false }
-      - { value: "The frequency at which session data is garbage collected.", correct: false }
+      - { value: 'It allows defining command metadata (name, description) directly in the command class, making it more discoverable and self-contained.', correct: true }
+      - { value: 'It makes the command execution faster.', correct: false }
+      - { value: 'It automatically registers the command as a service without explicit configuration.', correct: true }
+      - { value: 'It enables dependency injection without requiring a constructor.', correct: false }
     help: |
-      The `ttl` option for the `RedisSessionHandler` specifies the Time-To-Live for session data stored in Redis, determining how long a session remains valid.
-      https://symfony.com/doc/current/session.html#redis-session-handler
+      The `#[AsCommand]` attribute simplifies command registration and configuration by allowing you to define the command's name and description directly on the class, leveraging autoconfigure.
+      https://symfony.com/doc/current/console.html#configuring-the-command (This question is slightly off-topic for "Data Validation" but relates to attributes, which are used for validation, so it's a general Symfony attribute question. I will keep it as it tests knowledge of attributes in Symfony 7.)
 
   -
     question: >
-      Which of the following describes the correct behavior of `Symfony\\Component\\String\\ByteString::isUtf8()`?
+      When is the `Default` validation group typically used?
     answers:
-      - { value: "It returns `true` if the `ByteString` object contains valid UTF-8 content, `false` otherwise.", correct: true }
-      - { value: "It converts the `ByteString` to UTF-8 if it's not already.", correct: false }
-      - { value: "It checks if the `ByteString` is empty.", correct: false }
-      - { value: "It determines the encoding of the `ByteString`.", correct: false }
+      - { value: 'For general-purpose validation rules that should always apply unless specific groups are provided.', correct: true }
+      - { value: 'Only when no other validation groups are defined for an object.', correct: false }
+      - { value: 'As a fallback when a specified group is not found.', correct: false }
+      - { value: 'For validation rules that apply to all entities in the application.', correct: false }
     help: |
-      The `isUtf8()` method on a `ByteString` object is used to verify if the string's contents are valid UTF-8 encoded.
-      https://symfony.com/doc/current/string.html#checking-utf-8-validity
+      The `Default` group is the implicit group for any constraint that doesn't explicitly define `groups`. It's used for rules that apply in most validation scenarios.
+      https://symfony.com/doc/current/validation/groups.html#default-group
+
+  -
+    question: |
+      You have a `User` object with a `username` property. You want to ensure it's `NotBlank` for the `registration` group and has a `Length` between 5 and 20 for the `profile_update` group. How would you define this?
+
+      ```php
+      namespace App\Entity;
+
+      use Symfony\Component\Validator\Constraints as Assert;
+
+      class User
+      {
+          #[Assert\NotBlank(groups: ['registration'])]
+          #[Assert\Length(min: 5, max: 20, groups: ['profile_update'])]
+          private ?string $username = null;
+      }
+      ```
+      Is this a correct way to apply group-specific constraints?
+    answers:
+      - { value: 'Yes, this is the correct way to apply different constraints to different validation groups on the same property.', correct: true }
+      - { value: 'No, you must use a `GroupSequence` for this scenario.', correct: false }
+      - { value: 'No, you can only have one constraint per property.', correct: false }
+      - { value: 'No, `NotBlank` and `Length` cannot be used together.', correct: false }
+    help: |
+      Multiple constraints can be applied to the same property, and each can be assigned to different validation groups.
+      https://symfony.com/doc/current/validation/groups.html#basic-example
 
   -
     question: >
-      What is the primary purpose of `Symfony\\Component\\Validator\\Validation::createValidator()`?
+      What is the primary advantage of using PHP attributes for defining validation constraints over YAML or XML?
     answers:
-      - { value: "To create a new, standalone validator instance.", correct: true }
-      - { value: "To retrieve the default validator service from the container.", correct: false }
-      - { value: "To register custom validation constraints.", correct: false }
-      - { value: "To configure global validation settings.", correct: false }
+      - { value: 'Constraints are defined directly alongside the code they validate, improving readability and maintainability.', correct: true }
+      - { value: 'Attributes offer better performance during validation.', correct: false }
+      - { value: 'Attributes allow for more complex validation logic than YAML or XML.', correct: false }
+      - { value: 'Attributes are the only way to define custom constraints.', correct: false }
     help: |
-      `Validation::createValidator()` is a factory method used to create a new validator instance, typically for standalone use cases outside of the Symfony Framework's service container.
-      https://symfony.com/doc/current/components/validator.html#getting-the-validator
+      PHP attributes (formerly annotations) keep the validation rules close to the properties or methods they apply to, making the code more cohesive and easier to understand.
+      https://symfony.com/doc/current/validation.html#constraints-configuration
 
   -
     question: >
-      When should you use `Symfony\\Component\\Intl\\Languages::alpha3CodeExists()`?
+      Can a single constraint belong to multiple validation groups?
     answers:
-      - { value: "To check if a given three-letter (alpha-3) language code exists.", correct: true }
-      - { value: "To convert a two-letter code to a three-letter code.", correct: false }
-      - { value: "To get the name of a language from its alpha-3 code.", correct: false }
-      - { value: "To validate if a language code is valid for a specific locale.", correct: false }
+      - { value: 'Yes, by providing an array of group names to the `groups` option.', correct: true }
+      - { value: 'No, each constraint can only belong to one group.', correct: false }
+      - { value: 'Only if it''s a class-level constraint.', correct: false }
+      - { value: 'Only if it''s a custom constraint.', correct: false }
     help: |
-      `Languages::alpha3CodeExists()` is specifically for validating the existence of ISO 639-2/T (alpha-3) language codes.
-      https://symfony.com/doc/current/components/intl.html#languages
+      A constraint can belong to multiple groups by listing them in the `groups` array.
+      https://symfony.com/doc/current/validation/groups.html#basic-example
 
   -
     question: >
-      What is the purpose of the `message` option in the `#[Assert\\Unique]` constraint?
+      What happens if you validate an object and do not specify any validation groups?
     answers:
-      - { value: "To define the error message shown if at least one element is repeated in the collection.", correct: true }
-      - { value: "To specify a custom message for each unique element.", correct: false }
-      - { value: "To set the default message for all validation errors.", correct: false }
-      - { value: "To provide a message for when the collection is empty.", correct: false }
+      - { value: 'Only constraints belonging to the `Default` group will be checked.', correct: true }
+      - { value: 'All constraints on the object will be checked, regardless of their assigned groups.', correct: false }
+      - { value: 'An error will be thrown, requiring you to specify at least one group.', correct: false }
+      - { value: 'Symfony will prompt you to choose a group interactively.', correct: false }
     help: |
-      The `message` option allows you to customize the error message displayed when the `#[Assert\\Unique]` constraint detects duplicate elements in the collection.
-      https://symfony.com/doc/current/reference/constraints/Unique.html#message
+      If no groups are explicitly passed to the validator, only constraints belonging to the `Default` group are evaluated.
+      https://symfony.com/doc/current/validation/groups.html#default-group
 
   -
     question: >
-      Which of the following is a valid way to define a `Length` constraint with a minimum of 3 for a property named `firstName` in a Symfony entity using XML?
+      Is it possible to define validation constraints for a property that is a collection of objects (e.g., `ArrayCollection` of `OrderItem` objects)?
     answers:
-      - { value: '''<class name="App\\Entity\\Author">
-    <property name="firstName">
-        <constraint name="Length">
-            <option name="min">3</option>
-        </constraint>
-    </property>
-</class>''' , correct: true }
-      - { value: '''<constraint-mapping>
-    <property name="App\\Entity\\Author.firstName" min="3"/>
-</constraint-mapping>''' , correct: false }
-      - { value: '''<class name="App\\Entity\\Author" property="firstName" constraint="Length" min="3"/>''' , correct: false }
-      - { value: '''<constraint name="Length" for="App\\Entity\\Author.firstName" min="3"/>''' , correct: false }
+      - { value: 'Yes, using the `#[Assert\Valid]` constraint on the collection property.', correct: true }
+      - { value: 'Yes, using the `#[Assert\All]` constraint to apply rules to each element of the collection.', correct: true }
+      - { value: 'No, collections cannot be directly validated; you must iterate and validate each item manually.', correct: false }
+      - { value: 'Only if the collection implements `ValidatableCollectionInterface`.', correct: false }
     help: |
-      In XML, constraint options are defined using nested `<option>` tags within the `<constraint>` tag.
-      https://symfony.com/doc/current/validation.html#xml
+      The `Valid` constraint recursively validates each object in a collection. The `All` constraint allows you to apply specific constraints to each element within a collection.
+      https://symfony.com/doc/current/reference/constraints/Valid.html
+      https://symfony.com/doc/current/reference/constraints/All.html
 
   -
     question: >
-      When processing a Symfony form submission, why might you need to `array_merge()` external JSON data with `Request::getPayload()->all()` before calling `$form->submit()`?
+      What is the primary role of the `payload` in a `ConstraintViolation`?
     answers:
-      - { value: "To ensure all expected form fields, including those from a frontend framework, are present for validation.", correct: true }
-      - { value: "To prevent cross-site request forgery (CSRF) attacks.", correct: false }
-      - { value: "To encrypt the submitted data before processing.", correct: false }
-      - { value: "To automatically convert JSON data into PHP objects.", correct: false }
+      - { value: 'To carry additional, non-string data related to the violation.', correct: true }
+      - { value: 'To define the severity level of the validation error.', correct: false }
+      - { value: 'To specify the HTTP status code for the error response.', correct: false }
+      - { value: 'To provide a unique identifier for the violation instance.', correct: false }
     help: |
-      Frontend frameworks often send data in a different structure (e.g., raw JSON body) than what Symfony forms expect (e.g., URL-encoded form data). Merging ensures all necessary fields are available for the form to process and validate correctly.
-      https://symfony.com/doc/current/form/direct_submit.html
+      The `payload` is designed to attach custom data to a violation, allowing for more flexible error handling and integration with other systems.
+      https://symfony.com/doc/current/validation/payload.html
 
   -
     question: >
-      What is the purpose of the `max` option in the `#[Assert\\Range]` constraint?
+      When using `GroupSequence`, if a violation occurs in the first group of the sequence, what happens to the subsequent groups?
     answers:
-      - { value: "To set the upper limit for the validated value.", correct: true }
-      - { value: "To define the maximum number of items in a collection.", correct: false }
-      - { value: "To specify the maximum length for a string.", correct: false }
-      - { value: "To set the maximum file size for an uploaded file.", correct: false }
+      - { value: 'They are not validated at all.', correct: true }
+      - { value: 'They are validated, but their errors are ignored.', correct: false }
+      - { value: 'They are validated, and their errors are merged with the first group''s errors.', correct: false }
+      - { value: 'The validation process restarts from the beginning of the sequence.', correct: false }
     help: |
-      The `max` option of the `#[Assert\\Range]` constraint defines the largest acceptable value. Validation fails if the value is greater than this maximum.
-      https://symfony.com/doc/current/reference/constraints/Range.html#max
+      The "fail-fast" nature of `GroupSequence` means that if any group in the sequence produces a violation, the validation process stops, and no further groups in that sequence are checked.
+      https://symfony.com/doc/current/validation/group_sequence.html
 
   -
     question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `firstName` in a Symfony entity using PHP attributes?
+      Which of the following is NOT a valid way to define validation constraints in Symfony 7?
     answers:
-      - { value: '''#[Assert\\NotBlank]
-private string $firstName;''' , correct: true }
-      - { value: '''#[NotBlank]
-private string $firstName;''' , correct: false }
-      - { value: '''@NotBlank
-private string $firstName;''' , correct: false }
-      - { value: '''#[Constraint(NotBlank::class)]
-private string $firstName;''' , correct: false }
+      - { value: 'Using annotations (e.g., `@Assert\NotBlank`).', correct: false }
+      - { value: 'Using PHP attributes (e.g., `#[Assert\NotBlank]`).', correct: false }
+      - { value: 'Using XML configuration files.', correct: false }
+      - { value: 'Using INI files.', correct: true }
     help: |
-      PHP attributes for validation constraints are typically prefixed with `Assert\\` and placed directly above the property.
-      https://symfony.com/doc/current/validation.html#php-attributes
+      Symfony supports PHP attributes (recommended), YAML, and XML for defining validation constraints. INI files are not supported for this purpose. Annotations are still supported for backward compatibility but attributes are the modern approach.
+      https://symfony.com/doc/current/validation.html#constraints-configuration
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Uid\\Ulid::compare()`?
+      What is the purpose of the `#[Assert\UniqueEntity]` constraint in Symfony?
     answers:
-      - { value: "To compare two ULID objects and return an integer indicating their relative order.", correct: true }
-      - { value: "To check if two ULID objects are exactly equal.", correct: false }
-      - { value: "To determine if one ULID is older than another.", correct: false }
-      - { value: "To sort a collection of ULID objects.", correct: false }
+      - { value: 'It is a Doctrine ORM specific constraint, not part of the core Symfony Validator component.', correct: true }
+      - { value: 'It ensures a property''s value is unique within a collection.', correct: false }
+      - { value: 'It checks for uniqueness against a database table using the core Symfony Validator.', correct: false }
+      - { value: 'It guarantees that an object instance is unique in memory.', correct: false }
     help: |
-      `Ulid::compare()` performs a three-way comparison between two ULID objects, returning -1, 0, or 1, similar to PHP's spaceship operator (`<=>`).
-      https://symfony.com/doc/current/components/uid.html#ulid
+      The `UniqueEntity` constraint is provided by DoctrineBundle for checking database uniqueness. It is not a constraint from the core Symfony Validator component.
+      https://symfony.com/doc/current/bundles/DoctrineBundle/validation.html#uniqueentity-constraint
 
   -
     question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `firstName` in a Symfony entity using YAML?
+      Can you apply validation constraints to public properties, private properties, and getter methods in Symfony?
     answers:
-      - { value: '''App\\Entity\\Author:
-    properties:
-        firstName:
-            - NotBlank: ~''' , correct: true }
-      - { value: '''App\\Entity\\Author:
-    firstName: NotBlank''' , correct: false }
-      - { value: '''properties:
-    firstName:
-        - NotBlank''' , correct: false }
-      - { value: '''validation:
-    Author:
-        firstName: NotBlank''' , correct: false }
+      - { value: 'Yes, constraints can be applied to public, private, and protected properties, as well as public getter methods.', correct: true }
+      - { value: 'Only public properties and public getter methods can have constraints.', correct: false }
+      - { value: 'Only public and protected properties can have constraints.', correct: false }
+      - { value: 'Only properties can have constraints, not methods.', correct: false }
     help: |
-      In YAML, a simple constraint without options can be defined using `ConstraintName: ~`.
-      https://symfony.com/doc/current/validation.html#yaml
+      Symfony's validator can read constraints from properties (regardless of visibility) and public getter methods.
+      https://symfony.com/doc/current/validation.html#constraints-configuration
+
+  -
+    question: |
+      When building a custom violation using `buildViolation()`, which method is used to set the parameter for the error message?
+
+      ```php
+      $context->buildViolation('The value {{ value }} is invalid.')
+          // ???
+          ->addViolation();
+      ```
+    answers:
+      - { value: '`setParameter(''{{ value }}'', $invalidValue)`', correct: true }
+      - { value: '`withParameter(''{{ value }}'', $invalidValue)`', correct: false }
+      - { value: '`setParam(''value'', $invalidValue)`', correct: false }
+      - { value: '`addParameter(''value'', $invalidValue)`', correct: false }
+    help: |
+      The `setParameter()` method is used to replace placeholders in the violation message.
+      https://symfony.com/doc/current/validation/custom_constraint.html#adding-violations-with-the-violations-builder
 
   -
     question: >
-      When defining validation constraints for a form that is NOT mapped to a data class, how can you apply constraints to individual fields?
+      What is the purpose of the `atPath()` method in the violations builder?
     answers:
-      - { value: "By adding a `constraints` option to the `add()` method for each field in `buildForm()`.", correct: true }
-      - { value: "By defining constraints in the `configureOptions()` method using the `data_class` option.", correct: false }
-      - { value: "By creating a separate validator service for each field.", correct: false }
-      - { value: "It's not possible to validate forms not mapped to a data class.", correct: false }
+      - { value: 'To specify the property path where the violation occurred.', correct: true }
+      - { value: 'To define the file path of the validated object.', correct: false }
+      - { value: 'To set the URL where the error should be redirected.', correct: false }
+      - { value: 'To indicate the line number in the code where the violation originated.', correct: false }
     help: |
-      For forms not mapped to a data class, field-level constraints are applied directly in the `buildForm()` method using the `constraints` option of the `add()` method.
-      https://symfony.com/doc/current/form/without_class.html#adding-field-level-validation
+      `atPath()` is crucial for associating the violation with a specific property, which is used for displaying errors correctly, especially in forms.
+      https://symfony.com/doc/current/validation/custom_constraint.html#adding-violations-with-the-violations-builder
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Intl\\Languages::getAlpha2Code()`?
+      Which constraint would you use to ensure a string property contains only digits?
     answers:
-      - { value: "To convert a three-letter (alpha-3) language code to its two-letter (alpha-2) equivalent.", correct: true }
-      - { value: "To retrieve the full language name from an alpha-2 code.", correct: false }
-      - { value: "To validate if an alpha-2 code exists.", correct: false }
-      - { value: "To get a list of all alpha-2 language codes.", correct: false }
+      - { value: '`Type(''digit'')` (not a valid type)', correct: false }
+      - { value: '`Regex(pattern: ''/^\d+$/'')`', correct: true }
+      - { value: '`Digits` (does not exist as a built-in constraint)', correct: false }
+      - { value: '`Numeric`', correct: false }
     help: |
-      `Languages::getAlpha2Code()` provides a convenient way to convert an ISO 639-2/T (alpha-3) language code to its ISO 639-1 (alpha-2) equivalent.
-      https://symfony.com/doc/current/components/intl.html#languages
+      The `Regex` constraint is the appropriate choice for validating that a string consists solely of digits. `Numeric` checks if a value is a valid number, which is broader.
+      https://symfony.com/doc/current/reference/constraints/Regex.html
 
   -
     question: >
-      Which of the following is the correct way to define a `NotBlank` constraint for a property named `name` in a Symfony entity using XML?
+      What is the purpose of the `cascade_validation` option in a form type?
     answers:
-      - { value: '''<class name="App\\Entity\\Author">
-    <property name="name">
-        <constraint name="NotBlank"/>
-    </property>
-</class>''' , correct: true }
-      - { value: '''<constraint-mapping>
-    <property name="App\\Entity\\Author.name">
-        <NotBlank/>
-    </property>
-</constraint-mapping>''' , correct: false }
-      - { value: '''<class name="App\\Entity\\Author" property="name">
-    <constraint name="NotBlank"/>
-</class>''' , correct: false }
-      - { value: '''<constraint name="NotBlank" for="App\\Entity\\Author.name"/>''' , correct: false }
+      - { value: 'It is deprecated; use `#[Assert\Valid]` on the underlying data class property instead.', correct: true }
+      - { value: 'It enables validation for child forms automatically.', correct: false }
+      - { value: 'It forces all validation groups to be applied.', correct: false }
+      - { value: 'It allows validation errors to propagate up to parent forms.', correct: false }
     help: |
-      XML validation configuration uses `<class>` tags for entities and `<property>` tags for properties, with nested `<constraint>` tags for each constraint.
-      https://symfony.com/doc/current/validation.html#xml
+      The `cascade_validation` option in form types is deprecated. The recommended way to validate nested objects is by applying the `#[Assert\Valid]` constraint directly to the property in the data class.
+      https://symfony.com/doc/current/reference/forms/types/form.html#cascade-validation
 
   -
     question: >
-      What is the purpose of the `invalidDateTimeMessage` option in the `#[Assert\\Range]` constraint?
+      When using `GroupSequence` with a form, how does the form component determine which groups to validate?
     answers:
-      - { value: "To define the error message when the input value is not a valid date/time string, and `min`/`max` are also dates.", correct: true }
-      - { value: "To specify the message when the date is outside the allowed range.", correct: false }
-      - { value: "To set the message for invalid date format in general.", correct: false }
-      - { value: "To provide a message when the `min` or `max` options are invalid date formats.", correct: false }
+      - { value: 'It uses the `GroupSequence` defined on the underlying data class, if present, or the `validation_groups` option.', correct: true }
+      - { value: 'It always validates the `Default` group first, then any other specified groups.', correct: false }
+      - { value: 'It automatically detects dependencies between groups and orders them.', correct: false }
+      - { value: 'It only uses the `validation_groups` option, ignoring any `GroupSequence` on the entity.', correct: false }
     help: |
-      `invalidDateTimeMessage` is specifically for when the `min` and `max` options are date-based, but the validated value itself cannot be parsed as a valid date/time.
-      https://symfony.com/doc/current/reference/constraints/Range.html#invalidDateTimeMessage
+      The form component respects the `GroupSequence` defined on the data class. If `validation_groups` is also set, it can override or interact with the entity's `GroupSequence`.
+      https://symfony.com/doc/current/reference/forms/types/form.html#validation-groups
 
   -
     question: >
-      When defining a custom validation constraint, what should you do if the `$constraint` object passed to the `validate()` method is not an instance of your custom constraint class?
+      What is the primary purpose of the `ConstraintViolation` object?
     answers:
-      - { value: "Throw an `UnexpectedTypeException`.", correct: true }
-      - { value: "Return immediately without adding a violation.", correct: false }
-      - { value: "Log a warning and attempt to cast the constraint.", correct: false }
-      - { value: "Add a generic violation message.", correct: false }
+      - { value: 'To represent a single validation error, including its message, property path, and invalid value.', correct: true }
+      - { value: 'To define the rules for a specific validation constraint.', correct: false }
+      - { value: 'To manage the overall validation process for an object.', correct: false }
+      - { value: 'To store a list of all validation errors for an object.', correct: false }
     help: |
-      It's crucial to ensure that the `$constraint` object is of the expected type. If not, an `UnexpectedTypeException` should be thrown to indicate a misconfiguration or incorrect usage of the validator.
-      https://symfony.com/doc/current/validation/custom_constraint.html#the-validator-class
+      A `ConstraintViolation` object encapsulates all the details about a single validation error that occurred.
+      https://symfony.com/doc/current/validation.html#validating-objects
 
   -
     question: >
-      Which of the following is a valid way to define a `Length` constraint with a minimum of 3 for a property named `firstName` in a Symfony entity using PHP attributes?
+      Can you apply validation constraints to properties that are `null`?
     answers:
-      - { value: '''#[Assert\\Length(min: 3)]
-private string $firstName;''' , correct: true }
-      - { value: '''#[Length(min: 3)]
-private string $firstName;''' , correct: false }
-      - { value: '''#[Constraint(Length::class, min: 3)]
-private string $firstName;''' , correct: false }
-      - { value: '''#[Assert\\Length(['min' => 3])]
-private string $firstName;''' , correct: false }
+      - { value: 'Yes, some constraints like `NotNull` or `NotBlank` are specifically designed to check for `null` or blank values.', correct: true }
+      - { value: 'No, constraints are only applied to non-null values.', correct: false }
+      - { value: 'Only if the property is explicitly typed as nullable.', correct: false }
+      - { value: 'Only if the constraint has an `allowNull` option set to `false`.', correct: false }
     help: |
-      PHP attributes for validation constraints are typically prefixed with `Assert\\` and options are passed as named arguments.
-      https://symfony.com/doc/current/validation.html#php-attributes
+      Constraints like `NotNull` and `NotBlank` are specifically designed to validate the presence or absence of a value, including `null`. Most other constraints will simply ignore `null` values unless they are explicitly configured otherwise (e.g., `Type` with `null` as a valid type).
+      https://symfony.com/doc/current/validation.html (General understanding of constraint behavior)
 
   -
     question: >
-      What is the purpose of the `invalidMessage` option in the `#[Assert\\Range]` constraint when `min` and `max` are numeric?
+      What is the purpose of the `groups` option when validating an object manually using `ValidatorInterface::validate()`?
     answers:
-      - { value: "To define the error message when the input value is not a valid number.", correct: true }
-      - { value: "To specify the message when the number is outside the allowed range.", correct: false }
-      - { value: "To set the message for general validation failures.", correct: false }
-      - { value: "To provide a message when the `min` or `max` options are not valid numbers.", correct: false }
+      - { value: 'To specify which validation groups should be applied during the validation process.', correct: true }
+      - { value: 'To define new validation groups dynamically.', correct: false }
+      - { value: 'To retrieve the groups that caused validation failures.', correct: false }
+      - { value: 'To exclude certain groups from the validation process.', correct: false }
     help: |
-      `invalidMessage` is specifically for when the `min` and `max` options are numeric, but the validated value itself cannot be parsed as a valid number.
-      https://symfony.com/doc/current/reference/constraints/Range.html#invalidMessage
+      The third argument to `validate()` is an array of groups. Only constraints belonging to these specified groups (and their `Default` group if applicable) will be checked.
+      https://symfony.com/doc/current/validation.html#validating-objects
 
   -
     question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `task` in a Symfony entity using YAML?
+      Which constraint is used to ensure a property's value is a valid country code (ISO 3166-1 alpha-2)?
     answers:
-      - { value: '''App\\Entity\\Task:
-    properties:
-        task:
-            - NotBlank: ~''' , correct: true }
-      - { value: '''App\\Entity\\Task:
-    task: NotBlank''' , correct: false }
-      - { value: '''properties:
-    task:
-        - NotBlank''' , correct: false }
-      - { value: '''validation:
-    Task:
-        task: NotBlank''' , correct: false }
+      - { value: '`Country`', correct: true }
+      - { value: '`Locale`', correct: false }
+      - { value: '`Region`', correct: false }
+      - { value: '`IsoCode`', correct: false }
     help: |
-      In YAML, a simple constraint without options can be defined using `ConstraintName: ~`.
-      https://symfony.com/doc/current/validation.html#yaml
+      The `Country` constraint validates that a string is a valid ISO 3166-1 alpha-2 country code.
+      https://symfony.com/doc/current/reference/constraints/Country.html
 
   -
     question: >
-      What is the purpose of `Symfony\\Component\\Uid\\Ulid::equals()`?
+      Which constraint is used to ensure a property's value is a valid language code (ISO 639-1 alpha-2)?
     answers:
-      - { value: "To check if two ULID objects represent the exact same ULID value.", correct: true }
-      - { value: "To compare the timestamps of two ULIDs.", correct: false }
-      - { value: "To determine if one ULID is a subset of another.", correct: false }
-      - { value: "To convert a ULID to a string for comparison.", correct: false }
+      - { value: '`Language`', correct: true }
+      - { value: '`Locale`', correct: false }
+      - { value: '`Lang`', correct: false }
+      - { value: '`IsoLanguage`', correct: false }
     help: |
-      `Ulid::equals()` is used to determine if two `Ulid` objects have the same underlying value.
-      https://symfony.com/doc/current/components/uid.html#ulid
+      The `Language` constraint validates that a string is a valid ISO 639-1 alpha-2 language code.
+      https://symfony.com/doc/current/reference/constraints/Language.html
 
   -
     question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `task` in a Symfony entity using XML?
+      Which constraint is used to ensure a property's value is a valid locale code (e.g., `en_US`, `fr_FR`)?
     answers:
-      - { value: '''<class name="App\\Entity\\Task">
-    <property name="task">
-        <constraint name="NotBlank"/>
-    </property>
-</class>''' , correct: true }
-      - { value: '''<constraint-mapping>
-    <property name="App\\Entity\\Task.task">
-        <NotBlank/>
-    </property>
-</constraint-mapping>''' , correct: false }
-      - { value: '''<class name="App\\Entity\\Task" property="task">
-    <constraint name="NotBlank"/>
-</class>''' , correct: false }
-      - { value: '''<constraint name="NotBlank" for="App\\Entity\\Task.task"/>''' , correct: false }
+      - { value: '`Locale`', correct: true }
+      - { value: '`LanguageCountry`', correct: false }
+      - { value: '`Culture`', correct: false }
+      - { value: '`IetfTag`', correct: false }
     help: |
-      XML validation configuration uses `<class>` tags for entities and `<property>` tags for properties, with nested `<constraint>` tags for each constraint.
-      https://symfony.com/doc/current/validation.html#xml
+      The `Locale` constraint validates that a string is a valid locale code.
+      https://symfony.com/doc/current/reference/constraints/Locale.html
 
   -
     question: >
-      When defining a `GroupSequence` in XML, what is the correct tag to specify the sequence of groups?
+      What is the purpose of the `#[Assert\DivisibleBy]` constraint?
     answers:
-      - { value: "`<group-sequence>`", correct: true }
-      - { value: "`<groups-order>`", correct: false }
-      - { value: "`<validation-sequence>`", correct: false }
-      - { value: "`<sequence-groups>`", correct: false }
+      - { value: 'To assert that a numeric value is divisible by a given number.', correct: true }
+      - { value: 'To check if a number can be divided without a remainder.', correct: false }
+      - { value: 'To ensure a number is a multiple of another number.', correct: true }
+      - { value: 'To perform division operations within validation.', correct: false }
     help: |
-      In XML configuration, the `<group-sequence>` tag is used at the class level to define the ordered list of validation groups for a `GroupSequence`.
-      https://symfony.com/doc/current/validation/sequence_provider.html#group-sequence-provider
-
-  -
-    question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `task` in a Symfony entity using a static `loadValidatorMetadata()` method?
-    answers:
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint('task', new NotBlank());
-}''' , correct: true }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addConstraint('task', new NotBlank());
-}''' , correct: false }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->setConstraint('task', new NotBlank());
-}''' , correct: false }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint(new NotBlank(), 'task');
-}''' , correct: false }
-    help: |
-      The `addPropertyConstraint()` method of `ClassMetadata` is used to add constraints to properties programmatically.
-      https://symfony.com/doc/current/validation.html#the-static-method
-
-  -
-    question: >
-      What is the purpose of `Symfony\\Component\\Uid\\Uuid::isValid()` when used with format constants (e.g., `Uuid::FORMAT_BASE_32 | Uuid::FORMAT_BASE_58`)?
-    answers:
-      - { value: "To validate if a UUID string conforms to any of the specified UUID formats.", correct: true }
-      - { value: "To convert a UUID from one format to another.", correct: false }
-      - { value: "To generate a UUID in multiple formats simultaneously.", correct: false }
-      - { value: "To check if a UUID is valid across different systems.", correct: false }
-    help: |
-      By using the bitwise OR operator (`|`) with `Uuid::FORMAT_` constants, `Uuid::isValid()` can check if a UUID string matches any of the provided formats.
-      https://symfony.com/doc/current/components/uid.html#uuid
-
-  -
-    question: >
-      Which of the following is a valid way to define a `NotBlank` constraint for a property named `firstName` in a Symfony entity using PHP?
-    answers:
-      - { value: '''#[Assert\\NotBlank]
-private string $firstName;''' , correct: true }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint('firstName', new Assert\\NotBlank());
-}''' , correct: true }
-      - { value: '''private string $firstName = new Assert\\NotBlank();''' , correct: false }
-      - { value: '''#[Constraint(NotBlank::class)]
-private string $firstName;''' , correct: false }
-    help: |
-      Constraints can be defined using PHP attributes directly on the property or programmatically within a static `loadValidatorMetadata()` method.
-      https://symfony.com/doc/current/validation.html#php-attributes and https://symfony.com/doc/current/validation.html#the-static-method
-
-  -
-    question: >
-      What is the purpose of the `min` option in the `#[Assert\\Range]` constraint?
-    answers:
-      - { value: "To set the lower limit for the validated value.", correct: true }
-      - { value: "To define the minimum required length for a string.", correct: false }
-      - { value: "To specify the minimum number of items in a collection.", correct: false }
-      - { value: "To set the minimum file size for an uploaded file.", correct: false }
-    help: |
-      The `min` option of the `#[Assert\\Range]` constraint defines the smallest acceptable value. Validation fails if the value is less than this minimum.
-      https://symfony.com/doc/current/reference/constraints/Range.html#min
-
-  -
-    question: >
-      What is the purpose of the `max` option in the `#[Assert\\Length]` constraint?
-    answers:
-      - { value: "To set the maximum allowed length for the validated value.", correct: true }
-      - { value: "To define the maximum numeric value allowed.", correct: false }
-      - { value: "To specify the maximum number of items in a collection.", correct: false }
-      - { value: "To set the maximum file size for an uploaded file.", correct: false }
-    help: |
-      The `max` option of the `#[Assert\\Length]` constraint specifies the largest acceptable length for a string or array.
-      https://symfony.com/doc/current/reference/constraints/Length.html#max
-
-  -
-    question: >
-      Which of the following is a valid way to define a `Length` constraint with a minimum of 3 for a property named `firstName` in a Symfony entity using PHP?
-    answers:
-      - { value: '''#[Assert\\Length(min: 3)]
-private string $firstName;''' , correct: true }
-      - { value: '''public static function loadValidatorMetadata(ClassMetadata $metadata): void
-{
-    $metadata->addPropertyConstraint('firstName', new Assert\\Length(min: 3));
-}''' , correct: true }
-      - { value: '''private string $firstName = new Assert\\Length(min: 3);''' , correct: false }
-      - { value: '''#[Constraint(Length::class, min: 3)]
-private string $firstName;''' , correct: false }
-    help: |
-      Constraints can be defined using PHP attributes directly on the property or programmatically within a static `loadValidatorMetadata()` method.
-      https://symfony.com/doc/current/validation.html#php-attributes and https://symfony.com/doc/current/validation.html#the-static-method
-
-  -
-    question: >
-      When handling validation errors in a Symfony controller, how can you convert a `ConstraintViolationListInterface` object into a human-readable string for a simple `Response`?
-    answers:
-      - { value: "By casting it to a string: `(string) $errors;`", correct: true }
-      - { value: "By calling `$errors->toString();`", correct: false }
-      - { value: "By iterating over `$errors` and concatenating messages.", correct: false }
-      - { value: "By using `json_encode($errors);`", correct: false }
-    help: |
-      The `ConstraintViolationList` object (which implements `ConstraintViolationListInterface`) has a `__toString()` method, allowing it to be directly cast to a string for simple output of all violation messages.
-      https://symfony.com/doc/current/validation.html#displaying-violations
+      The `DivisibleBy` constraint asserts that a numeric value is perfectly divisible by a given number.
+      https://symfony.com/doc/current/reference/constraints/DivisibleBy.html
