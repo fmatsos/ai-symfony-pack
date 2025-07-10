@@ -3,910 +3,2851 @@ category: Console
 questions:
   -
     question: >
-      Which attribute is used to register a custom console command in Symfony 7?
+      Which attribute is used to define the name and description of a Symfony console command?
     answers:
-      - { value: '`#[AsCommand]`', correct: true }
-      - { value: '`#[ConsoleCommand]`', correct: false }
-      - { value: '`#[Command]`', correct: false }
-      - { value: '`#[RegisterCommand]`', correct: false }
+      -
+        value: >
+          `#[ConsoleCommand]`
+        correct: false
+      -
+        value: >
+          `#[Command]`
+        correct: false
+      -
+        value: >
+          `#[AsCommand]`
+        correct: true
+      -
+        value: >
+          `#[DefineCommand]`
+        correct: false
     help: |
-      The `#[AsCommand]` attribute is the modern way to register console commands in Symfony 7, replacing the static `$defaultName` property.
+      The `#[AsCommand]` attribute is the modern way to configure a console command's name, description, and other options directly on the command class.
       https://symfony.com/doc/current/console.html#configuring-the-command
+
   -
     question: |
-      Consider the following command definition:
+      Given the following command definition, which option type is `bar`?
 
       ```php
-      // src/Command/GreetCommand.php
-      namespace App\Command;
-
-      use Symfony\Component\Console\Attribute\AsCommand;
-      use Symfony\Component\Console\Command\Command;
-      use Symfony\Component\Console\Input\InputInterface;
-      use Symfony\Component\Console\Output\OutputInterface;
-      use Symfony\Component\Console\Input\InputArgument;
-
-      #[AsCommand(name: 'app:greet', description: 'Greets a user.')]
-      class GreetCommand extends Command
+      #[AsCommand(name: 'demo:args', description: 'Describe args behaviors')]
+      class DemoArgsCommand extends Command
       {
           protected function configure(): void
           {
-              $this->addArgument('name', InputArgument::REQUIRED, 'The name of the user.');
+              $this
+                  ->setDefinition(
+                      new InputDefinition([
+                          new InputOption('foo', 'f'),
+                          new InputOption('bar', 'b', InputOption::VALUE_REQUIRED),
+                          new InputOption('cat', 'c', InputOption::VALUE_OPTIONAL),
+                      ])
+                  );
           }
-
-          protected function execute(InputInterface $input, OutputInterface $output): int
-          {
-              $name = $input->getArgument('name');
-              $output->writeln(sprintf('Hello, %s!', $name));
-              return Command::SUCCESS;
-          }
+          // ...
       }
       ```
+    answers:
+      -
+        value: >
+          `VALUE_NONE`
+        correct: false
+      -
+        value: >
+          `VALUE_OPTIONAL`
+        correct: false
+      -
+        value: >
+          `VALUE_IS_ARRAY`
+        correct: false
+      -
+        value: >
+          `VALUE_REQUIRED`
+        correct: true
+    help: |
+      `InputOption::VALUE_REQUIRED` indicates that the option must be provided with a value (e.g., `--bar=value`).
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
 
-      How would you execute this command from the command line, providing the name "Alice"?
-    answers:
-      - { value: '`php bin/console app:greet Alice`', correct: true }
-      - { value: '`php bin/console app:greet --name=Alice`', correct: false }
-      - { value: '`php bin/console app:greet name=Alice`', correct: false }
-      - { value: '`php bin/console app:greet --argument=Alice`', correct: false }
-    help: |
-      Arguments are provided directly after the command name, in the order they are defined.
-      https://symfony.com/doc/current/console.html#arguments
   -
     question: >
-      Which of the following built-in commands is used to clear the Symfony cache?
+      Which of the following global options can be used to disable all output and interaction, including errors, in a Symfony console command (Symfony 7.2+)?
     answers:
-      - { value: '`cache:clear`', correct: true }
-      - { value: '`cache:warmup`', correct: false }
-      - { value: '`cache:purge`', correct: false }
-      - { value: '`clear:cache`', correct: false }
+      -
+        value: >
+          `--quiet`
+        correct: false
+      -
+        value: >
+          `--no-interaction`
+        correct: false
+      -
+        value: >
+          `--silent`
+        correct: true
+      -
+        value: >
+          `--verbose=0`
+        correct: false
     help: |
-      The `cache:clear` command is essential for clearing the application's cache, especially after configuration changes.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: >
-      What is the purpose of the `InputOption::VALUE_OPTIONAL` mode when defining a command option?
-    answers:
-      - { value: 'The option can be present, and if so, it may or may not have a value.', correct: true }
-      - { value: 'The option must be present, but its value is optional.', correct: false }
-      - { value: 'The option is optional, and if present, it must have a value.', correct: false }
-      - { value: 'The option cannot have a value.', correct: false }
-    help: |
-      `InputOption::VALUE_OPTIONAL` means the option itself is optional, and if it's provided, its value is also optional.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      Which method of the `OutputInterface` should you use to write a line of text to the console?
-    answers:
-      - { value: '`writeln()`', correct: true }
-      - { value: '`write()`', correct: false }
-      - { value: '`output()`', correct: false }
-      - { value: '`echo()`', correct: false }
-    help: |
-      The `writeln()` method writes a given message to the output and appends a newline character.
-      https://symfony.com/doc/current/console/coloring.html#output-styles-and-colors
-  -
-    question: >
-      What is the default verbosity level for a Symfony console command?
-    answers:
-      - { value: '`OutputInterface::VERBOSITY_NORMAL`', correct: true }
-      - { value: '`OutputInterface::VERBOSITY_QUIET`', correct: false }
-      - { value: '`OutputInterface::VERBOSITY_VERBOSE`', correct: false }
-      - { value: '`OutputInterface::VERBOSITY_DEBUG`', correct: false }
-    help: |
-      By default, commands run at the `VERBOSITY_NORMAL` level, showing essential information.
-      https://symfony.com/doc/current/console/verbosity.html
-  -
-    question: >
-      Which console event is dispatched just before a command is executed?
-    answers:
-      - { value: '`ConsoleEvents::COMMAND`', correct: true }
-      - { value: '`ConsoleEvents::TERMINATE`', correct: false }
-      - { value: '`ConsoleEvents::ERROR`', correct: false }
-      - { value: '`ConsoleEvents::INIT`', correct: false }
-    help: |
-      The `ConsoleEvents::COMMAND` event is dispatched after the command is found and initialized, but before its `execute()` method is called.
-      https://symfony.com/doc/current/console/events.html#consoleevents-command
+      The `--silent` option (introduced in Symfony 7.2) completely disables all output and interaction, including error messages.
+      https://symfony.com/doc/current/console/input.html#symfony-console-core-options
+
   -
     question: |
-      You want to prompt the user for a "yes/no" confirmation in your command. Which built-in helper should you use?
+      Which method is typically used to retrieve the value of a command-line argument within a Symfony console command's `execute` or `__invoke` method?
     answers:
-      - { value: '`QuestionHelper` with a `ConfirmationQuestion`', correct: true }
-      - { value: '`DialogHelper`', correct: false }
-      - { value: '`FormatterHelper`', correct: false }
-      - { value: '`ProcessHelper`', correct: false }
+      -
+        value: >
+          `InputInterface::getOption()`
+        correct: false
+      -
+        value: >
+          `InputInterface::getArgument()`
+        correct: true
+      -
+        value: >
+          `InputDefinition::getArgument()`
+        correct: false
+      -
+        value: >
+          `InputBag::get()`
+        correct: false
     help: |
-      The `QuestionHelper` provides methods for asking various types of questions, including confirmations.
-      https://symfony.com/doc/current/console/helpers.html#questionhelper
+      The `InputInterface::getArgument()` method is used to access the values of arguments passed to a console command.
+      https://symfony.com/doc/current/console/input.html#access-command-arguments-in-symfony-console
+
   -
     question: >
-      Which built-in command can you use to list all available console commands in a Symfony application?
+      What is the purpose of the `initialize()` method in a Symfony console command's lifecycle?
     answers:
-      - { value: '`list`', correct: true }
-      - { value: '`help`', correct: false }
-      - { value: '`show`', correct: false }
-      - { value: '`commands`', correct: false }
+      -
+        value: >
+          To execute the main logic of the command.
+        correct: false
+      -
+        value: >
+          To interactively ask the user for missing arguments/options.
+        correct: false
+      -
+        value: >
+          To initialize variables used in other command methods before `interact()` and `execute()`.
+        correct: true
+      -
+        value: >
+          To define the command's arguments and options.
+        correct: false
     help: |
-      The `list` command provides a comprehensive list of all registered commands.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
+      The `initialize()` method is executed before `interact()` and `execute()`, primarily for initializing variables.
+      https://symfony.com/doc/current/console.html#command-lifecycle-methods
+
+  -
+    question: >
+      Which of the following classes is used to test Symfony console commands programmatically?
+    answers:
+      -
+        value: >
+          `Symfony\Component\Console\Tester\CommandTester`
+        correct: true
+      -
+        value: >
+          `Symfony\Component\Console\Command\TestCommand`
+        correct: false
+      -
+        value: >
+          `Symfony\Component\Console\ApplicationTester`
+        correct: false
+      -
+        value: >
+          `Symfony\Component\Console\Test\CommandSimulator`
+        correct: false
+    help: |
+      The `CommandTester` class provides a way to simulate command execution and test its output and exit code without a real console environment.
+      https://symfony.com/doc/current/console.html#testing-commands
+
+  -
+    question: >
+      Which `InputArgument` constant should be used if a command argument can accept multiple values (e.g., `app:greet Fabien Ryan`)?
+    answers:
+      -
+        value: >
+          `InputArgument::MULTIPLE`
+        correct: false
+      -
+        value: >
+          `InputArgument::OPTIONAL_ARRAY`
+        correct: false
+      -
+        value: >
+          `InputArgument::IS_ARRAY`
+        correct: true
+      -
+        value: >
+          `InputArgument::COLLECTION`
+        correct: false
+    help: |
+      `InputArgument::IS_ARRAY` allows an argument to accept multiple values, which are then retrieved as an array. It must be the last argument defined.
+      https://symfony.com/doc/current/console/input.html#inputargument-variants
+
+  -
+    question: >
+      What is the default verbosity level when running a Symfony console command without specifying the `--verbose` option?
+    answers:
+      -
+        value: >
+          `0` (silent)
+        correct: false
+      -
+        value: >
+          `1` (standard verbosity)
+        correct: true
+      -
+        value: >
+          `2` (more verbose)
+        correct: false
+      -
+        value: >
+          `3` (debug-level)
+        correct: false
+    help: |
+      By default, Symfony console commands run with standard verbosity (`-v` or `--verbose=1`).
+      https://symfony.com/doc/current/console/input.html#symfony-console-core-options
+
   -
     question: |
-      How can you make an argument optional in a Symfony console command?
+      You want to prompt the user for a password in a console command, ensuring their input is not displayed on the screen. Which `SymfonyStyle` method should you use?
     answers:
-      - { value: 'By using `InputArgument::OPTIONAL` as the mode.', correct: true }
-      - { value: 'By setting its default value to `null`.', correct: false }
-      - { value: 'By not providing a default value.', correct: false }
-      - { value: 'By using `InputArgument::NONE` as the mode.', correct: false }
+      -
+        value: >
+          `$io->ask('Enter password: ');`
+        correct: false
+      -
+        value: >
+          `$io->secret('Enter password: ');`
+        correct: false
+      -
+        value: >
+          `$io->askHidden('Enter password: ');`
+        correct: true
+      -
+        value: >
+          `$io->promptHidden('Enter password: ');`
+        correct: false
     help: |
-      The `InputArgument::OPTIONAL` mode explicitly marks an argument as optional.
-      https://symfony.com/doc/current/console/input.html#arguments
+      The `SymfonyStyle::askHidden()` method is specifically designed for sensitive input like passwords, where the user's typing should be hidden.
+      https://symfony.com/doc/current/console/style.html#askhidden-method
+
   -
     question: >
-      What is the purpose of the `InputInterface` object in a console command's `execute()` method?
+      Which event is dispatched just before any Symfony console command is executed?
     answers:
-      - { value: 'To read arguments and options provided by the user.', correct: true }
-      - { value: 'To write output to the console.', correct: false }
-      - { value: 'To manage the command''s lifecycle.', correct: false }
-      - { value: 'To interact with the Symfony container.', correct: false }
+      -
+        value: >
+          `ConsoleTerminateEvent`
+        correct: false
+      -
+        value: >
+          `ConsoleErrorEvent`
+        correct: false
+      -
+        value: >
+          `ConsoleInitEvent`
+        correct: false
+      -
+        value: >
+          `ConsoleCommandEvent`
+        correct: true
     help: |
-      The `InputInterface` provides methods to access the command's arguments and options.
+      The `ConsoleCommandEvent` is dispatched right before a command's execution, allowing listeners to modify or prevent the command from running.
+      https://symfony.com/doc/current/components/console/events.html#consolecommandevent
+
+  -
+    question: |
+      How can you make a custom Symfony console command invisible in the default `list` output, while still allowing it to be executed?
+    answers:
+      -
+        value: >
+          By setting the `hidden` property to `true` in the `#[AsCommand]` attribute.
+        correct: true
+      -
+        value: >
+          By prefixing the command name with an underscore (`_`).
+        correct: false
+      -
+        value: >
+          By implementing `HiddenCommandInterface`.
+        correct: false
+      -
+        value: >
+          By calling `$this->setHidden(true);` in the `configure()` method.
+        correct: false
+    help: |
+      Setting `hidden: true` in the `#[AsCommand]` attribute hides the command from the `list` output.
+      https://symfony.com/doc/current/console/hide_commands.html
+
+  -
+    question: >
+      What is the purpose of the `interact()` method in a Symfony console command's lifecycle?
+    answers:
+      -
+        value: >
+          To perform the core business logic of the command.
+        correct: false
+      -
+        value: >
+          To define command arguments and options.
+        correct: false
+      -
+        value: >
+          To interactively ask the user for missing required options/arguments before validation.
+        correct: true
+      -
+        value: >
+          To clean up resources after the command has finished.
+        correct: false
+    help: |
+      The `interact()` method is where a command can prompt the user for any missing required input. It's called before input validation.
+      https://symfony.com/doc/current/console.html#command-lifecycle-methods
+
+  -
+    question: |
+      Which of the following is the correct way to register an inline command directly within the Symfony `Application` instance?
+    answers:
+      -
+        value: >
+          `$application->add(new MyCommand());`
+        correct: false
+      -
+        value: >
+          `$application->register('my:command')->setCode(function (...) {});`
+        correct: true
+      -
+        value: >
+          `$application->define('my:command', function (...) {});`
+        correct: false
+      -
+        value: >
+          `$application->createCommand('my:command', function (...) {});`
+        correct: false
+    help: |
+      The `register()` method allows defining a command's name and then chaining `setCode()` to define its execution logic directly.
+      https://symfony.com/doc/current/components/console.html#register-an-inline-command-with-symfony-console-application-register
+
+  -
+    question: >
+      Which global option would you use to display the version number of a Symfony console application?
+    answers:
+      -
+        value: >
+          `--info`
+        correct: false
+      -
+        value: >
+          `--about`
+        correct: false
+      -
+        value: >
+          `--version` or `-V`
+        correct: true
+      -
+        value: >
+          `--app-version`
+        correct: false
+    help: |
+      The `--version` or `-V` global option outputs the application's name and version.
+      https://symfony.com/doc/current/components/console/usage.html#displaying-symfony-console-application-version
+
+  -
+    question: |
+      You want to clear the entire console screen from within a Symfony command. Which `Cursor` method should you use?
+    answers:
+      -
+        value: >
+          `$cursor->clear()`
+        correct: false
+      -
+        value: >
+          `$cursor->resetScreen()`
+        correct: false
+      -
+        value: >
+          `$cursor->clearScreen()`
+        correct: true
+      -
+        value: >
+          `$cursor->eraseAll()`
+        correct: false
+    help: |
+      The `Cursor::clearScreen()` method clears all content from the terminal.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#clear-console-output-with-symfony-cursor
+
+  -
+    question: >
+      Which `SymfonyStyle` method is used to present a list of options to the user and allow them to select one?
+    answers:
+      -
+        value: >
+          `$io->select()`
+        correct: false
+      -
+        value: >
+          `$io->choose()`
+        correct: false
+      -
+        value: >
+          `$io->option()`
+        correct: false
+      -
+        value: >
+          `$io->choice()`
+        correct: true
+    help: |
+      The `SymfonyStyle::choice()` method is designed for presenting a list of predefined answers to the user for selection.
+      https://symfony.com/doc/current/console/style.html#selecting-from-a-list-of-choices-symfonystyle-choice
+
+  -
+    question: >
+      What is the primary benefit of using `SymfonyStyle` in console commands?
+    answers:
+      -
+        value: >
+          It provides a simpler API for common input/output tasks and consistent styling.
+        correct: true
+      -
+        value: >
+          It automatically handles all command arguments and options.
+        correct: false
+      -
+        value: >
+          It replaces the need for `InputInterface` and `OutputInterface`.
+        correct: false
+      -
+        value: >
+          It enables graphical user interfaces (GUIs) for console commands.
+        correct: false
+    help: |
+      `SymfonyStyle` simplifies common console interactions and ensures a consistent look and feel for command output.
+      https://symfony.com/doc/current/console/style.html
+
+  -
+    question: >
+      Which of the following is true regarding `InputOption::VALUE_NONE`?
+    answers:
+      -
+        value: >
+          It requires a value to be provided (e.g., `--option=value`).
+        correct: false
+      -
+        value: >
+          It accepts an optional value (e.g., `--option` or `--option=value`).
+        correct: false
+      -
+        value: >
+          It does not accept any input for the option; its presence acts as a boolean flag.
+        correct: true
+      -
+        value: >
+          It allows multiple values to be passed as an array.
+        correct: false
+    help: |
+      `InputOption::VALUE_NONE` is used for simple flags that are either present or absent, returning `true` or `false` respectively.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
+  -
+    question: >
+      When testing a Symfony console command using `CommandTester`, how do you pass arguments to the command?
+    answers:
+      -
+        value: >
+          As an indexed array of values to `execute()`.
+        correct: false
+      -
+        value: >
+          As an associative array where keys are argument names to `execute()`.
+        correct: true
+      -
+        value: >
+          Using `setArguments()` before calling `execute()`.
+        correct: false
+      -
+        value: >
+          Arguments are automatically parsed from the command name.
+        correct: false
+    help: |
+      Arguments are passed as an associative array to the `execute()` method of `CommandTester`, with keys corresponding to argument names.
+      https://symfony.com/doc/current/console.html#testing-commands
+
+  -
+    question: >
+      Which event is dispatched after a Symfony console command has been executed, regardless of success or failure?
+    answers:
+      -
+        value: >
+          `ConsoleFinishEvent`
+        correct: false
+      -
+        value: >
+          `ConsoleTerminateEvent`
+        correct: true
+      -
+        value: >
+          `ConsolePostCommandEvent`
+        correct: false
+      -
+        value: >
+          `ConsoleCompleteEvent`
+        correct: false
+    help: |
+      The `ConsoleTerminateEvent` is dispatched after the command has finished its execution, making it suitable for cleanup or logging.
+      https://symfony.com/doc/current/components/console/events.html#consoletremainateevent
+
+  -
+    question: |
+      What is the primary purpose of `ConsoleOutputInterface`?
+    answers:
+      -
+        value: >
+          To provide methods for writing to files.
+        correct: false
+      -
+        value: >
+          To indicate that an output object supports separate error streams.
+        correct: true
+      -
+        value: >
+          To define methods for reading user input.
+        correct: false
+      -
+        value: >
+          To manage command arguments and options.
+        correct: false
+    help: |
+      `ConsoleOutputInterface` is an interface that indicates an output object can differentiate between standard output and error output streams.
+      https://symfony.com/doc/current/console/style.html#writing-to-standard-and-error-output-streams
+
+  -
+    question: >
+      How can you explicitly set the exit code of a Symfony console command from within an event listener for `ConsoleTerminateEvent`?
+    answers:
+      -
+        value: >
+          By throwing a `RuntimeException` with the desired code.
+        correct: false
+      -
+        value: >
+          By calling `$event->setStatusCode($code);`
+        correct: false
+      -
+        value: >
+          By calling `$event->setExitCode($code);`
+        correct: true
+      -
+        value: >
+          The exit code cannot be changed in `ConsoleTerminateEvent`.
+        correct: false
+    help: |
+      The `ConsoleTerminateEvent::setExitCode()` method allows modifying the command's exit code after its execution.
+      https://symfony.com/doc/current/components/console/events.html#consoletremainateevent
+
+  -
+    question: >
+      Which of the following is a valid way to apply a predefined color style to console output using `OutputInterface`?
+    answers:
+      -
+        value: >
+          `$output->writeln('<green>My text</green>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<info>My text</info>');`
+        correct: true
+      -
+        value: >
+          `$output->writeln('<style="color: green;">My text</style>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('My text', 'info');`
+        correct: false
+    help: |
+      Symfony's console component uses specific tags like `<info>`, `<comment>`, `<question>`, and `<error>` for predefined styles.
+      https://symfony.com/doc/current/console/coloring.html#applying-predefined-console-color-styles-in-symfony
+
+  -
+    question: >
+      What is the purpose of `CommandLoaderInterface` in Symfony Console?
+    answers:
+      -
+        value: >
+          To define the structure of console commands.
+        correct: false
+      -
+        value: >
+          To load command definitions from YAML files.
+        correct: false
+      -
+        value: >
+          To provide a mechanism for lazy-loading commands.
+        correct: true
+      -
+        value: >
+          To automatically discover commands in a given directory.
+        correct: false
+    help: |
+      `CommandLoaderInterface` is part of Symfony's lazy-loading mechanism for commands, allowing commands to be instantiated only when they are actually needed.
+      https://symfony.com/doc/current/console/lazy_commands.html#api-reference-symfony-console-api-references-for-lazy-loading
+
+  -
+    question: >
+      Which `InputOption` constant allows an option to be provided without a value (e.g., `--yell`) or with an optional value (e.g., `--yell=loud`)?
+    answers:
+      -
+        value: >
+          `InputOption::VALUE_REQUIRED`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_NONE`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_OPTIONAL`
+        correct: true
+      -
+        value: >
+          `InputOption::VALUE_NEGATABLE`
+        correct: false
+    help: |
+      `InputOption::VALUE_OPTIONAL` allows an option to be present with or without an associated value.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
+  -
+    question: >
+      You need to move the console cursor to a specific absolute position (column 5, row 10). Which `Cursor` method would you use?
+    answers:
+      -
+        value: >
+          `$cursor->setPosition(5, 10);`
+        correct: false
+      -
+        value: >
+          `$cursor->moveTo(5, 10);`
+        correct: false
+      -
+        value: >
+          `$cursor->moveToPosition(5, 10);`
+        correct: true
+      -
+        value: >
+          `$cursor->setCoordinates(5, 10);`
+        correct: false
+    help: |
+      The `Cursor::moveToPosition()` method moves the cursor to the specified absolute column and row.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
+  -
+    question: >
+      Which of the following is a built-in Symfony console command used to list all available commands?
+    answers:
+      -
+        value: >
+          `show`
+        correct: false
+      -
+        value: >
+          `commands`
+        correct: false
+      -
+        value: >
+          `list`
+        correct: true
+      -
+        value: >
+          `help --all`
+        correct: false
+    help: |
+      The `list` command is a fundamental built-in command for discovering all registered console commands.
+      https://symfony.com/doc/current/console.html#listing-all-available-symfony-console-commands
+
+  -
+    question: >
+      What is the purpose of the `#[Argument]` attribute when injecting a command argument into the `__invoke` method?
+    answers:
+      -
+        value: >
+          It defines the argument as optional.
+        correct: false
+      -
+        value: >
+          It automatically maps the command-line argument to the method parameter.
+        correct: true
+      -
+        value: >
+          It specifies the default value for the argument.
+        correct: false
+      -
+        value: >
+          It marks the argument as an array.
+        correct: false
+    help: |
+      The `#[Argument]` attribute (part of PHP 8 attributes) allows for direct injection of command arguments into the `__invoke` method parameters, simplifying argument handling.
+      https://symfony.com/doc/current/console.html#injecting-services-into-commands
+
+  -
+    question: >
+      Which global option can be used to disable interactive prompts in a Symfony console command?
+    answers:
+      -
+        value: >
+          `--no-input`
+        correct: false
+      -
+        value: >
+          `--non-interactive`
+        correct: false
+      -
+        value: >
+          `--no-interaction`
+        correct: true
+      -
+        value: >
+          `--force`
+        correct: false
+    help: |
+      The `--no-interaction` option prevents the command from asking any interactive questions.
+      https://symfony.com/doc/current/console/input.html#symfony-console-core-options
+
+  -
+    question: >
+      How can you enable profiling for a Symfony console command execution?
+    answers:
+      -
+        value: >
+          By adding `--debug` to the command.
+        correct: false
+      -
+        value: >
+          By setting `APP_ENV=dev` before running the command.
+        correct: false
+      -
+        value: >
+          By using the `--profile` option.
+        correct: true
+      -
+        value: >
+          Profiling is not supported for console commands.
+        correct: false
+    help: |
+      The `--profile` option enables the Symfony profiler for console command executions, allowing for detailed performance analysis.
+      https://symfony.com/doc/current/console.html#profile-symfony-console-command-execution
+
+  -
+    question: >
+      Which `OutputInterface` method is used to write a line of text to the console, followed by a newline character?
+    answers:
+      -
+        value: >
+          `$output->writeLine('Hello');`
+        correct: false
+      -
+        value: >
+          `$output->print('Hello\n');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('Hello');`
+        correct: true
+      -
+        value: >
+          `$output->line('Hello');`
+        correct: false
+    help: |
+      The `writeln()` method writes the given message to the output and appends a newline.
+      https://symfony.com/doc/current/console.html#writing-output
+
+  -
+    question: >
+      What is the purpose of `OutputFormatterStyle` in Symfony Console?
+    answers:
+      -
+        value: >
+          To define the structure of command output.
+        correct: false
+      -
+        value: >
+          To create custom console output styles with specific foreground, background colors, and options.
+        correct: true
+      -
+        value: >
+          To parse and validate command-line arguments.
+        correct: false
+      -
+        value: >
+          To manage the history of console commands.
+        correct: false
+    help: |
+      `OutputFormatterStyle` allows you to define custom styles with specific colors and text options, which can then be applied to console output.
+      https://symfony.com/doc/current/console/coloring.html#defining-and-applying-custom-console-output-styles-in-symfony
+
+  -
+    question: >
+      Which `InputOption` constant allows an option to accept multiple values (e.g., `--dir=/foo --dir=/bar`)?
+    answers:
+      -
+        value: >
+          `InputOption::VALUE_ARRAY`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_MULTIPLE`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_IS_ARRAY`
+        correct: true
+      -
+        value: >
+          `InputOption::VALUE_COLLECTION`
+        correct: false
+    help: |
+      `InputOption::VALUE_IS_ARRAY` indicates that an option can be provided multiple times, and its values will be collected into an array.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
+  -
+    question: >
+      Which of the following describes the `ConsoleErrorEvent`?
+    answers:
+      -
+        value: >
+          Dispatched after a command successfully completes.
+        correct: false
+      -
+        value: >
+          Dispatched before a command starts execution.
+        correct: false
+      -
+        value: >
+          Dispatched whenever an exception is thrown by a command.
+        correct: true
+      -
+        value: >
+          Dispatched when a command receives a signal.
+        correct: false
+    help: |
+      The `ConsoleErrorEvent` is specifically triggered when an exception occurs during a command's execution.
+      https://symfony.com/doc/current/components/console/events.html#consoleerrorevent
+
+  -
+    question: >
+      How can you retrieve the current column and row coordinates of the console cursor using the `Cursor` helper?
+    answers:
+      -
+        value: >
+          `$cursor->getPosition();`
+        correct: false
+      -
+        value: >
+          `$cursor->getCoordinates();`
+        correct: false
+      -
+        value: >
+          `$cursor->getCurrentPosition();`
+        correct: true
+      -
+        value: >
+          `$cursor->whereAmI();`
+        correct: false
+    help: |
+      The `Cursor::getCurrentPosition()` method returns an array containing the current column and row of the cursor.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#retrieve-current-symfony-console-cursor-position
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Terminal`?
+    answers:
+      -
+        value: >
+          To execute shell commands from PHP.
+        correct: false
+      -
+        value: >
+          To interact with the underlying terminal properties like height, width, and color mode.
+        correct: true
+      -
+        value: >
+          To manage terminal sessions.
+        correct: false
+      -
+        value: >
+          To provide a graphical interface for console applications.
+        correct: false
+    help: |
+      The `Terminal` class provides access to and allows manipulation of terminal-specific properties, useful for adapting command output to the terminal environment.
+      https://symfony.com/doc/current/console.html#interact-with-symfony-console-terminal
+
+  -
+    question: >
+      Which of the following is the correct way to inject a service into a Symfony console command using constructor injection?
+    answers:
+      -
+        value: >
+          `#[Inject('my_service')] private MyService $myService`
+        correct: false
+      -
+        value: >
+          `public function __construct(#[Autowire] MyService $myService)`
+        correct: false
+      -
+        value: >
+          `public function __construct(private MyService $myService)`
+        correct: true
+      -
+        value: >
+          `public function __construct(MyService $myService)` (without `private`)
+        correct: true
+    help: |
+      Standard PHP 8 constructor property promotion or simple constructor injection are the correct ways to inject services into Symfony console commands, relying on autowiring.
+      https://symfony.com/doc/current/console.html#injecting-services-into-commands
+
+  -
+    question: >
+      What does `InputOption::VALUE_NEGATABLE` allow for a console option?
+    answers:
+      -
+        value: >
+          It allows the option to be omitted entirely.
+        correct: false
+      -
+        value: >
+          It allows the option to be provided with a positive or negative numeric value.
+        correct: false
+      -
+        value: >
+          It allows the option to be provided as a flag (e.g., `--yell`) or its negation (e.g., `--no-yell`).
+        correct: true
+      -
+        value: >
+          It makes the option's value optional.
+        correct: false
+    help: |
+      `InputOption::VALUE_NEGATABLE` enables a convenient way to define boolean options that can be explicitly turned off.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
+  -
+    question: >
+      Which method of `ConsoleCommandEvent` can be used to prevent a command from executing from within an event listener?
+    answers:
+      -
+        value: >
+          `$event->stopPropagation();`
+        correct: false
+      -
+        value: >
+          `$event->cancelCommand();`
+        correct: false
+      -
+        value: >
+          `$event->disableCommand();`
+        correct: true
+      -
+        value: >
+          `$event->preventExecution();`
+        correct: false
+    help: |
+      The `ConsoleCommandEvent::disableCommand()` method will stop the command from running, causing the application to return exit code 113.
+      https://symfony.com/doc/current/components/console/events.html#consolecommandevent
+
+  -
+    question: >
+      What is the primary use case for `OutputInterface::section()`?
+    answers:
+      -
+        value: >
+          To define separate sections in the command's help message.
+        correct: false
+      -
+        value: >
+          To create independent, dynamically updatable areas in the console output.
+        correct: true
+      -
+        value: >
+          To group related output messages.
+        correct: false
+      -
+        value: >
+          To apply different styles to different parts of the output.
+        correct: false
+    help: |
+      Output sections allow for dynamic console output, such as progress bars or real-time updates, by enabling overwriting or clearing specific parts of the screen.
+      https://symfony.com/doc/current/console.html#managing-dynamic-console-output-with-sections
+
+  -
+    question: >
+      When using `CommandTester`, how do you assert that a command executed successfully?
+    answers:
+      -
+        value: >
+          `$commandTester->isSuccessful();`
+        correct: false
+      -
+        value: >
+          `$commandTester->assertSuccessful();`
+        correct: false
+      -
+        value: >
+          `$commandTester->assertCommandIsSuccessful();`
+        correct: true
+      -
+        value: >
+          `$commandTester->getExitCode() === 0;`
+        correct: true
+    help: |
+      `CommandTester::assertCommandIsSuccessful()` is a convenient assertion method. Alternatively, checking `getExitCode() === 0` also confirms success.
+      https://symfony.com/doc/current/console.html#test-symfony-console-command-with-commandtester
+
+  -
+    question: >
+      Which `SymfonyStyle` method is used to ask the user a question whose answer is constrained to a given list of valid answers?
+    answers:
+      -
+        value: >
+          `$io->askList()`
+        correct: false
+      -
+        value: >
+          `$io->selectOption()`
+        correct: false
+      -
+        value: >
+          `$io->choice()`
+        correct: true
+      -
+        value: >
+          `$io->promptChoice()`
+        correct: false
+    help: |
+      The `choice()` method is specifically for presenting a list of choices and ensuring the user's input is one of the valid options.
+      https://symfony.com/doc/current/console/style.html#selecting-from-a-list-of-choices-symfonystyle-choice
+
+  -
+    question: >
+      What is the purpose of `CommandCompletionTester`?
+    answers:
+      -
+        value: >
+          To test the performance of console commands.
+        correct: false
+      -
+        value: >
+          To test the auto-completion logic of console commands.
+        correct: true
+      -
+        value: >
+          To simulate user input for interactive commands.
+        correct: false
+      -
+        value: >
+          To test the error handling of console commands.
+        correct: false
+    help: |
+      `CommandCompletionTester` is a utility for unit testing the command completion suggestions provided by a Symfony console command.
+      https://symfony.com/doc/current/console/input.html#unit-testing-command-completion-logic
+
+  -
+    question: >
+      Which of the following is a valid way to explicitly set the foreground color of console output to green using inline styling?
+    answers:
+      -
+        value: >
+          `$output->writeln('<color=green>My text</color>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<fg=green>My text</>');`
+        correct: true
+      -
+        value: >
+          `$output->writeln('<style="fg: green;">My text</style>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('[green]My text[/green]');`
+        correct: false
+    help: |
+      Inline styling uses `<fg=color>` for foreground color, `<bg=color>` for background color, and `<options=option1,option2>` for text options.
+      https://symfony.com/doc/current/console/coloring.html#applying-inline-console-styles-with-named-hex-colors-and-options-in-symfony
+
+  -
+    question: >
+      What is the purpose of the `ConsoleSignalEvent`?
+    answers:
+      -
+        value: >
+          It's dispatched when a command completes successfully.
+        correct: false
+      -
+        value: >
+          It's dispatched when a console command receives a system signal (e.g., SIGTERM).
+        correct: true
+      -
+        value: >
+          It's dispatched when a command is about to be executed.
+        correct: false
+      -
+        value: >
+          It's dispatched when an argument is missing.
+        correct: false
+    help: |
+      The `ConsoleSignalEvent` allows commands to react to system signals, enabling graceful shutdown or other signal-triggered behaviors.
+      https://symfony.com/doc/current/components/console/events.html#consolesignalevent
+
+  -
+    question: >
+      When defining an argument, what is the default behavior if no `InputArgument` constant is specified?
+    answers:
+      -
+        value: >
+          It is `InputArgument::REQUIRED`.
+        correct: false
+      -
+        value: >
+          It is `InputArgument::IS_ARRAY`.
+        correct: false
+      -
+        value: >
+          It is `InputArgument::OPTIONAL`.
+        correct: true
+      -
+        value: >
+          It is `InputArgument::VALUE_NONE`.
+        correct: false
+    help: |
+      By default, arguments are optional unless explicitly marked as `InputArgument::REQUIRED`.
+      https://symfony.com/doc/current/console/input.html#inputargument-variants
+
+  -
+    question: >
+      Which method of `ConsoleErrorEvent` can be used to change the exception that caused the error?
+    answers:
+      -
+        value: >
+          `$event->replaceError($newError);`
+        correct: false
+      -
+        value: >
+          `$event->setError($newError);`
+        correct: true
+      -
+        value: >
+          `$event->setException($newException);`
+        correct: false
+      -
+        value: >
+          `$event->updateError($newError);`
+        correct: false
+    help: |
+      The `ConsoleErrorEvent::setError()` method allows an event listener to replace the original exception with a different one.
+      https://symfony.com/doc/current/components/console/events.html#consoleerrorevent
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\CommandLoader\FactoryCommandLoader`?
+    answers:
+      -
+        value: >
+          To load commands from a database.
+        correct: false
+      -
+        value: >
+          To load commands by executing a factory callable only when the command is needed.
+        correct: true
+      -
+        value: >
+          To automatically generate command classes.
+        correct: false
+      -
+        value: >
+          To load commands from XML configuration files.
+        correct: false
+    help: |
+      `FactoryCommandLoader` implements `CommandLoaderInterface` and uses an array of callables to create command instances on demand, enabling lazy loading.
+      https://symfony.com/doc/current/console/lazy_commands.html#api-reference-symfony-console-api-references-for-lazy-loading
+
+  -
+    question: >
+      Which verbosity level corresponds to debug-level output in Symfony Console?
+    answers:
+      -
+        value: >
+          `-v`
+        correct: false
+      -
+        value: >
+          `-vv`
+        correct: false
+      -
+        value: >
+          `-vvv`
+        correct: true
+      -
+        value: >
+          `--debug`
+        correct: false
+    help: |
+      The `-vvv` option or `--verbose=3` sets the verbosity to the highest level, including debug information.
+      https://symfony.com/doc/current/console/input.html#symfony-console-core-options
+
+  -
+    question: >
+      How can you configure a console question to accept multiline input from the user until an end-of-transmission character is received?
+    answers:
+      -
+        value: >
+          By calling `setMultiLine(true)` on the `Question` object.
+        correct: true
+      -
+        value: >
+          By setting the `multiline` option in the question constructor.
+        correct: false
+      -
+        value: >
+          By using `InputOption::VALUE_IS_ARRAY` for the question.
+        correct: false
+      -
+        value: >
+          Multiline input is not supported by the QuestionHelper.
+        correct: false
+    help: |
+      The `Question::setMultiline(true)` method enables multiline input for a question, reading until Ctrl-D (Unix) or Ctrl-Z (Windows).
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#allow-multiline-answers-in-symfony-console-question
+
+  -
+    question: >
+      Which `Cursor` method would you use to hide the console cursor?
+    answers:
+      -
+        value: >
+          `$cursor->hideCursor();`
+        correct: false
+      -
+        value: >
+          `$cursor->invisible();`
+        correct: false
+      -
+        value: >
+          `$cursor->hide();`
+        correct: true
+      -
+        value: >
+          `$cursor->disableCursor();`
+        correct: false
+    help: |
+      The `Cursor::hide()` method makes the console cursor invisible.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#symfony-component-console-cursor-class-api-reference
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\CommandLoader\ContainerCommandLoader`?
+    answers:
+      -
+        value: >
+          To load commands from a YAML configuration file.
+        correct: false
+      -
+        value: >
+          To load commands as services from a PSR-11 compatible dependency injection container.
+        correct: true
+      -
+        value: >
+          To create new command classes dynamically.
+        correct: false
+      -
+        value: >
+          To manage command aliases.
+        correct: false
+    help: |
+      `ContainerCommandLoader` integrates with a PSR-11 container to load commands as services, leveraging the container's dependency injection capabilities.
+      https://symfony.com/doc/current/console/lazy_commands.html#api-reference-symfony-console-api-references-for-lazy-loading
+
+  -
+    question: >
+      Which of the following is the correct way to register a command class instance with the Symfony Console `Application`?
+    answers:
+      -
+        value: >
+          `$application->registerCommand(new MyCommand());`
+        correct: false
+      -
+        value: >
+          `$application->add(new MyCommand());`
+        correct: true
+      -
+        value: >
+          `$application->load(new MyCommand());`
+        correct: false
+      -
+        value: >
+          `$application->attach(new MyCommand());`
+        correct: false
+    help: |
+      The `Application::add()` method is used to register an instance of a `Command` class.
+      https://symfony.com/doc/current/components/console.html#register-a-command-class-with-symfony-console-application
+
+  -
+    question: >
+      What is the default behavior of `InputOption` if no value type constant (e.g., `VALUE_REQUIRED`, `VALUE_OPTIONAL`) is specified?
+    answers:
+      -
+        value: >
+          `InputOption::VALUE_REQUIRED`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_OPTIONAL`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_NONE`
+        correct: true
+      -
+        value: >
+          It will throw an error.
+        correct: false
+    help: |
+      If no value type is specified for an `InputOption`, it defaults to `InputOption::VALUE_NONE`, meaning it's a simple boolean flag.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
+  -
+    question: >
+      Which `SymfonyStyle` method is used to ask the user for a simple text input?
+    answers:
+      -
+        value: >
+          `$io->prompt()`
+        correct: false
+      -
+        value: >
+          `$io->query()`
+        correct: false
+      -
+        value: >
+          `$io->ask()`
+        correct: true
+      -
+        value: >
+          `$io->getInput()`
+        correct: false
+    help: |
+      The `SymfonyStyle::ask()` method is the standard way to prompt the user for a text response.
+      https://symfony.com/doc/current/console/style.html#ask-user-for-input-with-symfonystyle
+
+  -
+    question: >
+      What is the purpose of `TreeHelper` in Symfony Console?
+    answers:
+      -
+        value: >
+          To display hierarchical data structures in the console.
+        correct: true
+      -
+        value: >
+          To manage file system operations.
+        correct: false
+      -
+        value: >
+          To create interactive menus.
+        correct: false
+      -
+        value: >
+          To generate random data for testing.
+        correct: false
+    help: |
+      The `TreeHelper` is designed to render tree-like structures in the console, useful for displaying directory structures, dependency trees, or other hierarchical data.
+      https://symfony.com/doc/current/components/console/helpers/tree.html#render-console-tree-from-simple-php-array
+
+  -
+    question: >
+      Which of the following is true about the `__invoke()` method in a Symfony console command?
+    answers:
+      -
+        value: >
+          It is optional and can be replaced by `execute()`.
+        correct: false
+      -
+        value: >
+          It is executed before `initialize()` and `interact()`.
+        correct: false
+      -
+        value: >
+          It is the required method containing the command's main logic and must return an integer exit status.
+        correct: true
+      -
+        value: >
+          It is only used for commands without arguments or options.
+        correct: false
+    help: |
+      The `__invoke()` method (or `execute()`) is the core of the command, containing its main logic, and it must return an integer representing the exit status.
+      https://symfony.com/doc/current/console.html#command-lifecycle-methods
+
+  -
+    question: >
+      How can you clear all output from the current cursor position to the end of the current line?
+    answers:
+      -
+        value: >
+          `$cursor->clearLineAfter();`
+        correct: true
+      -
+        value: >
+          `$cursor->clearToEndOfLine();`
+        correct: false
+      -
+        value: >
+          `$cursor->eraseLineRight();`
+        correct: false
+      -
+        value: >
+          `$cursor->deleteLine();`
+        correct: false
+    help: |
+      The `Cursor::clearLineAfter()` method clears the portion of the current line from the cursor's position to the end.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#clear-console-output-with-symfony-cursor
+
+  -
+    question: >
+      Which global option would you use to display the help message for a Symfony console application?
+    answers:
+      -
+        value: >
+          `--info`
+        correct: false
+      -
+        value: >
+          `--help`
+        correct: true
+      -
+        value: >
+          `--man`
+        correct: false
+      -
+        value: >
+          `--docs`
+        correct: false
+    help: |
+      The `--help` option displays general help information about the console application and its commands.
+      https://symfony.com/doc/current/components/console/usage.html#displaying-global-symfony-console-options-help
+
+  -
+    question: >
+      What is the purpose of `QuestionHelper` in Symfony Console?
+    answers:
+      -
+        value: >
+          To validate command arguments.
+        correct: false
+      -
+        value: >
+          To provide utility methods for asking users questions and handling their input.
+        correct: true
+      -
+        value: >
+          To display progress bars.
+        correct: false
+      -
+        value: >
+          To format console output.
+        correct: false
+    help: |
+      `QuestionHelper` provides a set of methods for interacting with the user, such as asking questions, confirming actions, and selecting from choices.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-console-question-helper-api-documentation
+
+  -
+    question: >
+      Which of the following is true about `InputArgument::OPTIONAL`?
+    answers:
+      -
+        value: >
+          The argument must be provided, but its value can be empty.
+        correct: false
+      -
+        value: >
+          The argument can be omitted, and it is the default behavior for arguments.
+        correct: true
+      -
+        value: >
+          The argument can accept multiple values.
+        correct: false
+      -
+        value: >
+          The argument is required, but its position is flexible.
+        correct: false
+    help: |
+      `InputArgument::OPTIONAL` means the argument does not have to be provided, and this is the default behavior if no constant is specified.
+      https://symfony.com/doc/current/console/input.html#inputargument-variants
+
+  -
+    question: >
+      When using `SymfonyStyle`, how do you write a warning message to the error output stream?
+    answers:
+      -
+        value: >
+          `$io->error('Warning message');`
+        correct: false
+      -
+        value: >
+          `$io->warning('Warning message');`
+        correct: false
+      -
+        value: >
+          `$io->getErrorStyle()->warning('Warning message');`
+        correct: true
+      -
+        value: >
+          `$io->stderr('Warning message');`
+        correct: false
+    help: |
+      To write to the error output stream, you should obtain an `SymfonyStyle` instance specifically for errors using `getErrorStyle()` and then use its methods.
+      https://symfony.com/doc/current/console/style.html#writing-to-standard-and-error-output-streams
+
+  -
+    question: >
+      Which of the following is the correct way to install the Symfony Console component via Composer?
+    answers:
+      -
+        value: >
+          `composer install symfony/console`
+        correct: false
+      -
+        value: >
+          `composer add symfony/console`
+        correct: false
+      -
+        value: >
+          `composer require symfony/console`
+        correct: true
+      -
+        value: >
+          `composer get symfony/console`
+        correct: false
+    help: |
+      The `composer require` command is used to add new dependencies to a project.
+      https://symfony.com/doc/current/components/console.html#install-symfony-console-component-via-composer
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Event\ConsoleSignalEvent::abortExit()`?
+    answers:
+      -
+        value: >
+          To immediately terminate the command with an error.
+        correct: false
+      -
+        value: >
+          To prevent the command from exiting after a signal event is dispatched.
+        correct: true
+      -
+        value: >
+          To force the command to exit with a specific code.
+        correct: false
+      -
+        value: >
+          To ignore all subsequent signals.
+        correct: false
+    help: |
+      The `abortExit()` method in `ConsoleSignalEvent` allows a listener to prevent the command from terminating immediately after receiving a signal, giving it a chance to perform cleanup or other actions.
+      https://symfony.com/doc/current/components/console/events.html#consolesignalevent
+
+  -
+    question: >
+      Which `InputOption` constant is used for an option that does not accept any value, acting purely as a boolean flag?
+    answers:
+      -
+        value: >
+          `InputOption::VALUE_OPTIONAL`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_REQUIRED`
+        correct: false
+      -
+        value: >
+          `InputOption::VALUE_NONE`
+        correct: true
+      -
+        value: >
+          `InputOption::VALUE_FLAG`
+        correct: false
+    help: |
+      `InputOption::VALUE_NONE` is specifically for options that are present or absent, returning `true` or `false` respectively, without requiring a value.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
+  -
+    question: >
+      When using `CommandTester`, how do you retrieve the output generated by the command?
+    answers:
+      -
+        value: >
+          `$commandTester->getOutput();`
+        correct: false
+      -
+        value: >
+          `$commandTester->getDisplay();`
+        correct: true
+      -
+        value: >
+          `$commandTester->readOutput();`
+        correct: false
+      -
+        value: >
+          `$commandTester->getConsoleOutput();`
+        correct: false
+    help: |
+      The `CommandTester::getDisplay()` method returns the entire output that was written to the console during the command's execution.
+      https://symfony.com/doc/current/console.html#test-symfony-console-command-with-commandtester
+
+  -
+    question: >
+      Which of the following describes the `ConsoleTerminateEvent`?
+    answers:
+      -
+        value: >
+          Dispatched before the command's `initialize()` method.
+        correct: false
+      -
+        value: >
+          Dispatched after the command has completed its execution.
+        correct: true
+      -
+        value: >
+          Dispatched when a command fails with an exception.
+        correct: false
+      -
+        value: >
+          Dispatched when the console application starts.
+        correct: false
+    help: |
+      The `ConsoleTerminateEvent` is the final event in the command lifecycle, dispatched after the command has finished executing.
+      https://symfony.com/doc/current/components/console/events.html#consoletremainateevent
+
+  -
+    question: >
+      Which of the following is a valid way to apply a custom background color using a hexadecimal value in inline console styling?
+    answers:
+      -
+        value: >
+          `$output->writeln('<bg=#FF0000>Error</>');`
+        correct: true
+      -
+        value: >
+          `$output->writeln('<background=FF0000>Error</background>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<style="background-color: #FF0000;">Error</style>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<color="#FF0000">Error</color>');`
+        correct: false
+    help: |
+      Hexadecimal colors can be used with `fg=` for foreground and `bg=` for background within the console output tags.
+      https://symfony.com/doc/current/console/coloring.html#applying-inline-console-styles-with-named-hex-colors-and-options-in-symfony
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Question\ConfirmationQuestion`?
+    answers:
+      -
+        value: >
+          To ask the user for a numeric input.
+        correct: false
+      -
+        value: >
+          To ask the user for a 'yes' or 'no' confirmation.
+        correct: true
+      -
+        value: >
+          To ask the user to select from a list of predefined choices.
+        correct: false
+      -
+        value: >
+          To ask the user for a hidden input.
+        correct: false
+    help: |
+      `ConfirmationQuestion` is a specialized question type for prompting the user for a boolean (yes/no) answer.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-console-question-helper-api-documentation
+
+  -
+    question: >
+      Which of the following is a built-in Symfony console command used to display help for a specific command?
+    answers:
+      -
+        value: >
+          `php bin/console help <command-name>`
+        correct: true
+      -
+        value: >
+          `php bin/console <command-name> --docs`
+        correct: false
+      -
+        value: >
+          `php bin/console info <command-name>`
+        correct: false
+      -
+        value: >
+          `php bin/console <command-name> --manual`
+        correct: false
+    help: |
+      The `help` command is used to get detailed information about a specific command, including its arguments, options, and description.
+      https://symfony.com/doc/current/components/console/usage.html#displaying-global-symfony-console-options-help
+
+  -
+    question: >
+      What is the primary difference between `OutputInterface::write()` and `OutputInterface::writeln()`?
+    answers:
+      -
+        value: >
+          `write()` outputs to `stderr`, while `writeln()` outputs to `stdout`.
+        correct: false
+      -
+        value: >
+          `write()` does not append a newline character, while `writeln()` does.
+        correct: true
+      -
+        value: >
+          `write()` is for single characters, `writeln()` is for strings.
+        correct: false
+      -
+        value: >
+          `write()` is for unformatted output, `writeln()` is for formatted output.
+        correct: false
+    help: |
+      The key difference is that `writeln()` automatically adds a newline character at the end of the output, while `write()` does not.
+      https://symfony.com/doc/current/console.html#writing-output
+
+  -
+    question: >
+      Which `InputArgument` constant indicates that an argument is mandatory and the command will not run if it's not provided?
+    answers:
+      -
+        value: >
+          `InputArgument::OPTIONAL`
+        correct: false
+      -
+        value: >
+          `InputArgument::REQUIRED`
+        correct: true
+      -
+        value: >
+          `InputArgument::MANDATORY`
+        correct: false
+      -
+        value: >
+          `InputArgument::STRICT`
+        correct: false
+    help: |
+      `InputArgument::REQUIRED` ensures that the argument must be present for the command to execute.
+      https://symfony.com/doc/current/console/input.html#inputargument-variants
+
+  -
+    question: >
+      How can you clear all output from the cursor's current position to the end of the screen?
+    answers:
+      -
+        value: >
+          `$cursor->clearScreenAfter();`
+        correct: false
+      -
+        value: >
+          `$cursor->clearOutput();`
+        correct: true
+      -
+        value: >
+          `$cursor->eraseToEnd();`
+        correct: false
+      -
+        value: >
+          `$cursor->deleteFromCursor();`
+        correct: false
+    help: |
+      The `Cursor::clearOutput()` method clears all content from the current cursor position to the end of the terminal screen.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#clear-console-output-with-symfony-cursor
+
+  -
+    question: >
+      Which of the following is true about using unambiguous short command names in Symfony Console?
+    answers:
+      -
+        value: >
+          It is not supported; full command names must always be used.
+        correct: false
+      -
+        value: >
+          You can use the shortest unique prefix of a command name to execute it.
+        correct: true
+      -
+        value: >
+          Only aliases can be used as short command names.
+        correct: false
+      -
+        value: >
+          It only works for built-in commands.
+        correct: false
+    help: |
+      Symfony Console allows executing commands using the shortest unambiguous name, provided no other command shares that prefix.
+      https://symfony.com/doc/current/components/console/usage.html#using-unambiguous-short-command-names-in-symfony-console
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Question\ChoiceQuestion`?
+    answers:
+      -
+        value: >
+          To ask a question that requires a numerical answer.
+        correct: false
+      -
+        value: >
+          To ask a question with a predefined list of answers for the user to choose from.
+        correct: true
+      -
+        value: >
+          To ask a question that accepts free-form text input.
+        correct: false
+      -
+        value: >
+          To ask a question that requires a date input.
+        correct: false
+    help: |
+      `ChoiceQuestion` is designed to present a list of options to the user and ensure their input is one of the valid choices.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-console-question-helper-api-documentation
+
+  -
+    question: >
+      Which global option would you use to set the Kernel configuration environment for a Symfony console command?
+    answers:
+      -
+        value: >
+          `--env`
+        correct: true
+      -
+        value: >
+          `--environment`
+        correct: false
+      -
+        value: >
+          `--kernel-env`
+        correct: false
+      -
+        value: >
+          `--app-env`
+        correct: false
+    help: |
+      The `--env` option (provided by FrameworkBundle) allows specifying the Symfony environment (e.g., `dev`, `prod`).
+      https://symfony.com/doc/current/console/input.html#frameworkbundle-specific-options
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Command\LazyCommand`?
+    answers:
+      -
+        value: >
+          To automatically generate command definitions.
+        correct: false
+      -
+        value: >
+          To wrap a command factory and delay the actual command object creation until it's needed.
+        correct: true
+      -
+        value: >
+          To provide a base class for all console commands.
+        correct: false
+      -
+        value: >
+          To define commands that run in the background.
+        correct: false
+    help: |
+      `LazyCommand` is a crucial part of Symfony's lazy-loading mechanism, allowing commands to be instantiated only when they are invoked, improving application startup performance.
+      https://symfony.com/doc/current/console/lazy_commands.html#api-reference-symfony-console-api-references-for-lazy-loading
+
+  -
+    question: >
+      How can you move the console cursor one line up from its current position?
+    answers:
+      -
+        value: >
+          `$cursor->up();`
+        correct: false
+      -
+        value: >
+          `$cursor->moveUp();`
+        correct: true
+      -
+        value: >
+          `$cursor->lineUp();`
+        correct: false
+      -
+        value: >
+          `$cursor->goUp();`
+        correct: false
+    help: |
+      The `Cursor::moveUp()` method moves the cursor up by the specified number of lines (default is 1).
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
+  -
+    question: >
+      Which of the following is a valid way to disable Kernel debug for a Symfony console command?
+    answers:
+      -
+        value: >
+          `--no-debug`
+        correct: true
+      -
+        value: >
+          `--debug=false`
+        correct: false
+      -
+        value: >
+          `--disable-debug`
+        correct: false
+      -
+        value: >
+          `APP_DEBUG=0` (only via environment variable)
+        correct: true
+    help: |
+      The `--no-debug` option (from FrameworkBundle) disables Kernel debug. Alternatively, setting the `APP_DEBUG` environment variable to `0` also achieves this.
+      https://symfony.com/doc/current/console/input.html#frameworkbundle-specific-options
+
+  -
+    question: >
+      What is the purpose of `OutputInterface::section()->overwrite()`?
+    answers:
+      -
+        value: >
+          To append new content to a section.
+        correct: false
+      -
+        value: >
+          To replace all existing content within a specific output section with new content.
+        correct: true
+      -
+        value: >
+          To clear a section and then write new content.
+        correct: false
+      -
+        value: >
+          To move a section to a different part of the console.
+        correct: false
+    help: |
+      The `overwrite()` method is used for dynamic updates, replacing the entire content of a section with the provided text.
+      https://symfony.com/doc/current/console.html#managing-dynamic-console-output-with-sections
+
+  -
+    question: >
+      Which of the following describes the `ConsoleCommandEvent::commandShouldRun()` method?
+    answers:
+      -
+        value: >
+          It checks if the command has completed successfully.
+        correct: false
+      -
+        value: >
+          It checks if the command is currently enabled and allowed to run.
+        correct: true
+      -
+        value: >
+          It checks if all required arguments are provided.
+        correct: false
+      -
+        value: >
+          It checks if the command is hidden.
+        correct: false
+    help: |
+      `commandShouldRun()` determines if the command is currently enabled, which can be affected by `disableCommand()` in a listener.
+      https://symfony.com/doc/current/components/console/events.html#consolecommandevent
+
+  -
+    question: >
+      How can you make the console cursor visible again after hiding it?
+    answers:
+      -
+        value: >
+          `$cursor->showCursor();`
+        correct: false
+      -
+        value: >
+          `$cursor->visible();`
+        correct: false
+      -
+        value: >
+          `$cursor->show();`
+        correct: true
+      -
+        value: >
+          `$cursor->enableCursor();`
+        correct: false
+    help: |
+      The `Cursor::show()` method makes the console cursor visible.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#symfony-component-console-cursor-class-api-reference
+
+  -
+    question: >
+      Which of the following is a valid way to set a default value for a `Question` object?
+    answers:
+      -
+        value: >
+          `$question->setDefault('default_value');`
+        correct: true
+      -
+        value: >
+          `$question->setValue('default_value');`
+        correct: false
+      -
+        value: >
+          `$question->withDefault('default_value');`
+        correct: false
+      -
+        value: >
+          Default values are not supported for `Question` objects.
+        correct: false
+    help: |
+      The `Question::setDefault()` method allows you to specify a default value that will be returned if the user provides no input.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-console-question-helper-api-documentation
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Question\Question::setValidator()`?
+    answers:
+      -
+        value: >
+          To define the type of input expected (e.g., string, integer).
+        correct: false
+      -
+        value: >
+          To set a callback function that validates the user's input, throwing an exception on failure.
+        correct: true
+      -
+        value: >
+          To provide a list of valid choices for the user.
+        correct: false
+      -
+        value: >
+          To set the maximum length of the user's input.
+        correct: false
+    help: |
+      `Question::setValidator()` allows you to provide a callback function to validate the user's answer, ensuring it meets specific criteria.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-console-component-api-references
+
+  -
+    question: >
+      Which of the following is a correct way to move the cursor 3 lines down from its current position?
+    answers:
+      -
+        value: >
+          `$cursor->moveDown(3);`
+        correct: true
+      -
+        value: >
+          `$cursor->down(3);`
+        correct: false
+      -
+        value: >
+          `$cursor->move(0, 3);`
+        correct: false
+      -
+        value: >
+          `$cursor->setRow($cursor->getCurrentPosition()[1] + 3);`
+        correct: false
+    help: |
+      The `Cursor::moveDown()` method allows moving the cursor down by a specified number of lines.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
+  -
+    question: >
+      What is the default output when running a Symfony Console application with `--version` or `-V` if no custom name or version is set?
+    answers:
+      -
+        value: >
+          "Symfony Console"
+        correct: false
+      -
+        value: >
+          "Console Application"
+        correct: false
+      -
+        value: >
+          "Console Tool"
+        correct: true
+      -
+        value: >
+          An error message indicating no version is set.
+        correct: false
+    help: |
+      If no custom name or version is configured for the `Application`, the default output for `--version` is "Console Tool".
+      https://symfony.com/doc/current/components/console/usage.html#default-output-for-symfony-console-application-version
+
+  -
+    question: >
+      Which of the following is true about `InputArgument::IS_ARRAY`?
+    answers:
+      -
+        value: >
+          It must be the first argument defined.
+        correct: false
+      -
+        value: >
+          It can only be used with `InputArgument::OPTIONAL`.
+        correct: false
+      -
+        value: >
+          It must be used at the end of the argument list.
+        correct: true
+      -
+        value: >
+          It automatically makes the argument optional.
+        correct: false
+    help: |
+      An array argument (`InputArgument::IS_ARRAY`) must be the last argument defined because it consumes all remaining input values.
+      https://symfony.com/doc/current/console/input.html#inputargument-variants
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Question\Question::setMaxAttempts()`?
+    answers:
+      -
+        value: >
+          To limit the number of times a user can try to answer a question correctly.
+        correct: true
+      -
+        value: >
+          To set the maximum length of the user's input.
+        correct: false
+      -
+        value: >
+          To define the number of options in a choice question.
+        correct: false
+      -
+        value: >
+          To set a timeout for user input.
+        correct: false
+    help: |
+      `Question::setMaxAttempts()` limits how many times the `QuestionHelper` will ask for input if the validation fails. `null` means infinite attempts.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.html#symfony-console-component-api-references
+
+  -
+    question: >
+      Which of the following best describes the `interact()` method's behavior when the `--no-interaction` global option is used?
+    answers:
+      -
+        value: >
+          The `interact()` method will still be called, but all prompts will be skipped.
+        correct: false
+      -
+        value: >
+          The `interact()` method will not be called at all.
+        correct: true
+      -
+        value: >
+          The `interact()` method will throw an exception.
+        correct: false
+      -
+        value: >
+          The `interact()` method will use default values for all missing inputs.
+        correct: false
+    help: |
+      When `--no-interaction` is present, the `interact()` method is explicitly skipped, as its purpose is to handle interactive prompts.
+      https://symfony.com/doc/current/console.html#command-lifecycle-methods
+
+  -
+    question: >
+      How can you clear a specific number of lines from a console output section?
+    answers:
+      -
+        value: >
+          `$section->clearLines(2);`
+        correct: false
+      -
+        value: >
+          `$section->clear(2);`
+        correct: true
+      -
+        value: >
+          `$section->deleteLines(2);`
+        correct: false
+      -
+        value: >
+          `$section->remove(2);`
+        correct: false
+    help: |
+      The `SectionOutput::clear(int $lines)` method clears the specified number of lines from the section.
+      https://symfony.com/doc/current/console.html#php-console-section-output-manipulation
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Event\ConsoleErrorEvent::getExitCode()`?
+    answers:
+      -
+        value: >
+          To get the exit code that the command would have returned if no error occurred.
+        correct: false
+      -
+        value: >
+          To get the exit code associated with the thrown exception.
+        correct: true
+      -
+        value: >
+          To get the exit code that the application will return after the event.
+        correct: false
+      -
+        value: >
+          To get the default exit code for errors.
+        correct: false
+    help: |
+      `ConsoleErrorEvent::getExitCode()` returns the exit code that corresponds to the exception that was thrown.
+      https://symfony.com/doc/current/components/console/events.html#consoleerrorevent
+
+  -
+    question: >
+      Which of the following is the correct way to initialize a Symfony Console `Application` with an `EventDispatcher`?
+    answers:
+      -
+        value: >
+          `$application = new Application($dispatcher);`
+        correct: false
+      -
+        value: >
+          `$application->setEventDispatcher($dispatcher);`
+        correct: false
+      -
+        value: >
+          `$application->setDispatcher($dispatcher);`
+        correct: true
+      -
+        value: >
+          `$application->addEventDispatcher($dispatcher);`
+        correct: false
+    help: |
+      The `Application::setDispatcher()` method is used to associate an `EventDispatcher` instance with the console application.
+      https://symfony.com/doc/current/components/console/events.html#initialize-symfony-console-application-with-eventdispatcher
+
+  -
+    question: >
+      What happens if you set a `maxHeight` for an `OutputInterface::section()` and then write more lines than the `maxHeight`?
+    answers:
+      -
+        value: >
+          An exception is thrown.
+        correct: false
+      -
+        value: >
+          New lines replace the oldest lines in the section.
+        correct: true
+      -
+        value: >
+          The section's height automatically expands.
+        correct: false
+      -
+        value: >
+          The extra lines are truncated.
+        correct: false
+    help: |
+      When `setMaxHeight()` is used, new lines will replace older ones once the maximum height is reached, creating a scrolling effect within the section.
+      https://symfony.com/doc/current/console.html#php-console-section-output-manipulation
+
+  -
+    question: >
+      Which of the following is a valid way to move the cursor 3 columns right from its current position?
+    answers:
+      -
+        value: >
+          `$cursor->moveRight(3);`
+        correct: true
+      -
+        value: >
+          `$cursor->right(3);`
+        correct: false
+      -
+        value: >
+          `$cursor->move(3, 0);`
+        correct: false
+      -
+        value: >
+          `$cursor->setColumn($cursor->getCurrentPosition()[0] + 3);`
+        correct: false
+    help: |
+      The `Cursor::moveRight()` method allows moving the cursor right by a specified number of columns.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\SignalRegistry\SignalMap::getSignalName()`?
+    answers:
+      -
+        value: >
+          To get the integer value of a signal from its name.
+        correct: false
+      -
+        value: >
+          To get the name of a signal from its integer value.
+        correct: true
+      -
+        value: >
+          To register a new signal.
+        correct: false
+      -
+        value: >
+          To check if a signal is supported.
+        correct: false
+    help: |
+      `SignalMap::getSignalName()` provides a way to convert a signal's integer value (e.g., `SIGTERM` is 15) into its human-readable name.
+      https://symfony.com/doc/current/components/console/events.html#symfony-console-event-api-reference
+
+  -
+    question: >
+      Which of the following `SymfonyStyle` methods is suitable for asking a question that requires a 'yes' or 'no' answer?
+    answers:
+      -
+        value: >
+          `$io->confirm()`
+        correct: true
+      -
+        value: >
+          `$io->askBoolean()`
+        correct: false
+      -
+        value: >
+          `$io->choice(['yes', 'no'])`
+        correct: true
+      -
+        value: >
+          `$io->question('Are you sure? (y/n)')`
+        correct: false
+    help: |
+      `SymfonyStyle::confirm()` is specifically designed for yes/no questions. Alternatively, `choice()` can be used with 'yes' and 'no' options.
+      https://symfony.com/doc/current/console/style.html#confirmation-questions
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Output\OutputInterface`?
+    answers:
+      -
+        value: >
+          To read user input from the console.
+        correct: false
+      -
+        value: >
+          To define methods for writing output to the console.
+        correct: true
+      -
+        value: >
+          To manage command arguments and options.
+        correct: false
+      -
+        value: >
+          To handle console events.
+        correct: false
+    help: |
+      `OutputInterface` provides the contract for writing messages to the console, including methods like `write()` and `writeln()`.
+      https://symfony.com/doc/current/console.html#writing-output
+
+  -
+    question: >
+      Which of the following is a valid way to retrieve an array argument named `names` from `InputInterface`?
+    answers:
+      -
+        value: >
+          `$input->getArgument('names');`
+        correct: true
+      -
+        value: >
+          `$input->getArguments()['names'];`
+        correct: false
+      -
+        value: >
+          `$input->getArrayArgument('names');`
+        correct: false
+      -
+        value: >
+          `$input->get('names');`
+        correct: false
+    help: |
+      `InputInterface::getArgument()` is used to retrieve the value of an argument, whether it's a single value or an array.
+      https://symfony.com/doc/current/console/input.html#access-array-command-arguments-in-symfony-console
+
+  -
+    question: >
+      What is the primary role of the `execute()` method (or `__invoke()`) in a Symfony console command?
+    answers:
+      -
+        value: >
+          To define command arguments and options.
+        correct: false
+      -
+        value: >
+          To interact with the user for missing input.
+        correct: false
+      -
+        value: >
+          To contain the main business logic of the command and return an integer exit status.
+        correct: true
+      -
+        value: >
+          To initialize command-specific variables.
+        correct: false
+    help: |
+      The `execute()` (or `__invoke()`) method is where the core functionality of the command resides, and it must return an integer indicating the command's success or failure.
+      https://symfony.com/doc/current/console.html#command-lifecycle-methods
+
+  -
+    question: >
+      Which of the following is a valid way to apply bold text with an underscore using inline console styling?
+    answers:
+      -
+        value: >
+          `$output->writeln('<options=bold,underscore>My text</>');`
+        correct: true
+      -
+        value: >
+          `$output->writeln('<style="font-weight: bold; text-decoration: underline;">My text</style>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<bold;underscore>My text</bold;underscore>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('[bold][underscore]My text[/underscore][/bold]');`
+        correct: false
+    help: |
+      Multiple options can be applied by comma-separating them within the `options=` attribute of the console tag.
+      https://symfony.com/doc/current/console/coloring.html#applying-inline-console-styles-with-named-hex-colors-and-options-in-symfony
+
+  -
+    question: >
+      What is the purpose of `Symfony\Component\Console\Input\InputInterface`?
+    answers:
+      -
+        value: >
+          To define methods for writing output to the console.
+        correct: false
+      -
+        value: >
+          To provide access to command arguments and options.
+        correct: true
+      -
+        value: >
+          To manage console events.
+        correct: false
+      -
+        value: >
+          To handle command lifecycle methods.
+        correct: false
+    help: |
+      `InputInterface` provides methods to retrieve and interact with the arguments and options passed to a console command.
       https://symfony.com/doc/current/console/input.html
+
   -
     question: >
-      Which verbosity level should you use to display only critical errors and suppress all other output?
+      Which of the following is a valid way to retrieve an option named `iterations` from `InputInterface`?
     answers:
-      - { value: '`OutputInterface::VERBOSITY_QUIET`', correct: true }
-      - { value: '`OutputInterface::VERBOSITY_NORMAL`', correct: false }
-      - { value: '`OutputInterface::VERBOSITY_VERBOSE`', correct: false }
-      - { value: '`OutputInterface::VERBOSITY_DEBUG`', correct: false }
+      -
+        value: >
+          `$input->getOption('iterations');`
+        correct: true
+      -
+        value: >
+          `$input->getOptions()['iterations'];`
+        correct: false
+      -
+        value: >
+          `$input->get('iterations');`
+        correct: false
+      -
+        value: >
+          `$input->option('iterations');`
+        correct: false
     help: |
-      `VERBOSITY_QUIET` suppresses all output except for critical errors.
-      https://symfony.com/doc/current/console/verbosity.html
+      The `InputInterface::getOption()` method is used to retrieve the value of a command-line option.
+      https://symfony.com/doc/current/console/input.html#access-command-options-in-symfony-console
+
   -
     question: >
-      How can you retrieve a service from the dependency injection container within a console command?
+      What is the purpose of `Symfony\Component\Console\Style\StyleInterface`?
     answers:
-      - { value: 'By type-hinting it in the constructor and letting autowiring inject it.', correct: true }
-      - { value: 'By calling `$this->getContainer()->get(''service_id'')`.', correct: false }
-      - { value: 'By extending `ContainerAwareCommand` and using `$this->container->get(''service_id'')`.', correct: false }
-      - { value: 'By using `#[Autowire]` attribute on a property.', correct: true }
+      -
+        value: >
+          To provide a concrete implementation for console styling.
+        correct: false
+      -
+        value: >
+          To define the contract for creating custom console output styles.
+        correct: true
+      -
+        value: >
+          To automatically apply default styles to console output.
+        correct: false
+      -
+        value: >
+          To manage the color palette for the console.
+        correct: false
     help: |
-      The recommended way to get services is via constructor injection and autowiring. The `#[Autowire]` attribute can also be used for property injection. `ContainerAwareCommand` is deprecated.
-      https://symfony.com/doc/current/console/commands_as_services.html
+      `StyleInterface` is the interface that custom console style classes must implement, allowing for complete control over output appearance.
+      https://symfony.com/doc/current/console/style.html#api-reference-symfony-component-console-style-styleinterface
+
   -
     question: >
-      Which built-in helper is useful for displaying progress bars during long-running console tasks?
+      Which of the following is true about `InputOption::VALUE_REQUIRED`?
     answers:
-      - { value: '`ProgressBar`', correct: true }
-      - { value: '`ProcessHelper`', correct: false }
-      - { value: '`QuestionHelper`', correct: false }
-      - { value: '`FormatterHelper`', correct: false }
+      -
+        value: >
+          The option itself is required, and it must have a value.
+        correct: false
+      -
+        value: >
+          The option is optional, but if provided, it must have a value.
+        correct: true
+      -
+        value: >
+          The option is required, but its value is optional.
+        correct: false
+      -
+        value: >
+          The option can accept multiple values.
+        correct: false
     help: |
-      The `ProgressBar` helper allows you to easily display and update a progress bar in the console.
-      https://symfony.com/doc/current/console/helpers.html#progressbar
+      `InputOption::VALUE_REQUIRED` means that if the option is used, a value must be provided (e.g., `--iterations=5`). The option itself is still optional.
+      https://symfony.com/doc/current/console/input.html#inputoption-value-variants
+
   -
     question: >
-      What is the return value expected from the `execute()` method of a Symfony console command?
+      What is the purpose of `Symfony\Component\Console\Cursor`?
     answers:
-      - { value: 'An integer representing the exit status (0 for success, non-zero for error).', correct: true }
-      - { value: 'A boolean indicating success or failure.', correct: false }
-      - { value: 'A string message to be displayed to the user.', correct: false }
-      - { value: 'Nothing (void).', correct: false }
+      -
+        value: >
+          To manage database cursors in console commands.
+        correct: false
+      -
+        value: >
+          To control the position and visibility of the console cursor.
+        correct: true
+      -
+        value: >
+          To provide a visual indicator of command progress.
+        correct: false
+      -
+        value: >
+          To navigate through command history.
+        correct: false
     help: |
-      The `execute()` method must return an integer exit status. `Command::SUCCESS` (0) and `Command::FAILURE` (1) are common constants.
-      https://symfony.com/doc/current/console.html#return-codes
+      The `Cursor` helper allows for advanced console output manipulation by controlling the cursor's position, movement, and visibility.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#symfony-component-console-cursor-class-api-reference
+
   -
     question: >
-      How can you define an option that can be passed multiple times, like `--tag=foo --tag=bar`?
+      Which of the following is a valid way to write green text to the console using a predefined style?
     answers:
-      - { value: 'By setting `InputOption::VALUE_IS_ARRAY` as the mode.', correct: true }
-      - { value: 'By setting `InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY` as the mode.', correct: false }
-      - { value: 'By setting `InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY` as the mode.', correct: false }
-      - { value: 'This functionality is not directly supported by `InputOption`.', correct: false }
+      -
+        value: >
+          `$output->writeln('<success>My text</success>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<info>My text</info>');`
+        correct: true
+      -
+        value: >
+          `$output->writeln('<green>My text</green>');`
+        correct: false
+      -
+        value: >
+          `$output->writeln('<status=success>My text</status>');`
+        correct: false
     help: |
-      The `InputOption::VALUE_IS_ARRAY` flag allows an option to accept multiple values, which will be returned as an array.
-      https://symfony.com/doc/current/console/input.html#options
+      The `<info>` tag is used for informational messages, which are typically displayed in green.
+      https://symfony.com/doc/current/console/coloring.html#applying-predefined-console-color-styles-in-symfony
+
   -
     question: >
-      Which built-in command is used to display information about a specific command, including its arguments and options?
+      What is the purpose of `Symfony\Component\Console\Question\ConfirmationQuestion::setTrueAnswerRegex()`?
     answers:
-      - { value: '`help <command_name>`', correct: true }
-      - { value: '`info <command_name>`', correct: false }
-      - { value: '`describe <command_name>`', correct: false }
-      - { value: '`man <command_name>`', correct: false }
+      -
+        value: >
+          To set the regular expression used to determine if an answer means 'yes'.
+        correct: true
+      -
+        value: >
+          To set the default answer for the confirmation question.
+        correct: false
+      -
+        value: >
+          To validate that the user's input is a boolean.
+        correct: false
+      -
+        value: >
+          To define the error message for invalid input.
+        correct: false
     help: |
-      The `help` command provides detailed usage information for any given command.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You want to output a message to the console only if the verbosity level is `VERBOSITY_VERBOSE` or higher. How would you do this using the `OutputInterface`?
-    answers:
-      - { value: '`if ($output->isVerbose()) { $output->writeln(''Verbose message''); }`', correct: true }
-      - { value: '`$output->writelnIfVerbose(''Verbose message'');`', correct: false }
-      - { value: '`$output->verbose(''Verbose message'');`', correct: false }
-      - { value: '`if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) { ... }`', correct: true }
-    help: |
-      The `isVerbose()` method checks if the current verbosity level is at least `VERBOSITY_VERBOSE`. You can also directly compare the verbosity level.
-      https://symfony.com/doc/current/console/verbosity.html
-  -
-    question: >
-      What is the purpose of the `#[AsCommand(hidden: true)]` attribute?
-    answers:
-      - { value: 'To prevent the command from appearing in the `list` command output.', correct: true }
-      - { value: 'To mark the command as deprecated.', correct: false }
-      - { value: 'To make the command inaccessible from the command line.', correct: false }
-      - { value: 'To hide the command''s description.', correct: false }
-    help: |
-      Setting `hidden: true` makes the command invisible when running `php bin/console list`, but it can still be executed.
-      https://symfony.com/doc/current/console.html#configuring-the-command
+      This method allows customizing the regular expression used to interpret user input as a 'yes' answer for a confirmation question.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.rst#_snippet_5
+
   -
     question: >
-      Which console event is dispatched after a command has finished execution, regardless of success or failure?
+      Which of the following is a valid way to clear the entire current line of console output?
     answers:
-      - { value: '`ConsoleEvents::TERMINATE`', correct: true }
-      - { value: '`ConsoleEvents::POST_COMMAND`', correct: false }
-      - { value: '`ConsoleEvents::FINISH`', correct: false }
-      - { value: '`ConsoleEvents::END`', correct: false }
+      -
+        value: >
+          `$cursor->clearLine();`
+        correct: true
+      -
+        value: >
+          `$cursor->eraseLine();`
+        correct: false
+      -
+        value: >
+          `$cursor->resetLine();`
+        correct: false
+      -
+        value: >
+          `$cursor->deleteLine();`
+        correct: false
     help: |
-      The `ConsoleEvents::TERMINATE` event is dispatched after the command's `execute()` method has finished.
-      https://symfony.com/doc/current/console/events.html#consoleevents-terminate
+      The `Cursor::clearLine()` method clears all output from the current line.
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#clear-console-output-with-symfony-cursor
+
   -
     question: >
-      How can you define an argument that accepts multiple values, like `php bin/console app:process item1 item2 item3`?
+      What is the purpose of `Symfony\Component\Console\Question\ChoiceQuestion::setMultiselect()`?
     answers:
-      - { value: 'By using `InputArgument::IS_ARRAY` as the mode.', correct: true }
-      - { value: 'By using `InputArgument::OPTIONAL | InputArgument::IS_ARRAY` for optional multiple values.', correct: true }
-      - { value: 'By using `InputArgument::REQUIRED | InputArgument::IS_ARRAY` for required multiple values.', correct: true }
-      - { value: 'By setting the argument''s default value to an empty array.', correct: false }
+      -
+        value: >
+          To allow the user to select multiple answers from the list of choices.
+        correct: true
+      -
+        value: >
+          To set the maximum number of choices displayed.
+        correct: false
+      -
+        value: >
+          To enable a search filter for choices.
+        correct: false
+      -
+        value: >
+          To allow the user to type in a custom answer not in the list.
+        correct: false
     help: |
-      The `InputArgument::IS_ARRAY` flag allows an argument to accept multiple values, which will be returned as an array. It can be combined with `REQUIRED` or `OPTIONAL`.
-      https://symfony.com/doc/current/console/input.html#arguments
+      `ChoiceQuestion::setMultiselect(true)` enables the user to choose more than one option from the provided list.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.rst#_snippet_11
+
   -
     question: >
-      What is the purpose of the `OutputInterface::VERBOSITY_DEBUG` level?
+      Which of the following is a valid way to move the cursor one line up from its current position?
     answers:
-      - { value: 'To display all messages, including highly detailed debugging information.', correct: true }
-      - { value: 'To display only messages relevant to debugging.', correct: false }
-      - { value: 'To display messages that help in understanding the command''s flow.', correct: false }
-      - { value: 'It''s typically used for development environments only.', correct: false }
+      -
+        value: >
+          `$cursor->moveUp();`
+        correct: true
+      -
+        value: >
+          `$cursor->up();`
+        correct: false
+      -
+        value: >
+          `$cursor->move(0, -1);`
+        correct: false
+      -
+        value: >
+          `$cursor->setRow($cursor->getCurrentPosition()[1] - 1);`
+        correct: false
     help: |
-      `VERBOSITY_DEBUG` is the highest verbosity level, showing all possible output.
-      https://symfony.com/doc/current/console/verbosity.html
+      The `Cursor::moveUp()` method moves the cursor up by the specified number of lines (default is 1).
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
   -
     question: >
-      Which built-in command is used to check and fix Doctrine database schema issues?
+      What is the purpose of `Symfony\Component\Console\Question\ChoiceQuestion::setErrorMessage()`?
     answers:
-      - { value: '`doctrine:schema:update --force`', correct: false }
-      - { value: '`doctrine:migrations:migrate`', correct: false }
-      - { value: '`doctrine:database:create`', correct: false }
-      - { value: 'This is a Doctrine command, not a core Symfony command.', correct: true }
+      -
+        value: >
+          To set the message displayed when the user enters an invalid choice.
+        correct: true
+      -
+        value: >
+          To set the default error message for all questions.
+        correct: false
+      -
+        value: >
+          To define the error message for when no choice is selected.
+        correct: false
+      -
+        value: >
+          To set the message displayed when the question times out.
+        correct: false
     help: |
-      While commonly used in Symfony applications, Doctrine commands are provided by the DoctrineBundle, not the core Symfony Console component itself.
-      https://symfony.com/doc/current/bundles/DoctrineBundle/index.html
-  -
-    question: |
-      How can you apply a specific style (e.g., green text) to a message written to the console?
-    answers:
-      - { value: 'Using `<info>Your message</info>` tags within the message string.', correct: true }
-      - { value: 'Calling `$output->writeln(''Your message'', ''info'');`', correct: false }
-      - { value: 'Using CSS-like styles directly in the message.', correct: false }
-      - { value: 'Configuring a custom `OutputFormatter` for the `OutputInterface`.', correct: true }
-    help: |
-      Symfony's console component supports basic formatting tags like `<info>`, `<comment>`, `<error>`, and `<question>`. You can also define custom styles via the `OutputFormatter`.
-      https://symfony.com/doc/current/console/coloring.html
-  -
-    question: >
-      What is the purpose of the `InputOption::VALUE_NONE` mode for an option?
-    answers:
-      - { value: 'The option is a flag and does not accept a value (e.g., `--force`).', correct: true }
-      - { value: 'The option is optional and has no default value.', correct: false }
-      - { value: 'The option must be present but its value is ignored.', correct: false }
-      - { value: 'The option can only be used without any arguments.', correct: false }
-    help: |
-      `InputOption::VALUE_NONE` is used for boolean flags that are either present or not.
-      https://symfony.com/doc/current/console/input.html#options
+      `ChoiceQuestion::setErrorMessage()` allows customizing the error message shown to the user when they provide an input that is not among the valid choices. The `%s` placeholder can be used for the invalid input.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.rst#_snippet_11
+
   -
     question: >
-      Which console event is dispatched when an uncaught exception occurs during command execution?
+      Which of the following is a valid way to move the cursor one column left from its current position?
     answers:
-      - { value: '`ConsoleEvents::ERROR`', correct: true }
-      - { value: '`ConsoleEvents::EXCEPTION`', correct: false }
-      - { value: '`ConsoleEvents::FAILURE`', correct: false }
-      - { value: '`ConsoleEvents::CRITICAL`', correct: false }
+      -
+        value: >
+          `$cursor->moveLeft();`
+        correct: true
+      -
+        value: >
+          `$cursor->left();`
+        correct: false
+      -
+        value: >
+          `$cursor->move(-1, 0);`
+        correct: false
+      -
+        value: >
+          `$cursor->setColumn($cursor->getCurrentPosition()[0] - 1);`
+        correct: false
     help: |
-      The `ConsoleEvents::ERROR` event allows you to handle exceptions gracefully within your console application.
-      https://symfony.com/doc/current/console/events.html#consoleevents-error
+      The `Cursor::moveLeft()` method moves the cursor left by the specified number of columns (default is 1).
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
   -
     question: >
-      How can you access environment variables within a Symfony console command?
+      What is the purpose of `Symfony\Component\Console\Question\Question::__construct()`?
     answers:
-      - { value: 'Using `$_ENV` or `$_SERVER` superglobals.', correct: true }
-      - { value: 'Via the `InputInterface` object.', correct: false }
-      - { value: 'Through a dedicated `EnvironmentHelper`.', correct: false }
-      - { value: 'By injecting the `Kernel` service and accessing its environment property.', correct: true }
+      -
+        value: >
+          To create a new question with a prompt and an optional default value.
+        correct: true
+      -
+        value: >
+          To create a new question with a prompt and a list of choices.
+        correct: false
+      -
+        value: >
+          To create a new question that requires a hidden input.
+        correct: false
+      -
+        value: >
+          To create a new confirmation question.
+        correct: false
     help: |
-      Standard PHP superglobals work, and the Kernel service provides access to the application's environment.
-      https://symfony.com/doc/current/configuration.html#environment-variables
-  -
-    question: |
-      You need to execute another console command from within your current command. Which built-in helper can facilitate this?
-    answers:
-      - { value: '`Application` instance via `find()` and `run()` methods.', correct: true }
-      - { value: '`ProcessHelper` to run `php bin/console another:command`.', correct: true }
-      - { value: '`CommandRunner` service.', correct: false }
-      - { value: '`ConsoleHelper` with a `runCommand()` method.', correct: false }
-    help: |
-      You can either get the `Application` instance and run the command internally or use the `ProcessHelper` to execute it as a separate process.
-      https://symfony.com/doc/current/console/command_in_command.html
-  -
-    question: >
-      What is the purpose of the `InputArgument::REQUIRED` mode for an argument?
-    answers:
-      - { value: 'The argument must be provided when executing the command.', correct: true }
-      - { value: 'The argument must have a non-empty value.', correct: false }
-      - { value: 'The argument is required only if other conditions are met.', correct: false }
-      - { value: 'The argument is required, but its value can be null.', correct: false }
-    help: |
-      `InputArgument::REQUIRED` ensures that the user provides a value for the argument.
-      https://symfony.com/doc/current/console/input.html#arguments
+      The constructor for `Question` takes the question text and an optional default value for the user's input.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.rst#symfony-console-question-helper-api-documentation
+
   -
     question: >
-      Which built-in command is typically used to create a new bundle in Symfony?
+      Which of the following is a valid way to move the cursor one column right from its current position?
     answers:
-      - { value: '`make:bundle`', correct: true }
-      - { value: '`generate:bundle`', correct: false }
-      - { value: '`create:bundle`', correct: false }
-      - { value: '`bundle:new`', correct: false }
+      -
+        value: >
+          `$cursor->moveRight();`
+        correct: true
+      -
+        value: >
+          `$cursor->right();`
+        correct: false
+      -
+        value: >
+          `$cursor->move(1, 0);`
+        correct: false
+      -
+        value: >
+          `$cursor->setColumn($cursor->getCurrentPosition()[0] + 1);`
+        correct: false
     help: |
-      The `make:bundle` command (provided by `symfony/maker-bundle`) is the standard way to generate a new bundle skeleton.
-      https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html#make-bundle
-  -
-    question: |
-      You want to display a table of data in your console command. Which helper should you use?
-    answers:
-      - { value: '`Table` (from `Symfony\Component\Console\Helper\Table`)', correct: true }
-      - { value: '`FormatterHelper` with custom formatting.', correct: false }
-      - { value: '`TableHelper`', correct: false }
-      - { value: '`GridHelper`', correct: false }
-    help: |
-      The `Table` helper makes it easy to render tabular data in a clean, formatted way.
-      https://symfony.com/doc/current/console/helpers.html#table
-  -
-    question: >
-      What is the primary benefit of defining console commands as services?
-    answers:
-      - { value: 'They can be autowired with dependencies from the service container.', correct: true }
-      - { value: 'They run faster than traditional commands.', correct: false }
-      - { value: 'They are automatically registered without needing the `#[AsCommand]` attribute.', correct: false }
-      - { value: 'They can be easily shared between different Symfony applications.', correct: false }
-    help: |
-      Defining commands as services allows Symfony's dependency injection container to manage their dependencies, making them easier to test and maintain.
-      https://symfony.com/doc/current/console/commands_as_services.html
+      The `Cursor::moveRight()` method moves the cursor right by the specified number of columns (default is 1).
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
+
   -
     question: >
-      Which of the following is a valid way to define a default value for an optional argument?
+      What is the purpose of `Symfony\Component\Console\Question\ConfirmationQuestion::__construct()`?
     answers:
-      - { value: '`$this->addArgument(''name'', InputArgument::OPTIONAL, ''Description'', ''DefaultName'');`', correct: true }
-      - { value: '`$this->addArgument(''name'', InputArgument::OPTIONAL, ''DefaultName'');`', correct: false }
-      - { value: '`$this->addArgument(''name'', null, ''DefaultName'');`', correct: false }
-      - { value: '`$this->addArgument(''name'', InputArgument::OPTIONAL)->setDefault(''DefaultName'');`', correct: false }
+      -
+        value: >
+          To create a new confirmation question with a prompt, an optional default, and a regex for 'yes' answers.
+        correct: true
+      -
+        value: >
+          To create a new question that accepts any text input.
+        correct: false
+      -
+        value: >
+          To create a new question with a list of choices.
+        correct: false
+      -
+        value: >
+          To create a new question that requires a hidden input.
+        correct: false
     help: |
-      The default value is the fourth argument to `addArgument()`.
-      https://symfony.com/doc/current/console/input.html#arguments
+      The constructor for `ConfirmationQuestion` allows setting the question text, a default boolean value, and a regular expression to determine what counts as a 'yes' answer.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.rst#symfony-console-question-helper-api-documentation
+
   -
     question: >
-      What is the purpose of the `OutputInterface::VERBOSITY_QUIET` level?
+      Which of the following describes the `ConsoleCommandEvent::enableCommand()` method?
     answers:
-      - { value: 'To suppress all output, even errors.', correct: false }
-      - { value: 'To display only error messages and suppress all other output.', correct: true }
-      - { value: 'To display a minimal set of information.', correct: false }
-      - { value: 'To prevent any interaction with the user.', correct: false }
+      -
+        value: >
+          It forces the command to run, ignoring any previous `disableCommand()` calls.
+        correct: true
+      -
+        value: >
+          It enables a disabled command after it has finished executing.
+        correct: false
+      -
+        value: >
+          It re-enables a command that was previously disabled by a listener.
+        correct: true
+      -
+        value: >
+          It allows the command to proceed even if arguments are missing.
+        correct: false
     help: |
-      `VERBOSITY_QUIET` is used to run commands silently, only showing errors.
-      https://symfony.com/doc/current/console/verbosity.html
+      The `enableCommand()` method re-enables a command that was previously disabled by a listener using `disableCommand()`.
+      https://symfony.com/doc/current/components/console/events.html#consolecommandevent
+
   -
     question: >
-      Which built-in command can you use to check the health and configuration of your Symfony application?
+      What is the purpose of `Symfony\Component\Console\Question\ChoiceQuestion::__construct()`?
     answers:
-      - { value: '`debug:container`', correct: false }
-      - { value: '`lint:container`', correct: false }
-      - { value: '`about`', correct: true }
-      - { value: '`check:requirements`', correct: false }
+      -
+        value: >
+          To create a new question with a prompt and an optional default value.
+        correct: false
+      -
+        value: >
+          To create a new question with a prompt, a list of choices, and an optional default choice.
+        correct: true
+      -
+        value: >
+          To create a new confirmation question.
+        correct: false
+      -
+        value: >
+          To create a new question that requires a hidden input.
+        correct: false
     help: |
-      The `about` command provides a summary of your Symfony application's environment, configuration, and installed versions.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      How can you get the value of an option named `--env` from the `InputInterface` object?
-    answers:
-      - { value: '`$input->getOption(''env'')`', correct: true }
-      - { value: '`$input->getArgument(''env'')`', correct: false }
-      - { value: '`$input->option(''env'')`', correct: false }
-      - { value: '`$input->get(''env'')`', correct: false }
-    help: |
-      The `getOption()` method is used to retrieve the value of a defined option.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      Which console event is dispatched before the application runs the command?
-    answers:
-      - { value: '`ConsoleEvents::COMMAND`', correct: true }
-      - { value: '`ConsoleEvents::PRE_COMMAND`', correct: false }
-      - { value: '`ConsoleEvents::BOOT`', correct: false }
-      - { value: '`ConsoleEvents::INITIALIZE`', correct: false }
-    help: |
-      The `ConsoleEvents::COMMAND` event is triggered after the command is resolved but before its `execute` method.
-      https://symfony.com/doc/current/console/events.html#consoleevents-command
+      The constructor for `ChoiceQuestion` requires the question text, an array of possible choices, and an optional default choice.
+      https://symfony.com/doc/current/components/console/helpers/questionhelper.rst#symfony-console-question-helper-api-documentation
+
   -
     question: >
-      What is the purpose of the `setHelp()` method in a console command?
+      Which of the following is a valid way to move the cursor one line down from its current position?
     answers:
-      - { value: 'To provide detailed help text for the command, displayed with `help <command_name>`.', correct: true }
-      - { value: 'To set the short description of the command.', correct: false }
-      - { value: 'To define the command''s usage examples.', correct: false }
-      - { value: 'To specify the command''s arguments and options.', correct: false }
+      -
+        value: >
+          `$cursor->moveDown();`
+        correct: true
+      -
+        value: >
+          `$cursor->down();`
+        correct: false
+      -
+        value: >
+          `$cursor->move(0, 1);`
+        correct: false
+      -
+        value: >
+          `$cursor->setRow($cursor->getCurrentPosition()[1] + 1);`
+        correct: false
     help: |
-      The `setHelp()` method allows you to define a longer, more detailed help message for your command.
-      https://symfony.com/doc/current/console/commands.html#full-command-example
-  -
-    question: >
-      Which built-in command is used to display the configuration of a specific service in the dependency injection container?
-    answers:
-      - { value: '`debug:container <service_id>`', correct: true }
-      - { value: '`container:show <service_id>`', correct: false }
-      - { value: '`service:info <service_id>`', correct: false }
-      - { value: '`config:debug <service_id>`', correct: false }
-    help: |
-      The `debug:container` command, when given a service ID, shows its definition, arguments, and tags.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You want to ask the user a question with a default answer. Which class from `Symfony\Component\Console\Question` should you use?
-    answers:
-      - { value: '`Question`', correct: true }
-      - { value: '`ConfirmationQuestion`', correct: false }
-      - { value: '`ChoiceQuestion`', correct: false }
-      - { value: '`InputQuestion`', correct: false }
-    help: |
-      The `Question` class allows you to define a question with an optional default value.
-      https://symfony.com/doc/current/console/helpers.html#questionhelper
-  -
-    question: >
-      What is the purpose of the `OutputInterface::VERBOSITY_NORMAL` level?
-    answers:
-      - { value: 'To display standard output messages, typically without debug or verbose information.', correct: true }
-      - { value: 'To display only success messages.', correct: false }
-      - { value: 'To display all messages by default.', correct: false }
-      - { value: 'It''s the lowest verbosity level.', correct: false }
-    help: |
-      `VERBOSITY_NORMAL` is the default and shows typical command output.
-      https://symfony.com/doc/current/console/verbosity.html
-  -
-    question: >
-      How can you add a shortcut (alias) to a console command?
-    answers:
-      - { value: 'By adding `aliases: [''my:alias'']` to the `#[AsCommand]` attribute.', correct: true }
-      - { value: 'By calling `$this->setAlias(''my:alias'')` in `configure()`.', correct: false }
-      - { value: 'By defining an alias in `services.yaml`.', correct: false }
-      - { value: 'Aliases are automatically generated based on the command name.', correct: false }
-    help: |
-      The `aliases` option in the `#[AsCommand]` attribute allows you to define alternative names for your command.
-      https://symfony.com/doc/current/console.html#configuring-the-command
-  -
-    question: >
-      Which built-in command is used to display the current routes defined in your Symfony application?
-    answers:
-      - { value: '`debug:router`', correct: true }
-      - { value: '`router:list`', correct: false }
-      - { value: '`route:show`', correct: false }
-      - { value: '`list:routes`', correct: false }
-    help: |
-      The `debug:router` command lists all registered routes, including their methods, paths, and controller actions.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You want to prevent a command from being executed if a specific option is not provided. How would you enforce this?
-    answers:
-      - { value: 'By using `InputOption::VALUE_REQUIRED` as the mode for the option.', correct: true }
-      - { value: 'By checking `$input->hasOption(''my-option'')` in the `execute()` method.', correct: true }
-      - { value: 'By throwing an `InvalidArgumentException` if the option is missing.', correct: true }
-      - { value: 'By setting the option''s default value to `null`.', correct: false }
-    help: |
-      `InputOption::VALUE_REQUIRED` ensures the option must be present with a value. You can also manually validate its presence or value in the `execute()` method.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      What is the purpose of the `InputInterface::isInteractive()` method?
-    answers:
-      - { value: 'To check if the command is running in an interactive shell (e.g., not piped input).', correct: true }
-      - { value: 'To determine if the command requires user input.', correct: false }
-      - { value: 'To check if the user has provided any arguments or options.', correct: false }
-      - { value: 'To verify if the output stream is a TTY.', correct: false }
-    help: |
-      `isInteractive()` is useful for deciding whether to prompt the user for input or to use default values when running in non-interactive environments.
-      https://symfony.com/doc/current/console/input.html#interacting-with-the-user
-  -
-    question: >
-      Which built-in command is used to install or update Composer dependencies for your Symfony project?
-    answers:
-      - { value: '`composer install` or `composer update` (Composer command, not Symfony).', correct: true }
-      - { value: '`symfony:composer:install`', correct: false }
-      - { value: '`bin/console composer:install`', correct: false }
-      - { value: '`dependencies:update`', correct: false }
-    help: |
-      Composer is a separate dependency manager, and its commands are run directly, not through `php bin/console`.
-      https://getcomposer.org/doc/
-  -
-    question: >
-      How can you get the value of an argument named `userId` from the `InputInterface` object?
-    answers:
-      - { value: '`$input->getArgument(''userId'')`', correct: true }
-      - { value: '`$input->getOption(''userId'')`', correct: false }
-      - { value: '`$input->argument(''userId'')`', correct: false }
-      - { value: '`$input->get(''userId'')`', correct: false }
-    help: |
-      The `getArgument()` method is used to retrieve the value of a defined argument.
-      https://symfony.com/doc/current/console/input.html#arguments
-  -
-    question: >
-      What is the purpose of the `OutputInterface::VERBOSITY_VERY_VERBOSE` level?
-    answers:
-      - { value: 'To display more detailed information than `NORMAL`, but less than `DEBUG`.', correct: true }
-      - { value: 'It is synonymous with `VERBOSITY_DEBUG`.', correct: false }
-      - { value: 'It is used for logging to a file, not the console.', correct: false }
-      - { value: 'It only shows warnings and errors.', correct: false }
-    help: |
-      `VERBOSITY_VERY_VERBOSE` (`-vv`) provides more information than the default, often including details about internal processes.
-      https://symfony.com/doc/current/console/verbosity.html
-  -
-    question: >
-      Which built-in command is used to display information about the current Symfony environment and debug settings?
-    answers:
-      - { value: '`debug:config`', correct: true }
-      - { value: '`debug:env`', correct: false }
-      - { value: '`config:show`', correct: false }
-      - { value: '`env:info`', correct: false }
-    help: |
-      The `debug:config` command allows you to inspect the resolved configuration for bundles or specific configuration sections.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You want to ask the user to choose from a predefined list of options. Which class from `Symfony\Component\Console\Question` should you use?
-    answers:
-      - { value: '`ChoiceQuestion`', correct: true }
-      - { value: '`ConfirmationQuestion`', correct: false }
-      - { value: '`ListQuestion`', correct: false }
-      - { value: '`OptionQuestion`', correct: false }
-    help: |
-      The `ChoiceQuestion` allows you to present a list of choices to the user and validate their input against those choices.
-      https://symfony.com/doc/current/console/helpers.html#questionhelper
-  -
-    question: >
-      What is the correct way to define a command description using the `#[AsCommand]` attribute?
-    answers:
-      - { value: '`#[AsCommand(name: ''app:my-command'', description: ''My command description.'')]`', correct: true }
-      - { value: '`#[AsCommand(name: ''app:my-command'', desc: ''My command description.'')]`', correct: false }
-      - { value: '`#[AsCommand(''app:my-command'', description: ''My command description.'')]`', correct: false }
-      - { value: '`#[AsCommand(name: ''app:my-command'')]` and then `$this->setDescription(''My command description.'')`', correct: true }
-    help: |
-      The `description` key in the `#[AsCommand]` attribute is the correct way to set the command's description. Alternatively, you can use the `setDescription()` method.
-      https://symfony.com/doc/current/console.html#configuring-the-command
-  -
-    question: >
-      Which method of the `OutputInterface` allows you to write messages without a trailing newline character?
-    answers:
-      - { value: '`write()`', correct: true }
-      - { value: '`output()`', correct: false }
-      - { value: '`print()`', correct: false }
-      - { value: '`echo()`', correct: false }
-    help: |
-      The `write()` method writes the message without adding a newline, useful for progress updates or inline text.
-      https://symfony.com/doc/current/console/coloring.html#output-styles-and-colors
-  -
-    question: >
-      What is the purpose of the `InputOption::VALUE_REQUIRED` mode for an option?
-    answers:
-      - { value: 'The option must be present and must have a value (e.g., `--env=prod`).', correct: true }
-      - { value: 'The option is required, but its value is optional.', correct: false }
-      - { value: 'The option must be present, but its value can be null.', correct: false }
-      - { value: 'The option is required only if other arguments are provided.', correct: false }
-    help: |
-      `InputOption::VALUE_REQUIRED` ensures the option is provided and has a value.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      Which built-in command is used to display information about the services registered in the dependency injection container?
-    answers:
-      - { value: '`debug:container`', correct: true }
-      - { value: '`container:list`', correct: false }
-      - { value: '`service:debug`', correct: false }
-      - { value: '`list:services`', correct: false }
-    help: |
-      The `debug:container` command, when run without arguments, lists all available services.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      How can you make a command argument accept multiple values, but only if they are explicitly provided (e.g., `php bin/console process item1 item2`)?
-    answers:
-      - { value: '`InputArgument::OPTIONAL | InputArgument::IS_ARRAY`', correct: true }
-      - { value: '`InputArgument::REQUIRED | InputArgument::IS_ARRAY`', correct: false }
-      - { value: '`InputArgument::IS_ARRAY` with a default of `[]`.', correct: true }
-      - { value: '`InputArgument::OPTIONAL_ARRAY`', correct: false }
-    help: |
-      Combining `OPTIONAL` with `IS_ARRAY` or providing an empty array as a default for an `IS_ARRAY` argument makes it accept multiple values optionally.
-      https://symfony.com/doc/current/console/input.html#arguments
-  -
-    question: >
-      What is the purpose of the `#[AsCommand(description: '...')` attribute?
-    answers:
-      - { value: 'To provide a short description of the command, displayed in the `list` command.', correct: true }
-      - { value: 'To define the command''s full help text.', correct: false }
-      - { value: 'To specify the command''s name.', correct: false }
-      - { value: 'To define the command''s usage examples.', correct: false }
-    help: |
-      The `description` key in `#[AsCommand]` sets the one-line description visible in the command list.
-      https://symfony.com/doc/current/console.html#configuring-the-command
-  -
-    question: >
-      Which built-in command is used to display information about configured event listeners and subscribers?
-    answers:
-      - { value: '`debug:event-dispatcher`', correct: true }
-      - { value: '`event:list`', correct: false }
-      - { value: '`listener:debug`', correct: false }
-      - { value: '`debug:events`', correct: false }
-    help: |
-      The `debug:event-dispatcher` command shows which listeners and subscribers are registered for which events.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: >
-      How can you get the current verbosity level of the output?
-    answers:
-      - { value: '`$output->getVerbosity()`', correct: true }
-      - { value: '`$output->isQuiet()`', correct: true }
-      - { value: '`$output->isVerbose()`', correct: true }
-      - { value: '`$output->isDebug()`', correct: true }
-    help: |
-      The `getVerbosity()` method returns the current level. Helper methods like `isQuiet()`, `isVerbose()`, and `isDebug()` provide convenient checks.
-      https://symfony.com/doc/current/console/verbosity.html
-  -
-    question: >
-      What is the purpose of the `ConsoleEvents::TERMINATE` event?
-    answers:
-      - { value: 'To perform cleanup tasks after a command has finished execution.', correct: true }
-      - { value: 'To log command execution time.', correct: true }
-      - { value: 'To handle exceptions that occur during command execution.', correct: false }
-      - { value: 'To initialize services before command execution.', correct: false }
-    help: |
-      `ConsoleEvents::TERMINATE` is ideal for tasks that need to run after the command's main logic, such as logging or resource cleanup.
-      https://symfony.com/doc/current/console/events.html#consoleevents-terminate
-  -
-    question: >
-      Which built-in command is used to display the current environment variables loaded by Symfony?
-    answers:
-      - { value: '`debug:dotenv`', correct: true }
-      - { value: '`debug:env`', correct: false }
-      - { value: '`env:show`', correct: false }
-      - { value: '`config:env`', correct: false }
-    help: |
-      The `debug:dotenv` command (from `symfony/dotenv`) shows the environment variables loaded from `.env` files.
-      https://symfony.com/doc/current/components/dotenv.html#debugging-dotenv
-  -
-    question: |
-      You want to display a section of text with a distinct background color and padding. Which built-in helper can achieve this?
-    answers:
-      - { value: '`FormatterHelper` with `formatBlock()`', correct: true }
-      - { value: '`BlockHelper`', correct: false }
-      - { value: '`SectionHelper`', correct: false }
-      - { value: '`OutputFormatter` directly.', correct: false }
-    help: |
-      The `FormatterHelper::formatBlock()` method is designed for rendering blocks of text with various styles and padding.
-      https://symfony.com/doc/current/console/helpers.html#formatterhelper
-  -
-    question: >
-      What is the purpose of the `#[AsCommand(name: 'app:my-command')]` attribute?
-    answers:
-      - { value: 'To define the unique name by which the command is invoked from the command line.', correct: true }
-      - { value: 'To set the command''s description.', correct: false }
-      - { value: 'To specify the class name of the command.', correct: false }
-      - { value: 'To register the command as a service.', correct: false }
-    help: |
-      The `name` key is crucial for identifying and executing the command.
-      https://symfony.com/doc/current/console.html#configuring-the-command
-  -
-    question: >
-      Which built-in command is used to display information about the configured Twig templates?
-    answers:
-      - { value: '`debug:twig`', correct: true }
-      - { value: '`twig:list`', correct: false }
-      - { value: '`template:debug`', correct: false }
-      - { value: '`debug:templates`', correct: false }
-    help: |
-      The `debug:twig` command lists all available Twig templates and their paths.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You need to run a shell command from within your Symfony console command and capture its output. Which built-in helper is best suited for this?
-    answers:
-      - { value: '`ProcessHelper`', correct: true }
-      - { value: '`ShellHelper`', correct: false }
-      - { value: '`SystemHelper`', correct: false }
-      - { value: '`ExecHelper`', correct: false }
-    help: |
-      The `ProcessHelper` provides a convenient way to run external processes and interact with their input/output.
-      https://symfony.com/doc/current/console/helpers.html#processhelper
-  -
-    question: >
-      What is the primary role of the `Application` class in the Symfony Console component?
-    answers:
-      - { value: 'To manage and run console commands.', correct: true }
-      - { value: 'To handle HTTP requests.', correct: false }
-      - { value: 'To provide access to the dependency injection container.', correct: false }
-      - { value: 'To define command arguments and options.', correct: false }
-    help: |
-      The `Application` class is the entry point for the console application, responsible for finding and executing commands.
-      https://symfony.com/doc/current/console.html#creating-a-console-application
-  -
-    question: >
-      How can you make an option a simple flag that doesn't accept a value (e.g., `--force`)?
-    answers:
-      - { value: 'By using `InputOption::VALUE_NONE` as the mode.', correct: true }
-      - { value: 'By setting its default value to `true`.', correct: false }
-      - { value: 'By not providing a default value.', correct: false }
-      - { value: 'By using `InputOption::NO_VALUE` as the mode.', correct: false }
-    help: |
-      `InputOption::VALUE_NONE` is specifically for boolean flags.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      Which built-in command is used to display information about the configured routes and their associated controllers?
-    answers:
-      - { value: '`debug:router`', correct: true }
-      - { value: '`router:debug`', correct: false }
-      - { value: '`route:info`', correct: false }
-      - { value: '`list:routes`', correct: false }
-    help: |
-      The `debug:router` command provides a comprehensive list of all routes.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You want to display a message to the user and then immediately exit the command with a success status. How would you do this?
-    answers:
-      - { value: '`$output->writeln(''Success!''); return Command::SUCCESS;`', correct: true }
-      - { value: '`$output->writeln(''Success!''); exit(0);`', correct: false }
-      - { value: '`$this->exitSuccess(''Success!'');`', correct: false }
-      - { value: '`$output->success(''Success!'');`', correct: false }
-    help: |
-      The `execute()` method should return `Command::SUCCESS` (which is 0) for a successful exit.
-      https://symfony.com/doc/current/console.html#return-codes
-  -
-    question: >
-      What is the purpose of the `InputInterface::getArguments()` method?
-    answers:
-      - { value: 'To retrieve all arguments as an associative array.', correct: true }
-      - { value: 'To retrieve a specific argument by name.', correct: false }
-      - { value: 'To retrieve all options as an associative array.', correct: false }
-      - { value: 'To get the raw input string.', correct: false }
-    help: |
-      `getArguments()` returns an array of all arguments provided to the command.
-      https://symfony.com/doc/current/console/input.html#arguments
-  -
-    question: >
-      What is the purpose of the `InputInterface::getOptions()` method?
-    answers:
-      - { value: 'To retrieve all options as an associative array.', correct: true }
-      - { value: 'To retrieve a specific option by name.', correct: false }
-      - { value: 'To retrieve all arguments as an associative array.', correct: false }
-      - { value: 'To get the raw input string.', correct: false }
-    help: |
-      `getOptions()` returns an array of all options provided to the command.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      Which built-in command is used to display information about the configured services and their dependencies?
-    answers:
-      - { value: '`debug:container`', correct: true }
-      - { value: '`container:debug`', correct: false }
-      - { value: '`service:list`', correct: false }
-      - { value: '`list:services`', correct: false }
-    help: |
-      The `debug:container` command is the primary tool for inspecting the service container.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: >
-      How can you add a new line to the console output without writing any text?
-    answers:
-      - { value: '`$output->writeln('');`', correct: true }
-      - { value: '`$output->newline();`', correct: false }
-      - { value: '`$output->write(PHP_EOL);`', correct: true }
-      - { value: '`$output->lineBreak();`', correct: false }
-    help: |
-      `writeln('')` writes an empty string followed by a newline. You can also explicitly write the PHP end-of-line constant.
-      https://symfony.com/doc/current/console/coloring.html#output-styles-and-colors
-  -
-    question: >
-      What is the purpose of the `InputInterface::hasArgument()` method?
-    answers:
-      - { value: 'To check if a specific argument was provided by the user.', correct: true }
-      - { value: 'To check if any arguments were provided.', correct: false }
-      - { value: 'To check if an argument is defined for the command.', correct: false }
-      - { value: 'To check if an argument has a non-null value.', correct: false }
-    help: |
-      `hasArgument()` checks if an argument with the given name exists in the input.
-      https://symfony.com/doc/current/console/input.html#arguments
-  -
-    question: >
-      What is the purpose of the `InputInterface::hasOption()` method?
-    answers:
-      - { value: 'To check if a specific option was provided by the user.', correct: true }
-      - { value: 'To check if any options were provided.', correct: false }
-      - { value: 'To check if an option is defined for the command.', correct: false }
-      - { value: 'To check if an option has a non-null value.', correct: false }
-    help: |
-      `hasOption()` checks if an option with the given name exists in the input.
-      https://symfony.com/doc/current/console/input.html#options
-  -
-    question: >
-      Which built-in command is used to display information about the configured compiler passes?
-    answers:
-      - { value: '`debug:container --compiler`', correct: true }
-      - { value: '`debug:compiler`', correct: false }
-      - { value: '`container:compiler`', correct: false }
-      - { value: '`compiler:list`', correct: false }
-    help: |
-      The `debug:container` command with the `--compiler` option shows the compiler passes.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: >
-      How can you configure a console command to accept an optional argument with a default value of 'Guest'?
-    answers:
-      - { value: '`$this->addArgument(''name'', InputArgument::OPTIONAL, ''The user name'', ''Guest'');`', correct: true }
-      - { value: '`$this->addArgument(''name'', InputArgument::OPTIONAL, ''Guest'');`', correct: false }
-      - { value: '`$this->addArgument(''name'', null, ''Guest'');`', correct: false }
-      - { value: '`$this->addArgument(''name'', InputArgument::OPTIONAL)->setDefault(''Guest'');`', correct: false }
-    help: |
-      The default value is the fourth parameter in `addArgument()`.
-      https://symfony.com/doc/current/console/input.html#arguments
-  -
-    question: >
-      What is the purpose of the `ConsoleEvents::ERROR` event?
-    answers:
-      - { value: 'To catch and handle exceptions thrown during command execution.', correct: true }
-      - { value: 'To log errors to a file.', correct: false }
-      - { value: 'To display error messages to the user.', correct: false }
-      - { value: 'To prevent command execution if an error occurs.', correct: false }
-    help: |
-      The `ConsoleEvents::ERROR` event allows you to customize error handling, such as logging or displaying custom error messages.
-      https://symfony.com/doc/current/console/events.html#consoleevents-error
-  -
-    question: >
-      Which built-in command is used to display information about the configured cache pools?
-    answers:
-      - { value: '`debug:cache`', correct: true }
-      - { value: '`cache:debug`', correct: false }
-      - { value: '`cache:list`', correct: false }
-      - { value: '`debug:pools`', correct: false }
-    help: |
-      The `debug:cache` command provides details about the cache pools defined in your application.
-      https://symfony.com/doc/current/console/usage.html#built-in-commands
-  -
-    question: |
-      You want to display a multi-line block of text with a specific style, such as an error message. Which method of `FormatterHelper` is suitable?
-    answers:
-      - { value: '`formatBlock()`', correct: true }
-      - { value: '`format()`', correct: false }
-      - { value: '`block()`', correct: false }
-      - { value: '`writeln()` with style tags.', correct: false }
-    help: |
-      `FormatterHelper::formatBlock()` is designed for formatting multi-line blocks of text with predefined or custom styles.
-      https://symfony.com/doc/current/console/helpers.html#formatterhelper
-  -
-    question: >
-      What is the purpose of the `OutputInterface::VERBOSITY_VERBOSE` level?
-    answers:
-      - { value: 'To display more information than `NORMAL`, such as progress and intermediate steps.', correct: true }
-      - { value: 'To display only verbose messages.', correct: false }
-      - { value: 'It is the default verbosity level.', correct: false }
-      - { value: 'It is used for debugging purposes only.', correct: false }
-    help: |
-      `VERBOSITY_VERBOSE` (`-v`) provides more detailed output, often used for showing progress or additional context.
-      https://symfony.com/doc/current/console/verbosity.html
+      The `Cursor::moveDown()` method moves the cursor down by the specified number of lines (default is 1).
+      https://symfony.com/doc/current/components/console/helpers/cursor.html#control-symfony-console-cursor-movement
