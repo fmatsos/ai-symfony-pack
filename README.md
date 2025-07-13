@@ -21,12 +21,12 @@ Before you begin, you need to have the [Certificationy CLI](https://github.com/c
 You can easily get this pack by cloning the repository or downloading the latest release.
 ```bash
 # Clone the repository
-git clone https://github.com/fmatsos/ai-symfony-pack.git
+git clone https://github.com/fmatsos/symfony-pack.git
 ```
 Alternatively, you can download a specific release:
 ```bash
 # Download the latest release
-curl -L https://github.com/fmatsos/ai-symfony-pack/releases/latest/download/ai-symfony-pack.zip -o ai-symfony-pack.zip
+curl -L https://github.com/fmatsos/symfony-pack/releases/latest/download/symfony-pack.zip -o symfony-pack.zip
 ```
 ## Usage
 
@@ -38,7 +38,7 @@ You can add this pack to your Certificationy environment in one of two ways:
 
     ```json
     "require": {
-        "fmatsos/ai-symfony-pack": "^v25.7.10"
+        "fmatsos/symfony-pack": "^v25.7.10"
     }
     ```
 
@@ -48,7 +48,7 @@ You can add this pack to your Certificationy environment in one of two ways:
     # config.yml
     paths:
       # Add the path to your local clone of the pack
-      - "/path/to/your/certificationy/ai-symfony-pack"
+      - "/path/to/your/certificationy/symfony-pack"
     ```
 
 ## Topics Covered
