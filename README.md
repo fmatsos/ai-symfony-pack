@@ -1,4 +1,4 @@
-Get ready to ace your Symfony 7 certification exam!
+# Get ready to ace your Symfony 7 certification exam!
 
 This repository provides a comprehensive set of AI-generated multiple-choice questions, based on the official Symfony 7 documentation, to help you prepare.
 
