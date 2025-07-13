@@ -1,6 +1,6 @@
-# Welcome to the AI Symfony 7 Certification Pack!
+Get ready to ace your Symfony 7 certification exam!
 
-Get ready to ace your Symfony 7 certification exam! This repository provides a comprehensive set of AI-generated multiple-choice questions, based on the official Symfony 7 documentation, to help you prepare.
+This repository provides a comprehensive set of AI-generated multiple-choice questions, based on the official Symfony 7 documentation, to help you prepare.
 
 ## 🚀 Features
 
@@ -137,19 +137,21 @@ This system makes it easy to see how recent the question sets are.
 ## 🤝 Contributing & Support
 
 Your contributions are welcome! While the questions are AI-generated, you can help by:
+- Suggesting improvements for clarity.
+- Proposing new question categories.
+- Improving the documentation.
 
--   Reporting inaccuracies in questions or answers.
--   Suggesting improvements for clarity.
--   Proposing new question categories.
--   Improving the documentation.
+Please open an issue for you suggestions.
 
-Please open an issue or submit a pull request with your suggestions. If you find this pack helpful, consider starring the repository or sharing it with others!
+**For legal reasons you cannot ask to add questions. No pull requests are accepted.**
 
 ## 📝 Quality Assurance and Disclaimer
 
 All questions are generated based on the official Symfony 7 documentation. If you find any issues, please report them via the issue tracker.
 
-This pack is a study aid and should be used alongside official study materials and hands-on practice. It is not officially affiliated with Symfony or SensioLabs.
+This pack is a study aid and should be used alongside official study materials and hands-on practice.
+
+**It is not officially affiliated with Symfony or SensioLabs.**
 
 ## License
 
