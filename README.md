@@ -1,117 +1,156 @@
-# AI Symfony 7 Certification Pack
+# Welcome to the AI Symfony 7 Certification Pack!
 
-An AI-generated Certificationy pack for Symfony 7 certification preparation, featuring comprehensive multiple-choice questions based on the official Symfony 7 documentation.
+Get ready to ace your Symfony 7 certification exam! This repository provides a comprehensive set of AI-generated multiple-choice questions, based on the official Symfony 7 documentation, to help you prepare.
 
-## Overview
+## 🚀 Features
 
-This repository contains YAML-formatted question sets designed to help developers prepare for the Symfony 7 certification exam. Each question set covers different certification categories and is generated using artificial intelligence trained on the official Symfony 7 documentation to ensure accuracy and relevance.
+-   **🤖 AI-Generated Content**: Questions and answers are generated from the official Symfony 7 documentation to ensure accuracy and relevance.
+-   **📚 Comprehensive Coverage**: We cover all categories of the Symfony 7 certification exam.
+-   **✅ Certificationy Compatible**: The YAML format is fully compatible with the [Certificationy](https://github.com/certificationy/certificationy-cli) training platform.
+-   **🔄 Regular Updates**: We release new question sets regularly to keep the content fresh.
+-   **📅 Version-Controlled**: A date-based versioning system helps you track releases.
 
-## Features
-
-- **Comprehensive Coverage**: Questions covering all Symfony 7 certification categories
-- **AI-Generated Content**: Questions and answers generated from official Symfony 7 documentation
-- **Certificationy Compatible**: YAML format compatible with the Certificationy training platform
-- **Regular Updates**: New question sets released regularly with fresh content
-- **Version-Controlled**: Semantic versioning system adapted for date-based releases
-
-## Installation
+## 🏁 Getting Started
 
 ### Prerequisites
 
-This pack requires the [Certificationy CLI](https://github.com/certificationy/certificationy-cli) to be installed. You can install it using Composer:
-
-```bash
-composer create-project certificationy/certificationy-cli
-```
+Before you begin, you need to have the [Certificationy CLI](https://github.com/certificationy/certificationy-cli) installed. Please follow the instructions in their repository to get it set up.
 
 ### Installing the Pack
 
-You can obtain this pack by cloning the repository or downloading a specific release:
-
+You can easily get this pack by cloning the repository or downloading the latest release.
 ```bash
 # Clone the repository
 git clone https://github.com/fmatsos/ai-symfony-pack.git
-
-# Or download a specific release
+```
+Alternatively, you can download a specific release:
+```bash
+# Download the latest release
 curl -L https://github.com/fmatsos/ai-symfony-pack/releases/latest/download/ai-symfony-pack.zip -o ai-symfony-pack.zip
 ```
-
 ## Usage
 
-Once you have both the Certificationy CLI and this pack installed, you can use the YAML files to practice Symfony 7 certification questions. Each file corresponds to a specific certification category and contains multiple-choice questions with detailed explanations.
+Once you have the Certificationy CLI and this pack, you can start practicing. Each YAML file corresponds to a specific exam category and is filled with multiple-choice questions and detailed explanations.
 
-Read documentation of Certificationy CLI for more informations about available commands.
+You can add this pack to your Certificationy environment in one of two ways:
+
+1.  **Add to Composer requirements:**
+
+    ```json
+    "require": {
+        "fmatsos/ai-symfony-pack": "^v25.7.10"
+    }
+    ```
+
+2.  **Add the path to your Certificationy configuration file:**
+
+    ```yaml
+    # config.yml
+    paths:
+      # Add the path to your local clone of the pack
+      - "/path/to/your/certificationy/ai-symfony-pack"
+    ```
+
+## Topics Covered
+
+This pack includes questions from all major Symfony 7 certification topics:
+
+### PHP (up to PHP 8.2)
+- PHP API
+- OOP: classes, interfaces, traits, abstract classes
+- Namespaces, closures, error/exception handling
+- SPL and extensions
+
+### HTTP
+- Requests/responses, methods, status codes, headers, cookies
+- Symfony HttpClient component
+- Caching, language detection, content negotiation
+
+### Symfony Architecture
+- Flex, Components, Bridges
+- Request/response lifecycle, Kernel, EventDispatcher
+- Exception handling, naming conventions, BC promise, PSR compatibility
+
+### Controllers
+- `AbstractController`, request/response handling, flash/session/cookies
+- Built-in controllers, argument resolvers, redirects
+
+### Routing
+- YAML + PHP attributes configuration
+- Constraints, defaults, domain-based routing
+- Internal routes, locale guessing, method matching
+
+### Templating (Twig)
+- Syntax (up to Twig 3.8), escaping, filters, inheritance, includes
+- Translations, interpolation, rendering controllers
+- Asset management and debugging
+
+### Forms
+- Built-in and custom form types
+- Creation, validation, theming
+- CSRF, transformers, file uploads, events
+
+### Data Validation
+- Constraints (built-in and custom), groups, group sequences
+- Validation scopes and callbacks
+
+### Dependency Injection
+- Service container and registration (YAML + attributes)
+- Autowiring, decoration, service locators, compiler passes, tags
+
+### Security
+- Authentication/authorization, firewalls, providers
+- Password hashing, roles, access control, voters
+
+### HTTP Caching
+- Cache types (browser, proxy), ESI, headers (Expires, Cache-Control, ETag)
+- Client/server caching, Symfony reverse proxy support
+
+### Console
+- Built-in and custom commands
+- Arguments/options, helpers, verbosity, console events
+
+### Automated Testing
+- PHPUnit tests (unit + functional), Client and Crawler, Profiler
+- Introspection of request/response, deprecated handling
+
+### Miscellaneous
+- DotEnv, ExpressionLanguage, Debugging, Deployment
+- Messenger, Serializer, Mailer, Finder, Lock, Runtime
+- Intl, Web Profiler, Toolbar, Clock component
 
 ## Versioning System
 
-This project uses a modified Semantic Versioning approach adapted for date-based releases:
+We use a date-based versioning system with the format `YY.M.DD.X`:
 
-**Format**: `YY.M.DD.X`
+-   **YY**: Two-digit year (e.g., `25` for 2025)
+-   **M**: Month (1-12)
+-   **DD**: Day (01-31)
+-   **X**: An increment for multiple releases on the same day
 
-Where:
-- `YY`: Year (two digits)
-- `M`: Month (1-12)
-- `DD`: Day (01-31)
-- `X`: Increment for multiple generations on the same date
+**Examples:**
+-   `25.1.15`: First release on January 15, 2025.
+-   `25.1.15.1`: Second release on January 15, 2025.
 
-### Examples:
-- `25.1.15.1`: First generation on January 15, 2025
-- `25.1.15.2`: Second generation on January 15, 2025
-- `25.3.08.1`: First generation on March 8, 2025
+This system makes it easy to see how recent the question sets are.
 
-This versioning system allows for easy identification of when question sets were generated while maintaining compatibility with standard version management tools.
+## 🤝 Contributing & Support
 
-## Question Categories
+Your contributions are welcome! While the questions are AI-generated, you can help by:
 
-The pack covers all major Symfony 7 certification topics including:
+-   Reporting inaccuracies in questions or answers.
+-   Suggesting improvements for clarity.
+-   Proposing new question categories.
+-   Improving the documentation.
 
-- Architecture and Components
-- Controllers and Routing
-- Templating with Twig
-- Forms and Validation
-- Doctrine ORM Integration
-- Security and Authentication
-- Console Commands
-- Event Dispatcher
-- Dependency Injection
-- HTTP Foundation
-- Testing
-- Performance and Optimization
+Please open an issue or submit a pull request with your suggestions. If you find this pack helpful, consider starring the repository or sharing it with others!
 
-## Contributing
+## 📝 Quality Assurance and Disclaimer
 
-While the questions are AI-generated, contributions are welcome for:
+All questions are generated based on the official Symfony 7 documentation. If you find any issues, please report them via the issue tracker.
 
-- Reporting inaccuracies in questions or answers
-- Suggesting improvements to question clarity
-- Proposing new question categories
-- Documentation improvements
-
-Please open an issue or submit a pull request with your suggestions.
-
-## Quality Assurance
-
-All questions are generated based on the official Symfony 7 documentation to ensure accuracy and relevance. However, if you encounter any issues or inaccuracies, please report them through the issue tracker.
+This pack is a study aid and should be used alongside official study materials and hands-on practice. It is not officially affiliated with Symfony or SensioLabs.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Disclaimer
-
-This pack is designed as a study aid for Symfony 7 certification preparation. While the content is generated from official documentation, it should be used in conjunction with official study materials and hands-on practice.
-
-## Support
-
-If you find this pack helpful for your certification preparation, please consider:
-
-- Starring the repository
-- Sharing it with other developers
-- Reporting any issues you encounter
-- Contributing improvements
-
-For questions or support, please use the GitHub issue tracker.
-
----
-
-**Note**: This pack is not officially affiliated with Symfony or SensioLabs. It is an independent study resource created to help developers prepare for the Symfony certification exam.
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
