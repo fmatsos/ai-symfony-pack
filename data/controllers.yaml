@@ -1,1321 +1,1770 @@
 category: Controllers
 questions:
-  - question: Which of the following is the recommended naming convention for a
-      Symfony controller class?
-    answers:
-      - value: MyController.php
-        correct: false
-      - value: MyController.php (e.g., `App\Controller\MyController`)
-        correct: true
-      - value: my_controller.php
-        correct: false
-      - value: ControllerMy.php
-        correct: false
-    help: Symfony recommends controller classes to be suffixed with 'Controller' and
-      placed in the `src/Controller/` namespace, e.g.,
-      `App\Controller\MyController`.
-  - question: What is the primary benefit of extending
-      `Symfony\Bundle\FrameworkBundle\Controller\AbstractController` in your
+  - question: What is the primary purpose of extending
+      `Symfony\Bundle\FrameworkBundle\Controller\AbstractController` for your
       Symfony controllers?
     answers:
-      - value: It automatically registers the controller as a service.
-        correct: false
-      - value: It provides convenient helper methods for common controller tasks like
-          rendering templates, generating URLs, and handling redirects.
+      - value: To gain access to a suite of helper methods for common controller tasks.
         correct: true
-      - value: It enforces strict type-hinting for all action arguments.
+      - value: It is a mandatory requirement for all Symfony 7 controllers.
         correct: false
-      - value: It enables automatic routing for all public methods.
+      - value: To automatically register the controller as a public service.
         correct: false
-    help: The `AbstractController` provides access to various helper methods,
-      simplifying common controller tasks. While controllers are often
-      registered as services, this is typically handled by autoconfiguration and
-      the `controller.service_arguments` tag, not directly by extending
-      `AbstractController`.
-  - question: How do you correctly access the `Request` object within a Symfony
-      controller action method to retrieve query parameters?
+      - value: To enable automatic routing configuration via annotations.
+        correct: false
+    help: |-
+      The `AbstractController` provides convenient helper methods like `render()`, `generateUrl()`, `redirectToRoute()`, and `json()`, simplifying common controller tasks. It is not mandatory to extend it, but it's a common practice for convenience.
+      https://symfony.com/doc/current/controller.html#extending-the-base-controller-class
+  - question: Which PHP attribute is commonly used to map a URL path to a controller
+      method in Symfony 7?
     answers:
-      - value: "public function index(Request $request): Response { $page =
-          $request->query->get('page'); }"
+      - value: "`#[Route]`"
         correct: true
-      - value: "public function index(): Response { $request =
-          $this->get('request_stack')->getCurrentRequest(); $page =
-          $request->query->get('page'); }"
+      - value: "`#[Path]`"
         correct: false
-      - value: "public function index($request): Response { $page =
-          $request->query->get('page'); }"
+      - value: "`#[Url]`"
         correct: false
-      - value: "public function index(): Response { $page = $_GET['page']; }"
+      - value: "`#[MapRoute]`"
         correct: false
-    help: The `Request` object is automatically injected into controller action
-      methods when type-hinted with `Symfony\Component\HttpFoundation\Request`.
-      You can then access query parameters via
-      `$request->query->get('paramName')`.
-  - question: Which class must a Symfony controller action method return?
+    help: >-
+      The `Symfony\Component\Routing\Attribute\Route` attribute is the standard
+      way to define routes directly on controller methods in Symfony 7.
+
+      https://symfony.com/doc/current/controller.html#routing
+  - question: Which Symfony class is typically returned by a controller method to
+      represent the HTTP response?
     answers:
-      - value: "`Symfony\\Component\\HttpFoundation\\Request`"
-        correct: false
       - value: "`Symfony\\Component\\HttpFoundation\\Response`"
         correct: true
-      - value: "`Symfony\\Component\\HttpFoundation\\JsonResponse`"
+      - value: "`Symfony\\Component\\HttpFoundation\\Request`"
         correct: false
-      - value: "`Symfony\\Component\\HttpFoundation\\RedirectResponse`"
+      - value: "`Symfony\\Component\\HttpKernel\\Kernel`"
         correct: false
-    help: A Symfony controller action method must always return an instance of
-      `Symfony\Component\HttpFoundation\Response` or one of its subclasses
-      (e.g., `JsonResponse`, `RedirectResponse`).
-  - question: >-
-      Consider the following code snippet:
+      - value: "`Psr\\Http\\Message\\ResponseInterface`"
+        correct: false
+    help: >-
+      A Symfony controller's primary responsibility is to read from a `Request`
+      object and create/return a `Response` object.
 
+      https://symfony.com/doc/current/controller.html#the-response
+  - question: You need to generate a URL for a route named `app_product_show` with a
+      parameter `id` set to `123`. Which `AbstractController` helper method
+      should you use?
+    answers:
+      - value: "`$this->generateUrl('app_product_show', ['id' => 123])`"
+        correct: true
+      - value: "`$this->getUrl('app_product_show', ['id' => 123])`"
+        correct: false
+      - value: "`$this->route('app_product_show', ['id' => 123])`"
+        correct: false
+      - value: "`$this->path('app_product_show', ['id' => 123])`"
+        correct: false
+    help: >-
+      The `generateUrl()` method of `AbstractController` creates a URL for a
+      given route name and parameters.
+
+      https://symfony.com/doc/current/controller.html#generating-urls
+  - question: To redirect a user to the route `app_homepage` with an HTTP status
+      code of 301 (Moved Permanently), which `AbstractController` helper method
+      is most appropriate?
+    answers:
+      - value: "`$this->redirectToRoute('app_homepage', [], 301)`"
+        correct: true
+      - value: "`$this->redirect('app_homepage', 301)`"
+        correct: false
+      - value: "`$this->forward('app_homepage', [], 301)`"
+        correct: false
+      - value: "`new RedirectResponse($this->generateUrl('app_homepage'), 301)`"
+        correct: true
+    help: >-
+      The `redirectToRoute()` method is a convenient shortcut to create a
+      `RedirectResponse` to a specific route. You can specify the HTTP status
+      code as the third argument. Alternatively, you can manually create a
+      `RedirectResponse` with the generated URL.
+
+      https://symfony.com/doc/current/controller.html#redirecting
+  - question: How can you access the `Symfony\Component\HttpFoundation\Request`
+      object within a controller method in Symfony 7, assuming autowiring is
+      enabled?
+    answers:
+      - value: By type-hinting `Request $request` as an argument in the controller
+          method.
+        correct: true
+      - value: By calling `$this->getRequest()` if extending `AbstractController`.
+        correct: false
+      - value: By accessing the global `$_REQUEST` superglobal.
+        correct: false
+      - value: By calling `Request::createFromGlobals()` inside the method.
+        correct: false
+    help: >-
+      Symfony's argument value resolvers, including `RequestValueResolver`,
+      automatically inject the `Request` object when you type-hint it in your
+      controller method signature.
+
+      https://symfony.com/doc/current/controller.html#accessing-the-request
+  - question: Given a URL `/products?page=5&limit=10`, how would you retrieve the
+      `page` query parameter with a default value of `1` inside a controller
+      method?
+    answers:
+      - value: "`$request->query->get('page', 1)`"
+        correct: true
+      - value: "`$request->get('page', 1)`"
+        correct: false
+      - value: "`$request->attributes->get('page', 1)`"
+        correct: false
+      - value: "`$_GET['page'] ?? 1`"
+        correct: false
+    help: >-
+      The `Request` object's `query` property (an instance of `ParameterBag`) is
+      used to access query parameters. The `get()` method allows specifying a
+      default value.
+
+      https://symfony.com/doc/current/controller.html#accessing-the-request
+  - question: Which of the following is the recommended way to generate a 404 Not
+      Found HTTP response from a Symfony controller when a resource is not
+      found?
+    answers:
+      - value: Throwing a `NotFoundHttpException`.
+        correct: true
+      - value: Calling `$this->createNotFoundException()` if extending
+          `AbstractController`.
+        correct: true
+      - value: Returning `new Response('Not Found', 404)`.
+        correct: false
+      - value: Calling `$this->error(404)`.
+        correct: false
+    help: >-
+      Symfony provides `NotFoundHttpException` for 404 errors.
+      `AbstractController` offers a convenient shortcut method,
+      `createNotFoundException()`, which internally throws this exception.
+
+      https://symfony.com/doc/current/controller.html#generating-404-pages
+  - question: You want to make an internal sub-request to
+      `App\Controller\ReportController::generateReport` from your current
+      controller, passing `userId` and `format` as arguments. Which
+      `AbstractController` method should you use?
+    answers:
+      - value: "`$this->forward('App\\Controller\\ReportController::generateReport',
+          ['userId' => $id, 'format' => 'pdf'])`"
+        correct: true
+      - value: "`$this->redirectToRoute('report_generate', ['userId' => $id, 'format' =>
+          'pdf'])`"
+        correct: false
+      - value: "`$this->render('report/generate.html.twig', ['userId' => $id, 'format'
+          => 'pdf'])`"
+        correct: false
+      - value: "`$this->call('App\\Controller\\ReportController::generateReport',
+          ['userId' => $id, 'format' => 'pdf'])`"
+        correct: false
+    help: >-
+      The `forward()` method allows you to make an internal sub-request to
+      another controller action. It returns the `Response` object from the
+      forwarded controller.
+
+      https://symfony.com/doc/current/controller/forwarding.html
+  - question: How can you inject a service, such as `Psr\Log\LoggerInterface`, into
+      a Symfony controller method using autowiring?
+    answers:
+      - value: By type-hinting the service interface or class as a method argument.
+        correct: true
+      - value: By manually fetching it from the container using
+          `$this->container->get('logger')`.
+        correct: false
+      - value: "By defining it in `services.yaml` with `arguments: ['@logger']`."
+        correct: false
+      - value: By using the `#[Inject]` attribute on the method argument.
+        correct: false
+    help: |-
+      Symfony's autowiring automatically injects services into controller action methods when you type-hint the required service's class or interface.
+      https://symfony.com/doc/current/controller.html#injecting-services-into-controllers
+  - question: You need to inject a specific logger service named
+      `monolog.logger.security` into your controller. How would you achieve this
+      using PHP attributes?
+    answers:
+      - value: |-
+          ```php
+          #[Autowire(service: 'monolog.logger.security')]
+          LoggerInterface $securityLogger
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[Inject('monolog.logger.security')]
+          LoggerInterface $securityLogger
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[Service('monolog.logger.security')]
+          LoggerInterface $securityLogger
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[Target('monolog.logger.security')]
+          LoggerInterface $securityLogger
+          ```
+        correct: false
+    help: |-
+      The `#[Autowire]` attribute allows for more granular control over dependency injection, including injecting specific named services.
+      https://symfony.com/doc/current/controller.html#injecting-specific-services-or-parameters
+  - question: "Consider a route `#[Route('/product/{id}')]` and a controller method
+      `public function show(Product $product): Response`. What Symfony component
+      automatically resolves the `Product` object from the `id` route
+      parameter?"
+    answers:
+      - value: The `EntityValueResolver`.
+        correct: true
+      - value: The `RequestAttributeValueResolver`.
+        correct: false
+      - value: The `ServiceValueResolver`.
+        correct: false
+      - value: The `ParamConverter` (deprecated in Symfony 7 for this use case).
+        correct: false
+    help: |-
+      The `EntityValueResolver` (part of the `ArgumentResolver` component) automatically queries a Doctrine entity based on a route parameter and injects the object.
+      https://symfony.com/doc/current/controller/value_resolver.html#entityvalueresolver
+  - question: To automatically map an incoming JSON request payload to a `UserDto`
+      object in a controller method, which PHP attribute should you use?
+    answers:
+      - value: "`#[MapRequestPayload]`"
+        correct: true
+      - value: "`#[MapJson]`"
+        correct: false
+      - value: "`#[BindPayload]`"
+        correct: false
+      - value: "`#[RequestBody]`"
+        correct: false
+    help: >-
+      The `#[MapRequestPayload]` attribute automatically maps the request
+      payload (e.g., JSON, XML, form data) into a type-hinted object.
+
+      https://symfony.com/doc/current/controller.html#mapping-request-payloads
+  - question: You want to map the entire URL query string to a `SearchQueryDto`
+      object. Which PHP attribute facilitates this in a controller method?
+    answers:
+      - value: "`#[MapQueryString]`"
+        correct: true
+      - value: "`#[MapRequestPayload]`"
+        correct: false
+      - value: "`#[MapQuery]`"
+        correct: false
+      - value: "`#[Query]`"
+        correct: false
+    help: |-
+      The `#[MapQueryString]` attribute maps the entire query string into a single DTO object, simplifying parameter handling.
+      https://symfony.com/doc/current/controller.html#mapping-the-entire-query-string-to-a-dto
+  - question: How would you map a specific query parameter `firstName` from the URL
+      to a `string` argument in your controller method?
+    answers:
+      - value: |-
+          ```php
+          #[MapQueryParameter]
+          string $firstName
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[QueryParameter('firstName')]
+          string $firstName
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[RequestParameter('firstName')]
+          string $firstName
+          ```
+        correct: false
+      - value: |-
+          ```php
+          string $firstName = $request->query->get('firstName')
+          ```
+        correct: false
+    help: |-
+      The `#[MapQueryParameter]` attribute automatically maps individual query parameters from the URL query string to controller action arguments.
+      https://symfony.com/doc/current/controller.html#mapping-individual-query-parameters
+  - question: What is an 'invokable controller' in Symfony, and how is its main
+      method typically named?
+    answers:
+      - value: A controller class that defines a `__invoke()` method, allowing the class
+          instance itself to be called as a function.
+        correct: true
+      - value: A controller that can be called via a console command.
+        correct: false
+      - value: A controller that uses the `#[Invoke]` attribute.
+        correct: false
+      - value: A controller that returns an invokable object.
+        correct: false
+    help: |-
+      An invokable controller is a class that implements the `__invoke()` magic method. This allows the class name itself to be used as the controller reference in routing, making it suitable for single-action controllers.
+      https://symfony.com/doc/current/controller/service.html#invokable-controllers
+  - question: By default, how does Symfony register controller classes as services
+      to enable autowiring and dependency injection?
+    answers:
+      - value: By automatically tagging them with `controller.service_arguments` when
+          they are located in the `src/Controller/` directory.
+        correct: true
+      - value: By requiring them to extend `AbstractController`.
+        correct: false
+      - value: By explicitly defining them as services in `config/services.yaml`.
+        correct: false
+      - value: By using the `#[AsController]` attribute on the class.
+        correct: true
+    help: |-
+      Symfony automatically registers classes in `src/Controller/` as services and applies the `controller.service_arguments` tag, enabling autowiring. The `#[AsController]` attribute explicitly applies this tag.
+      https://symfony.com/doc/current/controller/service.html#controllers-as-services
+  - question: How do you add a 'success' flash message with the content 'Item saved
+      successfully!' from within a Symfony controller?
+    answers:
+      - value: "`$this->addFlash('success', 'Item saved successfully!')`"
+        correct: true
+      - value: "`$session->getFlashBag()->add('success', 'Item saved successfully!')`"
+        correct: true
+      - value: "`$this->get('session')->getFlashBag()->add('success', 'Item saved
+          successfully!')`"
+        correct: false
+      - value: "`$this->flash('success', 'Item saved successfully!')`"
+        correct: false
+    help: >-
+      If extending `AbstractController`, use the `addFlash()` helper. Otherwise,
+      inject the `SessionInterface` and use its `getFlashBag()->add()` method.
+
+      https://symfony.com/doc/current/controller.html#flash-messages
+  - question: Where are flash messages stored, and how are they typically retrieved
+      in a Twig template?
+    answers:
+      - value: They are stored in the user's session and retrieved in Twig using
+          `app.flashes`.
+        correct: true
+      - value: They are stored in cookies and retrieved in Twig using
+          `app.request.cookies.flashes`.
+        correct: false
+      - value: They are stored in the database and retrieved via a custom service.
+        correct: false
+      - value: They are stored in the request attributes and retrieved in Twig using
+          `app.request.attributes.flashes`.
+        correct: false
+    help: >-
+      Flash messages are temporary session messages. They are added to the
+      session and automatically cleared after being retrieved, typically in a
+      Twig template via the `app.flashes` global variable.
+
+      https://symfony.com/doc/current/controller.html#flash-messages
+  - question: To return a JSON response from a controller, which
+      `AbstractController` helper method is provided?
+    answers:
+      - value: "`$this->json($data, $status, $headers, $context)`"
+        correct: true
+      - value: "`$this->renderJson($data)`"
+        correct: false
+      - value: "`new JsonResponse($data)`"
+        correct: true
+      - value: "`$this->responseJson($data)`"
+        correct: false
+    help: >-
+      The `json()` method of `AbstractController` is a convenient way to create
+      and return a `JsonResponse` object. You can also instantiate
+      `JsonResponse` directly.
+
+      https://symfony.com/doc/current/controller.html#returning-json-response
+  - question: You need to serve a file located at `/path/to/document.pdf` as a
+      download. Which `AbstractController` helper method is suitable for this?
+    answers:
+      - value: "`$this->file('/path/to/document.pdf', 'report.pdf', 'attachment')`"
+        correct: true
+      - value: "`$this->download('/path/to/document.pdf')`"
+        correct: false
+      - value: "`$this->stream('/path/to/document.pdf')`"
+        correct: false
+      - value: "`new BinaryFileResponse('/path/to/document.pdf')`"
+        correct: true
+    help: >-
+      The `file()` method of `AbstractController` creates and returns a
+      `BinaryFileResponse` for serving files. You can specify the filename and
+      disposition. Directly instantiating `BinaryFileResponse` is also an
+      option.
+
+      https://symfony.com/doc/current/controller.html#serving-files
+  - question: How can you access a configuration parameter, such as
+      `kernel.project_dir`, from within a Symfony controller?
+    answers:
+      - value: Using `$this->getParameter('kernel.project_dir')` if extending
+          `AbstractController`.
+        correct: true
+      - value: By injecting `ParameterBagInterface $parameterBag` and using
+          `$parameterBag->get('kernel.project_dir')`.
+        correct: true
+      - value: By accessing `$_ENV['KERNEL_PROJECT_DIR']`.
+        correct: false
+      - value: By calling `Kernel::getProjectDir()`.
+        correct: false
+    help: |-
+      The `getParameter()` method is a helper provided by `AbstractController`. You can also inject the `ParameterBagInterface` service to access parameters.
+      https://symfony.com/doc/current/controller.html#accessing-configuration-parameters
+  - question: Which Twig function allows you to embed the output of another Symfony
+      controller directly into a template?
+    answers:
+      - value: "`render()`"
+        correct: true
+      - value: "`include()`"
+        correct: false
+      - value: "`embed()`"
+        correct: false
+      - value: "`controller_embed()`"
+        correct: false
+    help: >-
+      The `render()` Twig function is used to make an internal request to a URI
+      or controller and return its output, allowing for embedding controllers.
+
+      https://symfony.com/doc/current/templates.html#embedding-controllers
+  - question: What is the purpose of the `framework.fragments.path` configuration
+      option in Symfony?
+    answers:
+      - value: It defines the special URL path used by Symfony to serve template
+          fragments when controllers are embedded using the `controller()` Twig
+          function.
+        correct: true
+      - value: It specifies the default path for Twig templates.
+        correct: false
+      - value: It configures the location for cached template fragments.
+        correct: false
+      - value: It enables ESI (Edge Side Includes) for controller embedding.
+        correct: false
+    help: >-
+      The `framework.fragments.path` configuration option sets the internal URL
+      path for Symfony to handle sub-requests generated by `controller()` in
+      Twig, without requiring a public route for the embedded controller.
+
+      https://symfony.com/doc/current/templates.html#embedding-controllers
+  - question: Which Symfony event is dispatched after the controller has been
+      determined but *before* it is executed, allowing for its modification?
+    answers:
+      - value: "`kernel.controller`"
+        correct: true
+      - value: "`kernel.request`"
+        correct: false
+      - value: "`kernel.response`"
+        correct: false
+      - value: "`kernel.view`"
+        correct: false
+    help: >-
+      The `kernel.controller` event is dispatched by `HttpKernel::handle()`
+      immediately after the controller callable has been determined, allowing
+      listeners to inspect or modify it.
+
+      https://symfony.com/doc/current/reference/events.html#kernel-controller
+  - question: Which Symfony event is dispatched just before a controller is called,
+      allowing modification of the arguments passed to it?
+    answers:
+      - value: "`kernel.controller_arguments`"
+        correct: true
+      - value: "`kernel.controller`"
+        correct: false
+      - value: "`kernel.request`"
+        correct: false
+      - value: "`kernel.view`"
+        correct: false
+    help: |-
+      The `kernel.controller_arguments` event is dispatched just before the controller is executed, providing an opportunity to modify the arguments that will be passed to it.
+      https://symfony.com/doc/current/reference/events.html#kernel-controller-arguments
+  - question: If a controller returns a value that is *not* a `Response` object,
+      which Symfony event is dispatched to allow transformation of this value
+      into a `Response`?
+    answers:
+      - value: "`kernel.view`"
+        correct: true
+      - value: "`kernel.response`"
+        correct: false
+      - value: "`kernel.finish_request`"
+        correct: false
+      - value: "`kernel.terminate`"
+        correct: false
+    help: >-
+      The `kernel.view` event is dispatched only if the controller does not
+      return a `Response` object, allowing listeners to transform the return
+      value into a `Response`.
+
+      https://symfony.com/doc/current/reference/events.html#kernel-view
+  - question: To apply a security check, such as requiring `ROLE_ADMIN`, to *all*
+      actions within an `AdminController` class, where would you place the
+      `#[IsGranted]` attribute?
+    answers:
+      - value: On the `AdminController` class definition.
+        correct: true
+      - value: On the constructor of the `AdminController`.
+        correct: false
+      - value: In `config/security.yaml` under `access_control`.
+        correct: true
+      - value: Within each method of the `AdminController`.
+        correct: false
+    help: |-
+      The `#[IsGranted]` attribute can be applied to an entire controller class to enforce access control for all its methods. Alternatively, `access_control` rules in `security.yaml` can achieve the same.
+      https://symfony.com/doc/current/security.html#securing-controllers-and-templates
+  - question: How can you use the `#[IsGranted]` attribute to apply a more complex
+      security expression, such as requiring either `ROLE_ADMIN` or
+      `ROLE_MANAGER`?
+    answers:
+      - value: >-
+          ```php
+
+          #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or
+          is_granted("ROLE_MANAGER")'))]
+
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[IsGranted(['ROLE_ADMIN', 'ROLE_MANAGER'])]
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[IsGranted('ROLE_ADMIN || ROLE_MANAGER')]
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[IsGranted(roles: ['ROLE_ADMIN', 'ROLE_MANAGER'])]
+          ```
+        correct: false
+    help: |-
+      The `#[IsGranted]` attribute accepts a Symfony Expression Language `Expression` object for complex authorization rules.
+      https://symfony.com/doc/current/security/expressions.html#using-expressions-in-isgranted
+  - question: Which `AbstractController` method can be used to programmatically
+      enforce access control within a controller action, throwing an
+      `AccessDeniedException` if the condition is not met?
+    answers:
+      - value: "`$this->denyAccessUnlessGranted('ROLE_ADMIN')`"
+        correct: true
+      - value: "`$this->isGranted('ROLE_ADMIN')`"
+        correct: false
+      - value: "`$this->checkAccess('ROLE_ADMIN')`"
+        correct: false
+      - value: "`$this->throwAccessDeniedUnlessGranted('ROLE_ADMIN')`"
+        correct: false
+    help: |-
+      The `denyAccessUnlessGranted()` method is a convenient helper in `AbstractController` to enforce security rules programmatically. It throws an `AccessDeniedException` if the user does not have the required access.
+      https://symfony.com/doc/current/security.html#checking-access-inside-a-controller
+  - question: Which `AbstractController` method allows you to send HTTP 103 Early
+      Hints to the client for preloading resources?
+    answers:
+      - value: "`$this->sendEarlyHints($links)`"
+        correct: true
+      - value: "`$this->preloadResources($links)`"
+        correct: false
+      - value: "`$this->addLinkHeader($links)`"
+        correct: false
+      - value: "`$this->earlyHints($links)`"
+        correct: false
+    help: >-
+      The `sendEarlyHints()` method in `AbstractController` allows you to send
+      HTTP 103 Early Hints, which can improve perceived performance by allowing
+      browsers to prefetch resources. This feature requires SAPI support (e.g.,
+      FrankenPHP).
+
+      https://symfony.com/doc/current/controller.html#sending-early-hints
+  - question: When creating a custom argument value resolver, what Symfony service
+      tag must be applied to its service definition for Symfony to discover and
+      use it?
+    answers:
+      - value: "`controller.argument_value_resolver`"
+        correct: true
+      - value: "`argument_resolver`"
+        correct: false
+      - value: "`kernel.argument_resolver`"
+        correct: false
+      - value: "`controller.resolver`"
+        correct: false
+    help: |-
+      Custom argument value resolvers must be tagged with `controller.argument_value_resolver` in your service configuration to be recognized by Symfony's argument resolution system.
+      https://symfony.com/doc/current/controller/value_resolver.html#registering-the-value-resolver
+  - question: To explicitly target a specific argument resolver for a controller
+      argument, for example, `SessionValueResolver::class` for a nullable
+      `SessionInterface $session` argument, which PHP attribute would you use?
+    answers:
+      - value: |-
+          ```php
+          #[ValueResolver(SessionValueResolver::class)]
+          SessionInterface $session = null
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[TargetResolver(SessionValueResolver::class)]
+          SessionInterface $session = null
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[ResolveWith(SessionValueResolver::class)]
+          SessionInterface $session = null
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[ArgumentResolver(SessionValueResolver::class)]
+          SessionInterface $session = null
+          ```
+        correct: false
+    help: |-
+      The `#[ValueResolver]` attribute allows you to explicitly specify which argument resolver should be used for a particular controller argument, overriding the default resolution order.
+      https://symfony.com/doc/current/controller/value_resolver.html#targeting-a-specific-argument-resolver
+  - question: Which built-in argument resolver in Symfony automatically converts a
+      request attribute into a `DateTimeInterface` object?
+    answers:
+      - value: "`DateTimeValueResolver`"
+        correct: true
+      - value: "`DateValueResolver`"
+        correct: false
+      - value: "`RequestAttributeValueResolver`"
+        correct: false
+      - value: "`ObjectValueResolver`"
+        correct: false
+    help: |-
+      The `DateTimeValueResolver` attempts to find a request attribute matching the argument name and injects a `DateTimeInterface` object if type-hinted correctly.
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: Which built-in argument resolver is responsible for injecting services
+      from the dependency injection container into controller arguments based on
+      type hints?
+    answers:
+      - value: "`ServiceValueResolver`"
+        correct: true
+      - value: "`AutowireValueResolver`"
+        correct: false
+      - value: "`DependencyValueResolver`"
+        correct: false
+      - value: "`ContainerValueResolver`"
+        correct: false
+    help: |-
+      The `ServiceValueResolver` injects services from the dependency injection container if the argument is type-hinted with a valid service class or interface.
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: Which built-in argument resolver injects the current
+      `Symfony\Component\HttpFoundation\Request` object into a controller
+      argument type-hinted with `Request`?
+    answers:
+      - value: "`RequestValueResolver`"
+        correct: true
+      - value: "`HttpRequestValueResolver`"
+        correct: false
+      - value: "`GlobalRequestValueResolver`"
+        correct: false
+      - value: "`RequestObjectValueResolver`"
+        correct: false
+    help: |-
+      The `RequestValueResolver` injects the current `Symfony\Component\HttpFoundation\Request` object if the controller argument is type-hinted with `Request` or a class extending `Request`.
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: If a controller argument has a default value (e.g., `int $page = 1`)
+      and no other resolver provides a value, which built-in argument resolver
+      sets this default?
+    answers:
+      - value: "`DefaultValueResolver`"
+        correct: true
+      - value: "`OptionalValueResolver`"
+        correct: false
+      - value: "`FallbackValueResolver`"
+        correct: false
+      - value: "`ArgumentDefaultValueResolver`"
+        correct: false
+    help: |-
+      The `DefaultValueResolver` sets the default value of the argument if a default is present in the method signature and the argument is optional (not provided by other resolvers).
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: What is the typical naming convention for controller classes in a
+      Symfony application?
+    answers:
+      - value: Classes typically end with `Controller` (e.g., `ProductController`).
+        correct: true
+      - value: Classes typically end with `Action` (e.g., `ProductAction`).
+        correct: false
+      - value: Classes are named after the entity they manage (e.g., `Product`).
+        correct: false
+      - value: Classes are named after the route (e.g., `AppLuckyNumber`).
+        correct: false
+    help: >-
+      Symfony encourages naming controller classes with the `Controller` suffix
+      (e.g., `LuckyController`, `ProductController`) and placing them in the
+      `src/Controller/` directory.
+
+      https://symfony.com/doc/current/controller.html#basic-controller
+  - question: In a Symfony application, what is the primary role of the
+      `public/index.php` file?
+    answers:
+      - value: It acts as the front controller, handling all incoming HTTP requests.
+        correct: true
+      - value: It defines all the application's routes.
+        correct: false
+      - value: It contains the main application logic and business rules.
+        correct: false
+      - value: It is responsible for rendering all Twig templates.
+        correct: false
+    help: |-
+      The `public/index.php` file is the front controller. All requests are routed through this single entry point, which then bootstraps the Symfony application and dispatches the request to the appropriate controller.
+      https://symfony.com/doc/current/configuration/front_controllers_and_kernel.html
+  - question: When handling a form submission in a Symfony controller, what is the
+      correct sequence of actions after creating the form instance?
+    answers:
+      - value: Handle the request, check if the form is submitted, then check if it's
+          valid.
+        correct: true
+      - value: Check if the form is submitted, then handle the request, then check
+          validity.
+        correct: false
+      - value: Check if the form is valid, then handle the request, then check
+          submission.
+        correct: false
+      - value: Handle the request, then check if it's valid, then check if it's
+          submitted.
+        correct: false
+    help: >-
+      The typical flow for form handling in a controller is: create form, call
+      `handleRequest($request)`, then check `isSubmitted()` and `isValid()`.
+
+      https://symfony.com/doc/current/forms.html#handling-form-submissions
+  - question: After processing a form in a controller, how do you typically pass the
+      form object to a Twig template for rendering?
+    answers:
+      - value: "By passing the form's view object to the `render()` method: `return
+          $this->render('template.html.twig', ['form' => $form->createView()])`"
+        correct: true
+      - value: "By passing the form instance directly: `return
+          $this->render('template.html.twig', ['form' => $form])`"
+        correct: false
+      - value: By making the form globally available in Twig.
+        correct: false
+      - value: By calling `$form->render()` and passing the HTML string.
+        correct: false
+    help: >-
+      You pass the form's view object (obtained via `$form->createView()`) to
+      the template. Twig's form rendering functions then use this view object.
+
+      https://symfony.com/doc/current/forms.html#rendering-the-form
+  - question: To map a request payload containing a nested array of DTOs (e.g.,
+      `UserDto[]` within an `EmployeesDto`), what additional PHP packages are
+      required for `MapRequestPayload` to work correctly?
+    answers:
+      - value: "`phpstan/phpdoc-parser` and `phpdocumentor/type-resolver`"
+        correct: true
+      - value: "`symfony/serializer` and `symfony/property-access`"
+        correct: false
+      - value: "`doctrine/annotations` and `doctrine/collections`"
+        correct: false
+      - value: No additional packages are required; it works out-of-the-box.
+        correct: false
+    help: >-
+      For mapping nested DTO arrays, `MapRequestPayload` relies on
+      `phpstan/phpdoc-parser` and `phpdocumentor/type-resolver` to correctly
+      parse PHP DocBlocks for type information.
+
+      https://symfony.com/doc/current/controller.html#mapping-nested-dto-arrays
+  - question: How can you execute a Symfony console command (e.g., `debug:twig`)
+      programmatically from within a controller?
+    answers:
+      - value: By creating an `Application` instance, setting `setAutoExit(false)`,
+          creating an `ArrayInput`, and running the command with a
+          `BufferedOutput`.
+        correct: true
+      - value: By calling `$this->runCommand('debug:twig')`.
+        correct: false
+      - value: By injecting the `CommandBusInterface` and dispatching a command message.
+        correct: false
+      - value: By using `exec('php bin/console debug:twig')`.
+        correct: false
+    help: >-
+      To run a console command programmatically, you need to instantiate
+      `Symfony\Bundle\FrameworkBundle\Console\Application`, configure it not to
+      exit, and provide `ArrayInput` and `BufferedOutput` objects.
+
+      https://symfony.com/doc/current/console/command_in_controller.html
+  - question: You want to create a `Response` object with a 200 OK status code and
+      custom content type `text/css`. How would you achieve this?
+    answers:
+      - value: |-
+          ```php
+          $response = new Response('<style> ... </style>');
+          $response->headers->set('Content-Type', 'text/css');
+          ```
+        correct: true
+      - value: >-
+          ```php
+
+          $response = new Response('<style> ... </style>', 200, ['Content-Type'
+          => 'text/css']);
+
+          ```
+        correct: true
+      - value: |-
+          ```php
+          $response = $this->renderCss('<style> ... </style>');
+          ```
+        correct: false
+      - value: |-
+          ```php
+          $response = new Response();
+          $response->setContent('<style> ... </style>');
+          $response->setStatusCode(Response::HTTP_OK);
+          $response->setContentType('text/css');
+          ```
+        correct: false
+    help: >-
+      You can set headers on a `Response` object using its `headers` property,
+      which is a `HeaderBag` instance. You can also pass headers directly in the
+      constructor.
+
+      https://symfony.com/doc/current/controller.html#creating-a-response
+  - question: Which of the following is a valid way to set a `Cache-Control` header
+      on a `Response` object in Symfony?
+    answers:
+      - value: "`$response->headers->set('Cache-Control', 'max-age=3600, public');`"
+        correct: true
+      - value: "`$response->setCacheControl('max-age=3600, public');`"
+        correct: false
+      - value: "`$response->cache('max-age=3600, public');`"
+        correct: false
+      - value: "`$response->withCacheControl('max-age=3600, public');`"
+        correct: false
+    help: |-
+      HTTP headers, including `Cache-Control`, are managed via the `Response` object's `headers` property, which is a `HeaderBag`.
+      https://symfony.com/doc/current/components/http_foundation.html#response-headers
+  - question: How can a cookie be set on the `Response` object in a Symfony controller?
+    answers:
+      - value: >-
+          ```php
+
+          use Symfony\Component\HttpFoundation\Cookie;
+
+          $response->headers->setCookie(new Cookie('my_cookie', 'cookie_value',
+          time() + 3600));
+
+          ```
+        correct: true
+      - value: |-
+          ```php
+          $response->setCookie('my_cookie', 'cookie_value');
+          ```
+        correct: false
+      - value: |-
+          ```php
+          $response->addHeader('Set-Cookie', 'my_cookie=cookie_value');
+          ```
+        correct: false
+      - value: |-
+          ```php
+          setcookie('my_cookie', 'cookie_value');
+          ```
+        correct: false
+    help: >-
+      The `Response` object's `headers` property provides the `setCookie()`
+      method, which accepts a `Cookie` object. This is the recommended way to
+      manage cookies.
+
+      https://symfony.com/doc/current/components/http_foundation.html#cookies
+  - question: How can a cookie value be retrieved from the `Request` object in a
+      Symfony controller?
+    answers:
+      - value: "`$request->cookies->get('cookie_name')`"
+        correct: true
+      - value: "`$request->getCookie('cookie_name')`"
+        correct: false
+      - value: "`$_COOKIE['cookie_name']`"
+        correct: false
+      - value: "`$request->headers->get('Cookie')['cookie_name']`"
+        correct: false
+    help: >-
+      The `Request` object's `cookies` property (an instance of `ParameterBag`)
+      is used to access cookie values.
+
+      https://symfony.com/doc/current/components/http_foundation.html#cookies
+  - question: How do you access the session object within a Symfony controller,
+      assuming you extend `AbstractController`?
+    answers:
+      - value: "`$this->get('session')`"
+        correct: false
+      - value: "`$this->session`"
+        correct: false
+      - value: By type-hinting `SessionInterface $session` as a method argument.
+        correct: true
+      - value: "`$this->container->get('session')`"
+        correct: false
+    help: >-
+      The recommended way to access the session is by type-hinting
+      `SessionInterface` in your controller method, allowing Symfony's
+      autowiring to inject it.
+
+      https://symfony.com/doc/current/components/http_foundation.html#sessions
+  - question: To store a value `user_id` with data `123` in the session from a
+      Symfony controller, which method would you use?
+    answers:
+      - value: "`$session->set('user_id', 123)`"
+        correct: true
+      - value: "`$session->add('user_id', 123)`"
+        correct: false
+      - value: "`$session->store('user_id', 123)`"
+        correct: false
+      - value: "`$session->attributes->set('user_id', 123)`"
+        correct: false
+    help: >-
+      The `SessionInterface` provides `set()` and `get()` methods to store and
+      retrieve data from the session.
+
+      https://symfony.com/doc/current/components/http_foundation.html#sessions
+  - question: How do you access uploaded files from the `Request` object in a
+      Symfony controller?
+    answers:
+      - value: "`$request->files->get('form_field_name')`"
+        correct: true
+      - value: "`$request->getUploadedFile('form_field_name')`"
+        correct: false
+      - value: "`$_FILES['form_field_name']`"
+        correct: false
+      - value: "`$request->query->get('form_field_name')`"
+        correct: false
+    help: |-
+      Uploaded files are accessible via the `files` property of the `Request` object, which is an instance of `FileBag`.
+      https://symfony.com/doc/current/components/http_foundation.html#uploaded-files
+  - question: Which built-in argument resolver is responsible for resolving a backed
+      enum case from a route path parameter?
+    answers:
+      - value: "`BackedEnumValueResolver`"
+        correct: true
+      - value: "`EnumValueResolver`"
+        correct: false
+      - value: "`ScalarValueResolver`"
+        correct: false
+      - value: "`MapEnum`"
+        correct: false
+    help: |-
+      The `BackedEnumValueResolver` attempts to resolve a backed enum case from a route path parameter that matches the name of the argument, leading to a 404 if the value is invalid.
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: Which of the following is a valid way to define an invokable
+      controller in Symfony 7 for the route `/hello/{name}`?
+    answers:
+      - value: |-
+          ```php
+          #[Route('/hello/{name}', name: 'hello')]
+          class HelloController
+          {
+              public function __invoke(string $name = 'World'): Response
+              {
+                  // ...
+              }
+          }
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[Route('/hello/{name}', name: 'hello')]
+          class HelloController implements InvokableControllerInterface
+          {
+              public function invoke(string $name = 'World'): Response
+              {
+                  // ...
+              }
+          }
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[Route('/hello/{name}', name: 'hello', controller: '__invoke')]
+          class HelloController
+          {
+              public function __invoke(string $name = 'World'): Response
+              {
+                  // ...
+              }
+          }
+          ```
+        correct: false
+    help: |-
+      An invokable controller defines a `__invoke()` method. When routing to such a class, Symfony automatically calls this method.
+      https://symfony.com/doc/current/controller/service.html#invokable-controllers
+  - question: What is the primary benefit of using `#[MapRequestPayload]` or
+      `#[MapQueryString]` over manually accessing request parameters?
+    answers:
+      - value: They automatically deserialize and validate request data into structured
+          PHP objects (DTOs).
+        correct: true
+      - value: They improve routing performance by pre-parsing request data.
+        correct: false
+      - value: They eliminate the need for the `Request` object in controllers.
+        correct: false
+      - value: They provide built-in caching for request parameters.
+        correct: false
+    help: >-
+      These attributes streamline data handling by automatically mapping request
+      data to DTOs, including deserialization and validation, leading to cleaner
+      and more robust controller code.
+
+      https://symfony.com/doc/current/controller.html#mapping-request-payloads
+  - question: When defining a custom error controller in Symfony, which
+      configuration option in `framework.yaml` (or equivalent XML/PHP) is used?
+    answers:
+      - value: "`error_controller`"
+        correct: true
+      - value: "`exception_controller`"
+        correct: false
+      - value: "`404_controller`"
+        correct: false
+      - value: "`app_error_handler`"
+        correct: false
+    help: |-
+      The `error_controller` option in the `framework` configuration specifies the controller that handles exceptions thrown anywhere in your application.
+      https://symfony.com/doc/current/reference/configuration/framework.html#error-controller
+  - question: Which of the following is true regarding the
+      `ControllerResolverInterface` in Symfony's HttpKernel component?
+    answers:
+      - value: It is responsible for determining the executable controller callable from
+          a `Request` object.
+        correct: true
+      - value: It is responsible for resolving the arguments to be passed to the
+          controller.
+        correct: false
+      - value: It instantiates the controller class with its constructor arguments.
+        correct: false
+      - value: It is typically implemented by the `HttpKernel` class directly.
+        correct: false
+    help: |-
+      The `ControllerResolverInterface` defines the contract for finding the controller callable. Its implementation (`ControllerResolver`) looks for the `_controller` attribute in the request.
+      https://symfony.com/doc/current/components/http_kernel.html#controller-resolution
+  - question: Which of the following is true regarding the
+      `ArgumentResolverInterface` in Symfony's HttpKernel component?
+    answers:
+      - value: It determines and returns an array of arguments to pass to the given
+          controller callable.
+        correct: true
+      - value: It uses PHP reflection to identify the names and types of expected
+          arguments.
+        correct: true
+      - value: It is responsible for finding the controller callable itself.
+        correct: false
+      - value: It only resolves arguments that are explicitly defined as route
+          parameters.
+        correct: false
+    help: |-
+      The `ArgumentResolverInterface` (and its implementation `ArgumentResolver`) uses reflection to inspect controller method signatures and resolve the necessary arguments from the `Request` object or other sources.
+      https://symfony.com/doc/current/components/http_kernel.html#argument-resolution
+  - question: When embedding a controller in Twig using `render(controller(...))`,
+      what is a key difference compared to `render(path(...))` or
+      `render(url(...))`?
+    answers:
+      - value: "`render(controller(...))` does not require the embedded controller to
+          have a public route."
+        correct: true
+      - value: "`render(controller(...))` always makes an asynchronous request."
+        correct: false
+      - value: "`render(controller(...))` is only for ESI fragments."
+        correct: false
+      - value: "`render(controller(...))` bypasses Symfony's security system."
+        correct: false
+    help: >-
+      The `controller()` Twig function allows you to embed content from a
+      controller that does not necessarily have a publicly accessible route, as
+      it makes an internal sub-request.
+
+      https://symfony.com/doc/current/templates.html#embedding-controllers
+  - question: "You have a controller method that expects a `BookingId` value object
+      as an argument: `public function index(BookingId $id): Response`. What is
+      required for Symfony to correctly inject an instance of `BookingId`?"
+    answers:
+      - value: A custom argument value resolver for `BookingId` must be registered as a
+          service.
+        correct: true
+      - value: The `BookingId` class must implement `__toString()`.
+        correct: false
+      - value: The `BookingId` class must extend
+          `Symfony\Component\HttpFoundation\ParameterBag`.
+        correct: false
+      - value: Symfony automatically converts scalar route parameters to value objects.
+        correct: false
+    help: |-
+      For custom value objects, you need to create and register a custom argument value resolver that knows how to create an instance of your value object from the request data.
+      https://symfony.com/doc/current/controller/value_resolver.html#creating-a-custom-value-resolver
+  - question: Which of the following is a valid way to define a controller in Symfony 7?
+    answers:
+      - value: A PHP class with a public method annotated with `#[Route]`.
+        correct: true
+      - value: A PHP class with a public `__invoke()` method annotated with `#[Route]`.
+        correct: true
+      - value: A PHP function defined in a separate file and referenced in routing.
+        correct: false
+      - value: A Closure (anonymous function) directly in the routing configuration.
+        correct: true
+    help: >-
+      Symfony controllers can be class methods, invokable classes, or even
+      Closures defined directly in routing. Class methods with `#[Route]`
+      attributes are the most common.
+
+      https://symfony.com/doc/current/controller.html#basic-controller
+  - question: What is the purpose of the `#[AsController]` attribute in Symfony 7?
+    answers:
+      - value: It automatically applies the `controller.service_arguments` tag to the
+          controller class, enabling dependency injection.
+        correct: true
+      - value: It marks a class as a controller, but requires manual service definition.
+        correct: false
+      - value: It makes the controller class invokable.
+        correct: false
+      - value: It defines the default route for the controller.
+        correct: false
+    help: |-
+      The `#[AsController]` attribute is a convenient way to ensure a controller class is properly registered as a service and can benefit from autowiring, even if it doesn't extend `AbstractController`.
+      https://symfony.com/doc/current/controller/service.html#using-the-ascontroller-attribute
+  - question: Which of the following is NOT a built-in argument value resolver in
+      Symfony's HttpKernel component?
+    answers:
+      - value: "`FormValueResolver`"
+        correct: true
+      - value: "`RequestPayloadValueResolver`"
+        correct: false
+      - value: "`SessionValueResolver`"
+        correct: false
+      - value: "`UidValueResolver`"
+        correct: false
+    help: |-
+      Symfony provides resolvers for `Request`, `Session`, `DateTime`, `Entity`, `Service`, `RequestPayload`, `QueryString`, `QueryParameter`, `BackedEnum`, and `Uid`. There isn't a dedicated `FormValueResolver` as form handling is typically done via `$this->createForm()`.
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: When using `#[MapRequestPayload]` or `#[MapQueryString]`, how does
+      Symfony handle validation errors if the DTO is invalid?
+    answers:
+      - value: It throws a `ValidationException` which results in a 422 Unprocessable
+          Entity HTTP response by default.
+        correct: true
+      - value: It automatically redirects to an error page.
+        correct: false
+      - value: It logs the error and proceeds with a `null` DTO.
+        correct: false
+      - value: It returns a 500 Internal Server Error.
+        correct: false
+    help: >-
+      When validation fails for DTOs mapped with `#[MapRequestPayload]` or
+      `#[MapQueryString]`, Symfony throws a `ValidationException`, which by
+      default is caught and translated into a 422 Unprocessable Entity response.
+
+      https://symfony.com/doc/current/controller.html#validation
+  - question: What is the purpose of the `#[MapDateTime]` attribute in Symfony 7?
+    answers:
+      - value: To restrict the input format for `DateTimeInterface` arguments in
+          controllers.
+        correct: true
+      - value: To automatically convert a string to a `DateTimeImmutable` object.
+        correct: false
+      - value: To define the default timezone for `DateTime` objects.
+        correct: false
+      - value: To map a date string from the request body to a `DateTime` object.
+        correct: false
+    help: |-
+      The `#[MapDateTime]` attribute can be used with `DateTimeInterface` type-hinted arguments to restrict the accepted input format for date/time strings.
+      https://symfony.com/doc/current/controller/value_resolver.html#datetimevalueresolver
+  - question: >-
+      Consider the following controller method:
 
       ```php
 
-      // src/Controller/MyController.php
-
-      namespace App\Controller;
-
-
-      use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-      use Symfony\Component\HttpFoundation\Response;
-
-      use Symfony\Component\Routing\Attribute\Route;
-
-
-      class MyController extends AbstractController
+      public function show(Product $product): Response
 
       {
-          #[Route('/set-cookie', name: 'app_set_cookie')]
-          public function setCookie(): Response
-          {
-              $response = new Response('Cookie set!');
-              // ???
-              return $response;
-          }
+          // ...
       }
 
       ```
 
-
-      How would you correctly set a cookie named 'my_cookie' with the value
-      'test_value' in the response?
+      If no product with the given ID is found in the database, what will
+      Symfony's `EntityValueResolver` typically do by default?
     answers:
-      - value: $response->headers->setCookie(new Cookie('my_cookie', 'test_value'));
-        correct: true
-      - value: $response->setCookie('my_cookie', 'test_value');
-        correct: false
-      - value: $response->cookies->set('my_cookie', 'test_value');
-        correct: false
-      - value: $response->addCookie('my_cookie', 'test_value');
-        correct: false
-    help: To set a cookie on a `Response` object, you use
-      `$response->headers->setCookie(new Cookie(...))`. Remember to `use
-      Symfony\Component\HttpFoundation\Cookie;`.
-  - question: Which method of `AbstractController` is used to add a flash message?
-    answers:
-      - value: "`addFlash(string $type, string $message)`"
-        correct: true
-      - value: "`setFlash(string $type, string $message)`"
-        correct: false
-      - value: "`flash(string $type, string $message)`"
-        correct: false
-      - value: "`getFlashBag()->add(string $type, string $message)`"
-        correct: false
-    help: The `AbstractController` provides the `addFlash()` helper method to add
-      flash messages to the session. These messages are typically displayed on
-      the next request.
-  - question: You need to redirect a user to a specific named route in Symfony.
-      Which `AbstractController` helper method should you use?
-    answers:
-      - value: "`redirect('https://example.com/some/path')`"
-        correct: false
-      - value: "`redirectToRoute('app_homepage', ['param' => 'value'])`"
-        correct: true
-      - value: "`forward('App\\Controller\\OtherController::index')`"
-        correct: false
-      - value: "`$this->get('router')->generate('app_homepage')`"
-        correct: false
-    help: The `redirectToRoute()` method is specifically designed to generate a URL
-      for a given named route and return a `RedirectResponse`.
-  - question: What is the primary purpose of the `forward()` method in
-      `AbstractController`?
-    answers:
-      - value: To perform an HTTP redirect to another URL.
-        correct: false
-      - value: To make an internal sub-request to another controller and return its
-          `Response`.
-        correct: true
-      - value: To send the user's browser to a different route without changing the URL.
-        correct: false
-      - value: To execute a service method and return its result.
-        correct: false
-    help: The `forward()` method allows you to make an internal sub-request to
-      another controller. This is useful for reusing controller logic or
-      embedding content from other controllers within a single response.
-  - question: How can you generate a 404 Not Found page from a Symfony controller?
-    answers:
-      - value: Return `new Response('Not Found', 404);`
-        correct: false
-      - value: Throw a `Symfony\Component\HttpKernel\Exception\NotFoundHttpException`.
-        correct: true
-      - value: Call `$this->render('404.html.twig');`
-        correct: false
-      - value: Use `$this->error(404);`
-        correct: false
-    help: The recommended way to trigger a 404 Not Found response is to throw a
-      `NotFoundHttpException`. Symfony's exception listener will catch this and
-      render the appropriate error page.
-  - question: Which attribute is used to automatically map an uploaded file from the
-      request to an `UploadedFile` object in a Symfony controller argument?
-    answers:
-      - value: "`#[MapFile]`"
-        correct: false
-      - value: "`#[MapRequestFile]`"
-        correct: false
-      - value: "`#[MapUploadedFile]`"
-        correct: true
-      - value: "`#[FileArgument]`"
-        correct: false
-    help: The `#[MapUploadedFile]` attribute (from
-      `Symfony\Component\HttpKernel\Attribute\MapUploadedFile`) is used to
-      automatically resolve an uploaded file to an `UploadedFile` object.
-  - question: You want to embed the output of a Symfony controller into a Twig
-      template. Which Twig function allows you to do this by referencing a
-      route?
-    answers:
-      - value: "`include()`"
-        correct: false
-      - value: "`embed_controller()`"
-        correct: false
-      - value: "`render(path('my_route'))`"
-        correct: true
-      - value: "`call_controller('my_route')`"
-        correct: false
-    help: The `render()` Twig function, combined with `path()` or `url()`, allows
-      you to embed the output of a controller associated with a route.
-  - question: How does Symfony's `ArgumentResolver` primarily determine the values
-      for controller method arguments?
-    answers:
-      - value: By matching argument names to keys in the `Request` object's attributes
-          bag.
-        correct: true
-      - value: By matching argument names to values in the `$_POST` superglobal.
-        correct: false
-      - value: By inspecting the method's docblock for parameter descriptions.
-        correct: false
-      - value: By looking up services in the container that match the argument name.
-        correct: false
-    help: The `ArgumentResolver` first attempts to match argument names to keys
-      found in the `Request` object's attributes bag (which includes route
-      parameters).
-  - question: Which of the following is NOT a valid way to define a controller in
-      Symfony 7?
-    answers:
-      - value: A class method with a `#[Route]` attribute.
-        correct: false
-      - value: A class implementing `__invoke()` with a `#[Route]` attribute.
-        correct: false
-      - value: A standalone PHP function defined in a global namespace.
-        correct: true
-      - value: A service class with a method referenced in `routes.yaml`.
-        correct: false
-    help: While Symfony can resolve standalone functions in a very basic framework
-      setup, the standard and recommended way in a full Symfony application is
-      to use class methods (including invokable classes) with routing attributes
-      or configuration.
-  - question: What is the purpose of the `#[AsController]` attribute in Symfony 7?
-    answers:
-      - value: To mark a class as a service that can be autowired into other services.
-        correct: false
-      - value: To explicitly register a controller class as a service, enabling
-          dependency injection into its methods without extending
-          `AbstractController`.
-        correct: true
-      - value: To define a default route for all methods within the controller.
-        correct: false
-      - value: To prevent the controller from being autowired.
-        correct: false
-    help: The `#[AsController]` attribute (from
-      `Symfony\Component\HttpKernel\Attribute\AsController`) explicitly
-      registers a controller as a service, making it eligible for autowiring of
-      dependencies into its action methods.
-  - question: When defining a controller method, what happens if you type-hint an
-      argument with `Symfony\Component\HttpFoundation\Request`?
-    answers:
-      - value: The `Request` object is automatically injected by the `ArgumentResolver`.
-        correct: true
-      - value: Symfony will throw an error because the `Request` object cannot be
-          directly injected.
-        correct: false
-      - value: You must manually retrieve the `Request` object from the service
-          container.
-        correct: false
-      - value: The method will only be accessible via POST requests.
-        correct: false
-    help: The `ArgumentResolver` automatically injects the current `Request` object
-      when an argument is type-hinted with
-      `Symfony\Component\HttpFoundation\Request`.
-  - question: Which HTTP status code is commonly used for a temporary redirect in
-      Symfony?
-    answers:
-      - value: 200 OK
-        correct: false
-      - value: 301 Moved Permanently
-        correct: false
-      - value: 302 Found
-        correct: true
-      - value: 404 Not Found
-        correct: false
-    help: The `302 Found` status code is used for temporary redirects. The
-      `redirectToRoute()` and `redirect()` helper methods default to `302`.
-  - question: What is the correct way to retrieve a value from the session in a
-      Symfony controller?
-    answers:
-      - value: $session = $request->getSession(); $value = $session->get('key');
-        correct: true
-      - value: $value = $_SESSION['key'];
-        correct: false
-      - value: $value = $this->session->get('key');
-        correct: false
-      - value: $value = $this->get('session')->get('key');
-        correct: false
-    help: You can access the session via the `Request` object's `getSession()`
-      method. The session object implements
-      `Symfony\Component\HttpFoundation\Session\SessionInterface`.
-  - question: "When using `#[Route('/lucky/number/{max}')]` and a controller method
-      `public function number(int $max): Response`, how does Symfony get the
-      value for `$max`?"
-    answers:
-      - value: It's automatically resolved from the URL path by the `ArgumentResolver`.
-        correct: true
-      - value: It's retrieved from the `$_GET` superglobal.
-        correct: false
-      - value: It's injected as a service from the dependency injection container.
-        correct: false
-      - value: It's a fixed value defined in the `#[Route]` attribute.
-        correct: false
-    help: The `ArgumentResolver` automatically resolves route parameters (like
-      `{max}`) and injects them into the controller method arguments, provided
-      they are correctly type-hinted.
-  - question: Which of the following is a valid way to render a Twig template from a
-      Symfony controller extending `AbstractController`?
-    answers:
-      - value: return $this->render('template.html.twig', ['data' => $value]);
-        correct: true
-      - value: return $this->get('twig')->render('template.html.twig', ['data' =>
-          $value]);
-        correct: false
-      - value: return new Response($this->renderView('template.html.twig', ['data' =>
-          $value]));
-        correct: false
-      - value: return $this->display('template.html.twig', ['data' => $value]);
-        correct: false
-    help: The `render()` method is a helper provided by `AbstractController` to
-      render a Twig template and return a `Response` object.
-  - question: What is the purpose of the `kernel.controller` event in Symfony's
-      HttpKernel?
-    answers:
-      - value: It is dispatched after the controller has executed and returned a
+      - value: It will automatically throw a `NotFoundHttpException`, resulting in a 404
           response.
-        correct: false
-      - value: It is dispatched before the controller callable has been determined.
-        correct: false
-      - value: It is dispatched after the controller callable has been determined but
-          before its execution, allowing listeners to modify or replace the
-          controller.
         correct: true
-      - value: It is dispatched when a controller throws an exception.
+      - value: It will pass `null` to the `$product` argument.
         correct: false
-    help: The `kernel.controller` event is dispatched by `HttpKernel::handle()`
-      after the controller callable has been determined but before its
-      execution. This allows for dynamic modification of the controller.
-  - question: When should you consider using an 'invokable' controller (a class with
-      an `__invoke()` method) in Symfony?
+      - value: It will throw a `RuntimeException`.
+        correct: false
+      - value: It will redirect to the homepage.
+        correct: false
+    help: |-
+      By default, if the `EntityValueResolver` cannot find an entity matching the route parameter, it throws a `NotFoundHttpException`, which Symfony's error handler converts into a 404 Not Found response.
+      https://symfony.com/doc/current/controller/value_resolver.html#entityvalueresolver
+  - question: Which of the following describes a key benefit of using the
+      `AbstractController::forward()` method for internal sub-requests?
     answers:
-      - value: When the controller needs to handle multiple distinct actions.
-        correct: false
-      - value: When the controller is very simple and only handles a single action for a
-          specific route.
+      - value: It allows reusing controller logic without performing an HTTP redirect.
         correct: true
-      - value: When you want to prevent dependency injection into the controller.
+      - value: It sends a new HTTP request to the server, simulating a browser
+          navigation.
         correct: false
-      - value: When you need to extend multiple base controller classes.
+      - value: It is primarily used for asynchronous operations.
         correct: false
-    help: Invokable controllers are suitable for simple controllers that handle a
-      single action, often used in ADR (Action-Domain-Responder) architectures
-      for clarity and conciseness.
-  - question: Which of the following describes the correct behavior of
-      `ControllerResolverInterface::getController(Request $request)`?
+      - value: It bypasses Symfony's routing and security layers.
+        correct: false
+    help: >-
+      The `forward()` method makes an internal sub-request, meaning it calls
+      another controller method directly within the application's PHP process,
+      without a full HTTP roundtrip. This is useful for reusing logic or
+      embedding content.
+
+      https://symfony.com/doc/current/controller/forwarding.html
+  - question: When defining an `access_control` rule in Symfony's security
+      configuration, which option allows restricting access based on the
+      client's IP address?
     answers:
-      - value: It executes the controller and returns the `Response` object.
-        correct: false
-      - value: It determines and returns a PHP callable (the controller) based on the
-          request's information.
+      - value: "`ips`"
         correct: true
-      - value: It resolves all arguments for the controller method.
+      - value: "`hosts`"
         correct: false
-      - value: It generates a URL for the given controller.
+      - value: "`ip_addresses`"
         correct: false
-    help: The `getController()` method of `ControllerResolverInterface` is
-      responsible for finding and returning the actual PHP callable (function,
-      method, or invokable object) that will act as the controller for the given
-      request.
-  - question: You have a controller method that expects an integer `id` from the
-      route. If the `id` parameter is optional and should default to `1` if not
-      provided, how would you define the method signature?
+      - value: "`client_ip`"
+        correct: false
+    help: |-
+      The `ips` option in `access_control` allows you to restrict access to a URL pattern only to requests originating from specified IP addresses or subnets.
+      https://symfony.com/doc/current/security/access_control.html#restricting-access-by-ip-address
+  - question: Which of the following methods are available on the
+      `AbstractController` for rendering Twig templates?
     answers:
-      - value: "public function show(int $id = 1): Response"
+      - value: "`$this->render('template.html.twig', $parameters)`"
         correct: true
-      - value: "public function show(int $id ?? 1): Response"
+      - value: "`$this->renderBlock('template.html.twig', 'block_name', $parameters)`"
         correct: false
-      - value: "public function show(int $id = null): Response"
+      - value: "`$this->renderView('template.html.twig', $parameters)`"
         correct: false
-      - value: "public function show(int $id = (int)1): Response"
+      - value: "`$this->display('template.html.twig', $parameters)`"
         correct: false
-    help: PHP's default parameter values work seamlessly with Symfony's
-      ArgumentResolver to provide a fallback value if a route parameter is not
-      present.
-  - question: What is the primary role of the `public/index.php` file in a standard
-      Symfony application?
+    help: >-
+      The `render()` method is the primary way to render Twig templates from an
+      `AbstractController`. It returns a `Response` object containing the
+      rendered HTML.
+
+      https://symfony.com/doc/current/controller.html#rendering-templates
+  - question: What is the main advantage of defining controllers as services in Symfony?
     answers:
-      - value: It contains all the application's business logic.
-        correct: false
-      - value: It serves as the front controller, handling all incoming HTTP requests
-          and dispatching them through the kernel.
+      - value: It enables dependency injection of services directly into controller
+          constructors or methods.
         correct: true
-      - value: It defines all the application's routes.
+      - value: It makes controllers globally accessible via a simple function call.
         correct: false
-      - value: It is only used during development, not in production.
+      - value: It allows controllers to be cached more effectively.
         correct: false
-    help: The `public/index.php` file is the front controller. It bootstraps the
-      Symfony application, creates the `Request` and `Kernel` objects, handles
-      the request, and sends the response.
-  - question: When accessing the session in a Symfony controller, what is the best
-      practice to ensure the session is started and available?
+      - value: It automatically generates CRUD operations for the controller.
+        correct: false
+    help: >-
+      Defining controllers as services (which is the default behavior in modern
+      Symfony applications) allows Symfony's Dependency Injection Container to
+      manage their creation and inject required services, promoting testability
+      and modularity.
+
+      https://symfony.com/doc/current/controller/service.html
+  - question: Which of the following is a valid way to redirect to an external URL
+      (e.g., `https://example.com`) from a Symfony controller?
     answers:
-      - value: Call `session_start()` at the beginning of the controller method.
-        correct: false
-      - value: The session is automatically started by Symfony's `SessionListener` when
-          you retrieve it via `$request->getSession()`.
+      - value: "`$this->redirect('https://example.com')`"
         correct: true
-      - value: Inject `SessionInterface` into the controller's constructor.
+      - value: "`$this->redirectToUrl('https://example.com')`"
+        correct: false
+      - value: "`new RedirectResponse('https://example.com')`"
         correct: true
-      - value: Check `if (isset($_SESSION))` before using it.
+      - value: "`header('Location: https://example.com'); exit();`"
         correct: false
-    help: Symfony's `SessionListener` automatically handles starting the session.
-      When you retrieve the session object (e.g., via `$request->getSession()`
-      or by injecting `SessionInterface`), it will be ready to use.
-  - question: Which of the following is a valid way to retrieve a specific service,
-      like `Psr\Log\LoggerInterface`, in a Symfony controller action method
-      using autowiring?
-    answers:
-      - value: "public function index(LoggerInterface $logger): Response {
-          $logger->info('...'); }"
-        correct: true
-      - value: "public function index(): Response { $logger =
-          $this->container->get('logger'); $logger->info('...'); }"
-        correct: false
-      - value: "public function index(): Response { $logger = new Logger();
-          $logger->info('...'); }"
-        correct: false
-      - value: "public function index(string $logger): Response { $logger->info('...');
-          }"
-        correct: false
-    help: Symfony's autowiring allows you to simply type-hint the service interface
-      (or class) in your controller action method, and the container will
-      automatically inject the correct instance.
-  - question: What is the difference between `redirectToRoute()` and `redirect()`
-      helper methods in `AbstractController`?
-    answers:
-      - value: "`redirectToRoute()` generates a URL from a named route, while
-          `redirect()` redirects to an arbitrary URL."
-        correct: true
-      - value: "`redirectToRoute()` performs an internal sub-request, while `redirect()`
-          sends an HTTP redirect."
-        correct: false
-      - value: "`redirectToRoute()` is for GET requests, `redirect()` is for POST
-          requests."
-        correct: false
-      - value: There is no functional difference; they are aliases for the same method.
-        correct: false
-    help: "`redirectToRoute()` is convenient for redirecting within your application
-      using route names, whereas `redirect()` is used for redirecting to any
-      external or internal URL."
-  - question: "When defining a controller method like `public function index(Request
-      $request, int $year): Response`, does the order of `$request` and `$year`
-      arguments matter for argument resolution?"
-    answers:
-      - value: Yes, `Request` must always come first.
-        correct: false
-      - value: Yes, route parameters must always come first.
-        correct: false
-      - value: No, the `ArgumentResolver` matches arguments by name and type-hint, so
-          the order does not matter.
-        correct: true
-      - value: Only if custom argument resolvers are involved.
-        correct: false
-    help: The `ArgumentResolver` is smart enough to match arguments based on their
-      name and type-hint, regardless of their order in the method signature.
-  - question: How can you access application configuration parameters (e.g.,
-      `kernel.project_dir`) within a Symfony controller extending
-      `AbstractController`?
-    answers:
-      - value: Use `$this->getParameter('parameter_name');`
-        correct: true
-      - value: Access them directly via `$_ENV['parameter_name'];`
-        correct: false
-      - value: Inject `ParameterBagInterface` and use its `get()` method.
-        correct: true
-      - value: They are not accessible from controllers for security reasons.
-        correct: false
-    help: The `AbstractController` provides a `getParameter()` helper method.
-      Alternatively, you can inject
-      `Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface`
-      and use its `get()` method.
-  - question: Which HTTP status code indicates a permanent redirect?
-    answers:
-      - value: 301 Moved Permanently
-        correct: true
-      - value: 302 Found
-        correct: false
-      - value: 303 See Other
-        correct: false
-      - value: 307 Temporary Redirect
-        correct: false
-    help: The `301 Moved Permanently` status code informs clients that the resource
-      has permanently moved to a new URL, and they should update their links.
-  - question: What is the purpose of the `#[Route]` attribute in a Symfony controller?
-    answers:
-      - value: To define the controller's service ID.
-        correct: false
-      - value: To map a URL path to a specific controller method.
-        correct: true
-      - value: To automatically inject services into the controller.
-        correct: false
-      - value: To specify the HTTP client to be used by the controller.
-        correct: false
-    help: The `#[Route]` attribute is used to define routes directly on controller
-      methods, specifying the URL path, name, and allowed HTTP methods.
-  - question: When handling a form submission in a Symfony controller, what method
-      is typically called on the form object to process the request data?
-    answers:
-      - value: "`$form->submit($request);`"
-        correct: false
-      - value: "`$form->handleRequest($request);`"
-        correct: true
-      - value: "`$form->process($request);`"
-        correct: false
-      - value: "`$form->bind($request);`"
-        correct: false
-    help: The `handleRequest()` method is used to read the request data and populate
-      the form fields with the submitted values.
-  - question: Which of the following is a correct way to create a `JsonResponse` in
-      a Symfony controller?
-    answers:
-      - value: return new Response(json_encode(['message' => 'Hello']), 200,
-          ['Content-Type' => 'application/json']);
-        correct: false
-      - value: return $this->json(['message' => 'Hello']);
-        correct: true
-      - value: return new JsonResponse(['message' => 'Hello']);
-        correct: true
-      - value: return $this->response(['message' => 'Hello'], 'json');
-        correct: false
-    help: You can use the `json()` helper method from `AbstractController` or
-      directly instantiate `Symfony\Component\HttpFoundation\JsonResponse`.
-  - question: What happens if a controller method argument is type-hinted but no
-      corresponding value can be found in the request attributes or through a
-      value resolver?
-    answers:
-      - value: The argument will be `null`.
-        correct: false
-      - value: Symfony will throw a `RuntimeException` or similar exception indicating
-          an unresolvable argument.
-        correct: true
-      - value: The controller will skip execution.
-        correct: false
-      - value: It will attempt to autowire a service with that name.
-        correct: false
-    help: If an argument is type-hinted and required, but no value can be resolved,
-      Symfony's `ArgumentResolver` will throw an exception.
-  - question: What is the primary difference between an HTTP redirect and an
-      internal redirect (forwarding) in Symfony?
-    answers:
-      - value: An HTTP redirect sends a new HTTP response to the client, while an
-          internal redirect processes another controller internally without a
-          new HTTP request.
-        correct: true
-      - value: An HTTP redirect is faster than an internal redirect.
-        correct: false
-      - value: An HTTP redirect changes the URL in the browser, while an internal
-          redirect does not.
-        correct: true
-      - value: Internal redirects are only possible with `AbstractController`, while
-          HTTP redirects are not.
-        correct: false
-    help: HTTP redirects involve a round-trip to the client and change the browser's
-      URL. Internal redirects (`forward()`) are handled entirely server-side and
-      do not change the URL or involve a new client request.
-  - question: Which of the following is NOT a standard way to retrieve data from the
-      `Request` object in a Symfony controller?
-    answers:
-      - value: "`$request->query->get('param')` for GET parameters."
-        correct: false
-      - value: "`$request->request->get('param')` for POST parameters."
-        correct: false
-      - value: "`$request->headers->get('User-Agent')` for HTTP headers."
-        correct: false
-      - value: "`$request->data->get('param')` for JSON request bodies."
-        correct: true
-    help: For JSON request bodies, you would typically access
-      `$request->getContent()` and then decode the JSON, or use a custom
-      argument resolver or a request listener to deserialize it.
-  - question: When should you avoid extending `AbstractController` for your Symfony
-      controllers?
-    answers:
-      - value: When you need to use the `#[Route]` attribute.
-        correct: false
-      - value: When you want to manually inject all dependencies via the constructor or
-          `#[AsController]` attribute, and prefer not to use the helper methods.
-        correct: true
-      - value: When your controller is very complex and has many dependencies.
-        correct: false
-      - value: When you are building a RESTful API.
-        correct: false
-    help: Extending `AbstractController` is optional. If you prefer to explicitly
-      inject all services and don't need the convenience helper methods, or if
-      you are building a micro-framework, you might choose not to extend it.
-  - question: Which Twig function allows you to embed the output of a controller by
-      directly referencing its service ID or fully qualified class name and
+    help: >-
+      The `redirect()` method of `AbstractController` creates a
+      `RedirectResponse` to an arbitrary URL. You can also instantiate
+      `RedirectResponse` directly.
+
+      https://symfony.com/doc/current/controller.html#redirecting
+  - question: What is the purpose of the `#[Template]` attribute (from
+      `Symfony\Bridge\Twig\Attribute\Template`) when used on a controller
       method?
     answers:
-      - value: "`render(path('my_route'))`"
-        correct: false
-      - value: "`render(controller('App\\\\Controller\\\\BlogController::recentArticles\
-          '))`"
+      - value: It automatically renders a specified Twig template using the array
+          returned by the controller method as parameters.
         correct: true
-      - value: "`include('template.html.twig')`"
-        correct: false
-      - value: "`embed('App\\\\Controller\\\\BlogController::recentArticles')`"
-        correct: false
-    help: The `controller()` Twig function, used with `render()`, allows you to
-      directly specify the controller callable (e.g.,
-      `App\Controller\BlogController::recentArticles`) to execute and embed its
-      output.
-  - question: What is the purpose of the `ControllerEvent::setController(callable
-      $controller)` method?
-    answers:
-      - value: To define the controller for a new route.
-        correct: false
-      - value: To change the controller callable that will be executed during the
-          `kernel.controller` event.
-        correct: true
-      - value: To set the default controller for the entire application.
-        correct: false
-      - value: To register a new service as a controller.
-        correct: false
-    help: During the `kernel.controller` event, you can use `setController()` to
-      dynamically change which controller will handle the current request.
-  - question: Which of the following is a correct way to set a flash message type
-      'success' with the message 'Item saved successfully!'?
-    answers:
-      - value: $this->addFlash('success', 'Item saved successfully!');
-        correct: true
-      - value: $this->get('session')->getFlashBag()->add('success', 'Item saved
-          successfully!');
-        correct: true
-      - value: $this->flash('success', 'Item saved successfully!');
-        correct: false
-      - value: $_SESSION['_sf_flash']['success'][] = 'Item saved successfully!';
-        correct: false
-    help: Both `AbstractController::addFlash()` and direct access to the session's
-      flash bag are valid ways to set flash messages.
-  - question: When a controller method argument is type-hinted with a class (e.g.,
-      `BookingId $id`), and it's not a standard Symfony type, what mechanism is
-      used to resolve its value?
-    answers:
-      - value: Symfony attempts to find a service with that class name.
-        correct: false
-      - value: A custom argument value resolver must be configured to provide the
-          instance.
-        correct: true
-      - value: The argument will always be `null`.
-        correct: false
-      - value: It automatically deserializes JSON from the request body into that
-          object.
-        correct: false
-    help: For custom objects or complex types that are not directly resolvable from
-      request attributes or standard services, you need to implement and
-      register a custom argument value resolver.
-  - question: What is the purpose of the `ControllerResolver` in Symfony's HttpKernel?
-    answers:
-      - value: To resolve the correct Twig template to render.
-        correct: false
-      - value: To determine which PHP callable (controller) should handle the current
-          `Request`.
-        correct: true
-      - value: To resolve service dependencies for controllers.
-        correct: false
-      - value: To resolve route parameters into specific data types.
-        correct: false
-    help: The `ControllerResolver` (implementing `ControllerResolverInterface`) is
-      responsible for taking the `Request` object and determining the
-      appropriate controller callable to execute.
-  - question: How can you retrieve a cookie value from the `Request` object in a
-      Symfony controller?
-    answers:
-      - value: $request->cookies->get('cookie_name');
-        correct: true
-      - value: $request->getCookie('cookie_name');
-        correct: false
-      - value: $_COOKIE['cookie_name'];
-        correct: false
-      - value: $request->headers->get('Cookie')['cookie_name'];
-        correct: false
-    help: The `Request` object provides access to cookies via its `cookies`
-      property, which is a `ParameterBag`.
-  - question: What is the recommended way to generate a new Symfony controller using
-      the command line?
-    answers:
-      - value: "`php bin/console create:controller MyController`"
-        correct: false
-      - value: "`php bin/console make:controller MyController`"
-        correct: true
-      - value: "`symfony new:controller MyController`"
-        correct: false
-      - value: "`composer require controller MyController`"
-        correct: false
-    help: The `make:controller` command from the Symfony Maker bundle is the
-      standard way to generate new controller classes.
-  - question: Which of the following is true about the `Response` object in Symfony?
-    answers:
-      - value: It is immutable and cannot be modified after creation.
-        correct: false
-      - value: It encapsulates HTTP headers, content, and status code.
-        correct: true
-      - value: It is automatically sent to the client by the controller.
-        correct: false
-      - value: It can only contain HTML content.
-        correct: false
-    help: The `Response` object is a mutable object that holds all the information
-      needed to send an HTTP response back to the client. The kernel is
-      responsible for sending it.
-  - question: When using `#[MapUploadedFile]` for a controller argument, what is the
-      expected type-hint for the argument?
-    answers:
-      - value: "`string`"
-        correct: false
-      - value: "`array`"
-        correct: false
-      - value: "`Symfony\\Component\\HttpFoundation\\File\\UploadedFile`"
-        correct: true
-      - value: "`Psr\\Http\\Message\\UploadedFileInterface`"
-        correct: false
-    help: The `#[MapUploadedFile]` attribute resolves the uploaded file into an
-      instance of `Symfony\Component\HttpFoundation\File\UploadedFile`.
-  - question: What is the primary benefit of using `#[AsController]` over manually
-      tagging controllers with `controller.service_arguments` in
-      `services.yaml`?
-    answers:
-      - value: It allows controllers to extend multiple base classes.
-        correct: false
-      - value: It provides a more concise and attribute-driven way to register
-          controllers as services, improving readability and discoverability.
-        correct: true
-      - value: It prevents controllers from being autowired.
-        correct: false
-      - value: It's required for all controllers in Symfony 7.
-        correct: false
-    help: "`#[AsController]` simplifies controller service registration by using PHP
-      attributes, which is generally preferred for modern Symfony applications."
-  - question: You want to render a Twig template and pass an existing `Response`
-      object to modify its headers or status code. How would you do this using
-      `AbstractController`'s `render()` method?
-    answers:
-      - value: return $this->render('template.html.twig', [], $response);
-        correct: true
-      - value: return $this->render('template.html.twig')->setResponse($response);
-        correct: false
-      - value: return $this->render('template.html.twig', ['response' => $response]);
-        correct: false
-      - value: return $this->renderWithResponse('template.html.twig', $response);
-        correct: false
-    help: The `render()` method accepts an optional third argument, which is an
-      existing `Response` object to be modified and returned.
-  - question: What is the purpose of the `sendEarlyHints()` method in
-      `AbstractController`?
-    answers:
-      - value: To send a `200 OK` response immediately.
-        correct: false
-      - value: To send `103 Early Hints` headers immediately to the client, allowing the
-          browser to pre-load resources.
-        correct: true
-      - value: To send a `302 Redirect` response before the main content.
-        correct: false
-      - value: To send a `404 Not Found` response early in the request cycle.
-        correct: false
-    help: The `sendEarlyHints()` method creates and sends a `103 Early Hints` HTTP
-      response, which can improve perceived performance by allowing browsers to
-      start fetching resources sooner.
-  - question: Which of the following best describes the 'controller' in the context
-      of Symfony's MVC pattern?
-    answers:
-      - value: It is responsible for storing and retrieving data from the database.
-        correct: false
-      - value: It is a class method that accepts requests and returns a `Response`
-          object, acting as the bridge between the model and the view.
-        correct: true
-      - value: It is a Twig template responsible for rendering HTML.
-        correct: false
-      - value: It is a service that handles background tasks.
-        correct: false
-    help: In Symfony, a controller is typically a PHP class method (or an invokable
-      class) that processes an incoming request and prepares a response.
-  - question: "If you define a route with a parameter like `/products/{slug}` and
-      your controller method is `public function show(string $slug): Response`,
-      how does Symfony ensure the `$slug` argument is populated?"
-    answers:
-      - value: It relies on the `$_GET` superglobal.
-        correct: false
-      - value: The `RouterListener` extracts the `slug` from the URL and adds it to the
-          `Request` attributes, which the `ArgumentResolver` then uses.
-        correct: true
-      - value: You must manually call `$request->attributes->get('slug')`.
-        correct: false
-      - value: Symfony automatically performs a database lookup for the slug.
-        correct: false
-    help: The routing component matches the URL, extracts parameters, and stores
-      them in the `Request` object's attributes. The `ArgumentResolver` then
-      injects these attributes into the controller method arguments.
-  - question: What is the primary reason for placing the `public/index.php` file in
-      a dedicated `public` directory?
-    answers:
-      - value: To make all application files publicly accessible.
-        correct: false
-      - value: To enhance security by ensuring that only the front controller and public
-          assets are directly accessible via the web server.
-        correct: true
-      - value: To improve performance by caching the controller files.
-        correct: false
-      - value: It's a legacy requirement from older PHP versions.
-        correct: false
-    help: The `public` directory (or `web` in older Symfony versions) is the web
-      root, designed to expose only the necessary files (front controller,
-      assets) to the public, keeping application logic and configuration secure.
-  - question: Which of the following is true regarding flash messages in Symfony?
-    answers:
-      - value: They persist across multiple requests until explicitly cleared.
-        correct: false
-      - value: They are stored in cookies.
-        correct: false
-      - value: They are stored in the session and are automatically cleared after being
-          retrieved (typically on the next request).
-        correct: true
-      - value: They are only visible on the same page where they were set.
-        correct: false
-    help: Flash messages are a special type of session attribute that are designed
-      to be displayed once and then automatically removed from the session.
-  - question: You need to create a `Response` object with a specific HTTP status
-      code, e.g., 201 Created. How would you do this?
-    answers:
-      - value: return new Response('Content', 201);
-        correct: true
-      - value: return $this->response('Content')->setStatusCode(201);
-        correct: false
-      - value: return $this->createResponse('Content', 201);
-        correct: false
-      - value: return new Response('Content')->withStatus(201);
-        correct: false
-    help: The `Response` constructor accepts the content as the first argument and
-      the status code as the second.
-  - question: What is the purpose of the `controller.service_arguments` tag in
-      `services.yaml` for controllers?
-    answers:
-      - value: It marks the controller as a private service.
-        correct: false
-      - value: It enables autowiring of services into controller action arguments, even
-          if the controller doesn't extend `AbstractController`.
-        correct: true
-      - value: It defines the default arguments for all controller methods.
-        correct: false
-      - value: It prevents the controller from being optimized by the service container.
-        correct: false
-    help: The `controller.service_arguments` tag is crucial for enabling Symfony's
-      argument value resolvers and autowiring for controller action methods.
-  - question: Which of the following is an example of a 'built-in internal
-      controller' that Symfony uses?
-    answers:
-      - value: The `_wdt` controller for the Web Debug Toolbar.
-        correct: true
-      - value: Any controller defined by a third-party bundle.
-        correct: false
-      - value: A controller that handles database migrations.
-        correct: false
-      - value: A controller that sends emails.
-        correct: false
-    help: Symfony includes several internal controllers for features like the Web
-      Debug Toolbar (`_wdt`) or error pages, which are not typically defined by
-      the application developer.
-  - question: When defining a route using PHP attributes, where should the
-      `#[Route]` attribute be placed?
-    answers:
-      - value: On the controller class definition.
-        correct: true
-      - value: On the controller method (action) definition.
-        correct: true
-      - value: Inside the controller method body.
-        correct: false
-      - value: In the `composer.json` file.
-        correct: false
-    help: The `#[Route]` attribute can be placed on either the controller class (for
-      a prefix or default route) or directly on the action method to define its
-      specific route.
-  - question: What is the primary responsibility of an
-      `ArgumentValueResolverInterface` implementation?
-    answers:
-      - value: To resolve a controller callable from a request.
-        correct: false
-      - value: To convert a controller method argument into a specific object or value
-          based on the request.
-        correct: true
-      - value: To validate the arguments passed to a controller.
-        correct: false
-      - value: To handle exceptions thrown by controller arguments.
-        correct: false
-    help: Argument value resolvers are responsible for providing the actual value
-      for a controller method argument, often converting raw request data or
-      route parameters into more complex objects.
-  - question: "If you have a controller method `public function index(Request
-      $request, string $name = 'World'): Response` and the route is
-      `/hello/{name?}`, what will be the value of `$name` if the URL is
-      `/hello`?"
-    answers:
-      - value: "`null`"
-        correct: false
-      - value: "`'World'`"
-        correct: true
-      - value: An empty string `''`
-        correct: false
-      - value: An exception will be thrown.
-        correct: false
-    help: When a route parameter is optional (e.g., `{name?}`) and not provided in
-      the URL, the PHP default value for the corresponding controller argument
-      will be used.
-  - question: What is the purpose of the `RequestStack` service in Symfony?
-    answers:
-      - value: To manage multiple HTTP requests simultaneously.
-        correct: false
-      - value: To provide access to the current master request and any sub-requests.
-        correct: true
-      - value: To store all incoming request headers.
-        correct: false
-      - value: To handle request validation.
-        correct: false
-    help: The `RequestStack` service allows you to access the current `Request`
-      object, especially useful when dealing with sub-requests (e.g., from
-      `forward()`).
-  - question: Which of the following is the most secure and recommended project
-      directory structure for a Symfony application?
-    answers:
-      - value: All PHP files in the root directory, including the front controller.
-        correct: false
-      - value: A `public/` directory containing only the front controller (`index.php`)
-          and public assets, with application logic outside this directory.
-        correct: true
-      - value: A `src/` directory containing all files, including `index.php`.
-        correct: false
-      - value: Using a single `.htaccess` file to restrict access to all files except
-          `index.php`.
-        correct: false
-    help: The standard Symfony directory structure with a dedicated `public/` (or
-      `web/`) directory for the front controller and public assets is a
-      fundamental security best practice.
-  - question: When creating a custom form type in Symfony, how do you typically
-      integrate it with a controller?
-    answers:
-      - value: By instantiating the form type directly and calling `handleRequest()`.
-        correct: false
-      - value: By using `$this->createForm(MyFormType::class, $data);` in an
-          `AbstractController` method.
-        correct: true
-      - value: By defining the form in `services.yaml` and autowiring it.
-        correct: false
-      - value: By extending `Symfony\Component\Form\AbstractType` in the controller.
-        correct: false
-    help: The `createForm()` helper method from `AbstractController` is the standard
-      way to create a form instance from a dedicated form type class.
-  - question: What is the primary purpose of the `HttpKernel` component in Symfony?
-    answers:
-      - value: To manage database connections.
-        correct: false
-      - value: To convert a `Request` into a `Response` by dispatching events and
-          executing the controller.
-        correct: true
-      - value: To handle routing and URL generation.
-        correct: false
-      - value: To render Twig templates.
-        correct: false
-    help: The `HttpKernel` is the core of Symfony, responsible for the entire
-      request-response lifecycle, including event dispatching, controller
-      resolution, and response creation.
-  - question: If you want to log information from within a Symfony controller, which
-      service should you type-hint in your controller method?
-    answers:
-      - value: "`Logger`"
-        correct: false
-      - value: "`Psr\\Log\\LoggerInterface`"
-        correct: true
-      - value: "`Monolog\\Logger`"
-        correct: false
-      - value: "`LogService`"
-        correct: false
-    help: Symfony's logging integration uses the PSR-3 `LoggerInterface`.
-      Type-hinting this interface allows autowiring of the default logger.
-  - question: Consider a scenario where you have multiple controllers that share
-      some common logic. What is the most Symfony-idiomatic way to reuse this
-      logic?
-    answers:
-      - value: Create a base controller class that all other controllers extend.
-        correct: false
-      - value: Extract the common logic into a separate service and inject it into the
-          controllers.
-        correct: true
-      - value: Use global functions for the common logic.
-        correct: false
-      - value: Duplicate the code in each controller.
-        correct: false
-    help: Extracting reusable logic into services and injecting them into
-      controllers promotes separation of concerns, testability, and adherence to
-      the Dependency Inversion Principle.
-  - question: What is the purpose of the `#[MapQueryParameter]` attribute (or
-      similar `Map*` attributes) for controller arguments?
-    answers:
-      - value: To map a query parameter directly to a controller argument, potentially
-          with type conversion or validation.
-        correct: true
-      - value: To map a route parameter to a controller argument.
-        correct: false
-      - value: To automatically inject a service based on a query parameter.
-        correct: false
-      - value: To map an uploaded file to a controller argument.
-        correct: false
-    help: Symfony 6.2+ introduced `Map*` attributes (like `MapQueryParameter`,
-      `MapRequestPayload`, `MapUploadedFile`) to simplify the mapping of request
-      data directly to controller arguments, often with built-in type conversion
-      and validation.
-  - question: If you need to perform a redirect to an external URL (e.g.,
-      `https://www.google.com`), which `AbstractController` helper method should
-      you use?
-    answers:
-      - value: "`redirectToRoute('external_url')`"
-        correct: false
-      - value: "`redirect('https://www.google.com')`"
-        correct: true
-      - value: "`forward('external_controller')`"
-        correct: false
-      - value: "`$this->redirectExternal('https://www.google.com')`"
-        correct: false
-    help: The `redirect()` method is used for arbitrary URLs, including external
-      ones.
-  - question: What is the role of the `Request` object's `attributes` property in
-      controller argument resolution?
-    answers:
-      - value: It stores all HTTP headers from the request.
-        correct: false
-      - value: It holds the route parameters and other data added by listeners (like
-          `_controller`), which are then used by the `ArgumentResolver`.
-        correct: true
-      - value: It contains the raw request body.
-        correct: false
-      - value: It stores session data.
-        correct: false
-    help: The `attributes` property of the `Request` object is a `ParameterBag` that
-      stores data derived from the routing process, such as route parameters,
-      and other internal data like the `_controller` callable.
-  - question: When is the `kernel.request` event dispatched in the Symfony
-      HttpKernel lifecycle?
-    answers:
-      - value: After the controller has been executed.
-        correct: false
-      - value: After the `Response` has been sent to the client.
-        correct: false
-      - value: At the very beginning of the request handling process, allowing listeners
-          to return a `Response` early or modify the `Request`.
-        correct: true
-      - value: Only when an exception occurs.
-        correct: false
-    help: The `kernel.request` event is the first event dispatched by the
-      `HttpKernel`, making it a suitable place for early processing, such as
-      authentication, routing, or returning a cached response.
-  - question: Which PHP version is the minimum requirement for Symfony 7.0?
-    answers:
-      - value: PHP 7.4
-        correct: false
-      - value: PHP 8.0
-        correct: false
-      - value: PHP 8.1
-        correct: false
-      - value: PHP 8.2
-        correct: true
-    help: Symfony 7.0 requires PHP 8.2 or higher.
-  - question: What is the primary purpose of the `MicroKernelTrait` in Symfony?
-    answers:
-      - value: To enable full-stack application development with all Symfony bundles.
-        correct: false
-      - value: To simplify the creation of small, self-contained Symfony applications or
-          microservices by providing a minimal kernel setup.
-        correct: true
-      - value: To automatically generate controllers and routes.
-        correct: false
-      - value: To integrate with external microservices.
-        correct: false
-    help: The `MicroKernelTrait` provides a streamlined way to create a Symfony
-      kernel for smaller applications, often used for APIs or single-purpose
-      services, by reducing boilerplate.
-  - question: When is it appropriate to use `#[AsController]` instead of extending
-      `AbstractController`?
-    answers:
-      - value: When you need access to the `render()` and `redirectToRoute()` helper
-          methods.
-        correct: false
-      - value: When you want to explicitly define your controller as a service and
-          inject dependencies directly via constructor or action method
-          arguments, without relying on `AbstractController`'s helpers.
-        correct: true
-      - value: When your controller does not require any services.
-        correct: false
-      - value: When building a console command.
-        correct: false
-    help: "`#[AsController]` is ideal for controllers where you prefer explicit
-      dependency injection and don't need the convenience methods of
-      `AbstractController`, or when building a more 'pure' service-based
-      architecture."
-  - question: What is the correct way to retrieve a specific request header, such as
-      'User-Agent', in a Symfony controller?
-    answers:
-      - value: $request->headers->get('User-Agent');
-        correct: true
-      - value: $request->getHeader('User-Agent');
-        correct: false
-      - value: $_SERVER['HTTP_USER_AGENT'];
-        correct: false
-      - value: $request->attributes->get('User-Agent');
-        correct: false
-    help: The `Request` object's `headers` property provides a `HeaderBag` instance,
-      which has a `get()` method to retrieve header values.
-  - question: Which of the following is a valid way to define a route for an
-      invokable controller in `routes.yaml`?
+      - value: It defines the default template for all actions within the controller.
+        correct: false
+      - value: It injects the Twig environment into the controller method.
+        correct: false
+      - value: It marks the controller method as a Twig function.
+        correct: false
+    help: >-
+      The `#[Template]` attribute allows a controller method to return an array
+      of parameters instead of a `Response` object. Symfony then automatically
+      renders the specified Twig template with these parameters.
+
+      https://symfony.com/doc/current/templates.html#the-template-attribute
+  - question: Which of the following is the correct way to inject the Twig
+      environment service (`Twig\Environment`) into a Symfony controller's
+      constructor without extending `AbstractController`?
     answers:
       - value: |-
-          my_route:
-              path: /my-path
-              controller: App\Controller\MyInvokableController::index
-        correct: false
-      - value: |-
-          my_route:
-              path: /my-path
-              controller: App\Controller\MyInvokableController
+          ```php
+          use Twig\Environment;
+          class MyController
+          {
+              public function __construct(private Environment $twig) {}
+          }
+          ```
         correct: true
       - value: |-
-          my_route:
-              path: /my-path
-              controller: App\Controller\MyInvokableController::__invoke
+          ```php
+          class MyController
+          {
+              public function __construct(Environment $twig)
+              {
+                  $this->twig = $twig;
+              }
+          }
+          ```
+        correct: true
+      - value: |-
+          ```php
+          class MyController extends AbstractController
+          {
+              public function __construct(Environment $twig) {}
+          }
+          ```
         correct: false
       - value: |-
-          my_route:
-              path: /my-path
-              controller: App\Controller\MyInvokableController->invoke()
+          ```php
+          class MyController
+          {
+              public function index()
+              {
+                  $twig = $this->container->get('twig');
+              }
+          }
+          ```
         correct: false
-    help: For invokable controllers, you simply reference the class name in the
-      `controller` option, as the `__invoke()` method is implicitly called.
-  - question: What is the primary difference between `Request::query` and
-      `Request::request` in Symfony?
+    help: |-
+      Symfony's autowiring allows you to inject services directly into a controller's constructor by type-hinting the service's interface or class, regardless of whether it extends `AbstractController`.
+      https://symfony.com/doc/current/controller/service.html#injecting-services-into-controllers
+  - question: What is the purpose of `Symfony\Component\WebLink\Link` objects when
+      used with `sendEarlyHints()`?
     answers:
-      - value: "`Request::query` holds GET parameters, while `Request::request` holds
-          POST parameters."
+      - value: They represent resources that the browser should preload, preconnect, or
+          prefetch.
         correct: true
-      - value: "`Request::query` holds route parameters, while `Request::request` holds
-          GET parameters."
+      - value: They define internal links within the Symfony application.
         correct: false
-      - value: "`Request::query` is for URL-encoded data, while `Request::request` is
-          for JSON data."
+      - value: They specify external JavaScript and CSS files to be loaded.
         correct: false
-      - value: There is no difference; they are aliases.
+      - value: They are used for generating sitemaps.
         correct: false
-    help: "`Request::query` (a `ParameterBag`) provides access to query string
-      parameters (GET), while `Request::request` (also a `ParameterBag`)
-      provides access to request body parameters (POST)."
-  - question: What is the purpose of the `kernel.response` event in Symfony's HttpKernel?
-    answers:
-      - value: It is dispatched before the controller is executed.
-        correct: false
-      - value: It is dispatched after the controller has returned a `Response` object,
-          allowing listeners to modify the response before it is sent.
-        correct: true
-      - value: It is dispatched when a new `Response` object is created.
-        correct: false
-      - value: It is dispatched when a response is received from an external API.
-        correct: false
-    help: The `kernel.response` event is a crucial point in the lifecycle for
-      modifying the `Response` object, such as adding headers, compressing
-      content, or setting cookies, before it's sent to the client.
+    help: >-
+      `Link` objects are used to construct HTTP Link headers, which can signal
+      to the browser to perform actions like preloading resources, improving
+      page load performance.
+
+      https://symfony.com/doc/current/controller.html#sending-early-hints
   - question: Which of the following is a valid way to define a route for a
-      controller using YAML configuration?
+      controller method `index` within `App\Controller\HelloController` using
+      YAML configuration?
     answers:
       - value: |-
-          my_route:
-              path: /my-path
-              controller: App\Controller\MyController::index
+          ```yaml
+          # config/routes.yaml
+          hello:
+              path:       /hello
+              controller: App\Controller\HelloController::index
+          ```
         correct: true
       - value: |-
-          my_route:
-              route: /my-path
-              action: App\Controller\MyController::index
+          ```yaml
+          # config/routes.yaml
+          hello:
+              path:       /hello
+              _controller: App\Controller\HelloController::index
+          ```
         correct: false
       - value: |-
-          my_route:
-              url: /my-path
-              handler: App\Controller\MyController::index
+          ```yaml
+          # config/routes.yaml
+          hello:
+              route: /hello
+              action: App\Controller\HelloController::index
+          ```
+        correct: false
+    help: |-
+      In YAML routing, the `controller` key is used to specify the controller callable using the `FQCN::methodName` syntax.
+      https://symfony.com/doc/current/controller/service.html#routing-to-service-controllers
+  - question: What is the typical directory structure for controllers in a standard
+      Symfony application?
+    answers:
+      - value: "`src/Controller/`"
+        correct: true
+      - value: "`app/Controller/`"
+        correct: false
+      - value: "`var/Controller/`"
+        correct: false
+      - value: "`bin/Controller/`"
+        correct: false
+    help: >-
+      Symfony applications typically organize controller classes within the
+      `src/Controller/` directory.
+
+      https://symfony.com/doc/current/controller.html#basic-controller
+  - question: Which command-line tool is commonly used to generate a new, empty
+      controller class in Symfony?
+    answers:
+      - value: "`php bin/console make:controller`"
+        correct: true
+      - value: "`php bin/console generate:controller`"
+        correct: false
+      - value: "`php bin/console new:controller`"
+        correct: false
+      - value: "`php bin/console create:controller`"
+        correct: false
+    help: >-
+      The Symfony Maker bundle provides the `make:controller` command to quickly
+      scaffold new controller classes.
+
+      https://symfony.com/doc/current/controller.html#creating-a-new-controller
+  - question: What is the purpose of the `#[IsGranted]` attribute's `message` option?
+    answers:
+      - value: To provide a custom message that will be displayed to the user if access
+          is denied.
+        correct: true
+      - value: To log a message when access is granted.
+        correct: false
+      - value: To define the success message after an action.
+        correct: false
+      - value: To specify the translation key for the access denied message.
+        correct: false
+    help: |-
+      The `message` option in the `#[IsGranted]` attribute allows you to define a custom message that will be shown to the user when access is denied, providing more context than a generic error.
+      https://symfony.com/doc/current/security.html#securing-controllers-and-templates
+  - question: Which of the following is the correct way to inject a `LockFactory`
+      service named `invoice_lock_factory` into a controller method using
+      autowiring and attributes?
+    answers:
+      - value: |-
+          ```php
+          #[Autowire(service: 'invoice_lock_factory')]
+          LockFactory $invoiceLockFactory
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[Inject('invoice_lock_factory')]
+          LockFactory $invoiceLockFactory
+          ```
         correct: false
       - value: |-
-          my_route:
-              pattern: /my-path
-              method: App\Controller\MyController::index
+          ```php
+          LockFactory $invoiceLockFactory = $this->get('invoice_lock_factory')
+          ```
         correct: false
-    help: In YAML routing, `path` defines the URL pattern and `controller` specifies
-      the controller callable (FQCN::method).
-  - question: What is the main advantage of using argument value resolvers in
-      Symfony controllers?
+      - value: >-
+          ```php
+
+          LockFactory $invoiceLockFactory
+
+          ``` (assuming `invoice_lock_factory` is the default service ID for
+          `LockFactory`)
+        correct: false
+    help: |-
+      The `#[Autowire(service: 'service_id')]` attribute is used to inject a specific named service when the default autowiring by type hint is not sufficient or ambiguous.
+      https://symfony.com/doc/current/controller.html#injecting-specific-services-or-parameters
+  - question: What is the purpose of the
+      `Symfony\Component\HttpKernel\Event\ControllerEvent` object passed to
+      `kernel.controller` listeners?
     answers:
-      - value: They reduce the need for type-hinting in controller methods.
-        correct: false
-      - value: They allow for cleaner controller code by abstracting away the logic for
-          retrieving and converting request data into specific objects or
-          values.
+      - value: It provides access to the current `Request` object and the resolved
+          controller callable.
         correct: true
-      - value: They automatically validate all incoming request data.
+      - value: It contains the `Response` object that will be sent to the client.
         correct: false
-      - value: They replace the need for the `Request` object in controllers.
+      - value: It holds the arguments that will be passed to the controller.
         correct: false
-    help: Argument value resolvers streamline controller logic by handling the
-      complex task of transforming raw request data (like route parameters,
-      query parameters, or request bodies) into the specific objects or scalar
-      values that controller methods expect.
-  - question: If you need to redirect a user to a different page after a successful
-      form submission, what HTTP status code should typically be used for the
-      redirect?
+      - value: It allows modifying the route parameters before controller execution.
+        correct: false
+    help: |-
+      The `ControllerEvent` object provides methods like `getRequest()` and `getController()` (and `setController()`) to inspect and modify the request and the controller before execution.
+      https://symfony.com/doc/current/components/http_kernel.html#the-kernel-controller-event
+  - question: Which of the following describes the
+      `Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent` object?
     answers:
-      - value: 200 OK
-        correct: false
-      - value: 201 Created
-        correct: false
-      - value: 302 Found (or 303 See Other)
+      - value: It provides access to the `Request` object and the arguments that will be
+          passed to the controller.
         correct: true
-      - value: 400 Bad Request
+      - value: It allows modifying the arguments before the controller is executed.
+        correct: true
+      - value: It is dispatched before the controller itself is resolved.
         correct: false
-    help: The Post/Redirect/Get (PRG) pattern is a common web development design
-      pattern that prevents duplicate form submissions and ensures a clean user
-      experience. It typically uses a 302 or 303 redirect after a successful
-      POST.
-  - question: Which of the following is a valid way to generate a URL for a named
-      route within a Symfony controller extending `AbstractController`?
+      - value: It contains the return value of the controller.
+        correct: false
+    help: |-
+      The `ControllerArgumentsEvent` provides access to the `Request` and the resolved arguments, allowing listeners to modify them before the controller is called.
+      https://symfony.com/doc/current/reference/events.html#kernel-controller-arguments
+  - question: What is the purpose of the
+      `Symfony\Component\HttpKernel\Event\ViewEvent` object?
     answers:
-      - value: $this->generateUrl('app_homepage');
+      - value: It allows listeners to transform a non-`Response` return value from a
+          controller into a `Response` object.
         correct: true
-      - value: $this->get('router')->generate('app_homepage');
-        correct: true
-      - value: $this->url('app_homepage');
+      - value: It is dispatched when a Twig template is rendered.
         correct: false
-      - value: $this->route('app_homepage');
+      - value: It provides access to the view layer configuration.
         correct: false
-    help: Both the `generateUrl()` helper method from `AbstractController` and
-      direct access to the `router` service are valid ways to generate URLs.
-  - question: What is the primary function of a 'front controller' in a web
-      application architecture?
+      - value: It is dispatched after the `Response` has been created but before it's
+          sent.
+        correct: false
+    help: >-
+      The `ViewEvent` is dispatched only if the controller does not return a
+      `Response` object, giving listeners a chance to convert the controller's
+      return value into a proper HTTP `Response`.
+
+      https://symfony.com/doc/current/reference/events.html#kernel-view
+  - question: When using `#[MapQueryString]` with a DTO, how can you ensure a valid
+      DTO object is always available, even if the query string is empty?
     answers:
-      - value: To serve static assets like CSS and JavaScript.
-        correct: false
-      - value: To act as a single entry point for all web requests, centralizing request
-          handling and dispatching.
+      - value: "By providing a default DTO instance to the controller argument:
+          `#[MapQueryString] UserDto $userDto = new UserDto()`"
         correct: true
-      - value: To manage database connections and queries.
+      - value: By making the DTO properties nullable.
         correct: false
-      - value: To render HTML templates.
+      - value: By checking `if ($userDto === null)` inside the controller.
         correct: false
-    help: A front controller is a design pattern where a single controller handles
-      all requests for a website or web application. This centralizes common
-      functionality like routing, security, and bootstrapping.
-  - question: "When a controller method is defined as `public function index(int
-      $year = 2012): Response`, and the route is `/leap-year/{year?}`, what
-      happens if the URL is `/leap-year/2024`?"
+      - value: By configuring a default value in `services.yaml`.
+        correct: false
+    help: |-
+      You can provide a default DTO instance directly in the controller method signature. This ensures that even if the query string is empty, a valid DTO object is always injected.
+      https://symfony.com/doc/current/controller.html#providing-a-default-dto-for-an-empty-query-string
+  - question: Which of the following is a valid way to define a route for an
+      invokable controller `App\Controller\MyInvokableController` in PHP
+      routing?
     answers:
-      - value: "`$year` will be `2012`."
-        correct: false
-      - value: "`$year` will be `2024`."
+      - value: >-
+          ```php
+
+          $routes->add('my_route',
+          '/my-path')->controller(App\Controller\MyInvokableController::class);
+
+          ```
         correct: true
-      - value: An error will occur because a default value is provided.
+      - value: |-
+          ```php
+          $routes->add('my_route', '/my-path')->controller('App\\Controller\\MyInvokableController::__invoke');
+          ```
         correct: false
-      - value: The route will not match.
+      - value: >-
+          ```php
+
+          $routes->add('my_route',
+          '/my-path')->controller([App\Controller\MyInvokableController::class,
+          '__invoke']);
+
+          ```
         correct: false
-    help: If a value is provided in the URL for an optional route parameter, that
-      value will override the default value defined in the controller method
-      signature.
-  - question: Which of the following describes a common use case for `forward()` in
-      a Symfony controller?
+    help: |-
+      For invokable controllers, you can simply provide the FQCN of the controller class as the controller reference in PHP routing. Symfony will automatically call the `__invoke()` method.
+      https://symfony.com/doc/current/controller/service.html#routing-to-invokable-controllers
+  - question: What is the primary role of the `RouterListener` in the Symfony
+      HttpKernel request flow?
     answers:
-      - value: Displaying a login form on every page.
-        correct: false
-      - value: Embedding a dynamically generated sidebar or widget (e.g., 'latest
-          articles') from another controller into a main page's template.
+      - value: It matches the incoming request to a route and sets the `_controller` and
+          other route parameters as request attributes.
         correct: true
-      - value: Sending an email notification.
+      - value: It resolves the controller callable from the request attributes.
         correct: false
-      - value: Performing a database transaction.
+      - value: It dispatches the `kernel.request` event.
         correct: false
-    help: "`forward()` is often used to include content from other controllers,
-      effectively creating 'sub-requests' that generate a portion of the overall
-      response. This is common for reusable components like sidebars."
-  - question: What is the purpose of the `#[MapEntity]` attribute (from
-      `Symfony\Bridge\Doctrine\Attribute\MapEntity`)?
+      - value: It generates URLs for routes.
+        correct: false
+    help: |-
+      The `RouterListener` is an event subscriber that listens to the `kernel.request` event. Its main job is to match the incoming URL to a defined route and populate the request attributes with route information, including the `_controller`.
+      https://symfony.com/doc/current/components/http_kernel.html#the-request-flow
+  - question: Which of the following is true about `HttpException` in Symfony?
     answers:
-      - value: To automatically convert a route parameter into a Doctrine entity object.
+      - value: Exceptions extending `HttpException` will result in an HTTP response with
+          the exception's status code.
         correct: true
-      - value: To map a form field to a database entity.
+      - value: Any exception thrown in a controller will result in a 500 Internal Server
+          Error.
         correct: false
-      - value: To map an uploaded file to an entity property.
+      - value: "`NotFoundHttpException` is a specific type of `HttpException` for 404
+          errors."
+        correct: true
+      - value: They are automatically caught and displayed as a generic error page.
         correct: false
-      - value: To define a new database entity.
-        correct: false
-    help: While not directly in the provided 'Controllers' docs, `#[MapEntity]` is a
-      very common argument value resolver used with controllers to automatically
-      fetch a Doctrine entity based on a route parameter, simplifying controller
-      code.
-  - question: When dealing with cookies in Symfony, what is the recommended way to
-      add a new cookie to the response?
+    help: >-
+      Symfony's exception listener catches exceptions. If an exception extends
+      `HttpException` (e.g., `NotFoundHttpException`), Symfony will use the
+      status code defined by that exception. Otherwise, it defaults to a 500
+      Internal Server Error.
+
+      https://symfony.com/doc/current/controller.html#exceptions
+  - question: You want to add an HTTP Link header for preloading a CSS file
+      (`/app.css`) from your controller. Which `AbstractController` helper
+      method can you use?
     answers:
-      - value: Use `setcookie()` PHP function directly.
-        correct: false
-      - value: Create a `Cookie` object and add it to the `Response` object's headers
-          via `$response->headers->setCookie($cookie);`.
+      - value: "`$this->addLink($request, (new Link('preload',
+          '/app.css'))->withAttribute('as', 'style'))`"
         correct: true
-      - value: Call `$this->addCookie('name', 'value');` in `AbstractController`.
+      - value: "`$this->addHeader('Link', '<app.css>; rel=preload; as=style')`"
         correct: false
-      - value: Modify the `$_COOKIE` superglobal.
+      - value: "`$this->preload('/app.css', 'style')`"
         correct: false
-    help: The `Response` object provides a clean, object-oriented way to manage HTTP
-      headers, including setting cookies, through its `headers` property.
-  - question: Which of the following is true about the `Request` object in Symfony?
+      - value: "`$this->link('/app.css', 'preload', 'style')`"
+        correct: false
+    help: >-
+      The `addLink()` method provided by `AbstractController` is a convenient
+      way to add HTTP Link headers to the response, which are used for resource
+      hints like preloading.
+
+      https://symfony.com/doc/current/web_link.html#adding-link-headers
+  - question: What is the purpose of the `#[ValueResolver]` attribute in Symfony 7?
     answers:
-      - value: It is a global variable that can be accessed anywhere.
-        correct: false
-      - value: It is an object-oriented representation of the HTTP request, providing
-          access to headers, parameters, and content.
+      - value: To explicitly target a specific argument resolver for a controller method
+          argument.
         correct: true
-      - value: It is only available in controller constructors.
+      - value: To define a custom validation rule for an argument.
         correct: false
-      - value: It is automatically persisted across multiple user sessions.
+      - value: To mark an argument as optional.
         correct: false
-    help: The `Request` object (an instance of
-      `Symfony\Component\HttpFoundation\Request`) encapsulates all information
-      about the current HTTP request in an object-oriented manner, replacing
-      direct access to superglobals like `$_GET`, `$_POST`, `$_SERVER`.
+      - value: To automatically convert an argument to a specific data type.
+        correct: false
+    help: |-
+      The `#[ValueResolver]` attribute allows developers to control which argument resolver is used for a specific controller argument, improving performance and ensuring correct resolution, especially with nullable arguments or multiple potential resolvers.
+      https://symfony.com/doc/current/controller/value_resolver.html#targeting-a-specific-argument-resolver
+  - question: Which of the following best describes the 'Front Controller' pattern
+      as implemented in Symfony?
+    answers:
+      - value: A single entry point (`public/index.php`) that handles all incoming
+          requests and dispatches them to the appropriate controller.
+        correct: true
+      - value: Each web page having its own dedicated PHP file.
+        correct: false
+      - value: A design pattern where all business logic is placed directly in the
+          controller.
+        correct: false
+      - value: A system where controllers directly include HTML templates.
+        correct: false
+    help: >-
+      The Front Controller pattern centralizes request handling, routing, and
+      bootstrapping through a single script, typically `public/index.php` in
+      Symfony.
+
+      https://symfony.com/doc/current/create_framework/front_controller.html
+  - question: Which of the following is true about the
+      `Symfony\Component\HttpKernel\Kernel` class?
+    answers:
+      - value: It is the core of a Symfony application, responsible for setting up
+          bundles and the service container.
+        correct: true
+      - value: It implements `HttpKernelInterface` and typically uses
+          `MicroKernelTrait`.
+        correct: true
+      - value: It directly handles HTTP requests and sends responses.
+        correct: false
+      - value: It is responsible for defining all application routes.
+        correct: false
+    help: |-
+      The `Kernel` class is central to Symfony's architecture, managing the application's lifecycle, bundles, and service container. It implements `HttpKernelInterface` and often uses `MicroKernelTrait` for configuration.
+      https://symfony.com/doc/current/configuration/front_controllers_and_kernel.html#the-kernel
+  - question: What is the purpose of the `#[Autowire('%kernel.project_dir%')]`
+      attribute on a controller method argument?
+    answers:
+      - value: To inject the value of the `kernel.project_dir` parameter into the
+          argument.
+        correct: true
+      - value: To define a new service named `kernel.project_dir`.
+        correct: false
+      - value: To specify that the argument should be autowired as a service.
+        correct: false
+      - value: To make the controller method accessible from anywhere in the project
+          directory.
+        correct: false
+    help: |-
+      The `#[Autowire]` attribute can be used to inject specific parameter values into controller method arguments, using the `%parameter_name%` syntax.
+      https://symfony.com/doc/current/controller.html#injecting-specific-services-or-parameters
+  - question: When generating CRUD operations for a Doctrine entity using
+      `make:crud`, what types of files are typically created?
+    answers:
+      - value: A controller, a form type, and Twig templates.
+        correct: true
+      - value: A controller and a service for data handling.
+        correct: false
+      - value: Only a controller with basic actions.
+        correct: false
+      - value: An entity, a repository, and a controller.
+        correct: false
+    help: >-
+      The `make:crud` command generates a comprehensive set of files for
+      managing an entity, including the controller, its associated form type,
+      and various Twig templates for listing, showing, creating, and editing
+      records.
+
+      https://symfony.com/doc/current/controller.html#generating-crud
+  - question: Which of the following is a valid way to inject the
+      `SerializerInterface` service into a Symfony controller method?
+    answers:
+      - value: |-
+          ```php
+          use Symfony\Component\Serializer\SerializerInterface;
+          public function index(SerializerInterface $serializer): Response
+          {
+              // ...
+          }
+          ```
+        correct: true
+      - value: |-
+          ```php
+          public function index(): Response
+          {
+              $serializer = $this->get('serializer');
+              // ...
+          }
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[Inject('serializer')]
+          SerializerInterface $serializer
+          ```
+        correct: false
+    help: >-
+      Symfony's autowiring allows you to inject services by type-hinting their
+      interface or class directly into controller method arguments.
+
+      https://symfony.com/doc/current/serializer.html#injecting-the-serializer
+  - question: What is the purpose of the `#[AsCommand]` attribute in a Symfony
+      console command?
+    answers:
+      - value: To define the command's name and description.
+        correct: true
+      - value: To inject services into the command.
+        correct: false
+      - value: To execute the command automatically.
+        correct: false
+      - value: To link the command to a specific controller.
+        correct: false
+    help: >-
+      The `#[AsCommand]` attribute is used to configure the command's name,
+      description, and other options directly in the class.
+
+      https://symfony.com/doc/current/console.html#configuring-the-command
+  - question: Which built-in argument resolver is responsible for injecting the
+      configured session class implementing `SessionInterface`?
+    answers:
+      - value: "`SessionValueResolver`"
+        correct: true
+      - value: "`RequestStackSessionResolver`"
+        correct: false
+      - value: "`HttpSessionResolver`"
+        correct: false
+      - value: "`DefaultSessionResolver`"
+        correct: false
+    help: |-
+      The `SessionValueResolver` injects the configured session class implementing `SessionInterface` if type-hinted with `SessionInterface` or a class implementing it.
+      https://symfony.com/doc/current/controller/value_resolver.html#built-in-argument-resolvers
+  - question: What is the primary benefit of the `EntityValueResolver` in Symfony
+      controllers?
+    answers:
+      - value: It automatically queries and injects Doctrine entities based on route
+          parameters, reducing boilerplate code.
+        correct: true
+      - value: It allows controllers to directly interact with the database without a
+          repository.
+        correct: false
+      - value: It provides a caching mechanism for entities.
+        correct: false
+      - value: It automatically validates entity data before persistence.
+        correct: false
+    help: |-
+      The `EntityValueResolver` simplifies controller logic by automatically fetching and injecting Doctrine entities into controller methods based on route parameters (e.g., an ID), and automatically throwing a 404 if the entity is not found.
+      https://symfony.com/doc/current/controller/value_resolver.html#entityvalueresolver
