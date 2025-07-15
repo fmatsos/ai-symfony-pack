@@ -1,576 +1,338 @@
 category: Security
 questions:
-  - question: Which Symfony CLI command is used to check a project's dependencies
-      for known security vulnerabilities against the public PHP security
+  - question: Which Symfony CLI command is used to check a project's `composer.lock`
+      file for known security vulnerabilities against the public PHP security
       advisories database?
     answers:
       - value: "`symfony check:security`"
         correct: true
-      - value: "`composer security:check`"
+      - value: "`composer security:audit`"
         correct: false
-      - value: "`bin/console security:audit`"
+      - value: "`php bin/console security:check`"
         correct: false
       - value: "`symfony audit:dependencies`"
         correct: false
-    help: The `symfony check:security` command scans your `composer.lock` file for
-      known vulnerabilities without sending data over the network.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/setup.rst#_snippet_7
-  - question: What is the default value for the `check_path` option in a Symfony
-      security firewall's `form_login` configuration?
+    help: The `symfony check:security` command scans your project's `composer.lock`
+      file for known vulnerabilities without sending data over the network.
+  - question: What is the primary purpose of the
+      `Symfony\Bundle\SecurityBundle\Security` service?
     answers:
-      - value: "`/login_check`"
+      - value: To provide methods for interacting with Symfony's security component,
+          such as retrieving firewall configurations and managing user
+          authentication.
         correct: true
-      - value: "`/login`"
+      - value: To manage database connections for user providers.
         correct: false
-      - value: "`/authenticate`"
+      - value: To encrypt and decrypt sensitive application data.
         correct: false
-      - value: "`/submit_login`"
+      - value: To handle all HTTP request and response cycles.
         correct: false
-    help: The `check_path` option defines the URL path where login credentials are
-      submitted. Its default value is `/login_check`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_7
-  - question: Which of the following interfaces must a user entity implement in
-      Symfony 7 to be used with the security component for password
-      authentication?
-    answers:
-      - value: "`Symfony\\Component\\Security\\Core\\User\\UserInterface`"
-        correct: true
-      - value: "`Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInt\
-          erface`"
-        correct: true
-      - value: "`Symfony\\Component\\Security\\Core\\User\\AdvancedUserInterface`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Core\\User\\AuthenticatableInterface`"
-        correct: false
-    help: A user entity must implement `UserInterface` and
-      `PasswordAuthenticatedUserInterface` for password-based authentication in
-      Symfony.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_4
-  - question: When configuring multiple firewalls in Symfony, what is the
-      significance of their order in the `security.yaml` file?
-    answers:
-      - value: The request will be handled by the first firewall whose pattern matches.
-        correct: true
-      - value: The order determines the priority of authentication methods within a
-          single firewall.
-        correct: false
-      - value: The last firewall defined will always be the default if no pattern
-          matches.
-        correct: false
-      - value: The order only matters for stateless firewalls.
-        correct: false
-    help: The order in which firewalls are defined is very important, as the request
-      will be handled by the first firewall whose pattern matches.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_12
+    help: The `Security` service is a helper that provides convenient methods to
+      interact with the security component, including `isGranted()` and
+      `login()`.
   - question: |-
-      Consider the following `security.yaml` configuration:
+      Consider the following `access_control` rule in `security.yaml`:
 
       ```yaml
-      security:
-          access_control:
-              - { path: ^/admin/users, roles: ROLE_SUPER_ADMIN }
-              - { path: ^/admin, roles: ROLE_ADMIN }
+      access_control:
+          - { path: ^/cart/checkout, roles: PUBLIC_ACCESS, port: 8080 }
       ```
 
-      Which role is required to access `/admin/users/edit/1`?
+      What does this configuration achieve?
     answers:
-      - value: "`ROLE_SUPER_ADMIN`"
+      - value: It allows public access to `/cart/checkout` only when accessed via port
+          8080.
         correct: true
-      - value: "`ROLE_ADMIN`"
+      - value: It redirects all requests to `/cart/checkout` to port 8080.
         correct: false
-      - value: Both `ROLE_SUPER_ADMIN` and `ROLE_ADMIN`
+      - value: It denies access to `/cart/checkout` if the port is not 8080.
         correct: false
-      - value: Neither, as it's a specific path not covered.
+      - value: It is an invalid configuration for access control.
         correct: false
-    help: Symfony processes access control rules from top to bottom, applying the
-      first matching rule. More specific paths should be listed before more
-      general ones.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_60
-  - question: Which of the following Symfony Security events is dispatched after the
-      passport was validated and the authenticator created the security token?
+    help: The `port` option in `access_control` restricts access to a URL pattern
+      only when it's accessed via the specified port.
+  - question: Which of the following `access_control` configurations correctly
+      requires `ROLE_ADMIN` or `IS_AUTHENTICATED_FULLY` for URLs starting with
+      `/admin`?
     answers:
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\AuthenticationTokenCreatedE\
-          vent`"
-        correct: true
-      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationSuccessEvent`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\InteractiveLoginEvent`"
-        correct: false
-    help: The `AuthenticationTokenCreatedEvent` is dispatched after the passport was
-      validated and the authenticator created the security token (and user).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_72
-  - question: To programmatically log in a user on a specific firewall in Symfony,
-      which method of the `Security` helper would you use?
-    answers:
-      - value: "`$security->login($user, $authenticatorName, $firewallName);`"
-        correct: true
-      - value: "`$security->authenticate($user, $firewallName);`"
-        correct: false
-      - value: "`$security->setUser($user, $firewallName);`"
-        correct: false
-      - value: "`$security->switchUser($user, $firewallName);`"
-        correct: false
-    help: The `login()` method of the `Security` helper allows programmatic
-      authentication, accepting `user`, `authenticatorName`, and `firewallName`
-      as parameters.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_45
-  - question: What is the purpose of the `eraseCredentials()` method in a Symfony
-      user entity that implements `UserInterface`?
-    answers:
-      - value: To clear any temporary, sensitive data (like plain passwords) stored on
-          the user object after authentication.
-        correct: true
-      - value: To remove the user's roles after logout.
-        correct: false
-      - value: To delete the user's password from the database.
-        correct: false
-      - value: To invalidate the user's session.
-        correct: false
-    help: The `eraseCredentials()` method is called after authentication to clear
-      any temporary, sensitive data (e.g., plain password) that should not be
-      persisted.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_4
-  - question: Which of the following `access_control` options in Symfony Security is
-      used to redirect the user if the incoming request's channel (HTTP/HTTPS)
-      does not match the required value?
-    answers:
-      - value: "`requires_channel`"
-        correct: true
-      - value: "`force_https`"
-        correct: false
-      - value: "`secure_channel`"
-        correct: false
-      - value: "`channel_redirect`"
-        correct: false
-    help: The `requires_channel` option redirects the user if the incoming request's
-      channel (HTTP/HTTPS) does not match the required value.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_2
-  - question: To enable CSRF protection for a form login in Symfony, which option
-      should be set to `true` under the `form_login` configuration for a
-      firewall?
-    answers:
-      - value: "`enable_csrf`"
-        correct: true
-      - value: "`csrf_protection`"
-        correct: false
-      - value: "`protect_form`"
-        correct: false
-      - value: "`csrf_enabled`"
-        correct: false
-    help: "Setting `enable_csrf: true` under `form_login` enables CSRF protection
-      for the form login authenticator.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_2\
-      3"
-  - question: What is the primary purpose of the `#[IsGranted]` attribute in a
-      Symfony controller?
-    answers:
-      - value: To apply access control to a controller class or specific methods based
-          on roles or expressions.
-        correct: true
-      - value: To define a route that requires authentication.
-        correct: false
-      - value: To inject the security service into the controller.
-        correct: false
-      - value: To log the user out if they don't have the required permissions.
-        correct: false
-    help: The `#[IsGranted]` attribute is used to apply access control to controller
-      classes or methods, checking if the current user has the specified roles
-      or satisfies a given expression.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_62
-  - question: Which of the following special authentication attributes indicates
-      that a user is authenticated, potentially via a 'remember me' cookie, but
-      not necessarily through an active login during the current session?
-    answers:
-      - value: "`IS_AUTHENTICATED_REMEMBERED`"
-        correct: true
-      - value: "`IS_AUTHENTICATED_FULLY`"
-        correct: false
-      - value: "`IS_AUTHENTICATED`"
-        correct: false
-      - value: "`IS_REMEMBERED`"
-        correct: false
-    help: "`IS_AUTHENTICATED_REMEMBERED` indicates that the user is authenticated,
-      potentially via a 'remember me' cookie. It's a less strict check than
-      `IS_AUTHENTICATED_FULLY`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_7\
-      0"
-  - question: How can you programmatically log out a user from the current firewall
-      in a Symfony controller?
-    answers:
-      - value: "`$security->logout();`"
-        correct: true
-      - value: "`$this->get('security.context')->setToken(null);`"
-        correct: false
-      - value: "`$this->container->get('security.token_storage')->setToken(null);`"
-        correct: false
-      - value: "`$security->invalidateSession();`"
-        correct: false
-    help: The `logout()` method of the `Security` helper logs out the user from the
-      firewall associated with the current request.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_47
-  - question: Which configuration option is used to define role inheritance rules in
-      Symfony Security?
-    answers:
-      - value: "`role_hierarchy`"
-        correct: true
-      - value: "`roles_inheritance`"
-        correct: false
-      - value: "`access_hierarchy`"
-        correct: false
-      - value: "`permission_tree`"
-        correct: false
-    help: The `role_hierarchy` option allows defining role inheritance rules to
-      simplify user role management.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_25
-  - question: What is the default behavior of the `NotCompromisedPassword`
-      constraint in Symfony's validation component regarding HTTP requests for
-      checking compromised passwords?
-    answers:
-      - value: It makes HTTP requests to 'haveibeenpwned.com' by default.
-        correct: true
-      - value: It does not make HTTP requests by default.
-        correct: false
-      - value: It only makes requests in the `prod` environment.
-        correct: false
-      - value: It requires explicit configuration of an endpoint to make requests.
-        correct: false
-    help: By default, the `NotCompromisedPassword` constraint is enabled and makes
-      HTTP requests to 'haveibeenpwned.com'. It can be disabled or configured
-      with a different endpoint.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/framework.rst#_snippet_62
-  - question: "When configuring a Symfony security firewall, what does setting
-      `stateless: true` imply?"
-    answers:
-      - value: The firewall will not use the session for authenticating users.
-        correct: true
-      - value: The firewall will only allow API token authentication.
-        correct: false
-      - value: The firewall will automatically invalidate the user's session on every
-          request.
-        correct: false
-      - value: The firewall will not store any user information in the security token.
-        correct: false
-    help: "Setting `stateless: true` for a firewall means it will not use the
-      session for authenticating users, typically used for API firewalls.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration\
-      /security.rst#_snippet_21"
-  - question: Which of the following is the correct way to inject the
-      `UserPasswordHasherInterface` into a Symfony controller for hashing
-      passwords?
-    answers:
-      - value: >-
-          ```php
-
-          use
-          Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
-
-          public function index(UserPasswordHasherInterface $passwordHasher):
-          Response
-
-          {
-              // ...
-          }
-
+      - value: |-
+          ```yaml
+          access_control:
+              - { path: ^/admin, roles: [IS_AUTHENTICATED_FULLY, ROLE_ADMIN] }
           ```
         correct: true
-      - value: >-
-          ```php
-
-          use
-          Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-
-
-          public function index(UserPasswordEncoderInterface $passwordEncoder):
-          Response
-
-          {
-              // ...
-          }
-
+      - value: |-
+          ```yaml
+          access_control:
+              - { path: ^/admin, roles: ROLE_ADMIN OR IS_AUTHENTICATED_FULLY }
           ```
         correct: false
       - value: |-
-          ```php
-          use Symfony\Component\Security\Core\Security;
-
-          public function index(Security $security): Response
-          {
-              $passwordHasher = $security->getPasswordHasher();
-              // ...
-          }
+          ```yaml
+          access_control:
+              - { path: ^/admin, roles: ROLE_ADMIN }
+              - { path: ^/admin, roles: IS_AUTHENTICATED_FULLY }
           ```
         correct: false
-    help: The `UserPasswordHasherInterface` is the recommended service for hashing
-      user passwords in Symfony 7 and can be injected directly into controllers.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_9
-  - question: What is the purpose of the `context` option when configuring multiple
-      firewalls in Symfony Security?
+      - value: |-
+          ```yaml
+          access_control:
+              - { path: ^/admin, roles: IS_AUTHENTICATED_FULLY AND ROLE_ADMIN }
+          ```
+        correct: false
+    help: When multiple roles are provided in an array for `roles`, access is
+      granted if the user has *any* of the listed roles.
+  - question: What is the default value for the `user` parameter in the `x509`
+      authentication method configuration under a Symfony firewall?
     answers:
-      - value: To allow multiple firewalls to share the same security context and
-          session.
+      - value: "`SSL_CLIENT_S_DN_Email`"
         correct: true
-      - value: To define the default authentication method for a group of firewalls.
+      - value: "`SSL_CLIENT_S_DN`"
         correct: false
-      - value: To specify the order in which firewalls are evaluated.
+      - value: "`REMOTE_USER`"
         correct: false
-      - value: To set a unique identifier for each firewall for logging purposes.
+      - value: "`X509_USER_ID`"
         correct: false
-    help: Setting the `context` key to the same value for multiple firewalls allows
-      them to share the same security context and session.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_20
-  - question: Which of the following `access_decision_manager` strategies grants
-      access if there are more voters granting access than denying, with ties
-      broken by `allow_if_equal_granted_denied`?
+    help: The `x509` authentication method uses `SSL_CLIENT_S_DN_Email` by default
+      to extract the user identifier from the client certificate.
+  - question: Which of the following `firewall` configuration options specifies the
+      URL path that a login form must submit to for authentication?
     answers:
-      - value: "`consensus`"
+      - value: "`check_path`"
         correct: true
-      - value: "`affirmative`"
+      - value: "`login_path`"
         correct: false
-      - value: "`unanimous`"
+      - value: "`authentication_path`"
         correct: false
-      - value: "`priority`"
+      - value: "`submit_path`"
         correct: false
-    help: The `consensus` strategy grants access if there are more voters granting
-      access than denying. In case of a tie, the decision is based on the
-      `allow_if_equal_granted_denied` option.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/voters.rst#_snippet_7
-  - question: How can you configure Symfony to automatically migrate user passwords
-      from an older hasher (e.g., `bcrypt`) to a newer one (e.g., `sodium`) upon
-      successful authentication?
+    help: The `check_path` option defines the route or path where the login form
+      submits credentials. The firewall intercepts POST requests to this URL.
+  - question: In Symfony's security configuration, what is the significance of the
+      order in which firewalls are defined?
     answers:
-      - value: By using the `migrate_from` option under the new password hasher
-          configuration.
+      - value: The request will be handled by the first firewall whose `pattern`
+          matches.
         correct: true
-      - value: By defining a custom password migration service.
+      - value: The last defined firewall always takes precedence.
         correct: false
-      - value: "By setting `auto_migrate: true` for the new hasher."
+      - value: The order only affects the logging of security events.
         correct: false
-      - value: By manually re-hashing all passwords in a console command.
+      - value: Firewall order is irrelevant; all matching firewalls are processed.
         correct: false
-    help: The `migrate_from` option in `password_hashers` allows specifying older
-      hashers from which passwords should be rehashed upon successful
-      authentication.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/passwords.rst#_snippet_7
-  - question: Which Symfony Security event is dispatched when authentication is
-      nearing success and is the last event that can make an authentication fail
-      by throwing an `AuthenticationException`?
+    help: Firewall order is crucial; the first matching firewall handles the
+      request. A firewall with no pattern should typically be defined last.
+  - question: Which of the following security configuration sections is responsible
+      for defining how application users are loaded (e.g., from a database or
+      in-memory)?
     answers:
-      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationSuccessEvent`"
+      - value: "`providers`"
         correct: true
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent`"
+      - value: "`firewalls`"
         correct: false
+      - value: "`password_hashers`"
+        correct: false
+      - value: "`access_control`"
+        correct: false
+    help: The `providers` section in `security.yaml` defines how Symfony loads user
+      data for authentication.
+  - question: Which security event is dispatched after the passport was validated
+      and the authenticator created the security token (and user)?
+    answers:
       - value: "`Symfony\\Component\\Security\\Http\\Event\\AuthenticationTokenCreatedE\
           vent`"
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationSuccessEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent`"
         correct: false
       - value: "`Symfony\\Component\\Security\\Http\\Event\\InteractiveLoginEvent`"
         correct: false
-    help: The `AuthenticationSuccessEvent` is dispatched when authentication is
-      nearing success and is the last event that can make an authentication fail
-      by throwing an `AuthenticationException`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_72
-  - question: What is the purpose of the `UserBadge` when creating a `Passport` in a
-      custom Symfony authenticator?
+    help: The `AuthenticationTokenCreatedEvent` is dispatched early in the
+      authentication process, after the token is created but before full
+      success.
+  - question: How can you enforce HTTPS for a specific URL path, e.g.,
+      `/cart/checkout`, using Symfony's `access_control`?
     answers:
-      - value: To attach a user identifier (e.g., username, email) to the `Passport` for
-          user loading.
+      - value: "By setting `requires_channel: https` for the access control rule."
         correct: true
-      - value: To store the user's plain password before hashing.
+      - value: "By setting `secure: true` for the access control rule."
         correct: false
-      - value: To define the roles of the authenticated user.
+      - value: By adding a redirect rule in the routing configuration.
         correct: false
-      - value: To indicate if the user should be remembered across sessions.
+      - value: By configuring the web server to force HTTPS for that path.
         correct: false
-    help: The `UserBadge` is a badge used to attach a user identifier to the
-      `Passport`, which is then used to load the `UserInterface` object.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/custom_authenticator.rst#_snippet_4
-  - question: Which of the following `access_control` options allows you to restrict
-      access to a URL pattern only to requests originating from specified IP
-      addresses or subnets?
+    help: The `requires_channel` option in `access_control` automatically redirects
+      HTTP requests to HTTPS if configured.
+  - question: >-
+      Given the following `access_control` configuration:
+
+
+      ```yaml
+
+      access_control:
+          - path: ^/_internal/secure
+            roles: 'ROLE_ADMIN'
+            allow_if: "'127.0.0.1' == request.getClientIp() or request.headers.has('X-Secure-Access')"
+      ```
+
+
+      Under what conditions would access be granted to `/_internal/secure`?
+    answers:
+      - value: If the user has `ROLE_ADMIN` OR the client IP is `127.0.0.1` OR the
+          request has the `X-Secure-Access` header.
+        correct: true
+      - value: Only if the user has `ROLE_ADMIN` AND the client IP is `127.0.0.1` AND
+          the request has the `X-Secure-Access` header.
+        correct: false
+      - value: If the user has `ROLE_ADMIN` AND (the client IP is `127.0.0.1` OR the
+          request has the `X-Secure-Access` header).
+        correct: false
+      - value: Only if the `allow_if` expression evaluates to true, regardless of roles.
+        correct: false
+    help: The `roles` and `allow_if` options work like an OR expression. Access is
+      granted if the expression is TRUE or the user has the specified role(s).
+  - question: Which method of the `Symfony\Bundle\SecurityBundle\Security` helper
+      allows programmatic authentication of a user?
+    answers:
+      - value: "`login()`"
+        correct: true
+      - value: "`authenticate()`"
+        correct: false
+      - value: "`setUser()`"
+        correct: false
+      - value: "`grantAccess()`"
+        correct: false
+    help: The `login()` method is used to programmatically log in a user, optionally
+      specifying an authenticator, firewall, and badges.
+  - question: How can you register an event subscriber
+      (`App\EventListener\LogoutSubscriber`) to listen for security events
+      specifically on the 'main' firewall?
+    answers:
+      - value: "By tagging the service with `name: kernel.event_subscriber` and
+          `dispatcher: security.event_dispatcher.main`."
+        correct: true
+      - value: By implementing `FirewallAwareEventSubscriberInterface`.
+        correct: false
+      - value: By configuring the listener directly under the 'main' firewall in
+          `security.yaml`.
+        correct: false
+      - value: By using the `#[Firewall]` attribute on the subscriber class.
+        correct: false
+    help: To scope an event subscriber to a specific firewall, use the `dispatcher`
+      attribute in the `kernel.event_subscriber` tag with the format
+      `security.event_dispatcher.<firewall_name>`.
+  - question: What is the purpose of the `pattern` option in a Symfony security
+      firewall configuration?
+    answers:
+      - value: It is a regular expression matched against the incoming request URL to
+          determine if the firewall should be triggered.
+        correct: true
+      - value: It defines the encryption algorithm used for the firewall.
+        correct: false
+      - value: It specifies the user provider associated with the firewall.
+        correct: false
+      - value: It sets the default route for authenticated users.
+        correct: false
+    help: The `pattern` option uses a regular expression to match against the
+      request URL, activating the firewall if there's a match.
+  - question: Which Symfony Security Expression Language variable provides an array
+      of all roles the user has, including those granted indirectly via role
+      hierarchy, but *excluding* `IS_AUTHENTICATED_*` attributes?
+    answers:
+      - value: "`role_names`"
+        correct: true
+      - value: "`user.roles`"
+        correct: false
+      - value: "`token.roles`"
+        correct: false
+      - value: "`roles`"
+        correct: false
+    help: The `role_names` variable provides a flattened list of all granted roles,
+      excluding the special `IS_AUTHENTICATED_*` attributes.
+  - question: Which `access_control` option is used to restrict access to a URL
+      pattern only to requests originating from specified IP addresses or
+      subnets?
     answers:
       - value: "`ips`"
         correct: true
-      - value: "`hosts`"
+      - value: "`allow_ips`"
         correct: false
-      - value: "`client_ip`"
+      - value: "`client_ips`"
         correct: false
-      - value: "`source_ip`"
+      - value: "`source_ips`"
         correct: false
-    help: The `ips` option restricts access to a URL pattern only to requests
-      originating from specified IP addresses or subnets.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_2
-  - question: How can you enable user impersonation in Symfony Security?
+    help: The `ips` option allows you to define a list of allowed IP addresses or
+      CIDR notations for an access control rule.
+  - question: What is the default value for the `invalidate_session` option in the
+      Symfony security `logout` configuration?
     answers:
-      - value: "By setting `switch_user: true` under the desired firewall
-          configuration."
+      - value: "`true`"
         correct: true
-      - value: By enabling the `ImpersonationBundle`.
+      - value: "`false`"
         correct: false
-      - value: By calling `$security->enableImpersonation()` in a controller.
+      - value: "`null`"
         correct: false
-      - value: By adding `ROLE_IMPERSONATOR` to a user's roles.
+      - value: "`auto`"
         correct: false
-    help: "To enable user impersonation, you need to activate the 'switch_user'
-      firewall listener by setting `switch_user: true`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/impersonating_\
-      user.rst#_snippet_0"
-  - question: What is the default value for the `lifetime` option of a login link in
-      Symfony Security, which defines how long the link remains valid in
-      seconds?
-    answers:
-      - value: 300 seconds (5 minutes)
-        correct: true
-      - value: 60 seconds (1 minute)
-        correct: false
-      - value: 3600 seconds (1 hour)
-        correct: false
-      - value: 86400 seconds (1 day)
-        correct: false
-    help: The `lifetime` option for login links defaults to 300 seconds.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/login_link.rst#_snippet_9
-  - question: Which of the following methods is the recommended way to check if a
-      user has a specific role (e.g., `ROLE_ADMIN`) within a Symfony controller?
-    answers:
-      - value: "`$this->isGranted('ROLE_ADMIN');`"
-        correct: true
-      - value: "`$this->getUser()->hasRole('ROLE_ADMIN');`"
-        correct: false
-      - value: "`$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN');\
-          `"
-        correct: true
-      - value: "`$this->denyAccessUnlessGranted('ROLE_ADMIN');`"
-        correct: true
-    help: The `isGranted()` method (available via `AbstractController` or the
-      `Security` service) and `denyAccessUnlessGranted()` are the recommended
-      ways to check user roles for authorization.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_61,
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_66
-  - question: To configure a memory-based user provider in Symfony, which key is
-      used under the `providers` section in `security.yaml`?
-    answers:
-      - value: "`memory`"
-        correct: true
-      - value: "`in_memory`"
-        correct: false
-      - value: "`array`"
-        correct: false
-      - value: "`static`"
-        correct: false
-    help: The `memory` key is used to configure an in-memory user provider.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/user_providers.rst#_snippet_4
-  - question: Which of the following commands is used to install the Symfony
-      Security Bundle, which automatically generates a `security.yaml`
-      configuration file?
-    answers:
-      - value: "`composer require symfony/security-bundle`"
-        correct: true
-      - value: "`php bin/console security:install`"
-        correct: false
-      - value: "`composer install symfony/security`"
-        correct: false
-      - value: "`symfony new --security`"
-        correct: false
-    help: The command `composer require symfony/security-bundle` installs the
-      SecurityBundle and, with Symfony Flex, generates the basic
-      `security.yaml`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_0
-  - question: When configuring a custom logout handler in Symfony, which
-      `Clear-Site-Data` HTTP header directive clears all browsing data (cookies,
-      storage, cache) associated with the requesting website?
+    help: By default, Symfony invalidates the user's session upon logout. Setting
+      `invalidate_session` to `false` allows logging out from only the current
+      firewall.
+  - question: Which `Clear-Site-Data` HTTP header directive, when configured in
+      Symfony's logout, clears all browsing data associated with the requesting
+      website?
     answers:
       - value: "`*`"
         correct: true
       - value: "`all`"
         correct: false
-      - value: "`clear_all`"
-        correct: false
       - value: "`everything`"
         correct: false
-    help: The `Clear-Site-Data` HTTP header allows `*` for all directives (cache,
-      cookies, storage, executionContexts).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_11
-  - question: What is the purpose of the `allow_if` option in Symfony's
-      `access_control` configuration?
+      - value: "`clear_all`"
+        correct: false
+    help: The `*` directive for `Clear-Site-Data` clears all types of browsing data
+      (cookies, storage, cache, execution contexts).
+  - question: What is the default `check_path` for JSON login authentication in Symfony?
     answers:
-      - value: To define complex authorization rules based on a Symfony Expression
-          Language expression.
+      - value: "`/login_check`"
         correct: true
-      - value: To allow access only if the user is anonymous.
+      - value: "`/json_login`"
         correct: false
-      - value: To specify a list of allowed IP addresses.
+      - value: "`/api/login`"
         correct: false
-      - value: To enable access for users with any role.
+      - value: "`/authenticate`"
         correct: false
-    help: The `allow_if` option uses Symfony Expression Language to define dynamic
-      access control rules. It works as an OR condition with the `roles` option.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_4
-  - question: Which of the following is a valid way to configure a Symfony security
-      firewall to use HTTP Basic authentication with a custom realm?
+    help: The `check_path` for JSON login authentication defaults to `/login_check`,
+      similar to form login.
+  - question: How can you configure a Symfony firewall to require specific badges,
+      such as `CsrfTokenBadge`, on the authenticated passport?
     answers:
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  http_basic:
-                      realm: Secured Area
-          ```
+      - value: By using the `required_badges` option under the firewall configuration.
         correct: true
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  basic_auth:
-                      name: Secured Area
-          ```
+      - value: By adding a `#[RequiredBadge]` attribute to the authenticator.
         correct: false
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  authentication:
-                      type: http_basic
-                      realm: Secured Area
-          ```
+      - value: By defining a custom voter that checks for badges.
         correct: false
-    help: HTTP Basic authentication is configured under the `http_basic` key within
-      a firewall, with the `realm` option.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_31
-  - question: When defining an `access_control` rule, which option allows you to
-      restrict access based on the HTTP method(s) of the request?
+      - value: Badges are automatically handled and cannot be explicitly required.
+        correct: false
+    help: The `required_badges` option allows you to specify a list of badge class
+      names that must be present on the passport for authentication to succeed.
+  - question: Which configuration option in `security.yaml` allows Symfony to
+      automatically rehash user passwords to a newer, more secure algorithm upon
+      successful authentication?
     answers:
-      - value: "`methods`"
+      - value: "`migrate_from` under `password_hashers`"
         correct: true
-      - value: "`http_methods`"
+      - value: "`auto_rehash` under `password_hashers`"
         correct: false
-      - value: "`request_method`"
+      - value: "`upgrade_algorithm` under `providers`"
         correct: false
-      - value: "`verbs`"
+      - value: "`rehash_on_login` under `firewalls`"
         correct: false
-    help: The `methods` option in `access_control` allows restricting access based
-      on HTTP methods (e.g., `['POST', 'PUT']`).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_1
-  - question: What is the primary benefit of using `PasswordHasherFactory` for
-      password hashing in Symfony?
-    answers:
-      - value: It allows configuring and retrieving different password hashers for
-          various use cases or user types.
-        correct: true
-      - value: It automatically migrates all user passwords to the latest algorithm
-          without configuration.
-        correct: false
-      - value: It provides a single, global hasher for all user entities.
-        correct: false
-      - value: It encrypts passwords directly in the database, making them unreadable.
-        correct: false
-    help: The `PasswordHasherFactory` allows you to configure and retrieve different
-      password hashers, enabling the use of various algorithms for different
-      user classes or specific hashing needs.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/passwords.rst#_snippet_19
-  - question: Which of the following console commands can be used to display the
-      *actual* security configuration values used by your Symfony application,
-      including any overrides?
+    help: The `migrate_from` option in `password_hashers` enables automatic password
+      re-hashing from older algorithms to a new one.
+  - question: To inspect the *actual* security configuration values used by your
+      Symfony application, which console command should you use?
     answers:
       - value: "`php bin/console debug:config security`"
         correct: true
@@ -580,737 +342,10 @@ questions:
         correct: false
       - value: "`php bin/console security:config`"
         correct: false
-    help: The command `php bin/console debug:config security` displays the actual
-      configuration values used by your application. `config:dump-reference`
-      shows default values.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_0
-  - question: When configuring a login link in Symfony, which option specifies the
-      route name that will handle the login link's authentication check?
-    answers:
-      - value: "`check_route`"
-        correct: true
-      - value: "`login_route`"
-        correct: false
-      - value: "`auth_route`"
-        correct: false
-      - value: "`validation_route`"
-        correct: false
-    help: The `check_route` option defines the route name that handles the login
-      link's authentication check.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/login_link.rst#_snippet_0
-  - question: Which of the following security expression language functions checks
-      if the user is authenticated via 'remember-me' or 'fully' authenticated?
-    answers:
-      - value: "`is_authenticated()`"
-        correct: true
-      - value: "`is_logged_in()`"
-        correct: false
-      - value: "`is_granted('IS_AUTHENTICATED')`"
-        correct: true
-      - value: "`is_active()`"
-        correct: false
-    help: The `is_authenticated()` function returns `true` if the user is
-      authenticated via 'remember-me' or 'fully' authenticated.
-      `is_granted('IS_AUTHENTICATED')` achieves the same.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/expressions.rst#_snippet_2
-  - question: What is the primary purpose of the
-      `security.event_dispatcher.<firewall_name>` tag attribute when registering
-      an event subscriber in Symfony?
-    answers:
-      - value: To register the event subscriber to listen for security events only on a
-          specific firewall.
-        correct: true
-      - value: To define the priority of the event subscriber for all security events.
-        correct: false
-      - value: To specify the event name the subscriber is listening to.
-        correct: false
-      - value: To enable the event dispatcher for the specified firewall.
-        correct: false
-    help: "The `dispatcher: security.event_dispatcher.<firewall_name>` tag attribute
-      allows an event subscriber to listen for security events on a specific
-      firewall.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_7\
-      1"
-  - question: Which of the following `security` configuration options defines the
-      URL where the user is redirected after a 403 HTTP error, unless a custom
-      access denial handler is defined?
-    answers:
-      - value: "`access_denied_url`"
-        correct: true
-      - value: "`403_redirect_url`"
-        correct: false
-      - value: "`error_page_403`"
-        correct: false
-      - value: "`forbidden_url`"
-        correct: false
-    help: The `access_denied_url` option defines the URL where the user is
-      redirected after a 403 HTTP error.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_2
-  - question: To configure a Symfony security firewall to use X.509 client
-      certificate authentication, which key is used under the firewall
-      configuration?
-    answers:
-      - value: "`x509`"
-        correct: true
-      - value: "`client_cert`"
-        correct: false
-      - value: "`ssl_cert`"
-        correct: false
-      - value: "`certificate_auth`"
-        correct: false
-    help: The `x509` key is used to enable X.509 client certificate authentication
-      within a Symfony security firewall.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_36
-  - question: Which of the following is the correct way to configure a Symfony
-      `access_control` rule to require `ROLE_ADMIN` for a specific route named
-      `admin_dashboard`?
-    answers:
-      - value: |-
-          ```yaml
-          access_control:
-              - { route: admin_dashboard, roles: ROLE_ADMIN }
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          access_control:
-              - { path: ^/admin/dashboard, roles: ROLE_ADMIN }
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          access_control:
-              - { name: admin_dashboard, roles: ROLE_ADMIN }
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          access_control:
-              - { route_name: admin_dashboard, roles: ROLE_ADMIN }
-          ```
-        correct: false
-    help: Access control rules can be configured using the `route` option to match
-      specific named routes.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_0
-  - question: What is the default value for the `username_parameter` in a Symfony
-      security firewall's `form_login` configuration?
-    answers:
-      - value: "`_username`"
-        correct: true
-      - value: "`username`"
-        correct: false
-      - value: "`user`"
-        correct: false
-      - value: "`email`"
-        correct: false
-    help: The `username_parameter` option defaults to `_username`. It specifies the
-      name of the username field in the login form.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_7
-  - question: Which of the following commands is used to generate a basic form login
-      system (controller, Twig template, and security configuration) in Symfony?
-    answers:
-      - value: "`php bin/console make:security:form-login`"
-        correct: true
-      - value: "`php bin/console make:auth`"
-        correct: false
-      - value: "`php bin/console security:generate-login`"
-        correct: false
-      - value: "`composer require symfony/form-login-bundle`"
-        correct: false
-    help: The `make:security:form-login` command automates the creation of a form
-      login system.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_17
-  - question: Which `access_decision_manager` strategy in Symfony Security grants
-      access as soon as there is *one* voter granting access?
-    answers:
-      - value: "`affirmative`"
-        correct: true
-      - value: "`consensus`"
-        correct: false
-      - value: "`unanimous`"
-        correct: false
-      - value: "`priority`"
-        correct: false
-    help: The `affirmative` strategy grants access as soon as there is one voter
-      granting access.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/voters.rst#_snippet_7
-  - question: To prevent premature invalidation of login links by email preview
-      loaders, which two options should be configured for the `login_link`
-      authenticator in Symfony?
-    answers:
-      - value: "`max_uses: 1`"
-        correct: true
-      - value: "`check_post_only: true`"
-        correct: true
-      - value: "`lifetime: 0`"
-        correct: false
-      - value: "`disable_preview: true`"
-        correct: false
-    help: "Setting `max_uses: 1` and `check_post_only: true` for login links helps
-      prevent invalidation by email preview loaders.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/login_link.rst\
-      #_snippet_13"
-  - question: Which Symfony Security event is dispatched after an
-      `AuthenticationException` was thrown during authentication, allowing
-      listeners to modify the error response?
-    answers:
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginFailureEvent`"
-        correct: true
-      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationFailureEvent`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\AuthenticationErrorEvent`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\ExceptionEvent`"
-        correct: false
-    help: The `LoginFailureEvent` is dispatched after an `AuthenticationException`
-      was thrown during authentication. Listeners can modify the error response.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_72
-  - question: When defining a user provider using an entity, which option specifies
-      the property of the entity (e.g., `email`, `username`) that Symfony should
-      query to load the user?
-    answers:
-      - value: "`property`"
-        correct: true
-      - value: "`identifier`"
-        correct: false
-      - value: "`field`"
-        correct: false
-      - value: "`user_property`"
-        correct: false
-    help: The `property` option specifies the entity property to query by when using
-      an entity user provider.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/user_providers.rst#_snippet_0
-  - question: To configure a Symfony security firewall to be 'lazy' and load the
-      user provider only when needed, which option should be set to `true`?
-    answers:
-      - value: "`lazy`"
-        correct: true
-      - value: "`on_demand`"
-        correct: false
-      - value: "`deferred`"
-        correct: false
-      - value: "`load_on_access`"
-        correct: false
-    help: "The `lazy: true` option for a firewall ensures that the user provider is
-      loaded only when authentication is actually required.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_1\
-      2"
-  - question: Which of the following is a valid way to configure a Symfony
-      `access_control` rule to allow access to `/cart/checkout` only via HTTPS?
-    answers:
-      - value: >-
-          ```yaml
-
-          access_control:
-              - { path: ^/cart/checkout, roles: PUBLIC_ACCESS, requires_channel: https }
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          access_control:
-              - { path: ^/cart/checkout, roles: PUBLIC_ACCESS, secure: true }
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          access_control:
-              - { path: ^/cart/checkout, roles: PUBLIC_ACCESS, protocol: https }
-          ```
-        correct: false
-    help: "The `requires_channel: https` option enforces HTTPS for matching URLs in
-      access control rules.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control\
-      .rst#_snippet_7"
-  - question: What is the default `session_fixation_strategy` in Symfony Security,
-      which updates the session ID but keeps other session attributes after
-      authentication?
-    answers:
-      - value: "`SessionAuthenticationStrategy::MIGRATE`"
-        correct: true
-      - value: "`SessionAuthenticationStrategy::NONE`"
-        correct: false
-      - value: "`SessionAuthenticationStrategy::INVALIDATE`"
-        correct: false
-      - value: "`SessionAuthenticationStrategy::REGENERATE`"
-        correct: false
-    help: The default `session_fixation_strategy` is `MIGRATE`, which updates the
-      session ID while preserving attributes.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_2
-  - question: When configuring a custom authenticator for a firewall in Symfony,
-      which key is used to specify the authenticator service ID or class?
-    answers:
-      - value: "`custom_authenticators`"
-        correct: true
-      - value: "`authenticators`"
-        correct: false
-      - value: "`user_authenticators`"
-        correct: false
-      - value: "`auth_handlers`"
-        correct: false
-    help: The `custom_authenticators` key is used to enable and specify custom
-      authenticator services for a firewall.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/custom_authenticator.rst#_snippet_1
-  - question: Which of the following is the correct way to inject the `Security`
-      service into a custom service in Symfony to perform access checks using
-      `isGranted()`?
-    answers:
-      - value: |-
-          ```php
-          use Symfony\Bundle\SecurityBundle\Security;
-
-          class MyService
-          {
-              public function __construct(private Security $security) {}
-
-              public function someMethod(): void
-              {
-                  if ($this->security->isGranted('ROLE_ADMIN')) {
-                      // ...
-                  }
-              }
-          }
-          ```
-        correct: true
-      - value: |-
-          ```php
-          use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-
-          class MyService
-          {
-              public function __construct(private AuthorizationCheckerInterface $authChecker) {}
-
-              public function someMethod(): void
-              {
-                  if ($this->authChecker->isGranted('ROLE_ADMIN')) {
-                      // ...
-                  }
-              }
-          }
-          ```
-        correct: true
-      - value: >-
-          ```php
-
-          class MyService
-
-          {
-              public function someMethod(): void
-              {
-                  if ($this->container->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
-                      // ...
-                  }
-              }
-          }
-
-          ```
-        correct: false
-    help: The `Security` service can be injected directly for access checks. The
-      `AuthorizationCheckerInterface` is also a valid dependency.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_66
-  - question: When configuring a firewall, what does the `pattern` option define?
-    answers:
-      - value: A regular expression matched against the incoming request URL to trigger
-          authentication.
-        correct: true
-      - value: The name of the authentication provider to use.
-        correct: false
-      - value: The default route to redirect to after successful authentication.
-        correct: false
-      - value: The HTTP methods allowed for the firewall.
-        correct: false
-    help: The `pattern` option is a regular expression matched against the incoming
-      request URL. If there's a match, authentication is triggered.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_3
-  - question: Which of the following is the correct way to configure a Symfony
-      firewall to use a custom login rate limiter service named
-      `app.login_rate_limiter`?
-    answers:
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  login_throttling:
-                      limiter: app.login_rate_limiter
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  rate_limiter:
-                      service: app.login_rate_limiter
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  throttle:
-                      id: app.login_rate_limiter
-          ```
-        correct: false
-    help: Custom login rate limiters are configured under `login_throttling` with
-      the `limiter` option pointing to the service ID.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_41
-  - question: What is the purpose of the `security.expression_language_provider` tag
-      in Symfony's Dependency Injection component?
-    answers:
-      - value: To register custom expression language functions for the security
-          component.
-        correct: true
-      - value: To define custom security voters.
-        correct: false
-      - value: To provide custom user loaders for security.
-        correct: false
-      - value: To configure the default security expression language.
-        correct: false
-    help: The `security.expression_language_provider` tag is used to register
-      providers for expression language functions, allowing you to add custom
-      functions to security expressions.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_23
-  - question: When using the `denyAccessUnlessGranted()` method in a Symfony
-      controller, what type of exception is thrown if access is denied?
-    answers:
-      - value: "`Symfony\\Component\\Security\\Core\\Exception\\AccessDeniedException`"
-        correct: true
-      - value: "`Symfony\\Component\\HttpKernel\\Exception\\AccessDeniedHttpException`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Core\\Exception\\AuthenticationException\
-          `"
-        correct: false
-      - value: "`Symfony\\Component\\HttpFoundation\\Exception\\ForbiddenException`"
-        correct: false
-    help: The `denyAccessUnlessGranted()` method throws a
-      `Symfony\Component\Security\Core\Exception\AccessDeniedException` if
-      access is denied.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_61
-  - question: Which of the following describes the `IS_AUTHENTICATED_FULLY` special
-      authentication attribute?
-    answers:
-      - value: Requires the user to have actively authenticated during the current
-          session, not just via a persistent token.
-        correct: true
-      - value: Checks if a user is logged in, regardless of how they authenticated.
-        correct: false
-      - value: Indicates that the user was authenticated using a 'remember me' cookie.
-        correct: false
-      - value: Grants full administrative access to the application.
-        correct: false
-    help: "`IS_AUTHENTICATED_FULLY` is a stronger authentication check, requiring
-      active authentication in the current session.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_7\
-      0"
-  - question: What is the purpose of the `trusted_proxies` configuration option in
-      `framework.yaml`?
-    answers:
-      - value: To specify the IP addresses or CIDR notations of trusted reverse proxies.
-        correct: true
-      - value: To define a list of allowed client IP addresses for the application.
-        correct: false
-      - value: To configure the IP addresses of the database servers.
-        correct: false
-      - value: To whitelist domains for CORS policies.
-        correct: false
-    help: The `trusted_proxies` option is crucial for Symfony to correctly identify
-      the client's IP address and other information when operating behind a load
-      balancer or reverse proxy.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/framework.rst#_snippet_3
-  - question: When configuring logout in Symfony, which option is used to specify
-      the URL path that triggers the logout process?
-    answers:
-      - value: "`path`"
-        correct: true
-      - value: "`logout_path`"
-        correct: false
-      - value: "`route`"
-        correct: false
-      - value: "`uri`"
-        correct: false
-    help: The `path` option under `logout` defines the URL path that triggers the
-      logout process.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_11
-  - question: Which of the following is the correct way to configure a Symfony
-      security firewall to use Remote User authentication, specifying the user
-      provider and the `$_SERVER` parameter holding the user identifier?
-    answers:
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  remote_user:
-                      provider: your_user_provider
-                      user: REMOTE_USER
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  remote_auth:
-                      provider: your_user_provider
-                      header: REMOTE_USER
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          firewalls:
-              main:
-                  server_user:
-                      user_provider: your_user_provider
-                      variable: REMOTE_USER
-          ```
-        correct: false
-    help: Remote User authentication is configured under `remote_user`, with
-      `provider` and `user` (for the `$_SERVER` parameter).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_18
-  - question: What is the purpose of the `required_badges` option in a Symfony
-      security firewall's configuration?
-    answers:
-      - value: To specify a list of badges that must be present on the authenticated
-          passport for it to be considered valid.
-        correct: true
-      - value: To define the minimum number of authentication attempts allowed.
-        correct: false
-      - value: To enforce a specific set of roles for all users authenticated by this
-          firewall.
-        correct: false
-      - value: To list the security events that must be dispatched during
-          authentication.
-        correct: false
-    help: The `required_badges` option specifies a list of badges that must be
-      present on the authenticated passport for a Symfony firewall.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_22
-  - question: Which of the following security expression language variables
-      represents the object (if any) that is passed as the second argument to
-      `isGranted()`?
-    answers:
-      - value: "`object`"
-        correct: true
-      - value: "`subject`"
-        correct: true
-      - value: "`target`"
-        correct: false
-      - value: "`resource`"
-        correct: false
-    help: Both `object` and `subject` variables in security expressions store the
-      value passed as the second argument to `isGranted()`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/expressions.rst#_snippet_2
-  - question: What is the default value for the `target` option in a Symfony
-      security firewall's `logout` configuration?
-    answers:
-      - value: "`/` (the root URL)"
-        correct: true
-      - value: "`/login`"
-        correct: false
-      - value: The previous URL before logout.
-        correct: false
-      - value: The `login_path` configured for the firewall.
-        correct: false
-    help: The `target` option for logout defaults to `/`, which is the relative
-      path, absolute URL, or route name to redirect to after a successful
-      logout.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_11
-  - question: When configuring an LDAP user provider in Symfony, which option
-      defines the string format used to compose the user's Distinguished Name
-      (DN) from the username?
-    answers:
-      - value: "`dn_string`"
-        correct: true
-      - value: "`user_dn`"
-        correct: false
-      - value: "`ldap_dn`"
-        correct: false
-      - value: "`bind_dn_format`"
-        correct: false
-    help: The `dn_string` option defines the string format used to compose the
-      user's Distinguished Name (DN) from the username.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/ldap.rst#_snippet_4
-  - question: Which of the following commands is used to install the Symfony Rate
-      Limiter component, a prerequisite for features like login throttling?
-    answers:
-      - value: "`composer require symfony/rate-limiter`"
-        correct: true
-      - value: "`php bin/console limiter:install`"
-        correct: false
-      - value: "`composer require symfony/throttle-bundle`"
-        correct: false
-      - value: "`symfony install:rate-limiter`"
-        correct: false
-    help: The `symfony/rate-limiter` component is installed via `composer require
-      symfony/rate-limiter`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_39
-  - question: What is the purpose of the `erase_credentials` option in the main
-      `security` configuration?
-    answers:
-      - value: If true, the `eraseCredentials()` method of the user object is called
-          after authentication.
-        correct: true
-      - value: It removes sensitive user data from the session after logout.
-        correct: false
-      - value: It encrypts user credentials before storing them.
-        correct: false
-      - value: It clears the user's password from the security token.
-        correct: false
-    help: If `erase_credentials` is true, the `eraseCredentials()` method of the
-      user object is called after authentication.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_2
-  - question: Which of the following console commands can be used to generate a new
-      pair of asymmetric cryptographic keys for Symfony secrets and rotate the
-      active keys?
-    answers:
-      - value: "`php bin/console secrets:generate-keys --rotate`"
-        correct: true
-      - value: "`php bin/console secrets:rotate-keys`"
-        correct: false
-      - value: "`php bin/console security:rotate-keys`"
-        correct: false
-      - value: "`php bin/console secrets:new-keys`"
-        correct: false
-    help: The `secrets:generate-keys --rotate` command generates a new pair of keys
-      and rotates the active ones, invalidating old keys.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/configuration/secrets.rst#_snippet_0
-  - question: In Symfony's security expression language, which variable provides an
-      array containing the string representation of all roles the user has,
-      including those granted indirectly via role hierarchy, but *excluding*
-      `IS_AUTHENTICATED_*` attributes?
-    answers:
-      - value: "`role_names`"
-        correct: true
-      - value: "`roles`"
-        correct: false
-      - value: "`user.getRoles()`"
-        correct: false
-      - value: "`all_roles`"
-        correct: false
-    help: The `role_names` variable provides an array of all roles the user has,
-      including inherited ones, but excludes `IS_AUTHENTICATED_*` attributes.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/expressions.rst#_snippet_2
-  - question: How can you configure a Symfony security firewall to prevent GET
-      requests from submitting login data to the `check_path` URL?
-    answers:
-      - value: "Set `post_only: true` under `form_login`."
-        correct: true
-      - value: "Set `form_only: true` under `form_login`."
-        correct: false
-      - value: "Set `method: POST` for the `check_path` route."
-        correct: false
-      - value: This is the default behavior and requires no explicit configuration.
-        correct: true
-    help: "By default, login forms must be submitted to the `check_path` URL as a
-      POST request (`post_only: true`).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration\
-      /security.rst#_snippet_7"
-  - question: What is the purpose of the `hide_user_not_found` option in the main
-      `security` configuration?
-    answers:
-      - value: If true, a generic `BadCredentialsException` is thrown when a user is not
-          found, hiding the exact reason.
-        correct: true
-      - value: If true, it prevents the display of the username in error messages.
-        correct: false
-      - value: If true, it redirects to a generic login failure page without specific
-          user details.
-        correct: false
-      - value: If true, it logs user not found errors silently without exposing details.
-        correct: false
-    help: If `hide_user_not_found` is true, a generic `BadCredentialsException` is
-      thrown when a user is not found, preventing the exposure of whether a
-      username exists.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_2
-  - question: Which of the following is the correct way to configure a Symfony
-      firewall pattern to match multiple specific paths (e.g., `/_profiler/`,
-      `/_wdt/`, `/css/`)?
-    answers:
-      - value: |-
-          ```yaml
-          firewalls:
-              dev:
-                  pattern:
-                      - ^/_profiler/
-                      - ^/_wdt/
-                      - ^/css/
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          firewalls:
-              dev:
-                  pattern: [^/_profiler/, ^/_wdt/, ^/css/]
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          firewalls:
-              dev:
-                  patterns: ^/_profiler/|/_wdt/|/css/
-          ```
-        correct: false
-    help: Firewall patterns can be an array of regular expressions to match multiple
-      routes.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_13
-  - question: What is the purpose of the `allow_if_all_abstain` option in Symfony's
-      `access_decision_manager` configuration?
-    answers:
-      - value: It determines the access decision if all voters abstained from voting.
-        correct: true
-      - value: It allows access if no specific role is required.
-        correct: false
-      - value: It grants access if the user is not authenticated.
-        correct: false
-      - value: It forces all voters to make a decision, preventing abstention.
-        correct: false
-    help: The `allow_if_all_abstain` option determines the decision if all voters
-      abstained from voting. Its default is `false`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/voters.rst#_snippet_7
-  - question: Which of the following is a valid way to configure a Symfony firewall
-      to delete a specific cookie named `my_cookie` upon logout, with a path of
-      `/`?
-    answers:
-      - value: |-
-          ```yaml
-          logout:
-              delete_cookies:
-                  my_cookie:
-                      path: '/'
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          logout:
-              clear_cookies: [my_cookie: { path: '/' }]
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          logout:
-              delete_cookie: my_cookie
-              cookie_path: '/'
-          ```
-        correct: false
-    help: The `delete_cookies` option under `logout` allows specifying cookie names
-      and their attributes (like path and domain) for deletion.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_1
-  - question: What is the purpose of the `use_referer` option in a Symfony security
-      firewall's `form_login` configuration?
-    answers:
-      - value: If true, the user is redirected to the `HTTP_REFERER` header value after
-          login if no previous URL was stored.
-        correct: true
-      - value: It enables referrer-based CSRF protection.
-        correct: false
-      - value: It forces the login form to be submitted with a referrer header.
-        correct: false
-      - value: It prevents redirection loops by ignoring the referrer if it's the login
-          page.
-        correct: true
-    help: If `use_referer` is true, the user is redirected to the `HTTP_REFERER`
-      header value when no previous URL was stored, but avoids redirection loops
-      if the referrer is the login page itself.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/form_login.rst#_snippet_4
-  - question: Which of the following is the correct way to configure a Symfony
-      `access_control` rule to require `ROLE_USER` for requests matching a
-      custom request matcher service named
-      `App\Security\RequestMatcher\MyRequestMatcher`?
+    help: "`debug:config` shows the currently applied configuration, including any
+      overrides or environment-specific settings."
+  - question: Which of the following `access_control` configurations correctly uses
+      a custom request matcher service?
     answers:
       - value: >-
           ```yaml
@@ -1333,326 +368,679 @@ questions:
               - { roles: ROLE_USER, service: App\\Security\\RequestMatcher\\MyRequestMatcher }
           ```
         correct: false
-    help: For custom matching needs, you can use a `request_matcher` service in
-      `access_control`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_0
-  - question: What is the purpose of the `token_extractors` option under
-      `access_token` in a Symfony firewall configuration?
-    answers:
-      - value: To define one or more services or built-in extractors for retrieving the
-          access token from the request.
-        correct: true
-      - value: To specify the encryption algorithm for the access token.
-        correct: false
-      - value: To configure the lifetime of the access token.
-        correct: false
-      - value: To define the audience for which the access token is valid.
-        correct: false
-    help: The `token_extractors` option defines how the access token is extracted
-      from the incoming request, allowing for multiple extractors (e.g., header,
-      request body, custom service).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_token.rst#_snippet_4
-  - question: Which of the following is the correct way to configure a named
-      password hasher in Symfony, for example, a hasher named `harsh` with a
-      `cost` of 15?
-    answers:
-      - value: |-
-          ```yaml
-          password_hashers:
-              harsh:
-                  algorithm: auto
-                  cost: 15
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          password_hashers:
-              - name: harsh
-                algorithm: auto
-                cost: 15
-          ```
-        correct: false
-      - value: |-
-          ```yaml
-          password_hashers:
-              default:
-                  harsh:
-                      algorithm: auto
-                      cost: 15
-          ```
-        correct: false
-    help: Named password hashers are defined directly under `password_hashers` with
-      their chosen name as the key.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/passwords.rst#_snippet_14
-  - question: What is the default behavior of the `password_hashers` configuration
-      for
-      `Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface`
-      when set to `'auto'`?
-    answers:
-      - value: It automatically selects and migrates to the best possible hashing
-          algorithm (currently bcrypt).
-        correct: true
-      - value: It uses the PHP `password_hash()` function with default options.
-        correct: false
-      - value: It automatically detects the hashing algorithm used for existing
-          passwords.
-        correct: false
-      - value: It disables password hashing for development environments.
-        correct: false
-    help: Setting `password_hashers` to `'auto'` for
-      `PasswordAuthenticatedUserInterface` automatically selects and migrates to
-      the best possible hashing algorithm, currently bcrypt.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_8
-  - question: Which of the following is the correct way to retrieve a client's IP
-      address securely in Symfony, especially when behind reverse proxies?
-    answers:
-      - value: "`$request->getClientIp();` after configuring
-          `Request::setTrustedProxies()`"
-        correct: true
-      - value: "`$_SERVER['REMOTE_ADDR'];`"
-        correct: false
-      - value: "`$request->get('REMOTE_ADDR');`"
-        correct: false
-      - value: "`$request->headers->get('X-Forwarded-For');` without trusting proxies."
-        correct: false
-    help: Use `Request::getClientIp()` after configuring
-      `Request::setTrustedProxies()` to securely retrieve the client's IP
-      address behind proxies.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/create_framework/http_foundation.rst#_snippet_10
-  - question: Which Twig function is used to generate a relative logout URL for a
-      given firewall in Symfony?
-    answers:
-      - value: "`logout_url(key = null)`"
-        correct: true
-      - value: "`path('app_logout')`"
-        correct: false
-      - value: "`url('logout')`"
-        correct: false
-      - value: "`security_logout_path()`"
-        correct: false
-    help: The `logout_url()` Twig function generates a relative logout URL for a
-      specified firewall (or the current one if `key` is null).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/twig_reference.rst#_snippet_8
-  - question: What is the purpose of the `trusted_hosts` configuration option in
-      `framework.yaml`?
-    answers:
-      - value: To set a list of regular expressions for hostnames that the Symfony
-          application will respond to, preventing Host header attacks.
-        correct: true
-      - value: To define the domains from which cross-origin requests are allowed.
-        correct: false
-      - value: To specify the hostnames of trusted authentication servers.
-        correct: false
-      - value: To configure the default hostname for generated URLs.
-        correct: false
-    help: The `trusted_hosts` option sets a list of regular expressions for
-      hostnames the application will respond to, preventing Host header attacks.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/framework.rst#_snippet_10
-  - question: Which of the following `remember_me` cookie options ensures the cookie
-      is accessible only through the HTTP protocol and not by scripting
-      languages like JavaScript?
-    answers:
-      - value: "`httponly: true`"
-        correct: true
-      - value: "`secure: true`"
-        correct: false
-      - value: "`samesite: strict`"
-        correct: false
-      - value: "`javascript_access: false`"
-        correct: false
-    help: "Setting `httponly: true` makes the cookie accessible only through the
-      HTTP protocol, preventing JavaScript access.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/remember_me.rs\
-      t#_snippet_12"
-  - question: To configure a custom authentication success handler for a firewall's
-      login link authentication, which option is used?
-    answers:
-      - value: "`success_handler`"
-        correct: true
-      - value: "`on_success`"
-        correct: false
-      - value: "`login_success_handler`"
-        correct: false
-      - value: "`authentication_success`"
-        correct: false
-    help: The `success_handler` option under `login_link` specifies the service ID
-      of a custom authentication success handler.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/login_link.rst#_snippet_20
-  - question: Which of the following is the correct way to import the Symfony
-      security logout route loader in `config/routes/security.yaml`?
-    answers:
-      - value: |-
-          ```yaml
-          _symfony_logout:
-              resource: security.route_loader.logout
-              type: service
-          ```
-        correct: true
-      - value: |-
-          ```yaml
-          logout_routes:
-              import: security.route_loader.logout
-          ```
-        correct: false
       - value: >-
           ```yaml
 
-          security_logout:
-              path: /logout
-              controller: Symfony\Bundle\SecurityBundle\Controller\SecurityController::logout
+          access_control:
+              - { roles: ROLE_USER, custom_matcher: App\\Security\\RequestMatcher\\MyRequestMatcher }
           ```
         correct: false
-    help: The `security.route_loader.logout` service needs to be imported as a
-      resource to enable logout functionality.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_46
-  - question: Which of the following `security` configuration options allows you to
-      define a custom service that implements `AccessDecisionStrategyInterface`
-      for access control?
+    help: The `request_matcher` option allows you to specify a service ID that
+      implements `RequestMatcherInterface` for custom access control logic.
+  - question: When injecting the `Symfony\Bundle\SecurityBundle\Security` service
+      into a custom service to perform access checks, which method would you
+      typically use?
     answers:
-      - value: "`strategy_service`"
+      - value: "`isGranted()`"
         correct: true
-      - value: "`custom_strategy`"
+      - value: "`hasRole()`"
         correct: false
-      - value: "`decision_strategy_id`"
+      - value: "`checkAccess()`"
         correct: false
-      - value: "`voter_strategy`"
+      - value: "`authorize()`"
         correct: false
-    help: The `strategy_service` option under `access_decision_manager` allows
-      specifying a custom service that implements
-      `AccessDecisionStrategyInterface`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/voters.rst#_snippet_9
-  - question: When configuring X.509 authentication in Symfony, which `$_SERVER`
-      parameter is typically used as the user identifier to load the user?
+    help: The `isGranted()` method of the `Security` service is the standard way to
+      check if the current user has a specific permission or role.
+  - question: What is the purpose of the `erase_credentials` option in Symfony's
+      security configuration?
     answers:
-      - value: "`SSL_CLIENT_S_DN_Email`"
+      - value: If true, the `eraseCredentials()` method of the user object is called
+          after authentication.
         correct: true
-      - value: "`SSL_CLIENT_CERT`"
+      - value: It clears the user's session data after a specified timeout.
         correct: false
-      - value: "`SSL_CLIENT_I_DN`"
+      - value: It removes sensitive user data from logs.
         correct: false
-      - value: "`SSL_SERVER_S_DN`"
+      - value: It encrypts user credentials before storing them.
         correct: false
-    help: The `SSL_CLIENT_S_DN_Email` `$_SERVER` parameter is the default user
-      identifier for X.509 authentication.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_17
-  - question: Which of the following is the correct way to configure a Symfony
-      security firewall to be disabled (not apply any security) for specific
-      paths, e.g., for the profiler and web debug toolbar?
+    help: The `erase_credentials` option ensures sensitive data like plain-text
+      passwords are removed from the user object after authentication.
+  - question: Which `session_fixation_strategy` is recommended for Symfony
+      applications to prevent session fixation attacks while keeping session
+      attributes?
+    answers:
+      - value: "`MIGRATE`"
+        correct: true
+      - value: "`NONE`"
+        correct: false
+      - value: "`NEW_ID`"
+        correct: false
+      - value: "`REGENERATE`"
+        correct: false
+    help: The `MIGRATE` strategy updates the session ID but preserves existing
+      session attributes, mitigating session fixation without data loss.
+  - question: By default, is the `NotCompromisedPassword` constraint enabled in
+      Symfony's framework configuration?
+    answers:
+      - value: Yes, it is enabled by default.
+        correct: true
+      - value: No, it must be explicitly enabled.
+        correct: false
+      - value: It is enabled only in production environments.
+        correct: false
+      - value: It is deprecated in Symfony 7.
+        correct: false
+    help: The `NotCompromisedPassword` constraint is enabled by default, checking
+      passwords against a public API like 'haveibeenpwned.com'.
+  - question: Which of the following `access_control` rules correctly restricts
+      access to the `admin` route to users with `ROLE_ADMIN`?
+    answers:
+      - value: |-
+          ```yaml
+          access_control:
+              - { route: 'admin', roles: ROLE_ADMIN }
+          ```
+        correct: true
+      - value: |-
+          ```yaml
+          access_control:
+              - { path: '^/admin', roles: ROLE_ADMIN }
+          ```
+        correct: false
+      - value: |-
+          ```yaml
+          access_control:
+              - { route_name: 'admin', roles: ROLE_ADMIN }
+          ```
+        correct: false
+      - value: |-
+          ```yaml
+          access_control:
+              - { attributes: { _route: 'admin' }, roles: ROLE_ADMIN }
+          ```
+        correct: true
+    help: "Both `route: 'admin'` and `attributes: { _route: 'admin' }` are valid
+      ways to target a specific route in access control."
+  - question: In remote user authentication configuration, what is the default
+      `$_SERVER` parameter name holding the user identifier?
+    answers:
+      - value: "`REMOTE_USER`"
+        correct: true
+      - value: "`AUTH_USER`"
+        correct: false
+      - value: "`HTTP_REMOTE_USER`"
+        correct: false
+      - value: "`PHP_AUTH_USER`"
+        correct: false
+    help: The `remote_user` authenticator defaults to using the `REMOTE_USER` server
+      variable to get the user identifier.
+  - question: Which Composer command is used to install the Symfony SecurityBundle?
+    answers:
+      - value: "`composer require symfony/security-bundle`"
+        correct: true
+      - value: "`composer install symfony/security-bundle`"
+        correct: false
+      - value: "`composer add symfony/security-bundle`"
+        correct: false
+      - value: "`symfony install security-bundle`"
+        correct: false
+    help: The `composer require` command is used to add new packages to a Symfony
+      project.
+  - question: Which special authentication attribute indicates that a user is
+      authenticated, potentially via a 'remember me' cookie, but has not
+      actively authenticated during the current session?
+    answers:
+      - value: "`IS_AUTHENTICATED_REMEMBERED`"
+        correct: true
+      - value: "`IS_AUTHENTICATED_FULLY`"
+        correct: false
+      - value: "`IS_AUTHENTICATED`"
+        correct: false
+      - value: "`IS_REMEMBERED`"
+        correct: true
+    help: "`IS_AUTHENTICATED_REMEMBERED` and `IS_REMEMBERED` both signify
+      authentication via a 'remember me' cookie, distinct from a full login."
+  - question: When using the `#[IsGranted]` attribute, how can you pass the current
+      `Request` object as the `subject` for access control decisions?
+    answers:
+      - value: |-
+          ```php
+          #[IsGranted(attribute: '...', subject: new Expression('request'))]
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[IsGranted(attribute: '...', subject: Request::class)]
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[IsGranted(attribute: '...', subject: '@request')]
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[IsGranted(attribute: '...', subject: 'request')]
+          ```
+        correct: false
+    help: To use the `Request` object as the subject in `#[IsGranted]`, you must
+      wrap 'request' in a `new Expression()`.
+  - question: What is the default access decision strategy in Symfony's security
+      component?
+    answers:
+      - value: "`affirmative`"
+        correct: true
+      - value: "`consensus`"
+        correct: false
+      - value: "`unanimous`"
+        correct: false
+      - value: "`priority`"
+        correct: false
+    help: The `affirmative` strategy grants access as soon as one voter grants
+      access.
+  - question: Which access decision strategy grants access if there are more voters
+      granting access than denying, with ties broken by the
+      `allow_if_equal_granted_denied` option?
+    answers:
+      - value: "`consensus`"
+        correct: true
+      - value: "`unanimous`"
+        correct: false
+      - value: "`priority`"
+        correct: false
+      - value: "`affirmative`"
+        correct: false
+    help: The `consensus` strategy considers the majority vote among voters, with a
+      tie-breaking rule.
+  - question: "When configuring a Symfony firewall, what does setting `security:
+      false` for a specific pattern achieve?"
+    answers:
+      - value: It completely bypasses security for requests matching that pattern.
+        correct: true
+      - value: It enables a default, minimal security configuration.
+        correct: false
+      - value: It logs all security-related activities for that pattern.
+        correct: false
+      - value: It disables all authentication but keeps authorization checks.
+        correct: false
+    help: "Setting `security: false` for a firewall pattern means that no security
+      checks (authentication or authorization) will be performed for requests
+      matching that pattern."
+  - question: Which of the following is NOT a valid value for the `Clear-Site-Data`
+      HTTP header in Symfony's logout configuration?
+    answers:
+      - value: "`session`"
+        correct: true
+      - value: "`cookies`"
+        correct: false
+      - value: "`cache`"
+        correct: false
+      - value: "`storage`"
+        correct: false
+      - value: "`executionContexts`"
+        correct: false
+    help: The allowed values for `Clear-Site-Data` are `cache`, `cookies`,
+      `storage`, `executionContexts`, or `*`.
+  - question: What is the purpose of `role_hierarchy` in Symfony's security
+      configuration?
+    answers:
+      - value: It allows defining role inheritance rules to simplify user role
+          management.
+        correct: true
+      - value: It defines the order in which roles are checked during authorization.
+        correct: false
+      - value: It specifies the database table where roles are stored.
+        correct: false
+      - value: It encrypts role names for security.
+        correct: false
+    help: Role hierarchies allow you to grant a user multiple roles by assigning
+      them a single higher-level role (e.g., `ROLE_ADMIN` inherits `ROLE_USER`).
+  - question: Which Symfony Security Expression Language function checks if the user
+      is authenticated via 'remember-me' or 'fully' authenticated?
+    answers:
+      - value: "`is_authenticated()`"
+        correct: true
+      - value: "`is_logged_in()`"
+        correct: false
+      - value: "`has_authenticated()`"
+        correct: false
+      - value: "`is_active_user()`"
+        correct: false
+    help: "`is_authenticated()` returns true for both 'remember-me' and fully
+      authenticated users."
+  - question: What is the default value for the `username_parameter` option in a
+      Symfony form login firewall configuration?
+    answers:
+      - value: "`_username`"
+        correct: true
+      - value: "`username`"
+        correct: false
+      - value: "`email`"
+        correct: false
+      - value: "`user`"
+        correct: false
+    help: The `username_parameter` defaults to `_username`, which is the expected
+      name of the input field for the username in the login form.
+  - question: Which security event is dispatched after an `AuthenticationException`
+      was thrown during authentication?
+    answers:
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginFailureEvent`"
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationFailureEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\AuthenticationErrorEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\AuthenticationExceptionEven\
+          t`"
+        correct: false
+    help: The `LoginFailureEvent` is dispatched when authentication fails, allowing
+      listeners to modify the error response.
+  - question: What is the purpose of the `lazy` option in a Symfony firewall
+      configuration?
+    answers:
+      - value: It defers the loading of the user provider and authentication mechanisms
+          until they are actually needed.
+        correct: true
+      - value: It makes the firewall optional, only activating if other firewalls fail.
+        correct: false
+      - value: It enables lazy loading of user roles from the database.
+        correct: false
+      - value: It reduces the number of security checks performed for each request.
+        correct: false
+    help: The `lazy` option improves performance by delaying the instantiation of
+      security components until a protected resource is accessed.
+  - question: Which of the following describes the behavior of the `unanimous`
+      access decision strategy?
+    answers:
+      - value: Only grants access if there is no voter denying access.
+        correct: true
+      - value: Grants access as soon as there is one voter granting access.
+        correct: false
+      - value: Grants access if there are more voters granting access than denying.
+        correct: false
+      - value: Grants or denies access by the first voter that does not abstain.
+        correct: false
+    help: The `unanimous` strategy requires all non-abstaining voters to grant
+      access for access to be granted.
+  - question: What is the default value for the `target` option in the Symfony
+      security `logout` configuration?
+    answers:
+      - value: "`/`"
+        correct: true
+      - value: "`/login`"
+        correct: false
+      - value: "`/home`"
+        correct: false
+      - value: The previous URL
+        correct: false
+    help: After a successful logout, Symfony redirects to the root URL (`/`) by
+      default, unless a different `target` is specified.
+  - question: Which configuration option under a Symfony firewall allows you to
+      specify the name of the `$_SERVER` parameter containing the user
+      identifier for X.509 authentication?
+    answers:
+      - value: "`user`"
+        correct: true
+      - value: "`username_source`"
+        correct: false
+      - value: "`identifier`"
+        correct: false
+      - value: "`x509_user`"
+        correct: false
+    help: The `user` option under `x509` specifies the `$_SERVER` parameter for the
+      user identifier, defaulting to `SSL_CLIENT_S_DN_Email`.
+  - question: Which security event is dispatched just before a user logs out of your
+      application?
+    answers:
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\LogoutEvent`"
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\PreLogoutEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Core\\Event\\UserLogoutEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\SessionDestroyEvent`"
+        correct: false
+    help: The `LogoutEvent` is triggered right before the logout process completes,
+      allowing for custom logic.
+  - question: What is the primary purpose of the `IS_AUTHENTICATED_FULLY` special
+      authentication attribute?
+    answers:
+      - value: To check if the user has actively authenticated during the current
+          session, not just via a persistent token.
+        correct: true
+      - value: To check if the user is logged in via a 'remember me' cookie.
+        correct: false
+      - value: To check if the user has all required roles for the current resource.
+        correct: false
+      - value: To indicate that the user's session is fully secure.
+        correct: false
+    help: "`IS_AUTHENTICATED_FULLY` ensures the user has performed a full login in
+      the current session, providing a stronger authentication check than
+      `IS_AUTHENTICATED` or `IS_AUTHENTICATED_REMEMBERED`."
+  - question: Which of the following console commands displays the *default*
+      configuration values defined by Symfony for the security component?
+    answers:
+      - value: "`php bin/console config:dump-reference security`"
+        correct: true
+      - value: "`php bin/console debug:config security`"
+        correct: false
+      - value: "`php bin/console security:defaults`"
+        correct: false
+      - value: "`php bin/console security:reference`"
+        correct: false
+    help: "`config:dump-reference` shows the default configuration schema and values
+      for a bundle."
+  - question: In Symfony's security expression language, what does the `user`
+      variable represent?
+    answers:
+      - value: An instance of the current user object, or `null` if not authenticated.
+        correct: true
+      - value: The username of the authenticated user.
+        correct: false
+      - value: An array of roles assigned to the user.
+        correct: false
+      - value: The user provider service.
+        correct: false
+    help: The `user` variable provides access to the `UserInterface` object of the
+      currently authenticated user.
+  - question: What is the purpose of the `hide_user_not_found` option in Symfony's
+      security configuration?
+    answers:
+      - value: If true, a generic `BadCredentialsException` is thrown when a user is not
+          found, hiding the specific user identifier.
+        correct: true
+      - value: It prevents user enumeration attacks by obscuring error messages.
+        correct: true
+      - value: It hides the user's details from logs if they are not found.
+        correct: false
+      - value: It prevents the application from throwing an exception when a user is not
+          found.
+        correct: false
+    help: Setting `hide_user_not_found` to `true` (default) enhances security by
+      preventing attackers from guessing valid usernames.
+  - question: Which of the following `access_control` options allows you to restrict
+      access based on the HTTP method (e.g., POST, PUT)?
+    answers:
+      - value: "`methods`"
+        correct: true
+      - value: "`http_methods`"
+        correct: false
+      - value: "`request_method`"
+        correct: false
+      - value: "`verbs`"
+        correct: false
+    help: The `methods` option accepts an array of HTTP methods for which the access
+      control rule applies.
+  - question: "When configuring `password_hashers` in Symfony, what is the
+      significance of setting
+      `Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInter\
+      face: 'auto'`?"
+    answers:
+      - value: It automatically selects the best available password hasher for users
+          implementing `PasswordAuthenticatedUserInterface`.
+        correct: true
+      - value: It enables automatic password migration for all users.
+        correct: false
+      - value: It forces all users to use the `bcrypt` algorithm.
+        correct: false
+      - value: It disables password hashing for users of this interface.
+        correct: false
+    help: The `'auto'` setting for `PasswordAuthenticatedUserInterface` allows
+      Symfony to automatically choose a secure and modern password hasher based
+      on available PHP extensions.
+  - question: Which security event is dispatched after authentication was fully
+      successful and can be used to modify the response sent back to the user?
+    answers:
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent`"
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationSuccessEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\InteractiveLoginEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\ResponseEvent`"
+        correct: false
+    help: The `LoginSuccessEvent` is dispatched after successful authentication,
+      providing an opportunity to modify the HTTP response.
+  - question: What is the purpose of the `allow_if_all_abstain` option in Symfony's
+      access decision manager configuration?
+    answers:
+      - value: It determines the decision if all voters abstained from voting.
+        correct: true
+      - value: It allows access if no voters explicitly deny access.
+        correct: false
+      - value: It grants access if at least one voter abstains.
+        correct: false
+      - value: It is only used with the `unanimous` strategy.
+        correct: false
+    help: If no voter makes a decision (all abstain), `allow_if_all_abstain`
+      dictates whether access is granted or denied (default is `false`, meaning
+      deny).
+  - question: What is the default value for the `default_target_path` option in a
+      Symfony form login firewall configuration?
+    answers:
+      - value: "`/`"
+        correct: true
+      - value: "`/dashboard`"
+        correct: false
+      - value: "`/home`"
+        correct: false
+      - value: The previous URL
+        correct: false
+    help: The `default_target_path` specifies the page users are redirected to when
+      there is no previous page stored in the session, defaulting to the
+      application's root.
+  - question: Which security event is dispatched when a user is deauthenticated, for
+      instance, because their password was changed?
+    answers:
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\TokenDeauthenticatedEvent`"
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Core\\Event\\UserChangedEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\UserLogoutEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\SessionInvalidateEvent`"
+        correct: false
+    help: The `TokenDeauthenticatedEvent` is specifically for scenarios where a
+      user's authentication token becomes invalid, often due to credential
+      changes.
+  - question: In Symfony's `access_control`, what is the effect of setting the
+      `endpoint` option for the `NotCompromisedPassword` constraint?
+    answers:
+      - value: It allows defining a different, compatible API endpoint for password
+          checks instead of the default `haveibeenpwned.com`.
+        correct: true
+      - value: It specifies the URL to redirect to if a password is found to be
+          compromised.
+        correct: false
+      - value: It configures the internal API for password hashing.
+        correct: false
+      - value: It sets the maximum number of requests to the password compromise API.
+        correct: false
+    help: The `endpoint` option is useful for environments without public internet
+      access or for using a custom compromise database.
+  - question: Which of the following is a valid way to configure multiple patterns
+      for a single firewall in `security.yaml`?
     answers:
       - value: |-
           ```yaml
           firewalls:
               dev:
-                  pattern: ^/(_(profiler|wdt)|css|images|js)/
-                  security: false
+                  pattern:
+                      - ^/_profiler/
+                      - ^/_wdt/
           ```
         correct: true
       - value: |-
           ```yaml
           firewalls:
               dev:
-                  path: ^/(_(profiler|wdt)|css|images|js)/
-                  enabled: false
+                  pattern: [^/_profiler/, ^/_wdt/]
+          ```
+        correct: true
+      - value: |-
+          ```yaml
+          firewalls:
+              dev:
+                  patterns: ^/_profiler/, ^/_wdt/
           ```
         correct: false
       - value: |-
           ```yaml
           firewalls:
               dev:
-                  pattern: ^/(_(profiler|wdt)|css|images|js)/
-                  anonymous: true
+                  pattern: ^/_profiler/|/_wdt/
           ```
-        correct: false
-    help: "Setting `security: false` for a firewall disables security for paths
-      matching its pattern.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_1\
-      2"
-  - question: When using `#[IsGranted]` attribute with an array as `subject`, how
-      can you reference the elements of the array within the Expression
-      Language?
-    answers:
-      - value: Using `subject['key_name']`
         correct: true
-      - value: Using `subject.key_name`
-        correct: false
-      - value: Using `args['key_name']`
-        correct: false
-      - value: Using `this.key_name`
-        correct: false
-    help: When an array is used as the `subject` for `#[IsGranted]`, its elements
-      can be referenced using array syntax like `subject['key_name']`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/expressions.rst#_snippet_5
-  - question: Which of the following console commands is used to set or update a
-      secret value in the Symfony vault, prompting for input securely?
+    help: Symfony supports both array notation and a single regex string for
+      firewall patterns. The regex string can use `|` for OR conditions.
+  - question: What is the purpose of the `csrf_token_id` option in Symfony's logout
+      configuration?
     answers:
-      - value: "`php bin/console secrets:set <name>`"
+      - value: An arbitrary string used to identify the CSRF token for validation.
         correct: true
-      - value: "`php bin/console secrets:add <name>`"
+      - value: The name of the HTML element holding the CSRF token.
         correct: false
-      - value: "`php bin/console secrets:update <name>`"
+      - value: The service ID of the CSRF token manager.
         correct: false
-      - value: "`php bin/console secrets:write <name>`"
+      - value: The secret used to generate the CSRF token.
         correct: false
-    help: The `secrets:set <name>` command adds or updates a secret value in the
-      Symfony vault, with hidden input for security.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/configuration/secrets.rst#_snippet_0
-  - question: To configure an OpenID Connect (OIDC) User Info token handler in
-      Symfony Security, which key is used under `access_token.token_handler`?
+    help: The `csrf_token_id` helps distinguish CSRF tokens for different forms or
+      actions.
+  - question: Which Symfony Security Expression Language function is equivalent to
+      using the `isGranted()` method from the security service?
     answers:
-      - value: "`oidc_user_info`"
+      - value: "`is_granted(permission, object)`"
         correct: true
-      - value: "`oidc`"
+      - value: "`has_permission(permission, object)`"
         correct: false
-      - value: "`user_info`"
+      - value: "`can(permission, object)`"
         correct: false
-      - value: "`openid_connect`"
+      - value: "`check_permission(permission, object)`"
         correct: false
-    help: The `oidc_user_info` key is used to configure the generic OIDC User Info
-      token handler.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_token.rst#_snippet_9
-  - question: Which of the following `remember_me` cookie options, when set to
-      `'strict'`, prevents the cookie from being sent along with cross-site
-      requests, even when following a regular link?
+    help: The `is_granted()` function in expressions directly maps to the
+      `isGranted()` method of the security service, allowing for dynamic
+      authorization checks.
+  - question: When configuring a firewall for X.509 authentication, which parameter
+      specifies the `$_SERVER` variable containing the full 'distinguished name'
+      of the certificate if the `user` parameter is not available?
     answers:
-      - value: "`samesite`"
+      - value: "`credentials`"
         correct: true
-      - value: "`cross_site`"
+      - value: "`dn`"
         correct: false
-      - value: "`domain_strict`"
+      - value: "`certificate`"
         correct: false
-      - value: "`origin_check`"
+      - value: "`x509_dn`"
         correct: false
-    help: "Setting `samesite: 'strict'` prevents the cookie from being sent along
-      with cross-site requests.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/remember_me.rs\
-      t#_snippet_12"
-  - question: Which of the following is the correct way to define a multi-language
-      logout route in Symfony using `RoutingConfigurator`?
+    help: The `credentials` option is used as a fallback to extract user information
+      from the distinguished name if the primary `user` parameter is not
+      present.
+  - question: Which security event is dispatched after impersonation is completed in
+      Symfony?
+    answers:
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\SwitchUserEvent`"
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\ImpersonationEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Core\\Event\\UserSwitchEvent`"
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\UserImpersonatedEvent`"
+        correct: false
+    help: The `SwitchUserEvent` is specific to the 'switch user' functionality,
+      indicating a change in the active user context.
+  - question: What is the default value for the `password_parameter` in a Symfony
+      form login firewall configuration?
+    answers:
+      - value: "`_password`"
+        correct: true
+      - value: "`password`"
+        correct: false
+      - value: "`pass`"
+        correct: false
+      - value: "`secret`"
+        correct: false
+    help: The `password_parameter` defaults to `_password`, which is the expected
+      name of the input field for the password in the login form.
+  - question: Which `access_control` option allows you to restrict access based on
+      the hostname of the incoming request?
+    answers:
+      - value: "`host`"
+        correct: true
+      - value: "`hostname`"
+        correct: false
+      - value: "`domain`"
+        correct: false
+      - value: "`server_name`"
+        correct: false
+    help: The `host` option accepts a regular expression to match against the
+      request's hostname.
+  - question: In Symfony's security configuration, what does `IS_AUTHENTICATED` signify?
+    answers:
+      - value: The user is logged in, regardless of whether it's a full login or via
+          'remember me'.
+        correct: true
+      - value: The user has successfully completed multi-factor authentication.
+        correct: false
+      - value: The user's session is active and secure.
+        correct: false
+      - value: The user has the highest level of authentication.
+        correct: false
+    help: "`IS_AUTHENTICATED` is a general check for any form of successful
+      authentication."
+  - question: "What is the primary benefit of using `lazy: true` for a firewall in
+      Symfony?"
+    answers:
+      - value: Improved performance by delaying the instantiation of security
+          components.
+        correct: true
+      - value: Reduced memory consumption by unloading inactive firewalls.
+        correct: false
+      - value: Simplified configuration for firewalls with complex authentication
+          methods.
+        correct: false
+      - value: Enhanced security by only loading components when absolutely necessary.
+        correct: false
+    help: Lazy firewalls only load their associated user providers and
+      authenticators when a request actually matches their pattern, saving
+      resources.
+  - question: Which of the following is a valid way to configure a Monolog handler
+      to *exclude* messages from the 'security' channel?
     answers:
       - value: |-
-          ```php
-          $routes->add('app_logout', [
-              'en' => '/logout',
-              'fr' => '/deconnexion',
-          ])->methods(['GET']);
+          ```yaml
+          channels: ['!security']
           ```
         correct: true
       - value: |-
-          ```php
-          $routes->add('app_logout', '/logout')
-              ->addLocale('fr', '/deconnexion')
-              ->methods(['GET']);
+          ```yaml
+          exclude_channels: [security]
           ```
         correct: false
       - value: |-
-          ```php
-          $routes->add('app_logout', ['/logout', '/deconnexion'])
-              ->methods(['GET']);
+          ```yaml
+          channels: { exclude: security }
           ```
         correct: false
-    help: Multi-language routes can be defined by providing an array of paths keyed
-      by locale to the `add()` method.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_50
+      - value: |-
+          ```yaml
+          channels: [^security]
+          ```
+        correct: false
+    help: The `!` prefix before a channel name in Monolog configuration excludes
+      that channel from the handler.
+  - question: When using the `consensus` access decision strategy, what does the
+      `allow_if_equal_granted_denied` option determine?
+    answers:
+      - value: The decision in case of a tie between granting and denying voters.
+        correct: true
+      - value: Whether to grant access if all voters abstain.
+        correct: false
+      - value: The minimum number of voters required to grant access.
+        correct: false
+      - value: If the strategy should fall back to `affirmative` in case of a tie.
+        correct: false
+    help: By default, `allow_if_equal_granted_denied` is `true`, meaning access is
+      granted in a tie.
   - question: What is the purpose of the `user_identifier` option in X.509
       authentication configuration?
     answers:
@@ -1662,311 +1050,365 @@ questions:
       - value: It specifies the field in the user entity that stores the X.509
           certificate.
         correct: false
-      - value: It defines the default username to use if the certificate does not
-          provide one.
+      - value: It defines the unique identifier for the X.509 certificate itself.
         correct: false
-      - value: It is the name of the `$_SERVER` parameter containing the user
-          identifier.
+      - value: It is used to verify the authenticity of the X.509 certificate.
         correct: false
-    help: The `user_identifier` option tells Symfony which parameter to use to find
-      the user identifier within the distinguished name (DN) of the X.509
-      certificate.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_17
-  - question: Which of the following `remember_me` cookie options defines the number
-      of seconds after which the cookie will expire?
+    help: The `user_identifier` option helps parse the distinguished name (DN) to
+      extract a specific part as the user identifier, e.g., 'CN' for Common
+      Name.
+  - question: Which Symfony Security Expression Language variable holds the object
+      (if any) that is passed as the second argument to `isGranted()`?
     answers:
-      - value: "`lifetime`"
+      - value: "`object`"
         correct: true
-      - value: "`duration`"
+      - value: "`subject`"
+        correct: true
+      - value: "`target`"
         correct: false
-      - value: "`expires`"
+      - value: "`context`"
         correct: false
-      - value: "`valid_for`"
-        correct: false
-    help: The `lifetime` option defines the number of seconds after which the
-      'remember me' cookie will expire.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/remember_me.rst#_snippet_12
-  - question: To configure a Symfony security firewall to use an LDAP user provider,
-      which key is used under the `providers` section?
+    help: Both `object` and `subject` are equivalent and refer to the second
+      argument passed to `isGranted()`.
+  - question: What is the default value for the `access_denied_url` option in
+      Symfony's security configuration?
     answers:
-      - value: "`ldap`"
+      - value: "`null`"
         correct: true
-      - value: "`directory`"
+      - value: "`/access-denied`"
         correct: false
-      - value: "`active_directory`"
+      - value: "`/403`"
         correct: false
-      - value: "`external`"
+      - value: "`/error`"
         correct: false
-    help: The `ldap` key is used to configure an LDAP user provider under the
-      `providers` section.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/ldap.rst#_snippet_2
-  - question: Which of the following security expression language functions checks
-      if the user is *fully* authenticated (i.e., not just via a 'remember me'
-      cookie)?
+    help: By default, Symfony does not redirect to a specific URL on access denied;
+      it typically throws an `AccessDeniedException`.
+  - question: Which `firewall` option can be used to forward the user to the login
+      form instead of redirecting them when trying to access a protected
+      resource while unauthenticated?
     answers:
-      - value: "`is_fully_authenticated()`"
+      - value: "`use_forward`"
         correct: true
-      - value: "`is_granted('IS_AUTHENTICATED_FULLY')`"
-        correct: true
-      - value: "`is_authenticated_strict()`"
+      - value: "`forward_to_login`"
         correct: false
-      - value: "`is_active_session()`"
+      - value: "`redirect_on_unauthenticated: false`"
         correct: false
-    help: The `is_fully_authenticated()` function (or
-      `is_granted('IS_AUTHENTICATED_FULLY')`) returns `true` if the user is
-      fully authenticated.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/expressions.rst#_snippet_2
-  - question: What is the primary benefit of using the `#[IsGranted]` attribute with
-      `new Expression('request')` as the subject?
+      - value: "`internal_redirect`"
+        correct: false
+    help: "Setting `use_forward: true` changes the behavior from a HTTP redirect to
+      an internal forward, which can be useful for certain SPA architectures."
+  - question: What is the default `csrf_token_id` for the logout process in Symfony?
     answers:
-      - value: It allows access control decisions to be based directly on properties or
-          parameters of the incoming HTTP request.
+      - value: "`logout`"
         correct: true
-      - value: It automatically grants access if the request is secure.
+      - value: "`_logout`"
         correct: false
-      - value: It injects the entire Request object into the controller method.
+      - value: "`csrf_logout`"
         correct: false
-      - value: It enables request-based authentication without a user provider.
+      - value: "`app_logout`"
         correct: false
-    help: Using `new Expression('request')` as the subject for `#[IsGranted]`
-      enables access control decisions based on the current `Request` object.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/expressions.rst#_snippet_6
-  - question: To hide a user's input when asking for sensitive information like
-      passwords in a Symfony console command, which method should be called on
-      the `Question` object?
+    help: The `csrf_token_id` for logout defaults to 'logout', which is used to
+      identify the specific CSRF token for the logout form.
+  - question: Which of the following is a valid way to retrieve the `FirewallConfig`
+      object for the firewall that matched the current request using the
+      `Security` service?
     answers:
-      - value: "`setHidden(true)`"
+      - value: "`$this->security->getFirewallConfig($request)`"
         correct: true
-      - value: "`setSensitive(true)`"
+      - value: "`$this->security->getFirewall($request)`"
         correct: false
-      - value: "`hideInput(true)`"
+      - value: "`$this->security->getCurrentFirewall()`"
         correct: false
-      - value: "`maskInput(true)`"
+      - value: "`$this->security->getSecurityConfig()->getFirewall()`"
         correct: false
-    help: The `setHidden(true)` method on a `Question` object prevents the user's
-      input from being displayed on the console for sensitive information.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/console/helpers/questionhelper.rst#_snippet_13
-  - question: Which of the following is the default value for the
-      `decryption_env_var` option in Symfony's secrets management configuration?
+    help: The `getFirewallConfig()` method takes a `Request` object and returns the
+      configuration for the matching firewall.
+  - question: What is the purpose of the `always_use_default_target_path` option in
+      a Symfony form login firewall configuration?
     answers:
-      - value: "`base64:default::SYMFONY_DECRYPTION_SECRET`"
+      - value: If true, users are always redirected to the `default_target_path`
+          regardless of the previous URL stored in the session.
         correct: true
-      - value: "`SYMFONY_DECRYPTION_SECRET`"
+      - value: It forces the user to always log in via the default login form.
         correct: false
-      - value: "`APP_SECRET`"
+      - value: It ensures that the `default_target_path` is always secure (HTTPS).
         correct: false
-      - value: "`SYMFONY_VAULT_KEY`"
+      - value: It prevents redirection loops by always going to a fixed path.
         correct: false
-    help: The default value for `decryption_env_var` is
-      `base64:default::SYMFONY_DECRYPTION_SECRET`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/framework.rst#_snippet_31
-  - question: Which of the following Symfony Security events is dispatched just
-      before a user logs out of your application?
-    answers:
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\LogoutEvent`"
-        correct: true
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\PreLogoutEvent`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\UserLogoutEvent`"
-        correct: false
-      - value: "`Symfony\\Component\\Security\\Core\\Event\\LogoutSuccessEvent`"
-        correct: false
-    help: The `LogoutEvent` is dispatched just before a user logs out.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_72
-  - question: What is the purpose of the `token_handler` option under `access_token`
-      in a Symfony firewall configuration when configuring OIDC?
-    answers:
-      - value: To specify the service responsible for validating and parsing the OIDC
-          token.
-        correct: true
-      - value: To define the endpoint for retrieving user information from the OIDC
-          provider.
-        correct: false
-      - value: To configure the client ID and secret for OIDC authentication.
-        correct: false
-      - value: To set the scope of the OIDC token.
-        correct: false
-    help: The `token_handler` option specifies the service (e.g., `oidc`)
-      responsible for validating and parsing the OIDC token.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_token.rst#_snippet_15
-  - question: Which of the following is the correct way to inject the `Security`
-      service into a Symfony Form Type's constructor?
-    answers:
-      - value: |-
-          ```php
-          use Symfony\Bundle\SecurityBundle\Security;
-
-          class MyFormType extends AbstractType
-          {
-              public function __construct(private Security $security) {}
-              // ...
-          }
-          ```
-        correct: true
-      - value: >-
-          ```php
-
-          use Symfony\Component\Security\Core\SecurityContextInterface;
-
-
-          class MyFormType extends AbstractType
-
-          {
-              public function __construct(private SecurityContextInterface $securityContext) {}
-              // ...
-          }
-
-          ```
-        correct: false
-      - value: >-
-          ```php
-
-          class MyFormType extends AbstractType
-
-          {
-              public function buildForm(FormBuilderInterface $builder, array $options): void
-              {
-                  $security = $builder->getFormFactory()->getContainer()->get('security.helper');
-                  // ...
-              }
-          }
-
-          ```
-        correct: false
-    help: The `Security` service can be injected directly into a Form Type's
-      constructor.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/form/dynamic_form_modification.rst#_snippet_6
-  - question: What is the default value for the `user` parameter in `remote_user`
-      authentication, which specifies the `$_SERVER` parameter holding the user
-      identifier?
-    answers:
-      - value: "`REMOTE_USER`"
-        correct: true
-      - value: "`AUTH_USER`"
-        correct: false
-      - value: "`PHP_AUTH_USER`"
-        correct: false
-      - value: "`HTTP_REMOTE_USER`"
-        correct: false
-    help: The default value for the `user` parameter in `remote_user` authentication
-      is `REMOTE_USER`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/security.rst#_snippet_19
-  - question: "When configuring a Symfony security firewall, what does setting
-      `security: false` achieve?"
-    answers:
-      - value: It disables security for the paths matched by this firewall's pattern.
-        correct: true
-      - value: It makes the firewall publicly accessible without any authentication.
-        correct: true
-      - value: It prevents the firewall from being loaded.
-        correct: false
-      - value: It forces all requests to be handled by the next matching firewall.
-        correct: false
-    help: "Setting `security: false` for a firewall disables the security component
-      for the URLs matched by its pattern, making them publicly accessible.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_1\
-      2"
-  - question: Which of the following `access_control` options allows you to restrict
-      access based on the hostname of the incoming request?
-    answers:
-      - value: "`host`"
-        correct: true
-      - value: "`domain`"
-        correct: false
-      - value: "`hostname`"
-        correct: false
-      - value: "`server_name`"
-        correct: false
-    help: The `host` option in `access_control` allows restricting access based on
-      the hostname, using a regular expression.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/access_control.rst#_snippet_1
-  - question: What is the default value for the `lifetime` option of a 'remember me'
-      cookie in Symfony Security?
-    answers:
-      - value: 31536000 seconds (1 year)
-        correct: true
-      - value: 604800 seconds (7 days)
-        correct: false
-      - value: 2592000 seconds (30 days)
-        correct: false
-      - value: 3600 seconds (1 hour)
-        correct: false
-    help: The `lifetime` option for 'remember me' cookies defaults to 31536000
-      seconds (1 year).
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/remember_me.rst#_snippet_12
-  - question: Which of the following `access_decision_manager` strategies only
-      grants access if there is no voter denying access?
-    answers:
-      - value: "`unanimous`"
-        correct: true
-      - value: "`affirmative`"
-        correct: false
-      - value: "`consensus`"
-        correct: false
-      - value: "`strict`"
-        correct: false
-    help: The `unanimous` strategy only grants access if there is no voter denying
-      access.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/voters.rst#_snippet_7
-  - question: What is the purpose of the `local_dotenv_file` option in Symfony's
-      secrets management configuration?
-    answers:
-      - value: The path to the local `.env` file that must contain the vault decryption
-          key.
-        correct: true
-      - value: The path to the main `.env` file for environment variables.
-        correct: false
-      - value: The file where all unencrypted secrets are stored locally.
-        correct: false
-      - value: The file used for storing development-specific environment variables.
-        correct: false
-    help: The `local_dotenv_file` option specifies the path to the local `.env` file
-      that must contain the vault decryption key.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/configuration/framework.rst#_snippet_31
-  - question: Which of the following `remember_me` cookie options, when set to
-      `true`, ensures the cookie is sent to the user only through an HTTPS
-      secure connection?
-    answers:
-      - value: "`secure`"
-        correct: true
-      - value: "`https_only`"
-        correct: false
-      - value: "`ssl_only`"
-        correct: false
-      - value: "`encrypted`"
-        correct: false
-    help: "Setting `secure: true` ensures the 'remember me' cookie is sent only over
-      HTTPS.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/remember_me.rs\
-      t#_snippet_12"
-  - question: When configuring an LDAP user provider, which option specifies the DN
-      of the read-only user used to authenticate against the LDAP server to
-      fetch user information?
-    answers:
-      - value: "`search_dn`"
-        correct: true
-      - value: "`bind_dn`"
-        correct: false
-      - value: "`user_dn`"
-        correct: false
-      - value: "`auth_dn`"
-        correct: false
-    help: The `search_dn` option specifies the DN of the read-only user for
-      authentication against the LDAP server to fetch user information.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security/ldap.rst#_snippet_3
-  - question: Which Symfony Security event is dispatched after authentication was
-      fully successful, but only when the authenticator implements
-      `InteractiveAuthenticatorInterface`?
+    help: This option overrides the behavior of redirecting to the previously
+      requested URL after login, always sending the user to the
+      `default_target_path`.
+  - question: Which security event is dispatched only when the authenticator
+      implements
+      `Symfony\Component\Security\Http\Authenticator\InteractiveAuthenticatorInterface`,
+      indicating login requires explicit user action?
     answers:
       - value: "`Symfony\\Component\\Security\\Http\\Event\\InteractiveLoginEvent`"
         correct: true
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent`"
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\FormLoginEvent`"
         correct: false
-      - value: "`Symfony\\Component\\Security\\Core\\Event\\AuthenticationSuccessEvent`"
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\UserActionLoginEvent`"
         correct: false
-      - value: "`Symfony\\Component\\Security\\Http\\Event\\PostLoginEvent`"
+      - value: "`Symfony\\Component\\Security\\Http\\Event\\ExplicitLoginEvent`"
         correct: false
-    help: The `InteractiveLoginEvent` is dispatched after successful authentication
-      only when the authenticator implements
-      `InteractiveAuthenticatorInterface`.
-      https://github.com/fmatsos/symfony-docs/blob/v7.0/security.rst#_snippet_72
+    help: The `InteractiveLoginEvent` is specifically for authenticators that
+      involve direct user interaction, like a login form submission.
+  - question: What is the default value for the `user` parameter in the
+      `remote_user` authentication method configuration under a Symfony
+      firewall?
+    answers:
+      - value: "`REMOTE_USER`"
+        correct: true
+      - value: "`HTTP_REMOTE_USER`"
+        correct: false
+      - value: "`PHP_AUTH_USER`"
+        correct: false
+      - value: "`REMOTE_IDENTIFIER`"
+        correct: false
+    help: The `user` option for `remote_user` specifies the `$_SERVER` variable to
+      read the username from, defaulting to `REMOTE_USER`.
+  - question: Which of the following describes the `priority` access decision strategy?
+    answers:
+      - value: Grants or denies access by the first voter that does not abstain, based
+          on their service priority.
+        correct: true
+      - value: Grants access if there is at least one voter granting access.
+        correct: false
+      - value: Requires all voters to grant access for access to be granted.
+        correct: false
+      - value: Considers the sum of all voter decisions.
+        correct: false
+    help: The `priority` strategy allows for a specific voter to have precedence
+      over others in determining the access decision.
+  - question: What is the purpose of the `form_only` option in a Symfony form login
+      firewall configuration?
+    answers:
+      - value: Set to true to require that login data is sent using a form (checks for
+          `application/x-www-form-urlencoded` content-type).
+        correct: true
+      - value: It ensures that the login form is rendered using Symfony's Form
+          component.
+        correct: false
+      - value: It restricts login attempts to only those originating from the login
+          form.
+        correct: false
+      - value: It disables JSON login for this firewall.
+        correct: false
+    help: The `form_only` option prevents the form login authenticator from
+      processing requests that are not standard form submissions, which is
+      useful when also using a JSON login authenticator.
+  - question: Which `$_SERVER` parameter is typically exposed by Apache and used by
+      default for the `user` parameter in X.509 authentication?
+    answers:
+      - value: "`SSL_CLIENT_S_DN_Email`"
+        correct: true
+      - value: "`SSL_CLIENT_CERT`"
+        correct: false
+      - value: "`SSL_CLIENT_VERIFY`"
+        correct: false
+      - value: "`SSL_CLIENT_I_DN`"
+        correct: false
+    help: Apache commonly populates `SSL_CLIENT_S_DN_Email` with the email address
+      from the client certificate's subject distinguished name.
+  - question: What is the default value for the `post_only` option in a Symfony form
+      login firewall configuration?
+    answers:
+      - value: "`true`"
+        correct: true
+      - value: "`false`"
+        correct: false
+      - value: "`null`"
+        correct: false
+      - value: "`auto`"
+        correct: false
+    help: By default, login forms must be submitted as POST requests to the
+      `check_path` URL. Setting this to `false` allows GET requests as well,
+      though it's generally not recommended for security reasons.
+  - question: Which of the following is a valid way to configure `ips` in
+      `access_control` using an environment variable for multiple IP addresses?
+    answers:
+      - value: |-
+          ```yaml
+          ips: '%env(TRUSTED_IPS)%'
+          ```
+        correct: true
+      - value: |-
+          ```yaml
+          ips: [env('TRUSTED_IPS')]
+          ```
+        correct: false
+      - value: |-
+          ```yaml
+          ips: %TRUSTED_IPS%
+          ```
+        correct: false
+      - value: |-
+          ```yaml
+          ips: { env: TRUSTED_IPS }
+          ```
+        correct: false
+    help: Environment variables can be used directly within string values for `ips`,
+      and Symfony will parse comma-separated values into an array.
+  - question: What is the purpose of the `failure_path_parameter` option in a
+      Symfony form login firewall configuration?
+    answers:
+      - value: It lets you change the name of the HTML element used to set the failure
+          path.
+        correct: true
+      - value: It defines the route to redirect to after a failed login attempt.
+        correct: false
+      - value: It specifies the query parameter for the failure message.
+        correct: false
+      - value: It is used to pass additional parameters to the failure path.
+        correct: false
+    help: This option allows customizing the name of the form field that can
+      override the default `failure_path`.
+  - question: Which of the following options for `logout` configuration in Symfony
+      allows you to specify a custom CSRF token manager service?
+    answers:
+      - value: "`csrf_token_manager`"
+        correct: true
+      - value: "`csrf_manager`"
+        correct: false
+      - value: "`token_manager`"
+        correct: false
+      - value: "`custom_csrf_service`"
+        correct: false
+    help: The `csrf_token_manager` option accepts the service ID of a custom CSRF
+      token manager.
+  - question: What is the primary use case for the
+      `Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent`?
+    answers:
+      - value: It is the last event that can make an authentication fail by throwing an
+          `AuthenticationException`.
+        correct: true
+      - value: To modify the response sent back to the user after successful login.
+        correct: false
+      - value: To create the security token after passport validation.
+        correct: false
+      - value: To log successful authentication attempts.
+        correct: false
+    help: This event is triggered when authentication is nearing success, providing
+      a final opportunity to intervene before the process completes.
+  - question: Which of the following is a valid `Clear-Site-Data` directive to clear
+      only cookies upon logout?
+    answers:
+      - value: "`cookies`"
+        correct: true
+      - value: "`cookie`"
+        correct: false
+      - value: "`session_cookies`"
+        correct: false
+      - value: "`all_cookies`"
+        correct: false
+    help: The `cookies` directive specifically targets cookies for removal via the
+      `Clear-Site-Data` header.
+  - question: What is the purpose of the `use_referer` option in a Symfony form
+      login firewall configuration?
+    answers:
+      - value: If true, the user is redirected to the value stored in the `HTTP_REFERER`
+          header when no previous URL was stored in the session.
+        correct: true
+      - value: It forces the login form to be submitted with a `Referer` header.
+        correct: false
+      - value: It prevents redirection loops by ignoring the `HTTP_REFERER` if it's the
+          login page.
+        correct: true
+      - value: It enables referrer-based security checks.
+        correct: false
+    help: The `use_referer` option provides a fallback redirection target, but it
+      includes logic to prevent redirection loops back to the login page.
+  - question: When configuring X.509 authentication, which `$_SERVER` parameter is
+      the default for `credentials` if the `user` parameter is not available,
+      and is exposed by web servers like Nginx?
+    answers:
+      - value: "`SSL_CLIENT_S_DN`"
+        correct: true
+      - value: "`SSL_CLIENT_CERT`"
+        correct: false
+      - value: "`SSL_CLIENT_I_DN`"
+        correct: false
+      - value: "`SSL_CLIENT_RAW_CERT`"
+        correct: false
+    help: "`SSL_CLIENT_S_DN` provides the full distinguished name of the client
+      certificate, which can be parsed to find user details."
+  - question: Which of the following is the correct way to configure a firewall to
+      be `lazy` in PHP configuration?
+    answers:
+      - value: |-
+          ```php
+          $security->firewall('main')->lazy(true);
+          ```
+        correct: true
+      - value: |-
+          ```php
+          $security->firewall('main')->setLazy(true);
+          ```
+        correct: false
+      - value: |-
+          ```php
+          $security->firewall('main')->option('lazy', true);
+          ```
+        correct: false
+      - value: |-
+          ```php
+          $security->firewall('main', ['lazy' => true]);
+          ```
+        correct: false
+    help: The `lazy()` method is used on the firewall configuration object to enable
+      lazy loading.
+  - question: What is the default value for the `enable_csrf` option in Symfony's
+      logout configuration?
+    answers:
+      - value: "`null`"
+        correct: true
+      - value: "`true`"
+        correct: false
+      - value: "`false`"
+        correct: false
+      - value: "`auto`"
+        correct: false
+    help: The `enable_csrf` option defaults to `null`, meaning it will use the
+      global CSRF setting or require explicit configuration.
+  - question: Which of the following `access_control` options allows you to restrict
+      access based on a specific port number?
+    answers:
+      - value: "`port`"
+        correct: true
+      - value: "`server_port`"
+        correct: false
+      - value: "`http_port`"
+        correct: false
+      - value: "`listen_port`"
+        correct: false
+    help: The `port` option in `access_control` allows you to specify a required
+      port for the request to match the rule.
+  - question: "What is the primary reason for defining a firewall with `security:
+      false` and a broad pattern like `^/(_(profiler|wdt)|css|images|js)/`?"
+    answers:
+      - value: To exclude static assets and development tools from security checks for
+          performance and convenience.
+        correct: true
+      - value: To enable advanced security logging for these paths.
+        correct: false
+      - value: To force authentication for all requests to these paths.
+        correct: false
+      - value: To redirect all requests to these paths to a secure server.
+        correct: false
+    help: Commonly, development tools (profiler, wdt) and static assets (css, js,
+      images) do not require security checks, and excluding them improves
+      performance.
+  - question: In Symfony's security expression language, what does the `token`
+      variable represent?
+    answers:
+      - value: The current security token object
+          (`Symfony\Component\Security\Core\Authentication\Token\TokenInterface`).
+        correct: true
+      - value: The CSRF token for the current request.
+        correct: false
+      - value: A unique identifier for the user's session.
+        correct: false
+      - value: The authentication provider's token.
+        correct: false
+    help: The `token` variable provides access to the `TokenInterface` which holds
+      the authenticated user and their roles.
