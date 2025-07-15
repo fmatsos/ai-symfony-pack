@@ -1,255 +1,153 @@
 category: Miscellaneous
 questions:
-  - question: Which of the following console commands can be used to list all
-      registered cache warmers in a Symfony application?
+  - question: In Symfony, how can you configure a service method call to be ignored
+      if its required service dependency is not found in the container?
     answers:
-      - value: "`php bin/console debug:container --tag=kernel.cache_warmer`"
+      - value: By prefixing the service ID with `@?` in YAML configuration.
         correct: true
-      - value: "`php bin/console cache:warmer:list`"
+      - value: By using `on-invalid="ignore"` for the argument in XML configuration.
+        correct: true
+      - value: By using `->ignoreOnInvalid()` on the service definition in PHP
+          configuration.
+        correct: true
+      - value: By using `#[Optional]` attribute on the method parameter.
         correct: false
-      - value: "`php bin/console debug:cache --warmers`"
+      - value: "By setting `required: false` for the argument."
         correct: false
-      - value: "`php bin/console container:debug --tag=cache_warmer`"
-        correct: false
-    help: >-
-      The `debug:container` command with the `--tag` option is used to list
-      services associated with a specific tag. Cache warmers are tagged with
-      `kernel.cache_warmer`.
-
-      https://symfony.com/doc/current/reference/dic_tags.html#_snippet_12
-  - question: In Symfony's Dependency Injection, how can you configure a service
-      method call to be ignored if its required service dependency is not found
-      in the container?
+    help: To ignore a method call if a dependency is missing, use `@?logger` in
+      YAML, `on-invalid="ignore"` in XML, or `->ignoreOnInvalid()` in PHP. This
+      removes the method call entirely if the service is not found.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/optional_dependencies.rst#_snippet_1
+  - question: Which of the following correctly configures a service argument to be
+      `null` if the referenced service does not exist in the Symfony container?
     answers:
-      - value: By using `@?service_id` in YAML configuration.
+      - value: 'In XML: `<argument type="service" id="logger" on-invalid="null"/>`'
         correct: true
-      - value: By using `->ignoreOnInvalid()` with `service()` in PHP configuration.
+      - value: "In PHP: `service('logger')->nullOnInvalid()`"
         correct: true
-      - value: By setting `on-invalid="ignore"` for the argument in XML configuration.
-        correct: true
-      - value: By type-hinting the dependency as nullable (`?ServiceDependency`).
+      - value: "In YAML: `arguments: ['@?logger']`"
         correct: false
-    help: |-
-      Symfony provides mechanisms to handle optional service dependencies. For method calls, you can use `@?service_id` in YAML, `ignoreOnInvalid()` in PHP, or `on-invalid="ignore"` in XML to make the call ignored if the dependency is missing.
-      https://symfony.com/doc/current/service_container/optional_dependencies.html#_snippet_1
-  - question: Which of the following `Symfony\Component\String\UnicodeString`
-      methods can be used for case-insensitive comparisons by returning a string
-      that ignores case differences?
+      - value: "In YAML: `arguments: ['@~logger']`"
+        correct: false
+      - value: 'In XML: `<argument type="service" id="logger" optional="true"/>`'
+        correct: false
+    help: The `on-invalid="null"` in XML and `nullOnInvalid()` in PHP configuration
+      explicitly set the argument to `null` if the service is not found. Using
+      `@?` in YAML ignores the method call, it doesn't set to null.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/optional_dependencies.rst#_snippet_0
+  - question: How can you debug and inspect the priorities of registered normalizers
+      within the Symfony serializer service using the console?
     answers:
-      - value: "`folded()`"
+      - value: "`php bin/console debug:container --tag serializer.normalizer`"
         correct: true
-      - value: "`lower()`"
+      - value: "`php bin/console serializer:debug normalizers`"
         correct: false
-      - value: "`ignoreCase()`"
+      - value: "`php bin/console debug:serializer --type normalizer`"
         correct: false
-      - value: "`normalize()`"
+      - value: "`php bin/console container:debug --tag serializer.normalizer`"
         correct: false
-    help: >-
-      The `folded()` method returns a string that can be used for
-      case-insensitive comparisons, handling complexities of different languages
-      where simple `lower()` or `upper()` might not be sufficient for true
-      case-insensitivity.
-
-      https://symfony.com/doc/current/components/string.html#_snippet_10
-  - question: When using the Symfony Serializer component, which context option
-      should be set to `true` to prevent properties with `null` values from
-      being included in the normalized output?
+    help: The `debug:container` command with the `--tag` option is used to list
+      services associated with a specific tag, including `serializer.normalizer`
+      to inspect their priorities.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_27
+  - question: When defining a configuration tree, how do you handle irregular plural
+      forms for XML keys, such as transforming `<child>` elements into a
+      `children` array, using `fixXmlConfig()`?
     answers:
-      - value: "`AbstractObjectNormalizer::SKIP_NULL_VALUES`"
+      - value: "Pass both the singular and irregular plural form as arguments:
+          `$rootNode->fixXmlConfig('child', 'children')`"
         correct: true
-      - value: "`AbstractNormalizer::SKIP_NULL_VALUES`"
+      - value: Symfony automatically handles irregular plurals, no special configuration
+          is needed.
         correct: false
-      - value: "`ObjectNormalizer::IGNORE_NULL`"
+      - value: Define a custom pluralization rule in `config/packages/config.yaml`.
         correct: false
-      - value: "`Serializer::CONTEXT_SKIP_NULL`"
+      - value: Use `->setXmlConfig('child', 'children')` instead.
         correct: false
-    help: >-
-      The `AbstractObjectNormalizer::SKIP_NULL_VALUES` context option, when set
-      to `true`, instructs the `ObjectNormalizer` to exclude properties whose
-      values are `null` from the normalized array.
-
-      https://symfony.com/doc/current/components/serializer.html#_snippet_46
-  - question: >-
-      Consider the following Symfony console command definition:
-
-
-      ```php
-
-      use Symfony\Component\Console\Input\InputOption;
-
-
-      $this
-          ->addOption(
-              'yell',
-              null,
-              InputOption::VALUE_OPTIONAL,
-              'Should I yell while greeting?'
-          );
-      ```
-
-
-      If the user runs `php bin/console app:greet --yell`, what will be the
-      value of `$input->getOption('yell')`?
+    help: The `fixXmlConfig()` method can take a second argument to specify the
+      correct irregular plural form for XML keys, ensuring proper array
+      conversion.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/config/definition.rst#_snippet_25
+  - question: When documenting a deprecation in `UPGRADE.md` for a minor Symfony
+      version, what is the correct Markdown format for the entry?
     answers:
-      - value: An empty string (`''`).
-        correct: true
-      - value: "`true`"
-        correct: false
-      - value: "`null`"
-        correct: false
-      - value: "`false`"
-        correct: false
-    help: >-
-      When `InputOption::VALUE_OPTIONAL` is used, if the option is present but
-      no value is provided (e.g., `--yell` instead of `--yell=loud`), the value
-      will be an empty string (`''`). If the option is not present at all, the
-      value would be `null`.
+      - value: |-
+          ```markdown
+          DependencyInjection
+          -------------------
 
-      https://symfony.com/doc/current/console/input.html#_snippet_12
-  - question: Which of the following Symfony `FormEvents` constants provides access
-      to the *request data* during the form processing lifecycle?
-    answers:
-      - value: "`FormEvents::PRE_SUBMIT`"
+           * Deprecate the `Deprecated` class, use `Replacement` instead
+          ```
         correct: true
-      - value: "`FormEvents::POST_SUBMIT`"
-        correct: false
-      - value: "`FormEvents::PRE_SET_DATA`"
-        correct: false
-      - value: "`FormEvents::SUBMIT`"
-        correct: false
-    help: >-
-      The `FormEvents::PRE_SUBMIT` event is dispatched before the form's data is
-      submitted and mapped. At this stage, listeners have access to the raw
-      request data.
+      - value: |-
+          ```markdown
+          DependencyInjection
+          -------------------
 
-      https://symfony.com/doc/current/form/events.html#_snippet_6
-  - question: When debugging Symfony services, which console command and option
-      would you use to find all services that are tagged with
-      `kernel.event_listener`?
-    answers:
-      - value: "`php bin/console debug:container --tag=kernel.event_listener`"
-        correct: true
-      - value: "`php bin/console debug:event-listeners`"
+           - `Deprecated` class is now deprecated, use `Replacement`.
+          ```
         correct: false
-      - value: "`php bin/console container:list --tag=kernel.event_listener`"
-        correct: false
-      - value: "`php bin/console services:tagged kernel.event_listener`"
-        correct: false
-    help: >-
-      The `debug:container` command with the `--tag` option allows you to
-      inspect services that have a specific tag, which is useful for
-      understanding how different components are integrated.
+      - value: >-
+          ```markdown
 
-      https://symfony.com/doc/current/service_container/debug.html#_snippet_2
-  - question: You want to validate that a `DateTimeInterface` property
-      `deliveryDate` in your `Order` entity is at least 'today'. Which of the
-      following Symfony Validator constraints and configurations would achieve
-      this?
-    answers:
-      - value: "PHP Attribute: `#[Assert\\GreaterThanOrEqual('today')]`"
-        correct: true
-      - value: "YAML: `GreaterThanOrEqual: today`"
-        correct: true
-      - value: 'XML: `<constraint name="GreaterThanOrEqual">today</constraint>`'
-        correct: true
-      - value: "PHP Attribute: `#[Assert\\LessThan('today')]`"
-        correct: false
-    help: |-
-      The `GreaterThanOrEqual` constraint can be used with date strings like 'today' to validate `DateTime` objects. It ensures the value is greater than or equal to the specified date.
-      https://symfony.com/doc/current/reference/constraints/GreaterThanOrEqual.html#_snippet_2
-  - question: Which of the following methods of
-      `Symfony\Component\Console\Style\SymfonyStyle` is used to display a
-      prominently highlighted admonition message, similar to an error message,
-      in the console output?
-    answers:
-      - value: "`caution()`"
-        correct: true
-      - value: "`note()`"
-        correct: false
-      - value: "`warning()`"
-        correct: false
-      - value: "`error()`"
-        correct: false
-    help: >-
-      The `caution()` method displays a message with prominent highlighting,
-      similar to an error, to draw significant attention. The `note()` method
-      provides a less prominent highlight.
+          [DEPRECATED] DependencyInjection: `Deprecated` class, use
+          `Replacement`.
 
-      https://symfony.com/doc/current/console/style.html#_snippet_5
-  - question: When working with Symfony's `Finder` component, which method would you
-      use to exclude files that contain a specific string pattern?
-    answers:
-      - value: "`notContains()`"
-        correct: true
-      - value: "`excludeContent()`"
+          ```
         correct: false
-      - value: "`withoutContent()`"
-        correct: false
-      - value: "`filterContent()`"
-        correct: false
-    help: >-
-      The `notContains()` method allows you to filter out files based on whether
-      their content matches a given string pattern.
+      - value: >-
+          ```markdown
 
-      https://symfony.com/doc/current/components/finder.html#_snippet_11
-  - question: What is the purpose of the `kernel.cache_warmer` service tag in Symfony?
-    answers:
-      - value: To initialize any cache that will be needed by the application and
-          prevent the first user from a significant "cache hit".
-        correct: true
-      - value: To clear the application's cache during deployment.
-        correct: false
-      - value: To mark a service as eligible for caching its output.
-        correct: false
-      - value: To register a service that monitors cache usage.
-        correct: false
-    help: >-
-      Services tagged with `kernel.cache_warmer` are executed during the cache
-      warming process to pre-populate caches, improving performance for the
-      first user request.
+          Deprecations
 
-      https://symfony.com/doc/current/reference/dic_tags.html#_snippet_13
-  - question: Which of the following
-      `Symfony\Component\HttpKernel\Event\KernelEvent` methods can be used by an
-      event listener to determine if the current request is the main request (as
-      opposed to a sub-request)?
-    answers:
-      - value: "`isMainRequest()`"
-        correct: true
-      - value: "`getRequestType()` and check against
-          `HttpKernelInterface::MAIN_REQUEST`"
-        correct: true
-      - value: "`isMasterRequest()`"
-        correct: false
-      - value: "`isSubRequest()` and negate the result"
-        correct: false
-    help: >-
-      The `isMainRequest()` method on `KernelEvent` directly checks if the event
-      is for the main request. Alternatively, `getRequestType()` returns
-      `HttpKernelInterface::MAIN_REQUEST` or `HttpKernelInterface::SUB_REQUEST`.
+          ------------
 
-      https://symfony.com/doc/current/components/http_kernel.html#_snippet_16
-  - question: You need to ensure that a numeric property `age` is greater than 18.
-      Which of the following Symfony Validator configurations correctly applies
-      the `GreaterThan` constraint?
-    answers:
-      - value: "PHP Attribute: `#[Assert\\GreaterThan(18)]`"
-        correct: true
-      - value: "YAML: `age: - GreaterThan: 18`"
-        correct: true
-      - value: 'XML: `<constraint name="GreaterThan"><option
-          name="value">18</option></constraint>`'
-        correct: true
-      - value: "PHP Metadata: `$metadata->addPropertyConstraint('age', new
-          Assert\\GreaterThan(value: 18));`"
-        correct: true
-      - value: "PHP Attribute: `#[Assert\\GreaterThanOrEqual(19)]`"
+           * DependencyInjection: Deprecated `Deprecated` class, use `Replacement` instead.
+          ```
         correct: false
-    help: |-
-      The `GreaterThan` constraint validates that a value is strictly greater than the specified comparison value. It can be configured using PHP attributes, YAML, XML, or PHP metadata.
-      https://symfony.com/doc/current/reference/constraints/GreaterThan.html#_snippet_1
-  - question: When handling exceptions in Symfony, which event is dispatched when an
-      exception is thrown at any point inside `HttpKernel::handle()`?
+    help: The specified format for `UPGRADE.md` for minor version deprecations
+      includes the component name as a header, followed by a bullet point
+      describing the deprecation.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/contributing/code/conventions.rst#_snippet_8
+  - question: According to Symfony's code conventions for object relation methods,
+      what is the functional distinction between `setXXX()` and `replaceXXX()`
+      methods?
+    answers:
+      - value: "`setXXX()` may add new elements or replace existing ones, while
+          `replaceXXX()` only replaces existing elements and throws an exception
+          if an unrecognized key is passed."
+        correct: true
+      - value: "`setXXX()` is for single elements, `replaceXXX()` is for collections."
+        correct: false
+      - value: "`setXXX()` is for internal use, `replaceXXX()` is for public API."
+        correct: false
+      - value: "`setXXX()` is deprecated in favor of `replaceXXX()`."
+        correct: false
+    help: The convention states that `setXXX()` methods are flexible and can add or
+      replace, whereas `replaceXXX()` methods are strict, only replacing
+      existing items and throwing an exception for unknown keys.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/contributing/code/conventions.rst#_snippet_0
+  - question: When implementing `getSubscribedServices()` in a service subscriber,
+      how do you mark a service as optional so that its absence does not cause
+      an error?
+    answers:
+      - value: "Prefix the service type with a `?`: `return
+          ['?'.LoggerInterface::class];`"
+        correct: true
+      - value: Use the `#[Optional]` attribute on the service definition.
+        correct: false
+      - value: Return `null` for the service if it's not available.
+        correct: false
+      - value: Wrap the service in a `try-catch` block within `getSubscribedServices()`.
+        correct: false
+    help: By prepending the service type with a `?` in the `getSubscribedServices()`
+      array, you declare it as optional. It's crucial to then check for its
+      existence using `has()` on the service locator before attempting to
+      retrieve it.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/service_subscribers_locators.rst#_snippet_6
+  - question: Which event is dispatched when an exception is thrown at any point
+      inside `HttpKernel::handle()` and allows listeners to create an
+      appropriate `Response` for the exception?
     answers:
       - value: "`kernel.exception`"
         correct: true
@@ -259,1371 +157,1377 @@ questions:
         correct: false
       - value: "`kernel.response`"
         correct: false
-    help: >-
-      The `kernel.exception` event is specifically dispatched when an exception
-      occurs during the request handling process, allowing listeners to create
-      an appropriate `Response`.
-
-      https://symfony.com/doc/current/components/http_kernel.html#_snippet_11
-  - question: Which of the following `Symfony\Component\Process\Process` methods
-      should be used to run a command and immediately throw an exception if the
-      process returns a non-zero exit code?
+    help: The `kernel.exception` event is specifically designed for handling
+      exceptions thrown during the request handling process, allowing listeners
+      to transform them into HTTP responses.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/http_kernel.rst#_snippet_11
+  - question: When injecting services tagged with `app.handler` into
+      `HandlerCollection`, how can you specify that the priority of each handler
+      should be determined by a `getPriority()` method on the service itself,
+      instead of `getDefaultPriority()`?
     answers:
-      - value: "`mustRun()`"
+      - value: "Using PHP attributes: `#[TaggedIterator('app.handler',
+          defaultPriorityMethod: 'getPriority')]`"
         correct: true
-      - value: "`run()`"
-        correct: false
-      - value: "`start()`"
-        correct: false
-      - value: "`execute()`"
-        correct: false
-    help: >-
-      The `mustRun()` method is designed for scenarios where a non-zero exit
-      code indicates a critical failure, and an exception should be thrown to
-      halt execution.
-
-      https://symfony.com/doc/current/components/process.html#_snippet_12
-  - question: You are creating a custom Twig extension. Which method must you
-      implement in your extension class to register new filters?
-    answers:
-      - value: "`getFilters()`"
+      - value: "Using YAML: `!tagged_iterator { tag: app.handler,
+          default_priority_method: getPriority }`"
         correct: true
-      - value: "`registerFilters()`"
-        correct: false
-      - value: "`addFilters()`"
-        correct: false
-      - value: "`getTwigFilters()`"
-        correct: false
-    help: >-
-      Custom Twig extensions that provide filters must implement the
-      `getFilters()` method, which should return an array of `TwigFilter`
-      objects.
-
-      https://symfony.com/doc/current/templates.html#_snippet_54
-  - question: Which of the following options for the
-      `Symfony\Component\Validator\Constraints\Issn` constraint, when set to
-      `true`, strictly requires the ISSN value to include a hyphen?
-    answers:
-      - value: "`requireHyphen`"
+      - value: 'Using XML: `<argument type="tagged_iterator" tag="app.handler"
+          default-priority-method="getPriority"/>`'
         correct: true
-      - value: "`caseSensitive`"
+      - value: By implementing `PrioritizedHandlerInterface` in the handler services.
         correct: false
-      - value: "`strictFormat`"
+      - value: By defining `priority` directly in the tag definition for each service.
         correct: false
-      - value: "`withHyphen`"
-        correct: false
-    help: >-
-      The `requireHyphen` option controls whether the ISSN must contain a
-      hyphen. By default, it allows non-hyphenated values.
-
-      https://symfony.com/doc/current/reference/constraints/Issn.html#_snippet_1
-  - question: When using Symfony's `Finder` component, which method allows you to
-      sort results by their last modified time?
-    answers:
-      - value: "`sortByModifiedTime()`"
-        correct: true
-      - value: "`sortByAccessedTime()`"
-        correct: false
-      - value: "`sortByChangedTime()`"
-        correct: false
-      - value: "`sortByDate()`"
-        correct: false
-    help: >-
-      The `sortByModifiedTime()` method sorts the `Finder` results based on the
-      last modification time of the files or directories.
-
-      https://symfony.com/doc/current/components/finder.html#_snippet_19
-  - question: In Symfony's Monolog configuration, how would you include only
-      channels 'foo' and 'bar' for a specific handler in YAML?
-    answers:
-      - value: "`channels: [foo, bar]`"
-        correct: true
-      - value: "`channels: only [foo, bar]`"
-        correct: false
-      - value: "`channels: !foo, !bar`"
-        correct: false
-      - value: "`channels: all except [!foo, !bar]`"
-        correct: false
-    help: >-
-      To include only specific channels for a Monolog handler, you provide an
-      array of channel names under the `channels` key.
-
-      https://symfony.com/doc/current/logging/channels_handlers.html#_snippet_1
-  - question: Which of the following
-      `Symfony\Component\HttpKernel\Controller\ArgumentResolver` classes is
-      responsible for injecting the object representing the current logged-in
-      user, requiring type-hinting with `UserInterface` or your custom `User`
-      class?
-    answers:
-      - value: "`UserValueResolver`"
-        correct: true
-      - value: "`SecurityTokenValueResolver`"
-        correct: false
-      - value: "`EntityValueResolver`"
-        correct: false
-      - value: "`VariadicValueResolver`"
-        correct: false
-    help: >-
-      The `UserValueResolver` is a built-in argument resolver that automatically
-      injects the currently authenticated user object into controller arguments,
-      provided it's type-hinted correctly.
-
-      https://symfony.com/doc/current/controller/value_resolver.html#_snippet_5
-  - question: What is the purpose of the `form_rest(form)` Twig function?
-    answers:
-      - value: To render all form fields that have not yet been explicitly rendered.
-        correct: true
-      - value: To render only the hidden fields of a form.
-        correct: false
-      - value: To render the remaining errors of a form.
-        correct: false
-      - value: To reset the form to its initial state.
-        correct: false
-    help: >-
-      The `form_rest()` function is a convenience helper that ensures all form
-      fields, especially hidden ones or those accidentally missed, are rendered.
-
-      https://symfony.com/doc/current/form/form_customization.html#_snippet_11
-  - question: You are debugging an issue with event listeners and their execution
-      order. Which console command would you use to inspect the event listeners
-      registered for the `kernel.exception` event and their priorities?
-    answers:
-      - value: "`php bin/console debug:event-dispatcher kernel.exception`"
-        correct: true
-      - value: "`php bin/console debug:listeners kernel.exception`"
-        correct: false
-      - value: "`php bin/console event:list kernel.exception`"
-        correct: false
-      - value: "`php bin/console container:debug --event=kernel.exception`"
-        correct: false
-    help: >-
-      The `debug:event-dispatcher` command allows you to inspect all listeners
-      and subscribers for a given event, including their priorities, which is
-      crucial for debugging event flow.
-
-      https://symfony.com/doc/current/reference/events.html#_snippet_12
-  - question: When defining a custom value resolver in Symfony, which service tag
-      must be applied for Symfony to discover and use it for argument resolution
-      in controllers?
-    answers:
-      - value: "`controller.argument_value_resolver`"
-        correct: true
-      - value: "`argument_resolver`"
-        correct: false
-      - value: "`controller.resolver`"
-        correct: false
-      - value: "`value_resolver`"
-        correct: false
-    help: >-
-      The `controller.argument_value_resolver` tag is essential for registering
-      custom value resolvers with Symfony's dependency injection container,
-      making them available for controller argument injection.
-
-      https://symfony.com/doc/current/controller/value_resolver.html#_snippet_9
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\Collection` options, when set to
-      `false`, will result in a validation error if the underlying collection
-      contains elements not defined in the `fields` option?
-    answers:
-      - value: "`allowExtraFields`"
-        correct: true
-      - value: "`allowMissingFields`"
-        correct: false
-      - value: "`ignoreUndefined`"
-        correct: false
-      - value: "`strict`"
-        correct: false
-    help: |-
-      The `allowExtraFields` option controls whether the collection validator should allow fields that are not explicitly defined in the `fields` option. Setting it to `false` enforces a strict schema.
-      https://symfony.com/doc/current/reference/constraints/Collection.html#_snippet_6
-  - question: How can you specify a custom priority for a tagged service in Symfony,
-      ensuring it is injected earlier in a collection than services with default
-      priority?
-    answers:
-      - value: By setting the `priority` attribute to a positive integer (e.g., `20`) in
-          the service tag definition.
-        correct: true
-      - value: By setting the `priority` attribute to a negative integer (e.g., `-10`)
-          in the service tag definition.
-        correct: false
-      - value: By implementing a `getPriority()` method in the service class.
-        correct: false
-      - value: By defining the service earlier in the configuration file.
-        correct: false
-    help: >-
-      Higher `priority` values for service tags mean the service will be
-      processed or injected earlier. The default priority is 0.
-
-      https://symfony.com/doc/current/service_container/tags.html#_snippet_26
-  - question: Which of the following
-      `Symfony\Component\Console\Helper\FormatterHelper` methods is used to
-      truncate a message to a specified length, optionally from the end of the
-      string using a negative length, and allows customizing the suffix?
-    answers:
-      - value: "`truncate()`"
-        correct: true
-      - value: "`shorten()`"
-        correct: false
-      - value: "`limit()`"
-        correct: false
-      - value: "`cut()`"
-        correct: false
-    help: |-
-      The `truncate()` method provides flexible string truncation capabilities, including specifying the length, direction of truncation, and the suffix to append.
-      https://symfony.com/doc/current/components/console/helpers/formatterhelper.html#_snippet_3
-  - question: In Symfony's Serializer component, when deserializing XML data, how
-      can you configure the serializer to throw an `ExtraAttributesException` if
-      the input data contains attributes not mapped to the target object?
-    answers:
-      - value: Set `AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES` to `false` in the
-          deserialization context.
-        correct: true
-      - value: Set `AbstractNormalizer::IGNORE_UNMAPPED_ATTRIBUTES` to `false` in the
-          deserialization context.
-        correct: false
-      - value: Configure the `ObjectNormalizer` with `setAllowExtraAttributes(false)`.
-        correct: false
-      - value: Enable strict mode on the `XmlEncoder`.
-        correct: false
-    help: >-
-      By setting `AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES` to `false` in the
-      context, the serializer will enforce strict mapping and throw an exception
-      for any unmapped attributes in the input data.
-
-      https://symfony.com/doc/current/components/serializer.html#_snippet_6
-  - question: Which of the following
-      `Symfony\Component\DependencyInjection\ContainerBuilder` methods allows an
-      extension to prepend configuration to other extensions, ensuring it's
-      merged before their `load` methods are called?
-    answers:
-      - value: "`prependExtensionConfig(string $name, array $config)`"
-        correct: true
-      - value: "`addExtensionConfig(string $name, array $config)`"
-        correct: false
-      - value: "`setExtensionConfig(string $name, array $config)`"
-        correct: false
-      - value: "`mergeExtensionConfig(string $name, array $config)`"
-        correct: false
-    help: >-
-      The `prependExtensionConfig()` method, typically used within a
-      `PrependExtensionInterface` implementation, allows an extension to inject
-      configuration that will be merged with existing configurations of other
-      bundles.
-
-      https://symfony.com/doc/current/bundles/prepend_extension.html#_snippet_3
-  - question: You want to use the `Symfony\Component\String` component and create a
-      `UnicodeString` object. Which shortcut function can you use for this
-      purpose?
-    answers:
-      - value: "`u()`"
-        correct: true
-      - value: "`s()`"
-        correct: false
-      - value: "`b()`"
-        correct: false
-      - value: "`str()`"
-        correct: false
-    help: >-
-      The `u()` function is a convenient shortcut to create a `UnicodeString`
-      object. The `s()` function creates either a `ByteString` or
-      `UnicodeString` based on content, and `b()` creates a `ByteString`.
-
-      https://symfony.com/doc/current/components/string.html#_snippet_4
-  - question: Which of the following Monolog processors, built into Symfony's
-      MonologBridge, adds information about the current console command to log
-      records?
-    answers:
-      - value: "`ConsoleCommandProcessor`"
-        correct: true
-      - value: "`WebProcessor`"
-        correct: false
-      - value: "`RouteProcessor`"
-        correct: false
-      - value: "`DebugProcessor`"
-        correct: false
-    help: >-
-      The `ConsoleCommandProcessor` is specifically designed to enrich log
-      records with details about the currently executing console command.
-
-      https://symfony.com/doc/current/logging/processors.html#_snippet_6
-  - question: To customize the error message for the
-      `Symfony\Component\Validator\Constraints\LessThanOrEqual` constraint,
-      which option should you configure?
-    answers:
-      - value: "`message`"
-        correct: true
-      - value: "`errorMessage`"
-        correct: false
-      - value: "`invalidMessage`"
-        correct: false
-      - value: "`text`"
-        correct: false
-    help: |-
-      Most Symfony validator constraints, including `LessThanOrEqual`, use the `message` option to allow customization of the validation error message.
-      https://symfony.com/doc/current/reference/constraints/LessThanOrEqual.html#_snippet_4
-  - question: Which of the following HTTP methods is typically used by APIs for
-      modifying existing resources on the server?
-    answers:
-      - value: PUT
-        correct: true
-      - value: PATCH
-        correct: true
-      - value: GET
-        correct: false
-      - value: POST
-        correct: false
-      - value: DELETE
-        correct: false
-    help: |-
-      Both PUT and PATCH methods are used for updating resources. PUT typically replaces the entire resource, while PATCH applies partial modifications.
-      https://symfony.com/doc/current/introduction/http_fundamentals.html#_snippet_1
-  - question: When defining a custom translation loader service in Symfony, which
-      service tag is required, and what is the purpose of its mandatory `alias`
-      option?
-    answers:
-      - value: "Tag: `translation.loader`, Alias purpose: Defines a custom format for
-          translation files (e.g., `bin`)."
-        correct: true
-      - value: "Tag: `translator.loader`, Alias purpose: Specifies the locale for the
-          loader."
-        correct: false
-      - value: "Tag: `translation.resource_loader`, Alias purpose: Provides a unique
-          identifier for the loader service."
-        correct: false
-      - value: "Tag: `translator.resource`, Alias purpose: Links the loader to a
-          specific translation domain."
-        correct: false
-    help: >-
-      The `translation.loader` tag with a required `alias` option allows you to
-      register custom loaders for specific translation file formats (e.g.,
-      `.bin` files).
-
-      https://symfony.com/doc/current/reference/dic_tags.html#_snippet_28
-  - question: In Symfony's `SessionMetadataBag`, which method would you use to
-      retrieve the Unix timestamp when the session was last accessed?
-    answers:
-      - value: "`getLastUsed()`"
-        correct: true
-      - value: "`getAccessed()`"
-        correct: false
-      - value: "`getUpdatedAt()`"
-        correct: false
-      - value: "`getTimestamp()`"
-        correct: false
-    help: >-
-      The `getLastUsed()` method of `SessionMetadataBag` provides the timestamp
-      of the last session activity.
-
-      https://symfony.com/doc/current/session.html#_snippet_18
-  - question: You want to implement a custom scheduler trigger that skips tasks on
-      holidays. Which interface must your custom trigger class implement?
-    answers:
-      - value: "`Symfony\\Component\\Scheduler\\Trigger\\TriggerInterface`"
-        correct: true
-      - value: "`Symfony\\Component\\Scheduler\\Trigger\\SchedulerTriggerInterface`"
-        correct: false
-      - value: "`Symfony\\Component\\Scheduler\\Trigger\\CustomTriggerInterface`"
-        correct: false
-      - value: "`Symfony\\Component\\Scheduler\\Trigger\\RunnableTriggerInterface`"
-        correct: false
-    help: >-
-      To create a custom scheduler trigger, your class must implement
-      `TriggerInterface` and define the logic for determining the next run date.
-
-      https://symfony.com/doc/current/scheduler.html#_snippet_11
-  - question: Which Twig filter transforms a string into a human-readable format
-      (e.g., replacing underscores with spaces, capitalizing) and is useful for
-      displaying PHP properties?
+    help: The `defaultPriorityMethod` option in `TaggedIterator` attribute,
+      `!tagged_iterator` in YAML, and `default-priority-method` in XML allow
+      specifying a custom method on the tagged service to determine its
+      priority.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/tags.rst#_snippet_28
+  - question: Which Twig filter transforms a string like `dateOfBirth` into `Date of
+      birth`?
     answers:
       - value: "`humanize`"
         correct: true
-      - value: "`format_text`"
+      - value: "`capitalize`"
         correct: false
-      - value: "`beautify`"
+      - value: "`title`"
         correct: false
-      - value: "`prettify`"
+      - value: "`format_label`"
         correct: false
-    help: >-
-      The `humanize` filter is specifically designed to convert strings, often
-      from variable names, into a more readable format for display to users.
+    help: The `humanize` filter is designed to convert strings (e.g., PHP
+      properties/variables) into a more human-readable format by replacing
+      underscores with spaces and capitalizing.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/twig_reference.rst#_snippet_18
+  - question: What is the purpose of the `abbr_class` Twig filter?
+    answers:
+      - value: To generate an `<abbr>` HTML element for a PHP class name, showing the
+          FQCN in a tooltip.
+        correct: true
+      - value: To shorten a PHP class name by removing its namespace.
+        correct: false
+      - value: To convert a class name to its snake_case equivalent.
+        correct: false
+      - value: To check if a class exists and is loadable.
+        correct: false
+    help: The `abbr_class` filter creates an HTML `<abbr>` tag for a PHP class,
+      making the fully qualified class name (FQCN) visible on hover.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/twig_reference.rst#_snippet_18
+  - question: Which option controls how a Symfony service decorator behaves if the
+      decorated service does not exist?
+    answers:
+      - value: "`decoration_on_invalid`"
+        correct: true
+      - value: "`on_missing_decorated`"
+        correct: false
+      - value: "`allow_null_decoration`"
+        correct: false
+      - value: "`optional_decoration`"
+        correct: false
+    help: The `decoration_on_invalid` option for service decorators allows
+      specifying behavior (`exception`, `ignore`, `null`) when the decorated
+      service is missing.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/service_decoration.rst#_snippet_10
+  - question: Which Symfony Workflow event is triggered *after* the subject has
+      entered new places and its marking has been updated?
+    answers:
+      - value: "`workflow.entered`"
+        correct: true
+      - value: "`workflow.enter`"
+        correct: false
+      - value: "`workflow.transition`"
+        correct: false
+      - value: "`workflow.completed`"
+        correct: false
+    help: The `workflow.entered` event occurs after the subject's marking is updated
+      to reflect its new places, indicating it has fully entered them.
+      `workflow.enter` is triggered *before* the marking update.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/workflow.rst#_snippet_13
+  - question: How can you perform a case-insensitive search for a substring 'B'
+      within the string 'abc' using Symfony's String component?
+    answers:
+      - value: "`u('abc')->ignoreCase()->indexOf('B');`"
+        correct: true
+      - value: "`u('abc')->indexOf('B', caseSensitive: false);`"
+        correct: false
+      - value: "`u('abc')->lower()->indexOf('B');`"
+        correct: false
+      - value: "`u('abc')->contains('B', ignoreCase: true);`"
+        correct: false
+    help: The `ignoreCase()` method can be chained before other string methods like
+      `indexOf()` to perform case-insensitive operations.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_11
+  - question: In Symfony's `TranslationDebugCommand`, how can you check if there are
+      both missing AND unused translations using its exit codes?
+    answers:
+      - value: "`if (TranslationDebugCommand::EXIT_CODE_MISSING &
+          TranslationDebugCommand::EXIT_CODE_UNUSED)`"
+        correct: false
+      - value: "`if (TranslationDebugCommand::EXIT_CODE_MISSING |
+          TranslationDebugCommand::EXIT_CODE_UNUSED)`"
+        correct: true
+      - value: "`if (TranslationDebugCommand::EXIT_CODE_MISSING &&
+          TranslationDebugCommand::EXIT_CODE_UNUSED)`"
+        correct: false
+      - value: "`if (TranslationDebugCommand::EXIT_CODE_MISSING +
+          TranslationDebugCommand::EXIT_CODE_UNUSED)`"
+        correct: false
+    help: The bitwise OR operator (`|`) is used to combine the bit masks of the exit
+      codes, allowing a single conditional check for multiple conditions.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/translation.rst#_snippet_45
+  - question: >-
+      Consider the following ICU MessageFormat string:
 
-      https://symfony.com/doc/current/reference/twig_reference.html#_snippet_18
-  - question: When defining a command-line argument in Symfony Console, which
-      constant is used to mark the argument as optional?
-    answers:
-      - value: "`InputArgument::OPTIONAL`"
-        correct: true
-      - value: "`InputArgument::REQUIRED`"
-        correct: false
-      - value: "`InputArgument::IS_OPTIONAL`"
-        correct: false
-      - value: "`InputArgument::VALUE_OPTIONAL`"
-        correct: false
-    help: |-
-      The `InputArgument::OPTIONAL` constant is used when defining a command-line argument to indicate that it is not mandatory for the command to run.
-      https://symfony.com/doc/current/components/console/console_arguments.html#_snippet_1
-  - question: You are using the Symfony Serializer to denormalize data and want to
-      collect all type mismatch exceptions instead of stopping on the first one.
-      Which context option should you use?
-    answers:
-      - value: "`DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS`"
-        correct: true
-      - value: "`AbstractNormalizer::ALLOW_PARTIAL_DENORMALIZATION`"
-        correct: false
-      - value: "`Serializer::CONTINUE_ON_ERROR`"
-        correct: false
-      - value: "`ObjectNormalizer::COLLECT_ERRORS`"
-        correct: false
-    help: >-
-      Setting `DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS` to `true`
-      allows the serializer to gather all denormalization errors into a
-      `PartialDenormalizationException`.
 
-      https://symfony.com/doc/current/components/serializer.html#_snippet_49
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\NoSuspiciousCharacters`
-      restriction levels requires the string's characters to be in the ASCII
-      range?
+      ```text
+
+      {gender_of_host, select,
+          female {{num_guests, plural, offset:1
+              =0    {{host} does not give a party.}
+              =1    {{host} invites {guest} to her party.}
+              =2    {{host} invites {guest} and one other person to her party.}
+              other {{host} invites {guest} and # other people to her party.}
+          }}
+          male {{num_guests, plural, offset:1
+              =0    {{host} does not give a party.}
+              =1    {{host} invites {guest} to his party.}
+              =2    {{host} invites {guest} and one other person to his party.}
+              other {{host} invites {guest} and # other people to his party.}
+          }}
+          other {{num_guests, plural, offset:1
+              =0    {{host} does not give a party.}
+              =1    {{host} invites {guest} to their party.}
+              =2    {{host} invites {guest} and one other person to their party.}
+              other {{host} invites {guest} and # other people to their party.}
+          }}
+      }
+
+      ```
+
+
+      Which of the following statements is true about this message format?
     answers:
-      - value: "`NoSuspiciousCharacters::RESTRICTION_LEVEL_ASCII`"
+      - value: It combines the `select` function for gender-based variations and the
+          `plural` function for guest count.
         correct: true
-      - value: "`NoSuspiciousCharacters::RESTRICTION_LEVEL_SINGLE_SCRIPT`"
+      - value: The `offset:1` in the `plural` function means the guest count will be
+          displayed as `num_guests - 1`.
+        correct: true
+      - value: The `other` key is optional within the `select` function.
         correct: false
-      - value: "`NoSuspiciousCharacters::RESTRICTION_LEVEL_MINIMAL`"
+      - value: The `#` symbol in the `plural` function represents the raw `num_guests`
+          value.
         correct: false
-      - value: "`NoSuspiciousCharacters::RESTRICTION_LEVEL_HIGH`"
-        correct: false
-    help: |-
-      The `RESTRICTION_LEVEL_ASCII` constant enforces that all characters in the validated string must fall within the ASCII character set.
-      https://symfony.com/doc/current/reference/constraints/NoSuspiciousCharacters.html#_snippet_2
-  - question: You are documenting a deprecation in Symfony's `UPGRADE.md` for a
-      minor version. Which format should you use to specify the deprecated class
-      and its replacement?
+    help: This example demonstrates the nesting of `select` and `plural` functions.
+      The `offset` in `plural` adjusts the number used for pluralization rules,
+      and the `other` key is mandatory in `select` functions. The `#` represents
+      the adjusted number.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/formats/message_format.rst#_snippet_8
+  - question: Which command is used to run Psalm static analysis on a specific
+      Symfony component, such as `Workflow`, locally?
     answers:
-      - value: "`* Deprecate the `Deprecated` class, use `Replacement` instead`"
+      - value: "`$ psalm.phar src/Symfony/Component/Workflow`"
         correct: true
-      - value: "`* `Deprecated` class is deprecated, replace with `Replacement``"
+      - value: "`$ php bin/console psalm:run Workflow`"
         correct: false
-      - value: "`* Removed `Deprecated` class, use `Replacement` instead`"
+      - value: "`$ composer psalm src/Symfony/Component/Workflow`"
         correct: false
-      - value: "`* `Deprecated` is now soft-deprecated, use `Replacement``"
+      - value: "`$ vendor/bin/psalm src/Symfony/Component/Workflow`"
         correct: false
-    help: |-
-      For minor version deprecations in `UPGRADE.md`, the standard format is to state 'Deprecate the `Deprecated` class, use `Replacement` instead'.
-      https://symfony.com/doc/current/contributing/code/conventions.html#_snippet_8
-  - question: Which of the following Symfony `AbstractController` helper methods is
-      used to create and return a `JsonResponse` object from given data?
+    help: The command `psalm.phar` followed by the path to the component directory
+      is used to run Psalm analysis locally.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/contributing/code/pull_requests.rst#_snippet_15
+  - question: Given a `HandlerCollection` that injects services tagged with
+      `app.handler`, how can you exclude a specific service,
+      `App\Handler\Three`, from being injected using PHP attributes?
+    answers:
+      - value: |-
+          ```php
+          #[TaggedIterator('app.handler', exclude: ['App\\Handler\\Three'])]
+          iterable $handlers
+          ```
+        correct: true
+      - value: |-
+          ```php
+          #[TaggedIterator('app.handler', except: ['App\\Handler\\Three'])]
+          iterable $handlers
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[TaggedIterator('app.handler')]
+          #[ExcludeService('App\\Handler\\Three')]
+          iterable $handlers
+          ```
+        correct: false
+      - value: |-
+          ```php
+          #[TaggedIterator('app.handler')]
+          iterable $handlers exclude 'App\\Handler\\Three'
+          ```
+        correct: false
+    help: The `exclude` option within the `#[TaggedIterator]` attribute allows
+      specifying an array of service IDs or class names to be excluded from the
+      injected collection.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/tags.rst#_snippet_23
+  - question: When dispatching a `GenericEvent` in Symfony, how do you access the
+      original subject associated with the event within a listener?
+    answers:
+      - value: Using `$event->getSubject()`
+        correct: true
+      - value: Using `$event->getData()`
+        correct: false
+      - value: Using `$event->getPayload()`
+        correct: false
+      - value: Using `$event->getOriginal()`
+        correct: false
+    help: The `getSubject()` method of the
+      `Symfony\Component\EventDispatcher\GenericEvent` class is used to retrieve
+      the subject that was passed during the event's construction.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher/generic_event.rst#_snippet_0
+  - question: Which `AbstractController` helper method is used to retrieve the value
+      of a configuration parameter?
+    answers:
+      - value: "`getParameter(string $name)`"
+        correct: true
+      - value: "`getConfig(string $name)`"
+        correct: false
+      - value: "`getParam(string $name)`"
+        correct: false
+      - value: "`fetchParameter(string $name)`"
+        correct: false
+    help: The `getParameter()` method in `AbstractController` provides access to
+      application configuration parameters.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller.rst#_snippet_34
+  - question: Which `AbstractController` helper method is used to create and return
+      a `JsonResponse` object from given data, allowing specification of status,
+      headers, and serialization context?
     answers:
       - value: "`json(mixed $data, int $status = 200, array $headers = [], array
           $context = [])`"
         correct: true
-      - value: "`jsonResponse(mixed $data, int $status = 200, array $headers = [], array
-          $context = [])`"
+      - value: "`jsonResponse(mixed $data, int $status = 200, array $headers = [])`"
+        correct: false
+      - value: "`serialize(mixed $data, string $format = 'json', array $context = [])`"
         correct: false
       - value: "`createJsonResponse(mixed $data, int $status = 200)`"
         correct: false
-      - value: "`responseJson(mixed $data)`"
+    help: The `json()` method is a convenient helper in `AbstractController` for
+      returning JSON responses, automatically handling serialization and
+      response creation.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller.rst#_snippet_34
+  - question: When using the Symfony Serializer, how can you collect multiple type
+      mismatch exceptions during denormalization instead of throwing the first
+      one encountered?
+    answers:
+      - value: Set the context option
+          `DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS` to `true`.
+        correct: true
+      - value: Catch `ValidationException` and iterate through its violations.
         correct: false
-    help: >-
-      The `json()` method is a convenient shortcut in `AbstractController` to
-      create a `JsonResponse` from PHP data, handling JSON encoding and setting
-      appropriate headers.
+      - value: Configure the serializer with an `ErrorCollectingNormalizer`.
+        correct: false
+      - value: Enable the `partial_denormalization` flag in `serializer.yaml`.
+        correct: false
+    help: The `COLLECT_DENORMALIZATION_ERRORS` context option, when set to `true`,
+      makes the serializer collect all denormalization errors into a
+      `PartialDenormalizationException`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/serializer.rst#_snippet_49
+  - question: How can you configure the `ObjectNormalizer` to skip properties with
+      `null` values during the normalization process using the Symfony
+      Serializer?
+    answers:
+      - value: Set `AbstractObjectNormalizer::SKIP_NULL_VALUES` to `true` in the
+          normalization context.
+        correct: true
+      - value: Use the `#[IgnoreNull]` attribute on properties.
+        correct: false
+      - value: "Set `skip_null_values: true` in the serializer configuration."
+        correct: false
+      - value: Implement `DenormalizableInterface` and handle nulls manually.
+        correct: false
+    help: The `AbstractObjectNormalizer::SKIP_NULL_VALUES` context option is used to
+      instruct the `ObjectNormalizer` to exclude properties that have `null`
+      values from the normalized output.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/serializer.rst#_snippet_46
+  - question: Which console command allows you to list all registered cache warmers
+      in your Symfony application?
+    answers:
+      - value: "`php bin/console debug:container --tag=kernel.cache_warmer`"
+        correct: true
+      - value: "`php bin/console cache:warmers:list`"
+        correct: false
+      - value: "`php bin/console debug:cache --warmers`"
+        correct: false
+      - value: "`php bin/console container:debug --tag=cache_warmer`"
+        correct: false
+    help: The `debug:container` command with the `--tag` option is used to list all
+      services tagged with `kernel.cache_warmer`, which are the registered cache
+      warmers.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_12
+  - question: When documenting the *consequences* of a deprecation (i.e., its
+      removal) in `UPGRADE.md` for the *next major version*, what is the correct
+      Markdown format?
+    answers:
+      - value: |-
+          ```markdown
+          DependencyInjection
+          -------------------
 
-      https://symfony.com/doc/current/controller.html#_snippet_34
-  - question: In Symfony's `Finder` component, how would you filter files to include
-      only those modified after 'yesterday'?
-    answers:
-      - value: "`$finder->date('since yesterday');`"
+           * Remove the `Deprecated` class, use `Replacement` instead
+          ```
         correct: true
-      - value: "`$finder->date('> yesterday');`"
-        correct: false
-      - value: "`$finder->modifiedAfter('yesterday');`"
-        correct: false
-      - value: "`$finder->whereDate('modified', '>', 'yesterday');`"
-        correct: false
-    help: >-
-      The `date()` method in `Finder` supports various relative date formats and
-      comparison operators to filter files by their modification time.
+      - value: |-
+          ```markdown
+          Deprecations Removed
+          --------------------
 
-      https://symfony.com/doc/current/components/finder.html#_snippet_15
-  - question: When defining a service in Symfony, how can you configure an argument
-      to be set to `null` if the referenced service does not exist in the
-      container?
+           * DependencyInjection: `Deprecated` class removed.
+          ```
+        correct: false
+      - value: |-
+          ```markdown
+          [REMOVED] DependencyInjection: `Deprecated` class.
+          ```
+        correct: false
+      - value: |-
+          ```markdown
+          Breaking Changes
+          ----------------
+
+           * The `Deprecated` class has been removed. Use `Replacement`.
+          ```
+        correct: false
+    help: The format for documenting removals in `UPGRADE.md` for the next major
+      version is similar to deprecations, but explicitly states 'Remove' or
+      'Removed'.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/contributing/code/conventions.rst#_snippet_9
+  - question: What is the primary purpose of the `kernel.cache_warmer` service tag
+      in Symfony?
     answers:
-      - value: 'In XML: `<argument type="service" id="logger" on-invalid="null"/>`'
+      - value: To initialize any cache that will be needed by the application and
+          prevent the first user from a significant 'cache hit'.
         correct: true
-      - value: "In PHP: `service('logger')->nullOnInvalid()`"
-        correct: true
-      - value: "In YAML: `arguments: ['@?logger']`"
+      - value: To clear the application's cache during deployment.
         correct: false
-      - value: By type-hinting the argument as nullable (`?LoggerInterface`).
+      - value: To define services that automatically refresh cached data at runtime.
         correct: false
-    help: |-
-      The `on-invalid="null"` attribute in XML and `nullOnInvalid()` in PHP configuration explicitly tell the container to inject `null` if the service is not found.
-      https://symfony.com/doc/current/service_container/optional_dependencies.html#_snippet_0
-  - question: Which of the following cron-like aliases is NOT a valid alias for
-      recurring messages in the Symfony Scheduler component?
+      - value: To mark services that can be optionally cached by the container.
+        correct: false
+    help: The `kernel.cache_warmer` tag is used for services that pre-populate or
+      warm up the cache, improving the performance for the first request.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_13
+  - question: Which of the following statements accurately describes the recommended
+      way to create an event listener in Symfony 7?
     answers:
-      - value: "`#monthly`"
+      - value: Implement `Symfony\Component\EventDispatcher\EventSubscriberInterface`
+          and tag the service with `kernel.event_subscriber`.
+        correct: true
+      - value: Implement `Symfony\Component\EventDispatcher\EventListenerInterface` and
+          tag the service with `kernel.event_listener`.
         correct: false
-      - value: "`#yearly`"
+      - value: Create a service and define its event methods in `services.yaml` with the
+          `event` key.
         correct: false
-      - value: "`#annually@midnight`"
+      - value: Extend `AbstractEventListener` and override the `onEvent` method.
         correct: false
+    help: While `kernel.event_listener` exists, `kernel.event_subscriber`
+      (implementing `EventSubscriberInterface`) is the recommended approach as
+      it allows a single class to subscribe to multiple events.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_13
+  - question: Which HTTP method is primarily used by APIs for modifying existing
+      resources on the server?
+    answers:
+      - value: PUT/PATCH
+        correct: true
+      - value: POST
+        correct: false
+      - value: GET
+        correct: false
+      - value: DELETE
+        correct: false
+    help: PUT and PATCH methods are standard HTTP verbs used for updating resources,
+      with PATCH typically for partial updates and PUT for complete replacement.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/introduction/http_fundamentals.rst#_snippet_1
+  - question: How does `fixXmlConfig()` normalize XML configuration where a singular
+      element name like `<extension>` should be treated as an array named
+      `extensions`?
+    answers:
+      - value: It automatically pluralizes the singular key to create the array key.
+        correct: true
+      - value: It requires a manual mapping from singular to plural in the
+          configuration.
+        correct: false
+      - value: It only works for predefined XML element names.
+        correct: false
+      - value: It converts all singular XML elements into arrays by default.
+        correct: false
+    help: The `fixXmlConfig()` method automatically handles the pluralization of the
+      given singular key to correctly map XML elements to an array in the
+      configuration tree.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/config/definition.rst#_snippet_24
+  - question: How can you customize the visual separator used between preferred
+      choices and normal choices when rendering a Symfony form field in Twig?
+    answers:
+      - value: Pass the `separator` option directly to the `form_widget` function.
+        correct: true
+      - value: Define the separator in the form type's `configureOptions()` method.
+        correct: false
+      - value: Override the `choice_widget_separator` block in a custom Twig template.
+        correct: false
+      - value: Set a global Twig variable `form_choice_separator`.
+        correct: false
+    help: The `separator` option can be passed as part of the options array to
+      `form_widget()` to customize the divider between preferred and normal
+      choices.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/forms/types/entity.rst#_snippet_9
+  - question: In a Symfony event listener, how do you check if the current request
+      being handled is the main request (not a sub-request)?
+    answers:
+      - value: "`if ($event->isMainRequest()) { ... }`"
+        correct: true
+      - value: "`if ($event->getRequestType() === HttpKernelInterface::MAIN_REQUEST) {
+          ... }`"
+        correct: true
+      - value: "`if (!$event->isSubRequest()) { ... }`"
+        correct: false
+      - value: "`if ($event->getRequest()->isMain()) { ... }`"
+        correct: false
+    help: The `isMainRequest()` method on `RequestEvent` (which extends
+      `KernelEvent`) is the direct way to check if the event pertains to the
+      main request. Alternatively, comparing `getRequestType()` to
+      `HttpKernelInterface::MAIN_REQUEST` achieves the same.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/http_kernel.rst#_snippet_16
+      and
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/events.rst#_snippet_0
+  - question: Given the string `abcdeabcde`, what will
+      `u('abcdeabcde')->indexOf('c', -4)` return?
+    answers:
+      - value: "7"
+        correct: true
+      - value: "2"
+        correct: false
+      - value: "null"
+        correct: false
+      - value: "6"
+        correct: false
+    help: The `indexOf()` method supports a negative offset, which means the search
+      starts from that many characters from the end of the string. In this case,
+      -4 means starting 4 characters from the end, which is at index 6 ('a').
+      The first 'c' found from that point is at index 7.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_19
+  - question: Given the string `abcdeabcde`, what will
+      `u('abcdeabcde')->indexOfLast('c')` return?
+    answers:
+      - value: "7"
+        correct: true
+      - value: "2"
+        correct: false
+      - value: "null"
+        correct: false
+      - value: "8"
+        correct: false
+    help: The `indexOfLast()` method returns the position of the last occurrence of
+      the substring. In 'abcdeabcde', the last 'c' is at index 7.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_19
+  - question: In Symfony documentation, how are PHP code examples differentiated
+      between those using full Symfony framework features and those using
+      standalone Symfony components?
+    answers:
+      - value: "Using `.. code-block:: php-symfony` and `.. code-block:: php-standalone`
+          within a `configuration-block`."
+        correct: true
+      - value: Using separate `php-framework` and `php-component` directives.
+        correct: false
+      - value: By adding comments at the top of the code snippet indicating the context.
+        correct: false
+      - value: There is no specific differentiation; context is inferred.
+        correct: false
+    help: The `php-symfony` and `php-standalone` code block types within a
+      `configuration-block` are used to provide context-specific PHP examples.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/contributing/documentation/format.rst#_snippet_2
+  - question: Which argument resolver automatically queries for a Doctrine entity
+      based on route parameters and injects it into a controller method?
+    answers:
+      - value: "`Symfony\\Bridge\\Doctrine\\ArgumentResolver\\EntityValueResolver`"
+        correct: true
+      - value: "`Symfony\\Component\\HttpKernel\\Controller\\ArgumentResolver\\Doctrine\
+          EntityResolver`"
+        correct: false
+      - value: "`Symfony\\Component\\Routing\\ArgumentResolver\\EntityResolver`"
+        correct: false
+      - value: "`Symfony\\Bundle\\FrameworkBundle\\Controller\\ArgumentResolver\\Doctri\
+          neResolver`"
+        correct: false
+    help: The `EntityValueResolver` from `Symfony\Bridge\Doctrine` is responsible
+      for automatically fetching Doctrine entities based on route parameters.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller/value_resolver.rst#_snippet_5
+  - question: Which method of the `SessionMetadataBag` object returns the Unix
+      timestamp when the session was last accessed?
+    answers:
+      - value: "`getLastUsed()`"
+        correct: true
+      - value: "`getAccessedTime()`"
+        correct: false
+      - value: "`getLastActivity()`"
+        correct: false
+      - value: "`getUpdateTime()`"
+        correct: false
+    help: The `getLastUsed()` method provides the timestamp of the last session
+      access.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/session.rst#_snippet_18
+  - question: Which method of the `SessionMetadataBag` object returns the Unix
+      timestamp when the session was created?
+    answers:
+      - value: "`getCreated()`"
+        correct: true
+      - value: "`getCreationTime()`"
+        correct: false
+      - value: "`getStartTime()`"
+        correct: false
+      - value: "`getInitTime()`"
+        correct: false
+    help: The `getCreated()` method provides the timestamp of the session's
+      creation.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/session.rst#_snippet_18
+  - question: What is the purpose of the `isMainRequest()` method available on
+      `Symfony\Component\HttpKernel\Event\KernelEvent`?
+    answers:
+      - value: To determine if the current request is the primary request being handled
+          by the kernel, as opposed to a sub-request.
+        correct: true
+      - value: To check if the request originated from the main application entry point
+          (`index.php`).
+        correct: false
+      - value: To verify if the request has a valid session and is authenticated.
+        correct: false
+      - value: To identify if the request is an AJAX request.
+        correct: false
+    help: The `isMainRequest()` method is crucial for event listeners to apply logic
+      selectively, ensuring certain operations only occur for the primary
+      request, not for embedded requests (e.g., ESI, HZ).
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/events.rst#_snippet_0
+  - question: How do you dispatch a custom event, such as `OrderPlacedEvent`, in Symfony?
+    answers:
+      - value: Create an instance of the custom event class and pass it to
+          `$dispatcher->dispatch($event);`
+        correct: true
+      - value: Call `$dispatcher->dispatch('order.placed', $order);`
+        correct: false
+      - value: Use `$dispatcher->trigger(new OrderPlacedEvent($order));`
+        correct: false
+      - value: Define the event in `services.yaml` and inject it.
+        correct: false
+    help: To dispatch a custom event, instantiate your custom event class (e.g.,
+      `OrderPlacedEvent`) with any necessary data, and then pass that event
+      object to the `dispatch()` method of the event dispatcher.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher.rst#_snippet_8
+  - question: Which of the following is a valid cron-like alias for recurring
+      messages in the Symfony Scheduler?
+    answers:
       - value: "`#midnight`"
+        correct: true
+      - value: "`#daily`"
         correct: false
-    help: >-
-      The provided documentation snippet lists `#annually@midnight`, `#yearly`,
-      `#yearly@midnight`, and `#midnight` as valid aliases. `#monthly` is not
-      listed.
-
-      https://symfony.com/doc/current/scheduler.html#_snippet_8
-  - question: In Symfony's Serializer component, how can you customize the
-      serialization of a specific object property (e.g., a `DateTime` object)
-      into a desired format (e.g., ISO 8601 string)?
+      - value: "`#hourly`"
+        correct: false
+      - value: "`#weekly`"
+        correct: false
+    help: The Symfony Scheduler supports several cron-like aliases, including
+      `#midnight`, `#annually@midnight`, `#yearly`, and `#yearly@midnight`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/scheduler.rst#_snippet_8
+  - question: In ICU MessageFormat, what is the purpose of the `select` function?
     answers:
-      - value: By providing a callback function for the property under
-          `AbstractNormalizer::CALLBACKS` in the serialization context.
+      - value: To choose different message strings based on a variable's value, similar
+          to a switch statement.
         correct: true
-      - value: By implementing a custom normalizer for the `DateTime` class.
+      - value: To select a random message from a predefined list.
         correct: false
-      - value: "By adding a `#[Serializer\\Context(format: 'iso8601')]` attribute to the
-          property."
+      - value: To concatenate multiple message parts into a single string.
         correct: false
-      - value: By configuring the `DateTimeNormalizer` service.
+      - value: To filter out unwanted characters from a message.
         correct: false
-    help: >-
-      The `AbstractNormalizer::CALLBACKS` context option allows you to define
-      custom callback functions that will be invoked to normalize specific
-      properties, providing fine-grained control over their serialized
-      representation.
-
-      https://symfony.com/doc/current/components/serializer.html#_snippet_25
-  - question: Which of the following `Symfony\Component\Validator\Constraints\Time`
-      constraint options determines whether the time should include seconds in
-      its validation pattern?
+    help: The `select` function in ICU MessageFormat allows conditional message
+      selection based on a given variable's value, enabling gender-specific or
+      other context-dependent translations. The `other` key is required as a
+      fallback.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/formats/message_format.rst#_snippet_2
+  - question: Which PHP one-liner can be used to generate a 40-character hexadecimal
+      string suitable for the `ref` field in Symfony Flex recipes?
     answers:
-      - value: "`withSeconds`"
+      - value: "`echo bin2hex(random_bytes(20));`"
         correct: true
-      - value: "`allowSeconds`"
+      - value: "`echo uniqid('', true);`"
         correct: false
-      - value: "`strictSeconds`"
+      - value: "`echo md5(random_bytes(20));`"
         correct: false
-      - value: "`secondsRequired`"
+      - value: "`echo sha1(time());`"
         correct: false
-    help: >-
-      The `withSeconds` option, when set to `true` (default), expects a
-      `HH:MM:SS` format, and when `false`, it expects `HH:MM`.
-
-      https://symfony.com/doc/current/reference/constraints/Time.html#_snippet_1
-  - question: When configuring Monolog in Symfony, how can you prevent specific HTTP
-      status codes (e.g., 403, 404) from being logged by a `fingers_crossed`
-      handler?
+    help: The `bin2hex(random_bytes(20))` generates a 40-character hexadecimal
+      string (20 bytes * 2 hex chars/byte), which is suitable for the `ref`
+      field.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/setup/flex_private_recipes.rst#_snippet_2
+  - question: How can you prevent the Symfony Serializer from normalizing specific
+      attributes (e.g., 'age') of an object by passing options in the
+      serialization context?
     answers:
-      - value: Use the `excluded_http_codes` option in the handler configuration.
+      - value: Pass `[AbstractNormalizer::IGNORED_ATTRIBUTES => ['age']]` in the context
+          array.
         correct: true
-      - value: Use the `ignore_http_codes` option in the handler configuration.
+      - value: Pass `['skip_attributes' => ['age']]` in the context array.
         correct: false
-      - value: Set a `min_level` for the handler that is higher than the level of these
-          errors.
+      - value: Use `#[Ignore]` attribute on the 'age' property.
         correct: false
-      - value: Implement a custom Monolog processor to filter these codes.
+      - value: Configure a custom normalizer to exclude 'age'.
         correct: false
-    help: |-
-      The `excluded_http_codes` option allows you to specify an array of HTTP status codes that the `fingers_crossed` handler should not log.
-      https://symfony.com/doc/current/logging/monolog_exclude_http_codes.html#_snippet_0
-  - question: Which of the following Twig filters generates an `<abbr>` element with
-      the short name of a PHP class, showing the Fully Qualified Class Name
-      (FQCN) in a tooltip?
+    help: The `AbstractNormalizer::IGNORED_ATTRIBUTES` context option allows
+      specifying an array of attribute names to be excluded during
+      normalization.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/serializer.rst#_snippet_18
+  - question: Which method of the Symfony Finder component allows you to exclude
+      files that contain a specific string pattern?
     answers:
-      - value: "`abbr_class`"
+      - value: "`notContains()`"
         correct: true
-      - value: "`php_class`"
+      - value: "`withoutContent()`"
         correct: false
-      - value: "`class_abbr`"
+      - value: "`excludeContent()`"
         correct: false
-      - value: "`fqcn_abbr`"
+      - value: "`filterContent()`"
         correct: false
-    help: >-
-      The `abbr_class` filter is useful for displaying PHP class names in a
-      user-friendly way, providing the full class name on hover.
-
-      https://symfony.com/doc/current/reference/twig_reference.html#_snippet_18
-  - question: In Symfony's ExpressionLanguage component, which of the following is a
-      valid example of a business rule that checks if a user belongs to
-      'good_customers' or 'collaborator' groups?
-    answers:
-      - value: "`user.getGroup() in ['good_customers', 'collaborator']`"
-        correct: true
-      - value: "`user.group == 'good_customers' or user.group == 'collaborator'`"
-        correct: false
-      - value: "`user.hasGroup('good_customers') or user.hasGroup('collaborator')`"
-        correct: false
-      - value: "`in_array(user.getGroup(), ['good_customers', 'collaborator'])`"
-        correct: false
-    help: |-
-      The `in` operator is used in ExpressionLanguage to check if a value exists within a given array, providing a concise way to define such conditions.
-      https://symfony.com/doc/current/components/expression_language.html#_snippet_1
-  - question: Which of the following `Symfony\Component\Console\Helper\Helper`
-      methods is used to format a number of bytes into a human-readable memory
-      string (e.g., GiB, MiB, KiB, B)?
-    answers:
-      - value: "`formatMemory(bytes: int)`"
-        correct: true
-      - value: "`convertBytes(bytes: int)`"
-        correct: false
-      - value: "`humanReadableBytes(bytes: int)`"
-        correct: false
-      - value: "`formatBytes(bytes: int)`"
-        correct: false
-    help: |-
-      The `formatMemory()` method provides a convenient way to display memory sizes in a user-friendly format in console applications.
-      https://symfony.com/doc/current/components/console/helpers/formatterhelper.html#_snippet_5
-  - question: When using the `Symfony\Component\String\UnicodeString` component,
-      which method would you use to extract the part of the string *after* the
-      first occurrence of a 'needle' string, optionally including the 'needle'
-      itself?
-    answers:
-      - value: "`after(string $needle, bool $includeNeedle = false)`"
-        correct: true
-      - value: "`substringAfter(string $needle, bool $includeNeedle = false)`"
-        correct: false
-      - value: "`extractAfter(string $needle, bool $includeNeedle = false)`"
-        correct: false
-      - value: "`post(string $needle, bool $includeNeedle = false)`"
-        correct: false
-    help: >-
-      The `after()` method is specifically designed to return the substring that
-      follows the first occurrence of a given needle, with an option to include
-      the needle.
-
-      https://symfony.com/doc/current/components/string.html#_snippet_14
-  - question: You need to clear all configured cache pools in your Symfony
-      application using a console command. Which of the following commands
-      achieves this?
-    answers:
-      - value: "`php bin/console cache:pool:clear --all`"
-        correct: true
-      - value: "`php bin/console cache:clear --all`"
-        correct: false
-      - value: "`php bin/console cache:pool:clear *`"
-        correct: false
-      - value: "`php bin/console cache:clear-all`"
-        correct: false
-    help: >-
-      The `cache:pool:clear` command with the `--all` option is used to clear
-      all cache pools defined in the application's configuration.
-
-      https://symfony.com/doc/current/cache.html#_snippet_15
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\NegativeOrZero` constraint
-      options allows you to customize the error message displayed when
-      validation fails?
-    answers:
-      - value: "`message`"
-        correct: true
-      - value: "`errorMessage`"
-        correct: false
-      - value: "`invalidMessage`"
-        correct: false
-      - value: "`text`"
-        correct: false
-    help: |-
-      The `message` option is standard across Symfony validator constraints for customizing the validation error message.
-      https://symfony.com/doc/current/reference/constraints/NegativeOrZero.html#_snippet_1
-  - question: When using `fixXmlConfig()` in a Symfony configuration definition, how
-      do you handle irregular plural forms (e.g., 'child' to 'children')?
-    answers:
-      - value: "Provide the singular and then the irregular plural as a second argument:
-          `fixXmlConfig('child', 'children')`"
-        correct: true
-      - value: Symfony automatically handles common irregular plurals, no special
-          configuration needed.
-        correct: false
-      - value: Define a custom pluralization rule in the configuration.
-        correct: false
-      - value: Use `fixXmlConfig('children')` and ensure the singular is inferred.
-        correct: false
-    help: |-
-      For irregular plurals, `fixXmlConfig()` accepts a second argument to explicitly define the correct plural form, ensuring proper XML to array conversion.
-      https://symfony.com/doc/current/components/config/definition.html#_snippet_25
-  - question: In Symfony's ICU MessageFormat, which function is used to handle
-      ordinal pluralization (e.g., 1st, 2nd, 3rd, 4th)?
-    answers:
-      - value: "`selectordinal`"
-        correct: true
-      - value: "`ordinal`"
-        correct: true
-      - value: "`pluralordinal`"
-        correct: false
-      - value: "`cardinal`"
-        correct: false
-    help: |-
-      Both `selectordinal` (for detailed rules) and `ordinal` (for simpler formatting) are used for ordinal pluralization in ICU MessageFormat.
-      https://symfony.com/doc/current/reference/formats/message_format.html#_snippet_11
-  - question: Which of the following `Symfony\Component\Validator\Constraints\Image`
-      constraint options, when set to `true`, validates image contents for
-      corruption using PHP's `imagecreatefromstring` function?
-    answers:
-      - value: "`detectCorrupted`"
-        correct: true
-      - value: "`validateContents`"
-        correct: false
-      - value: "`checkIntegrity`"
-        correct: false
-      - value: "`verifyImage`"
-        correct: false
-    help: |-
-      The `detectCorrupted` option enables a check for image corruption, requiring the PHP GD extension.
-      https://symfony.com/doc/current/reference/constraints/Image.html#_snippet_6
-  - question: When defining a Monolog processor using the `#[AsMonologProcessor]`
-      attribute, which attribute parameter allows you to specify the logging
-      channel the processor should be pushed to?
-    answers:
-      - value: "`channel`"
-        correct: true
-      - value: "`handler`"
-        correct: false
-      - value: "`channels`"
-        correct: false
-      - value: "`forChannel`"
-        correct: false
-    help: >-
-      The `channel` parameter of the `#[AsMonologProcessor]` attribute allows
-      you to target a specific logging channel for the processor.
-
-      https://symfony.com/doc/current/logging/processors.html#_snippet_5
-  - question: You want to exclude a specific service, `App\Handler\Three`, from
-      being injected by a tagged iterator in Symfony. Which of the following
-      configurations correctly achieves this?
-    answers:
-      - value: "PHP Attribute: `#[TaggedIterator('app.handler', exclude:
-          ['App\\Handler\\Three'])]`"
-        correct: true
-      - value: "YAML: `!tagged_iterator { tag: app.handler, exclude:
-          ['App\\Handler\\Three'] }`"
-        correct: true
-      - value: "XML: `<exclude>App\\Handler\\Three</exclude>` within the
-          `tagged_iterator` argument."
-        correct: true
-      - value: "PHP Configurator: `tagged_iterator('app.handler', exclude:
-          [App\\Handler\\Three::class])`"
-        correct: true
-    help: >-
-      The `exclude` option within the `TaggedIterator` attribute or its
-      corresponding configuration allows you to specify services that should be
-      explicitly excluded from the injected collection.
-
-      https://symfony.com/doc/current/service_container/tags.html#_snippet_23
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\NotIdenticalTo` constraint
-      options allows you to customize the error message displayed when
-      validation fails, and includes parameters like `{{ compared_value }}` and
-      `{{ compared_value_type }}`?
-    answers:
-      - value: "`message`"
-        correct: true
-      - value: "`errorMessage`"
-        correct: false
-      - value: "`invalidMessage`"
-        correct: false
-      - value: "`text`"
-        correct: false
-    help: |-
-      The `message` option is used to customize the error message for the `NotIdenticalTo` constraint, providing dynamic parameters for context.
-      https://symfony.com/doc/current/reference/constraints/NotIdenticalTo.html#_snippet_1
-  - question: In Symfony's `EventDispatcher` component, when no additional data
-      needs to be passed to event listeners, which base class should you use for
-      the event object?
-    answers:
-      - value: "`Symfony\\Contracts\\EventDispatcher\\Event`"
-        correct: true
-      - value: "`Symfony\\Component\\EventDispatcher\\GenericEvent`"
-        correct: false
-      - value: "`Psr\\EventDispatcher\\EventInterface`"
-        correct: false
-      - value: "`Symfony\\Component\\EventDispatcher\\Event`"
-        correct: false
-    help: |-
-      For simple events without custom data, the `Symfony\Contracts\EventDispatcher\Event` class is the appropriate choice.
-      https://symfony.com/doc/current/components/event_dispatcher.html#_snippet_9
-  - question: Which of the following `Symfony\Component\Console\Style\SymfonyStyle`
-      methods is used to display a simple, highlighted admonition message (less
-      prominent than a caution)?
-    answers:
-      - value: "`note()`"
-        correct: true
-      - value: "`info()`"
-        correct: false
-      - value: "`comment()`"
-        correct: false
-      - value: "`message()`"
-        correct: false
-    help: >-
-      The `note()` method provides a way to display important but not critical
-      information in the console, with a distinct visual style.
-
-      https://symfony.com/doc/current/console/style.html#_snippet_5
-  - question: When defining a service in Symfony, how can you configure a tagged
-      iterator to use a custom method (e.g., `getPriority()`) on the service
-      itself to determine its priority, instead of the default
-      `getDefaultPriority()`?
-    answers:
-      - value: "Using `defaultPriorityMethod: 'getPriority'` in the `TaggedIterator`
-          attribute or configuration."
-        correct: true
-      - value: By implementing
-          `Symfony\Component\DependencyInjection\Attribute\PrioritizedTaggedIterator`.
-        correct: false
-      - value: "By setting `priority_method: 'getPriority'` in the service tag."
-        correct: false
-      - value: It's not possible to use a custom method for priority; only
-          `getDefaultPriority()` is supported.
-        correct: false
-    help: >-
-      The `defaultPriorityMethod` option allows you to specify a custom method
-      on the tagged service class that will be called to determine its priority
-      within the collection.
-
-      https://symfony.com/doc/current/service_container/tags.html#_snippet_28
-  - question: Which of the following `Symfony\Component\Process\Process` methods
-      allows you to start a process asynchronously and returns immediately,
-      without waiting for the process to terminate?
-    answers:
-      - value: "`start()`"
-        correct: true
-      - value: "`run()`"
-        correct: false
-      - value: "`execute()`"
-        correct: false
-      - value: "`fork()`"
-        correct: false
-    help: >-
-      The `start()` method initiates the process in the background, allowing
-      your PHP script to continue execution without blocking.
-
-      https://symfony.com/doc/current/components/process.html#_snippet_12
-  - question: You are preparing for a Symfony minor version upgrade. Which section
-      in your `composer.json` file needs to be updated to align the framework's
-      internal version requirement with the new minor version?
-    answers:
-      - value: The `require` key within the `extra.symfony` block.
-        correct: true
-      - value: The main `require` section for `symfony/symfony`.
-        correct: false
-      - value: The `config.platform.symfony` key.
-        correct: false
-      - value: The `minimum-stability` setting.
-        correct: false
-    help: >-
-      During a minor Symfony upgrade, the `require` key inside the
-      `extra.symfony` block of `composer.json` must be updated to reflect the
-      new minor version (e.g., from `6.3.*` to `6.4.*`).
-
-      https://symfony.com/doc/current/setup/upgrade_minor.html#_snippet_1
-  - question: Which of the following `Symfony\Component\Validator\Constraints\Date`
-      constraint options allows you to customize the error message displayed if
-      the underlying data is not a valid date?
-    answers:
-      - value: "`message`"
-        correct: true
-      - value: "`errorMessage`"
-        correct: false
-      - value: "`invalidDateMessage`"
-        correct: false
-      - value: "`dateMessage`"
-        correct: false
-    help: >-
-      The `message` option is the standard way to customize the validation error
-      message for the `Date` constraint.
-
-      https://symfony.com/doc/current/reference/constraints/Date.html#_snippet_1
-  - question: When using `Symfony\Component\EventDispatcher\GenericEvent`, how can
-      you filter or modify data passed within the event (e.g., converting a
-      string argument to lowercase)?
-    answers:
-      - value: Access the argument directly as an array element on the `$event` object
-          (e.g., `$event['data'] = strtolower($event['data']);`).
-        correct: true
-      - value: Call `setArgument()` on the `$event` object after retrieving and
-          modifying the argument.
-        correct: false
-      - value: The `GenericEvent` is read-only; you must dispatch a new event with
-          modified data.
-        correct: false
-      - value: Implement a custom `DataTransformerInterface` for the event.
-        correct: false
-    help: |-
-      The `GenericEvent` allows direct access and modification of its arguments as if it were an array, making it convenient for data manipulation within listeners.
-      https://symfony.com/doc/current/components/event_dispatcher/generic_event.html#_snippet_3
-  - question: You need to validate that a `dateOfBirth` property ensures a person is
-      at least 18 years old. Which of the following Symfony Validator
-      configurations correctly applies the `LessThan` constraint to achieve
-      this?
-    answers:
-      - value: "PHP Attribute: `#[Assert\\LessThan('-18 years')]`"
-        correct: true
-      - value: "YAML: `dateOfBirth: - LessThan: -18 years`"
-        correct: true
-      - value: 'XML: `<constraint name="LessThan">-18 years</constraint>`'
-        correct: true
-      - value: "PHP Metadata: `$metadata->addPropertyConstraint('dateOfBirth', new
-          Assert\\LessThan('-18 years'));`"
-        correct: true
-      - value: "PHP Attribute: `#[Assert\\GreaterThanOrEqual('+18 years')]`"
-        correct: false
-    help: |-
-      The `LessThan` constraint with a relative date string like `'-18 years'` can be used to validate that a date is earlier than 18 years ago, effectively ensuring a minimum age.
-      https://symfony.com/doc/current/reference/constraints/LessThan.html#_snippet_3
-  - question: Which of the following `Symfony\Component\Validator\Constraints\Isbn`
-      constraint options is used to customize the error message displayed if the
-      `type` is `null` and the value fails both ISBN-10 and ISBN-13 checks?
-    answers:
-      - value: "`bothIsbnMessage`"
-        correct: true
-      - value: "`message`"
-        correct: false
-      - value: "`invalidIsbnMessage`"
-        correct: false
-      - value: "`defaultMessage`"
-        correct: false
-    help: >-
-      The `bothIsbnMessage` option specifically targets the error message when a
-      value is neither a valid ISBN-10 nor a valid ISBN-13.
-
-      https://symfony.com/doc/current/reference/constraints/Isbn.html#_snippet_1
-  - question: When working with Symfony's `Finder` component, which method allows
-      you to sort results by their file extension?
-    answers:
-      - value: "`sortByExtension()`"
-        correct: true
-      - value: "`sortByType()`"
-        correct: false
-      - value: "`sortByName()`"
-        correct: false
-      - value: "`sortBySuffix()`"
-        correct: false
-    help: >-
-      The `sortByExtension()` method sorts the `Finder` results alphabetically
-      based on the file extension.
-
-      https://symfony.com/doc/current/components/finder.html#_snippet_19
-  - question: Which of the following `Symfony\Component\Process\Process` methods
-      should be used to retrieve all collected standard output from a process
-      after it has finished executing?
-    answers:
-      - value: "`getOutput()`"
-        correct: true
-      - value: "`getStdout()`"
-        correct: false
-      - value: "`readOutput()`"
-        correct: false
-      - value: "`getProcessOutput()`"
-        correct: false
-    help: >-
-      The `getOutput()` method returns the entire standard output stream of the
-      process as a string.
-
-      https://symfony.com/doc/current/components/process.html#_snippet_12
-  - question: In Symfony's `EventDispatcher` component, how can you extend Symfony's
-      event alias mapping for custom events (e.g., mapping
-      `App\Event\MyCustomEvent::class` to `my_custom_event`)?
-    answers:
-      - value: By adding `AddEventAliasesPass` to your `Kernel.php`'s `build()` method.
-        correct: true
-      - value: By defining aliases in `services.yaml` under a `events.aliases` section.
-        correct: false
-      - value: By tagging your custom event class with `event.alias`.
-        correct: false
-      - value: By implementing `EventAliasInterface` in your custom event.
-        correct: false
-    help: >-
-      The `AddEventAliasesPass` compiler pass allows you to register custom
-      event aliases, enabling you to refer to your events by a simpler string
-      name.
-
-      https://symfony.com/doc/current/event_dispatcher.html#_snippet_10
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\Negative` constraint options
-      allows you to customize the error message displayed when the value is not
-      less than zero?
-    answers:
-      - value: "`message`"
-        correct: true
-      - value: "`errorMessage`"
-        correct: false
-      - value: "`invalidMessage`"
-        correct: false
-      - value: "`text`"
-        correct: false
-    help: |-
-      The `message` option is the standard way to customize the validation error message for the `Negative` constraint.
-      https://symfony.com/doc/current/reference/constraints/Negative.html#_snippet_1
-  - question: In Symfony's `ServiceSubscriberInterface`, how do you declare a
-      service as optional within the `getSubscribedServices()` method to prevent
-      errors if it's not found in the container?
-    answers:
-      - value: Prepend its type with a `?` (e.g., `'?'.LoggerInterface::class`).
-        correct: true
-      - value: Wrap the service ID in `optional()` (e.g.,
-          `optional(LoggerInterface::class)`).
-        correct: false
-      - value: "Add an `optional: true` flag to the service definition."
-        correct: false
-      - value: Return `null` for the service if it's not available.
-        correct: false
-    help: |-
-      By prepending the service type with a `?`, you signal to the service locator that the service is optional, and its absence should not cause an error.
-      https://symfony.com/doc/current/service_container/service_subscribers_locators.html#_snippet_6
-  - question: Which of the following `Symfony\Component\String\UnicodeString`
-      methods would you use to change all graphemes/code points to 'title case'
-      (e.g., 'foo bar' to 'Foo Bar')?
-    answers:
-      - value: "`title(allWords: true)`"
-        correct: true
-      - value: "`title()`"
-        correct: false
-      - value: "`capitalize()`"
-        correct: false
-      - value: "`toTitleCase()`"
-        correct: false
-    help: >-
-      The `title()` method, especially with `allWords: true`, converts each
-      word's first letter to uppercase and the rest to lowercase, achieving
-      title case.
-
-      https://symfony.com/doc/current/components/string.html#_snippet_10
-  - question: When configuring a Monolog processor, how can you register it to apply
-      only to a specific handler (e.g., 'main') using service tags in Symfony?
-    answers:
-      - value: "Add a `monolog.processor` tag with a `handler` option (e.g., `{ name:
-          monolog.processor, handler: main }`)."
-        correct: true
-      - value: Add a `monolog.processor` tag with a `channel` option set to the
-          handler's channel.
-        correct: false
-      - value: Define the processor as a child service of the specific handler.
-        correct: false
-      - value: Implement `Monolog\Handler\HandlerAwareInterface` in your processor.
-        correct: false
-    help: >-
-      The `handler` option within the `monolog.processor` tag allows you to
-      associate a processor with a particular Monolog handler.
-
-      https://symfony.com/doc/current/logging/processors.html#_snippet_7
-  - question: Which of the following `Symfony\Component\Process\Process` methods is
-      used to create a new process instance from a shell command line string,
-      rather than an array of command parts?
-    answers:
-      - value: "`fromShellCommandline(string $command, ...)`"
-        correct: true
-      - value: "`createFromShell(string $command, ...)`"
-        correct: false
-      - value: "`newShellProcess(string $command, ...)`"
-        correct: false
-      - value: "`__construct(string $command, ...)`"
-        correct: false
-    help: >-
-      The `fromShellCommandline()` static method is specifically designed for
-      creating a `Process` object from a single shell command string.
-
-      https://symfony.com/doc/current/components/process.html#_snippet_12
-  - question: What is the purpose of the `WebDebugToolbarListener` in Symfony?
-    answers:
-      - value: It injects JavaScript into the page to display the web debug toolbar in
-          the `dev` environment.
-        correct: true
-      - value: It collects debugging information from the application for the profiler.
-        correct: false
-      - value: It handles exceptions and displays them in the web debug toolbar.
-        correct: false
-      - value: It provides a mechanism to enable or disable the web debug toolbar.
-        correct: false
-    help: >-
-      The `WebDebugToolbarListener` is responsible for integrating the Web Debug
-      Toolbar into the rendered HTML, making debugging information accessible in
-      the browser.
-
-      https://symfony.com/doc/current/components/http_kernel.html#_snippet_11
-  - question: In Symfony's ICU MessageFormat, when combining `select` and `plural`
-      functions, what is the purpose of the `offset` option within the `plural`
-      function?
-    answers:
-      - value: To adjust the count used for pluralization, so that `offset:1` means '1
-          other person' for a count of 2.
-        correct: true
-      - value: To define the starting index for the plural categories.
-        correct: false
-      - value: To specify a fallback message if no plural rule matches.
-        correct: false
-      - value: To shift the displayed number by a certain value.
-        correct: false
-    help: |-
-      The `offset` option in the `plural` function modifies the number used for pluralization, allowing you to create messages like 'X other people' instead of 'X people'.
-      https://symfony.com/doc/current/reference/formats/message_format.html#_snippet_8
-  - question: Which of the following `Symfony\Component\String\UnicodeString`
-      methods would you use to find the *last* occurrence of a substring within
-      a string?
-    answers:
-      - value: "`indexOfLast()`"
-        correct: true
-      - value: "`lastIndexOf()`"
-        correct: false
-      - value: "`findLast()`"
-        correct: false
-      - value: "`positionLast()`"
-        correct: false
-    help: >-
-      The `indexOfLast()` method returns the position of the last occurrence of
-      a substring, or `null` if not found.
-
-      https://symfony.com/doc/current/components/string.html#_snippet_20
-  - question: When registering a custom Twig extension as a service in Symfony,
-      which service tag is required?
+    help: The `notContains()` method is used to filter out files whose content
+      matches the given string or regular expression.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/finder.rst#_snippet_11
+  - question: When registering a custom Twig extension as a service in Symfony, what
+      tag must be applied to the service definition?
     answers:
       - value: "`twig.extension`"
         correct: true
-      - value: "`twig.service`"
+      - value: "`twig.loader`"
+        correct: false
+      - value: "`twig.runtime`"
         correct: false
       - value: "`app.twig_extension`"
         correct: false
-      - value: "`framework.twig_extension`"
-        correct: false
-    help: >-
-      The `twig.extension` tag is used to inform Symfony's dependency injection
-      container that a service is a Twig extension and should be registered with
-      the Twig environment.
-
-      https://symfony.com/doc/current/reference/dic_tags.html#_snippet_36
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\NotEqualTo` constraint options
-      allows you to customize the error message displayed when the value is
-      equal to the comparison value?
+    help: Services that implement `Twig\Extension\ExtensionInterface` (or extend
+      `AbstractExtension`) must be tagged with `twig.extension` to be registered
+      with Twig.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_36
+  - question: How do you register a custom cache warmer service in Symfony using PHP
+      configuration?
     answers:
-      - value: "`message`"
+      - value: |-
+          ```php
+          $container
+              ->register(MyCustomWarmer::class)
+              ->addTag('kernel.cache_warmer', ['priority' => 0])
+          ;
+          ```
         correct: true
-      - value: "`errorMessage`"
+      - value: |-
+          ```php
+          $container->services()
+              ->set(MyCustomWarmer::class)
+              ->tag('cache_warmer')
+          ;
+          ```
         correct: false
-      - value: "`notEqualMessage`"
+      - value: |-
+          ```php
+          $container->addCacheWarmer(MyCustomWarmer::class);
+          ```
         correct: false
-      - value: "`text`"
+      - value: |-
+          ```php
+          #[AsCacheWarmer(priority: 0)]
+          class MyCustomWarmer implements CacheWarmerInterface
+          {
+              // ...
+          }
+          ```
         correct: false
-    help: |-
-      The `message` option is standard across Symfony validator constraints for customizing the validation error message.
-      https://symfony.com/doc/current/reference/constraints/NotEqualTo.html#_snippet_1
-  - question: You need to retrieve the value of a configuration parameter (e.g.,
-      `kernel.bundles`) within a Symfony controller. Which `AbstractController`
-      helper method should you use?
+    help: To register a cache warmer, the service must be registered and then tagged
+      with `kernel.cache_warmer` using `addTag()`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_11
+  - question: How can you define the priority of a service programmatically when
+      autoconfiguring tags, by implementing a static method within the service
+      class?
     answers:
-      - value: "`getParameter(string $name)`"
+      - value: "By implementing a static `getDefaultPriority(): int` method."
         correct: true
-      - value: "`getContainer()->getParameter(string $name)`"
+      - value: "By implementing `getPriority(): int` method."
         correct: false
-      - value: "`getParam(string $name)`"
+      - value: By defining a `PRIORITY` constant in the class.
         correct: false
-      - value: "`container->getParameter(string $name)`"
+      - value: "By using the `#[Priority(value: 0)]` attribute."
         correct: false
-    help: >-
-      The `getParameter()` method is a convenient shortcut provided by
-      `AbstractController` to access parameters from the service container.
-
-      https://symfony.com/doc/current/controller.html#_snippet_34
-  - question: When documenting a deprecation in the `UPGRADE.md` file for the *next
-      major version*, which format should be used to indicate the removal of a
-      class and its replacement?
+    help: The `getDefaultPriority()` static method allows a service to define its
+      default priority when autoconfigured with tags.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/service_container/tags.rst#_snippet_27
+  - question: When registering a custom translation loader service in Symfony, what
+      is the purpose of the `alias` option within the `translation.loader` tag?
     answers:
-      - value: "`* Remove the `Deprecated` class, use `Replacement` instead`"
+      - value: It defines a custom file format suffix that the loader will handle (e.g.,
+          `.bin`).
         correct: true
-      - value: "`* Deprecate the `Deprecated` class, use `Replacement` instead`"
+      - value: It provides a unique identifier for the translation loader service.
         correct: false
-      - value: "`* The `Deprecated` class will be removed, use `Replacement``"
+      - value: It specifies the locale that the loader is responsible for.
         correct: false
-      - value: "`* `Deprecated` is no longer supported, use `Replacement``"
+      - value: It sets the priority for the translation loader.
         correct: false
-    help: |-
-      For removals in the next major version, `UPGRADE.md` specifies 'Remove the `Deprecated` class, use `Replacement` instead'.
-      https://symfony.com/doc/current/contributing/code/conventions.html#_snippet_9
-  - question: Which of the following `Symfony\Component\Process\Process` methods
-      allows you to check if an asynchronously started process is still active?
+    help: The `alias` option for the `translation.loader` tag is crucial as it tells
+      Symfony which file extension (e.g., `.bin` for an alias 'bin') your custom
+      loader is responsible for.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/dic_tags.rst#_snippet_28
+  - question: Which of the following methods can be used to sort results obtained
+      from the Symfony Finder component?
     answers:
-      - value: "`isRunning(): bool`"
+      - value: "`sortByName()`"
         correct: true
-      - value: "`isStarted(): bool`"
-        correct: false
-      - value: "`isActive(): bool`"
-        correct: false
-      - value: "`getStatus(): int`"
-        correct: false
-    help: >-
-      The `isRunning()` method returns `true` if the process is currently
-      executing, and `false` otherwise.
-
-      https://symfony.com/doc/current/components/process.html#_snippet_12
-  - question: In Symfony's `Finder` component, how would you sort files by their size?
-    answers:
+      - value: "`sortByExtension()`"
+        correct: true
       - value: "`sortBySize()`"
         correct: true
-      - value: "`sortByLength()`"
+      - value: "`sortByCreationTime()`"
         correct: false
-      - value: "`sortByBytes()`"
+      - value: "`sortByPath()`"
         correct: false
-      - value: "`sortBySizeAsc()`"
-        correct: false
-    help: >-
-      The `sortBySize()` method sorts the `Finder` results based on the size of
-      the files.
-
-      https://symfony.com/doc/current/components/finder.html#_snippet_19
-  - question: Which of the following
-      `Symfony\Component\Validator\Constraints\LessThan` constraint options
-      allows you to customize the error message displayed if the value is not
-      less than the comparison value?
+    help: The Finder component provides several sorting methods, including
+      `sortByName()`, `sortByExtension()`, `sortBySize()`, `sortByType()`,
+      `sortByAccessedTime()`, `sortByChangedTime()`, and `sortByModifiedTime()`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/finder.rst#_snippet_19
+  - question: How can you sort Symfony Finder results by modified time in descending
+      order (newest first)?
     answers:
-      - value: "`message`"
+      - value: "`$finder->sortByModifiedTime()->reverseSorting();`"
         correct: true
-      - value: "`errorMessage`"
+      - value: "`$finder->sortByModifiedTime('desc');`"
         correct: false
-      - value: "`invalidMessage`"
+      - value: "`$finder->sort(function (SplFileInfo $a, SplFileInfo $b) { return
+          $b->getMTime() <=> $a->getMTime(); });`"
+        correct: true
+      - value: "`$finder->sortByModifiedTime()->desc();`"
         correct: false
-      - value: "`text`"
+    help: You can chain `reverseSorting()` after a sorting method to reverse the
+      order. Alternatively, a custom `sort()` closure can be used for more
+      complex sorting logic, including descending order.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/finder.rst#_snippet_19
+  - question: Which of the following `FormEvents` constants is associated with
+      'Model data'?
+    answers:
+      - value: "`FormEvents::PRE_SET_DATA`"
+        correct: true
+      - value: "`FormEvents::POST_SET_DATA`"
+        correct: true
+      - value: "`FormEvents::PRE_SUBMIT`"
         correct: false
-    help: |-
-      The `message` option is standard across Symfony validator constraints for customizing the validation error message.
-      https://symfony.com/doc/current/reference/constraints/LessThan.html#_snippet_4
+      - value: "`FormEvents::SUBMIT`"
+        correct: false
+    help: Both `PRE_SET_DATA` and `POST_SET_DATA` events provide access to the
+      form's model data. `PRE_SUBMIT` provides request data, `SUBMIT` provides
+      normalized data, and `POST_SUBMIT` provides view data.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/form/events.rst#_snippet_6
+  - question: "When using the Symfony String component, what is the result of
+      `u('hello world')->before('o', includeNeedle: true)`?"
+    answers:
+      - value: "`'hello'`"
+        correct: true
+      - value: "`'hell'`"
+        correct: false
+      - value: "`'hello '`"
+        correct: false
+      - value: "`'o world'`"
+        correct: false
+    help: The `before()` method returns the part of the string before the first
+      occurrence of the needle. When `includeNeedle` is `true`, the needle
+      itself is included in the returned substring. The first 'o' is at index 4,
+      so 'hello' is returned.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_14
+  - question: "When using the Symfony String component, what is the result of
+      `u('hello world')->after('o', includeNeedle: true)`?"
+    answers:
+      - value: "`'o world'`"
+        correct: true
+      - value: "`' world'`"
+        correct: false
+      - value: "`'world'`"
+        correct: false
+      - value: "`'hello'`"
+        correct: false
+    help: The `after()` method returns the part of the string after the first
+      occurrence of the needle. When `includeNeedle` is `true`, the needle
+      itself is included in the returned substring. The first 'o' is at index 4,
+      so 'o world' is returned.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_14
+  - question: Which `AbstractController` helper method is used to send HTTP 103
+      Early Hints to the client for preloading resources, requiring SAPI support
+      like FrankenPHP?
+    answers:
+      - value: "`sendEarlyHints(array $links)`"
+        correct: true
+      - value: "`preload(array $links)`"
+        correct: false
+      - value: "`earlyHints(array $links)`"
+        correct: false
+      - value: "`sendPreloadHeaders(array $links)`"
+        correct: false
+    help: The `sendEarlyHints()` method allows sending HTTP 103 Early Hints, which
+      can improve perceived performance by allowing the client to start
+      preloading resources. It requires specific SAPI support.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller.rst#_snippet_34
+  - question: Which `AbstractController` helper method is used to create and return
+      a `BinaryFileResponse` for serving files?
+    answers:
+      - value: "`file(string|Symfony\\Component\\HttpFoundation\\File\\File $file,
+          string $fileName = null, string $disposition = 'attachment')`"
+        correct: true
+      - value: "`download(string $path, string $fileName = null)`"
+        correct: false
+      - value: "`streamFile(string $path, string $disposition = 'attachment')`"
+        correct: false
+      - value: "`binaryResponse(string $path, string $fileName = null)`"
+        correct: false
+    help: The `file()` method is a convenient way to create `BinaryFileResponse`
+      objects for serving files, with options for filename and disposition.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller.rst#_snippet_34
+  - question: Which argument resolver is responsible for injecting the object
+      representing the current logged-in security token, and what type-hint does
+      it require?
+    answers:
+      - value: "`Symfony\\Component\\Security\\Http\\Controller\\SecurityTokenValueReso\
+          lver`, requiring `TokenInterface`."
+        correct: true
+      - value: "`Symfony\\Component\\Security\\Http\\Controller\\UserValueResolver`,
+          requiring `TokenInterface`."
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Core\\Authentication\\Token\\Storage\\To\
+          kenStorageInterface`, requiring `TokenInterface`."
+        correct: false
+      - value: "`Symfony\\Component\\Security\\Core\\Security`, requiring
+          `TokenInterface`."
+        correct: false
+    help: The `SecurityTokenValueResolver` injects the security token, and it
+      requires type-hinting with `TokenInterface` or a class extending it.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller/value_resolver.rst#_snippet_5
+  - question: Which argument resolver verifies if request data is an array and adds
+      all elements to the argument list, making them available to the last
+      (variadic) argument of the action?
+    answers:
+      - value: "`Symfony\\Component\\HttpKernel\\Controller\\ArgumentResolver\\Variadic\
+          ValueResolver`"
+        correct: true
+      - value: "`Symfony\\Component\\HttpKernel\\Controller\\ArgumentResolver\\ArrayVal\
+          ueResolver`"
+        correct: false
+      - value: "`Symfony\\Component\\HttpKernel\\Controller\\ArgumentResolver\\Collecti\
+          onValueResolver`"
+        correct: false
+      - value: "`Symfony\\Component\\HttpKernel\\Controller\\ArgumentResolver\\RequestD\
+          ataResolver`"
+        correct: false
+    help: The `VariadicValueResolver` is specifically designed to handle variadic
+      arguments in controller actions by injecting all elements from an array in
+      the request data.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller/value_resolver.rst#_snippet_5
+  - question: To inject the current logged-in user object into a controller method,
+      which type-hint is required, and what attribute might be needed for a
+      custom User class?
+    answers:
+      - value: "`UserInterface` or custom `User` class; `#[CurrentUser]` attribute for
+          custom `User` class."
+        correct: true
+      - value: "`UserInterface` or custom `User` class; `#[InjectUser]` attribute for
+          custom `User` class."
+        correct: false
+      - value: "`SecurityUserInterface` or custom `User` class; `#[AsUser]` attribute
+          for custom `User` class."
+        correct: false
+      - value: Only `UserInterface` is supported for direct injection.
+        correct: false
+    help: The `UserValueResolver` injects the current user. It requires type-hinting
+      `UserInterface` or your custom `User` class, and if it's a custom class,
+      the `#[CurrentUser]` attribute is necessary.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller/value_resolver.rst#_snippet_5
+  - question: What is the purpose of the `folded()` method in Symfony's String component?
+    answers:
+      - value: It returns a string that can be used for case-insensitive comparisons,
+          handling various language complexities.
+        correct: true
+      - value: It converts a string to its lowercase equivalent.
+        correct: false
+      - value: It removes all non-alphanumeric characters from a string.
+        correct: false
+      - value: It shortens a string by folding long lines.
+        correct: false
+    help: The `folded()` method provides a 'folded' version of the string, which is
+      suitable for robust case-insensitive comparisons across different
+      languages and character sets.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_10
+  - question: "How can you convert a string like `Foo: Bar-baz.` to `fooBarBaz`
+      using Symfony's String component?"
+    answers:
+      - value: "`u('Foo: Bar-baz.')->camel()`"
+        correct: true
+      - value: "`u('Foo: Bar-baz.')->lower()->camel()`"
+        correct: false
+      - value: "`u('Foo: Bar-baz.')->pascal()->lowerFirst()`"
+        correct: false
+      - value: "`u('Foo: Bar-baz.')->toCamelCase()`"
+        correct: false
+    help: The `camel()` method directly converts a string to camelCase, handling
+      various separators.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_10
+  - question: "How can you convert a string like `Foo: Bar-baz.` to `foo_bar_baz`
+      using Symfony's String component?"
+    answers:
+      - value: "`u('Foo: Bar-baz.')->snake()`"
+        correct: true
+      - value: "`u('Foo: Bar-baz.')->lower()->replace(' ', '_')`"
+        correct: false
+      - value: "`u('Foo: Bar-baz.')->toSnakeCase()`"
+        correct: false
+      - value: "`u('Foo: Bar-baz.')->underscore()`"
+        correct: false
+    help: The `snake()` method converts a string to snake_case, handling various
+      separators and casing.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_10
+  - question: What is the correct way to register a custom Twig filter named `price`
+      that uses the `formatPrice` method of `App\Twig\AppExtension`?
+    answers:
+      - value: |-
+          ```php
+          // src/Twig/AppExtension.php
+          use Twig\\TwigFilter;
+
+          class AppExtension extends AbstractExtension
+          {
+              public function getFilters(): array
+              {
+                  return [
+                      new TwigFilter('price', [$this, 'formatPrice']),
+                  ];
+              }
+              // ...
+          }
+          ```
+        correct: true
+      - value: |-
+          ```php
+          // src/Twig/AppExtension.php
+          class AppExtension extends AbstractExtension
+          {
+              protected function registerFilters(): array
+              {
+                  return ['price' => 'formatPrice'];
+              }
+              // ...
+          }
+          ```
+        correct: false
+      - value: |-
+          ```php
+          // src/Twig/AppExtension.php
+          #[TwigFilter('price')]
+          public function formatPrice(float $number): string
+          {
+              // ...
+          }
+          ```
+        correct: false
+      - value: >-
+          ```php
+
+          // config/services.yaml
+
+          services:
+              App\\Twig\\AppExtension:
+                  calls:
+                      - [addFilter, ['price', '@App\\Twig\\AppExtension::formatPrice']]
+          ```
+        correct: false
+    help: Custom Twig filters are registered by overriding the `getFilters()` method
+      in a Twig extension class and returning an array of `TwigFilter`
+      instances.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/templates.rst#_snippet_54
+  - question: Which event's data is 'Request data' in the Symfony Form component
+      lifecycle?
+    answers:
+      - value: "`FormEvents::PRE_SUBMIT`"
+        correct: true
+      - value: "`FormEvents::SUBMIT`"
+        correct: false
+      - value: "`FormEvents::POST_SUBMIT`"
+        correct: false
+      - value: "`FormEvents::PRE_SET_DATA`"
+        correct: false
+    help: The `PRE_SUBMIT` event is triggered before any data is bound to the form,
+      providing access to the raw request data.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/form/events.rst#_snippet_6
+  - question: Which event's data is 'Normalized data' in the Symfony Form component
+      lifecycle?
+    answers:
+      - value: "`FormEvents::SUBMIT`"
+        correct: true
+      - value: "`FormEvents::PRE_SUBMIT`"
+        correct: false
+      - value: "`FormEvents::POST_SUBMIT`"
+        correct: false
+      - value: "`FormEvents::POST_SET_DATA`"
+        correct: false
+    help: The `SUBMIT` event provides access to the data after it has been
+      normalized by the form's data transformers.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/form/events.rst#_snippet_6
+  - question: Which event's data is 'View data' in the Symfony Form component lifecycle?
+    answers:
+      - value: "`FormEvents::POST_SUBMIT`"
+        correct: true
+      - value: "`FormEvents::SUBMIT`"
+        correct: false
+      - value: "`FormEvents::PRE_SUBMIT`"
+        correct: false
+      - value: "`FormEvents::PRE_SET_DATA`"
+        correct: false
+    help: The `POST_SUBMIT` event provides access to the data in its 'view' format,
+      which is the format used for rendering the form.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/form/events.rst#_snippet_6
   - question: What is the purpose of the
-      `Symfony\Component\Security\Http\Firewall\ContextListener` in Symfony?
+      `Symfony\Component\HttpKernel\Event\ExceptionEvent::getThrowable()`
+      method?
     answers:
-      - value: It serializes the current user's information into the session for
-          persistence across requests.
+      - value: To access the original exception that was thrown during the request
+          handling.
         correct: true
-      - value: It authenticates the user based on the security context.
+      - value: To retrieve the HTTP status code associated with the exception.
         correct: false
-      - value: It manages the security token for the current request.
+      - value: To get the response object generated from the exception.
         correct: false
-      - value: It loads user details from a user provider.
+      - value: To check if the exception has been handled.
         correct: false
-    help: >-
-      The `ContextListener` is a `kernel.response` listener that ensures the
-      security context (user information) is persisted in the session between
-      requests.
-
-      https://symfony.com/doc/current/components/http_kernel.html#_snippet_11
-  - question: Which of the following `Symfony\Component\Process\Process` methods is
-      used to block execution until an asynchronously started process
-      terminates, and can optionally receive a callback for real-time output?
+    help: Listeners for the `kernel.exception` event use `getThrowable()` to obtain
+      the actual `Throwable` object that caused the event.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/http_kernel.rst#_snippet_11
+  - question: Which listener is responsible for injecting JavaScript into the page
+      to display the web debug toolbar in the `dev` environment?
     answers:
-      - value: "`wait(?callable $callback = null): int`"
+      - value: "`Symfony\\Bundle\\WebProfilerBundle\\EventListener\\WebDebugToolbarList\
+          ener`"
         correct: true
-      - value: "`finish(?callable $callback = null): int`"
+      - value: "`Symfony\\Component\\HttpKernel\\EventListener\\ProfilerListener`"
         correct: false
-      - value: "`block(?callable $callback = null): int`"
+      - value: "`Symfony\\Bundle\\FrameworkBundle\\EventListener\\DebugToolbarListener`"
         correct: false
-      - value: "`join(?callable $callback = null): int`"
+      - value: "`Symfony\\Component\\HttpKernel\\EventListener\\ResponseListener`"
         correct: false
-    help: >-
-      The `wait()` method is used to pause the current script's execution until
-      the background process completes, and it can also process output in
-      real-time via a callback.
-
-      https://symfony.com/doc/current/components/process.html#_snippet_12
-  - question: In Symfony's `ServiceSubscriberInterface`, how can you subscribe to a
-      service using a custom string key instead of its Fully Qualified Class
-      Name (FQCN)?
+    help: The `WebDebugToolbarListener` is specifically designed to inject the
+      necessary JavaScript for the Web Debug Toolbar into the response.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/http_kernel.rst#_snippet_11
+  - question: Which listener serializes the current user's information into the
+      session for persistence across requests?
     answers:
-      - value: By returning an associative array where the key is the custom string and
-          the value is the FQCN (e.g., `'logger' => LoggerInterface::class`).
+      - value: "`Symfony\\Component\\Security\\Http\\Firewall\\ContextListener`"
         correct: true
-      - value: "By using the `#[ServiceSubscriber(key: 'logger')]` attribute."
+      - value: "`Symfony\\Component\\Security\\Http\\Firewall\\SessionListener`"
         correct: false
-      - value: By defining an alias for the service in `services.yaml`.
+      - value: "`Symfony\\Component\\Security\\Http\\Firewall\\UserPersistenceListener`"
         correct: false
-      - value: This is not supported; only FQCNs can be used as keys.
+      - value: "`Symfony\\Bundle\\SecurityBundle\\EventListener\\AuthenticationListener\
+          `"
         correct: false
-    help: |-
-      You can define a custom key for a subscribed service by providing an associative array in `getSubscribedServices()`, mapping your desired key to the service's FQCN.
-      https://symfony.com/doc/current/service_container/service_subscribers_locators.html#_snippet_4
+    help: The `ContextListener` plays a crucial role in maintaining user
+      authentication by serializing user data into the session.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/http_kernel.rst#_snippet_11
+  - question: Which core listener on `kernel.exception` converts thrown exceptions
+      into appropriate HTTP responses, such as a 404 page for a
+      `NotFoundHttpException`?
+    answers:
+      - value: "`Symfony\\Component\\HttpKernel\\EventListener\\ErrorListener`"
+        correct: true
+      - value: "`Symfony\\Component\\HttpKernel\\EventListener\\ExceptionListener`"
+        correct: false
+      - value: "`Symfony\\Bundle\\FrameworkBundle\\EventListener\\HttpExceptionListener\
+          `"
+        correct: false
+      - value: "`Symfony\\Component\\HttpKernel\\EventListener\\ResponseExceptionListen\
+          er`"
+        correct: false
+    help: The `ErrorListener` is a fundamental component of Symfony's error
+      handling, transforming exceptions into user-friendly HTTP responses.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/http_kernel.rst#_snippet_11
+  - question: What is the purpose of the
+      `Symfony\Component\HttpKernel\Event\KernelEvent::getRequestType()` method?
+    answers:
+      - value: It returns the type of the request, either
+          `HttpKernelInterface::MAIN_REQUEST` or
+          `HttpKernelInterface::SUB_REQUEST`.
+        correct: true
+      - value: It returns the HTTP method of the request (e.g., GET, POST).
+        correct: false
+      - value: It returns the content type of the request.
+        correct: false
+      - value: It returns the format of the request (e.g., html, json).
+        correct: false
+    help: The `getRequestType()` method allows listeners to differentiate between
+      main requests and sub-requests, which is important for conditional logic
+      in event handling.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/events.rst#_snippet_0
+  - question: What is the purpose of the
+      `Symfony\Component\HttpKernel\Event\KernelEvent::getKernel()` method?
+    answers:
+      - value: It returns the Kernel instance handling the request.
+        correct: true
+      - value: It returns the application's service container.
+        correct: false
+      - value: It returns the current environment of the application (e.g., 'dev',
+          'prod').
+        correct: false
+      - value: It returns the root directory of the application.
+        correct: false
+    help: The `getKernel()` method provides access to the `HttpKernelInterface`
+      instance that is currently processing the request.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/events.rst#_snippet_0
+  - question: What is the purpose of the
+      `Symfony\Component\HttpKernel\Event\KernelEvent::getRequest()` method?
+    answers:
+      - value: It returns the current `Request` object being handled.
+        correct: true
+      - value: It returns the `Response` object generated for the current request.
+        correct: false
+      - value: It returns the `RequestStack` service.
+        correct: false
+      - value: It returns the URL of the current request.
+        correct: false
+    help: The `getRequest()` method provides direct access to the
+      `Symfony\Component\HttpFoundation\Request` object associated with the
+      current event.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/reference/events.rst#_snippet_0
+  - question: Which of the following methods can be used to change the case of a
+      string using Symfony's String component?
+    answers:
+      - value: "`lower()`"
+        correct: true
+      - value: "`upper()`"
+        correct: true
+      - value: "`title()`"
+        correct: true
+      - value: "`camel()`"
+        correct: true
+      - value: "`snake()`"
+        correct: true
+      - value: "`capitalize()`"
+        correct: false
+      - value: "`pascal()`"
+        correct: false
+    help: The Symfony String component offers `lower()`, `upper()`, `title()`,
+      `camel()`, and `snake()` for various case transformations. PascalCase can
+      be achieved by chaining `camel()->title()`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_10
+  - question: "How can you achieve 'PascalCase' (e.g., `FooBarBaz`) from a string
+      like `Foo: Bar-baz.` using Symfony's String component?"
+    answers:
+      - value: "`u('Foo: Bar-baz.')->camel()->title()`"
+        correct: true
+      - value: "`u('Foo: Bar-baz.')->pascal()`"
+        correct: false
+      - value: "`u('Foo: Bar-baz.')->upperCamel()`"
+        correct: false
+      - value: "`u('Foo: Bar-baz.')->title(allWords: true)`"
+        correct: false
+    help: PascalCase can be achieved by first converting to camelCase using
+      `camel()` and then applying title case to the first letter using
+      `title()`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/string.rst#_snippet_10
   - question: Which of the following
-      `Symfony\Component\Validator\Constraints\GreaterThanOrEqual` constraint
-      options allows you to customize the error message displayed if the
-      validation fails, and includes parameters like `{{ compared_value }}` and
-      `{{ compared_value_type }}`?
+      `Symfony\Component\EventDispatcher\GenericEvent` methods allows you to
+      check if an argument with a specified key exists?
     answers:
-      - value: "`message`"
+      - value: "`hasArgument(key: string)`"
         correct: true
-      - value: "`errorMessage`"
+      - value: "`argumentExists(key: string)`"
         correct: false
-      - value: "`invalidMessage`"
+      - value: "`issetArgument(key: string)`"
         correct: false
-      - value: "`text`"
+      - value: "`getArgument(key: string, default: null) !== null`"
         correct: false
-    help: |-
-      The `message` option is standard across Symfony validator constraints for customizing the validation error message.
-      https://symfony.com/doc/current/reference/constraints/GreaterThanOrEqual.html#_snippet_6
-  - question: When using `Symfony\Component\String\UnicodeString`, which method
-      would you use to find the *first* occurrence of a substring within a
-      string, with support for an optional offset?
-    answers:
-      - value: "`indexOf(string $needle, int $offset = 0)`"
-        correct: true
-      - value: "`find(string $needle, int $offset = 0)`"
-        correct: false
-      - value: "`position(string $needle, int $offset = 0)`"
-        correct: false
-      - value: "`firstOccurrence(string $needle, int $offset = 0)`"
-        correct: false
-    help: >-
-      The `indexOf()` method returns the position of the first occurrence of a
-      substring, or `null` if not found. It supports a starting offset.
-
-      https://symfony.com/doc/current/components/string.html#_snippet_19
+    help: The `hasArgument()` method is specifically designed to check for the
+      existence of an argument by its key within the `GenericEvent`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher/generic_event.rst#_snippet_0
   - question: Which of the following
-      `Symfony\Component\Validator\Constraints\GreaterThan` constraint options
-      allows you to customize the error message displayed if the value is not
-      greater than the comparison value?
+      `Symfony\Component\EventDispatcher\GenericEvent` methods allows you to
+      retrieve all arguments as an associative array?
     answers:
-      - value: "`message`"
+      - value: "`getArguments()`"
         correct: true
-      - value: "`errorMessage`"
+      - value: "`allArguments()`"
         correct: false
-      - value: "`invalidMessage`"
+      - value: "`getPayload()`"
         correct: false
-      - value: "`text`"
+      - value: "`toArray()`"
         correct: false
-    help: |-
-      The `message` option is standard across Symfony validator constraints for customizing the validation error message.
-      https://symfony.com/doc/current/reference/constraints/GreaterThan.html#_snippet_5
-  - question: In Symfony's `Collection` constraint, what is the purpose of the
-      `exclude` option within the `Cascade` constraint?
+    help: The `getArguments()` method returns the entire associative array of
+      arguments stored within the `GenericEvent`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher/generic_event.rst#_snippet_0
+  - question: When contributing to Symfony, what is the recommended way to tag
+      modified components in a pull request message?
     answers:
-      - value: To exclude one or more properties from the cascade validation.
+      - value: Prefix the commit message with `[Component]` or `[Component1]
+          [Component2]`.
         correct: true
-      - value: To specify properties that should always be validated, even if not
-          explicitly defined.
+      - value: Use a dedicated 'Components' section in the PR description.
         correct: false
-      - value: To define properties that should be ignored during the initial validation
-          pass.
+      - value: Add labels to the GitHub pull request for each component.
         correct: false
-      - value: To prevent validation of nested collections.
+      - value: Mention the components in the first sentence of the PR description.
         correct: false
-    help: |-
-      The `exclude` option in the `Cascade` constraint allows you to selectively prevent certain properties from being validated when the cascade validation is triggered.
-      https://symfony.com/doc/current/reference/constraints/Cascade.html#_snippet_1
+    help: The convention is to use square brackets around the component names at the
+      beginning of the pull request message, e.g., `[Yaml] fixed something` or
+      `[Form] [Validator] added something`.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/contributing/code/pull_requests.rst#_snippet_12
+  - question: What is the purpose of the
+      `Symfony\Component\HttpKernel\Controller\ArgumentResolver\SecurityTokenValueResolver`?
+    answers:
+      - value: To inject the object representing the current logged-in security token
+          into controller arguments.
+        correct: true
+      - value: To resolve security credentials from the request.
+        correct: false
+      - value: To validate the security token against the firewall.
+        correct: false
+      - value: To retrieve the security context for the current request.
+        correct: false
+    help: The `SecurityTokenValueResolver` is specifically designed to inject the
+      `TokenInterface` object representing the current security token into
+      controller method arguments.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller/value_resolver.rst#_snippet_5
+  - question: Which argument resolver injects a Symfony HttpFoundation `Request`
+      object created from a PSR-7 object, requiring the installation of the
+      PSR-7 Bridge component?
+    answers:
+      - value: PSR-7 Objects Resolver
+        correct: true
+      - value: PsrRequestValueResolver
+        correct: false
+      - value: HttpFoundationPsrBridgeResolver
+        correct: false
+      - value: RequestPsrConverter
+        correct: false
+    help: The PSR-7 Objects Resolver (part of the PSR-7 Bridge component) handles
+      the conversion and injection of PSR-7 request objects into Symfony's
+      HttpFoundation `Request` object.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/controller/value_resolver.rst#_snippet_5
   - question: Which of the following
-      `Symfony\Component\HttpKernel\Controller\ArgumentResolver` classes is
-      responsible for automatically querying for a Doctrine entity based on
-      route parameters and passing it as an argument to the controller?
+      `Symfony\Component\EventDispatcher\GenericEvent` methods allows you to set
+      a single argument by its key?
     answers:
-      - value: "`EntityValueResolver`"
+      - value: "`setArgument(key: string, value: mixed)`"
         correct: true
-      - value: "`DoctrineEntityResolver`"
+      - value: "`addArgument(key: string, value: mixed)`"
         correct: false
-      - value: "`ORMValueResolver`"
+      - value: "`set(key: string, value: mixed)`"
         correct: false
-      - value: "`ModelValueResolver`"
+      - value: "`putArgument(key: string, value: mixed)`"
         correct: false
-    help: >-
-      The `EntityValueResolver` (provided by `DoctrineBridge`) simplifies
-      fetching database records by automatically resolving entities from route
-      parameters.
-
-      https://symfony.com/doc/current/controller/value_resolver.html#_snippet_5
+    help: The `setArgument()` method is used to add or update a single argument
+      within the `GenericEvent` by its key.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher/generic_event.rst#_snippet_0
+  - question: Which of the following
+      `Symfony\Component\EventDispatcher\GenericEvent` methods allows you to set
+      multiple arguments from an associative array?
+    answers:
+      - value: "`setArguments(arguments: array)`"
+        correct: true
+      - value: "`addArguments(arguments: array)`"
+        correct: false
+      - value: "`mergeArguments(arguments: array)`"
+        correct: false
+      - value: "`setAll(arguments: array)`"
+        correct: false
+    help: The `setArguments()` method allows replacing all existing arguments with a
+      new set provided as an associative array.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher/generic_event.rst#_snippet_0
+  - question: Which of the following
+      `Symfony\Component\EventDispatcher\GenericEvent` methods allows you to
+      retrieve an argument by its key, with an optional default value?
+    answers:
+      - value: "`getArgument(key: string, default: mixed = null)`"
+        correct: true
+      - value: "`fetchArgument(key: string, default: mixed = null)`"
+        correct: false
+      - value: "`retrieveArgument(key: string, default: mixed = null)`"
+        correct: false
+      - value: "`get(key: string, default: mixed = null)`"
+        correct: false
+    help: The `getArgument()` method provides a way to retrieve a specific argument
+      by its key, returning a default value if the argument does not exist.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/components/event_dispatcher/generic_event.rst#_snippet_0
+  - question: Which Symfony Workflow event is triggered when the subject is about to
+      leave a place?
+    answers:
+      - value: "`workflow.leave`"
+        correct: true
+      - value: "`workflow.exit`"
+        correct: false
+      - value: "`workflow.before_transition`"
+        correct: false
+      - value: "`workflow.place_exit`"
+        correct: false
+    help: The `workflow.leave` event is dispatched just before the subject's marking
+      is updated to reflect its departure from a place.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/workflow.rst#_snippet_13
+  - question: Which Symfony Workflow event is triggered when the subject is going
+      through a transition?
+    answers:
+      - value: "`workflow.transition`"
+        correct: true
+      - value: "`workflow.on_transition`"
+        correct: false
+      - value: "`workflow.apply`"
+        correct: false
+      - value: "`workflow.process`"
+        correct: false
+    help: The `workflow.transition` event is dispatched as the subject moves from
+      one place to another via a defined transition.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/workflow.rst#_snippet_13
+  - question: Which Symfony Workflow event is triggered right before the subject's
+      marking is updated to reflect new places?
+    answers:
+      - value: "`workflow.enter`"
+        correct: true
+      - value: "`workflow.entering`"
+        correct: false
+      - value: "`workflow.before_enter`"
+        correct: false
+      - value: "`workflow.place_enter`"
+        correct: false
+    help: The `workflow.enter` event is dispatched just before the subject's marking
+      is updated, indicating it is about to enter new places.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/workflow.rst#_snippet_13
+  - question: Which Symfony Workflow event is triggered when the object has
+      completed a transition?
+    answers:
+      - value: "`workflow.completed`"
+        correct: true
+      - value: "`workflow.after_transition`"
+        correct: false
+      - value: "`workflow.finished`"
+        correct: false
+      - value: "`workflow.transition_end`"
+        correct: false
+    help: The `workflow.completed` event is dispatched after a transition has
+      successfully finished and the object's state has been updated.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/workflow.rst#_snippet_13
+  - question: Which Symfony Workflow event is triggered for each transition that is
+      now accessible for the subject?
+    answers:
+      - value: "`workflow.announce`"
+        correct: true
+      - value: "`workflow.available_transitions`"
+        correct: false
+      - value: "`workflow.can_apply`"
+        correct: false
+      - value: "`workflow.possible_transitions`"
+        correct: false
+    help: The `workflow.announce` event is dispatched for each transition that the
+      subject can currently take, allowing listeners to react to available
+      transitions.
+      https://github.com/fmatsos/symfony-docs/blob/v7.0/workflow.rst#_snippet_13
